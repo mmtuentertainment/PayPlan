@@ -1,12 +1,12 @@
 # PayPlan - BNPL Payment Manager
 
-**Live Demo:** https://frontend-8m27q4sx2-matthew-utts-projects-89452c41.vercel.app
+**Live Demo:** https://frontend-8d48vnok9-matthew-utts-projects-89452c41.vercel.app
 
 Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified payment timeline, risk detection, and calendar export.
 
 ## 🚀 Quick Start (Public Demo)
 
-1. Visit https://frontend-8m27q4sx2-matthew-utts-projects-89452c41.vercel.app
+1. Visit https://frontend-8d48vnok9-matthew-utts-projects-89452c41.vercel.app
 2. Click "Use Sample CSV" to load example data
 3. Adjust timezone and payday settings
 4. Click "Build Plan"
@@ -41,7 +41,7 @@ Afterpay,2,2025-10-09,32.50,USD,true,8
 **POST** `/api/plan`
 
 ```bash
-curl -X POST https://frontend-8m27q4sx2-matthew-utts-projects-89452c41.vercel.app/api/plan \
+curl -X POST https://frontend-8d48vnok9-matthew-utts-projects-89452c41.vercel.app/api/plan \
   -H "Content-Type: application/json" \
   -d '{
     "items": [...],
