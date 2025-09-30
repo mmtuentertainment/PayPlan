@@ -151,10 +151,15 @@ function formatRiskFlags(riskFlags) {
  * @returns {Array} Simplified normalized format
  */
 function normalizeOutput(installments) {
+  const toBool = (v) => (typeof v === 'boolean' ? v : String(v).toLowerCase() === 'true');
+  const toNum = (v) => (typeof v === 'number' ? v : Number(v));
+
   return installments.map(i => ({
     provider: i.provider,
     dueDate: i.due_date,
-    amount: i.amount
+    amount: toNum(i.amount),
+    autopay: toBool(i.autopay),
+    lateFee: toNum(i.late_fee)
   }));
 }
 
