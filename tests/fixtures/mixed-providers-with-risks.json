@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "provider": "Klarna",
+      "installment_no": 1,
+      "due_date": "2025-10-02",
+      "amount": 45.00,
+      "currency": "USD",
+      "autopay": true,
+      "late_fee": 7.00
+    },
+    {
+      "provider": "Affirm",
+      "installment_no": 3,
+      "due_date": "2025-10-02",
+      "amount": 58.00,
+      "currency": "USD",
+      "autopay": false,
+      "late_fee": 15.00
+    },
+    {
+      "provider": "Afterpay",
+      "installment_no": 2,
+      "due_date": "2025-10-05",
+      "amount": 32.50,
+      "currency": "USD",
+      "autopay": true,
+      "late_fee": 8.00
+    },
+    {
+      "provider": "PayPal",
+      "installment_no": 1,
+      "due_date": "2025-10-09",
+      "amount": 50.00,
+      "currency": "USD",
+      "autopay": false,
+      "late_fee": 10.00
+    },
+    {
+      "provider": "Zip",
+      "installment_no": 1,
+      "due_date": "2025-10-15",
+      "amount": 40.00,
+      "currency": "USD",
+      "autopay": true,
+      "late_fee": 5.00
+    }
+  ],
+  "paycheckDates": ["2025-10-05", "2025-10-19", "2025-11-02"],
+  "minBuffer": 200.00,
+  "timeZone": "America/New_York"
+}

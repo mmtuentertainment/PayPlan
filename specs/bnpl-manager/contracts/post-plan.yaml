@@ -1,0 +1,288 @@
+openapi: 3.0.0
+info:
+  title: PayPlan BNPL Manager API
+  version: 0.1.0
+  description: Serverless endpoint for BNPL payment planning and risk detection
+
+paths:
+  /plan:
+    post:
+      summary: Generate payment plan from BNPL installments
+      description: |
+        Accepts structured installment data with payday and timezone information,
+        performs deterministic risk analysis, and returns a prioritized weekly action plan
+        with calendar export.
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+            examples:
+              explicitPaydays:
+                summary: Request with explicit payday dates
+                value:
+                  items:
+                    - provider: Klarna
+                      installment_no: 1
+                      due_date: "2025-10-02"
+                      amount: 45.00
+                      currency: USD
+                      autopay: true
+                      late_fee: 7.00
+                    - provider: Affirm
+                      installment_no: 3
+                      due_date: "2025-10-02"
+                      amount: 58.00
+                      currency: USD
+                      autopay: false
+                      late_fee: 15.00
+                  paycheckDates:
+                    - "2025-10-05"
+                    - "2025-10-19"
+                    - "2025-11-02"
+                  minBuffer: 200.00
+                  timeZone: "America/New_York"
+
+              cadencePaydays:
+                summary: Request with payday cadence
+                value:
+                  items:
+                    - provider: Afterpay
+                      installment_no: 2
+                      due_date: "2025-10-09"
+                      amount: 32.50
+                      currency: USD
+                      autopay: true
+                      late_fee: 8.00
+                  payCadence: biweekly
+                  nextPayday: "2025-10-05"
+                  minBuffer: 150.00
+                  timeZone: "America/Los_Angeles"
+
+      responses:
+        '200':
+          description: Successful plan generation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanResponse'
+              examples:
+                successfulPlan:
+                  value:
+                    summary: "You have 3 BNPL payments totaling $165.50 due this week. Two payments collide on Wednesday Oct 2nd. Focus on paying Affirm first (highest late fee). Consider deferring Afterpay if cash is tight after your Oct 5th payday."
+                    actionsThisWeek:
+                      - "Wednesday Oct 2: Pay Affirm $58.00 (highest late fee $15)"
+                      - "Wednesday Oct 2: Pay Klarna $45.00 (late fee $7)"
+                      - "Saturday Oct 5: Pay Afterpay $32.50 (weekend - verify autopay)"
+                    riskFlags:
+                      - "⚠️ COLLISION: 2 payments due on Oct 2 (Wednesday)"
+                      - "💰 CASH_CRUNCH: $135.50 due within 3 days of Oct 5 payday"
+                      - "🔔 WEEKEND_AUTOPAY: Afterpay payment due Saturday (autopay enabled)"
+                    ics: "QkVHSU46VkNBTEVOREFSClZFUlNJT046Mi4wCi4uLg=="
+                    normalized:
+                      - provider: Affirm
+                        dueDate: "2025-10-02"
+                        amount: 58.00
+                      - provider: Klarna
+                        dueDate: "2025-10-02"
+                        amount: 45.00
+                      - provider: Afterpay
+                        dueDate: "2025-10-05"
+                        amount: 32.50
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingItems:
+                  value:
+                    error: "Validation Error"
+                    message: "items array is required and must contain at least 1 installment"
+                invalidTimezone:
+                  value:
+                    error: "Validation Error"
+                    message: "Invalid IANA timezone: 'US/Pacific'. Use 'America/Los_Angeles' instead"
+                missingPaydayInfo:
+                  value:
+                    error: "Validation Error"
+                    message: "Must provide either paycheckDates OR (payCadence + nextPayday)"
+
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                processingError:
+                  value:
+                    error: "Processing Error"
+                    message: "Failed to generate ICS calendar: invalid date format"
+
+components:
+  schemas:
+    PlanRequest:
+      type: object
+      required:
+        - items
+        - minBuffer
+        - timeZone
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Installment'
+        paycheckDates:
+          type: array
+          minItems: 3
+          items:
+            type: string
+            format: date
+            example: "2025-10-05"
+          description: "Option A: Explicit payday dates (ISO yyyy-mm-dd)"
+        payCadence:
+          type: string
+          enum: [weekly, biweekly, semimonthly, monthly]
+          description: "Option B: Payday frequency"
+        nextPayday:
+          type: string
+          format: date
+          example: "2025-10-05"
+          description: "Required with payCadence. Next payday date"
+        minBuffer:
+          type: number
+          minimum: 0
+          example: 200.00
+          description: "Minimum cash buffer to maintain (for cash crunch detection)"
+        timeZone:
+          type: string
+          example: "America/New_York"
+          description: "IANA timezone identifier for date/time calculations"
+
+    Installment:
+      type: object
+      required:
+        - provider
+        - installment_no
+        - due_date
+        - amount
+        - currency
+        - autopay
+        - late_fee
+      properties:
+        provider:
+          type: string
+          enum: [Klarna, Affirm, Afterpay, PayPal, Zip, Sezzle]
+          example: Klarna
+        installment_no:
+          type: integer
+          minimum: 1
+          example: 1
+        due_date:
+          type: string
+          format: date
+          example: "2025-10-02"
+          description: "ISO 8601 date (yyyy-mm-dd)"
+        amount:
+          type: number
+          minimum: 0.01
+          example: 45.00
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: USD
+          description: "ISO 4217 currency code"
+        autopay:
+          type: boolean
+          example: true
+        late_fee:
+          type: number
+          minimum: 0
+          example: 7.00
+          description: "Late fee amount for this installment"
+
+    PlanResponse:
+      type: object
+      required:
+        - summary
+        - actionsThisWeek
+        - riskFlags
+        - ics
+        - normalized
+      properties:
+        summary:
+          type: string
+          description: "Plain-English 6-8 bullet point summary of the week"
+          example: "You have 3 BNPL payments totaling $165.50 due this week..."
+        actionsThisWeek:
+          type: array
+          items:
+            type: string
+          description: "Prioritized action items (late_fee DESC, amount ASC)"
+          example:
+            - "Wednesday Oct 2: Pay Affirm $58.00 (highest late fee $15)"
+            - "Wednesday Oct 2: Pay Klarna $45.00 (late fee $7)"
+        riskFlags:
+          type: array
+          items:
+            type: string
+          description: "Human-readable risk descriptions"
+          example:
+            - "⚠️ COLLISION: 2 payments due on Oct 2 (Wednesday)"
+            - "💰 CASH_CRUNCH: $135.50 due within 3 days of Oct 5 payday"
+        ics:
+          type: string
+          format: byte
+          description: "Base64-encoded ICS calendar file with TZID and 24h-prior alarms"
+          example: "QkVHSU46VkNBTEVOREFSClZFUlNJT046Mi4wCi4uLg=="
+        normalized:
+          type: array
+          items:
+            $ref: '#/components/schemas/NormalizedInstallment'
+
+    NormalizedInstallment:
+      type: object
+      required:
+        - provider
+        - dueDate
+        - amount
+      properties:
+        provider:
+          type: string
+          example: Klarna
+        dueDate:
+          type: string
+          format: date
+          example: "2025-10-02"
+        amount:
+          type: number
+          example: 45.00
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "Validation Error"
+        message:
+          type: string
+          example: "items array is required and must contain at least 1 installment"
+        details:
+          type: object
+          description: "Optional additional error context"
+
+servers:
+  - url: https://api.payplan.app/v1
+    description: Production server
+  - url: http://localhost:3000
+    description: Local development server
