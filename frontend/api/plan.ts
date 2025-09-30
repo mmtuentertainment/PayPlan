@@ -156,8 +156,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     // Step 6: Generate ICS calendar
     const icsBase64 = generateICSWithTZID(normalizedInstallments, timeZone);
 
-    // Generate normalized output
-    const normalized = normalizeOutput(normalizedInstallments);
+    // Generate normalized output with type coercion
+    const toBool = (v: any) => (typeof v === 'boolean' ? v : String(v).toLowerCase() === 'true');
+    const toNum = (v: any) => (typeof v === 'number' ? v : Number(v));
+    const getDue = (x: any) => x.due_date || x.dueDate;
+
+    const normalized = normalizedInstallments
+      .map((x: any) => ({
+        provider: x.provider,
+        dueDate: getDue(x),
+        amount: toNum(x.amount),
+        autopay: toBool(x.autopay),
+        lateFee: toNum(typeof x.late_fee !== 'undefined' ? x.late_fee : x.lateFee ?? 0)
+      }));
 
     // Return response
     return sendJson(res, 200, {

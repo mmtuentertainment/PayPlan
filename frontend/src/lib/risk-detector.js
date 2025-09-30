@@ -126,10 +126,11 @@ function detectCashCrunch(installments, paydays, minBuffer, timezone) {
  */
 function detectWeekendAutopay(installments, timezone) {
   const risks = [];
+  const toBool = (v) => (typeof v === 'boolean' ? v : String(v).toLowerCase() === 'true');
 
   for (const installment of installments) {
-    // Only check autopay-enabled payments
-    if (!installment.autopay) continue;
+    // Only check autopay-enabled payments (strict boolean check)
+    if (!toBool(installment.autopay)) continue;
 
     const dueDateDt = DateTime.fromISO(installment.due_date, { zone: timezone });
     const dayOfWeek = dueDateDt.weekday; // 1-7, where 6=Saturday, 7=Sunday

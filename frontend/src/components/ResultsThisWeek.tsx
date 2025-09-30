@@ -31,7 +31,9 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>This Week</CardTitle>
+        <CardTitle>
+          This Week <span className="text-muted-foreground text-sm font-normal">(next 7 days)</span>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <ol className="list-decimal pl-6 space-y-1">
