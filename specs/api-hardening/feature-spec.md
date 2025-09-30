@@ -2,7 +2,7 @@
 
 **Feature Branch**: `003-api-hardening`
 **Created**: 2025-09-30
-**Status**: Draft
+**Status**: Clarified - Ready for Planning
 **Version**: v0.1.1 (patch release)
 **Input**: "Ship PayPlan v0.1.1 (API Hardening) with three changes only: A) RFC 9457 Problem Details, B) Rate Limit (serverless-friendly), C) Idempotency-Key support"
 
@@ -325,3 +325,147 @@ Static page explaining each error type.
 **Status**: ⏸️ **WAITING FOR CLARIFICATIONS**
 
 Ready to resolve clarifications and proceed to planning phase.
+---
+
+## Clarifications Resolved
+
+### Session 1: 2025-09-30
+
+**Q1: Rate Limit Storage** - How should rate limit state be stored in Vercel's serverless environment?
+
+**A1:** Use Upstash Redis with @upstash/ratelimit library (sliding window algorithm). Namespace: `PAYPLAN:{env}`. Key pattern: `rl:{ip}`. Emit X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset headers on ALL responses (success and error).
+→ **Integrated into:** FR-008, FR-012, FR-013, New FR-031
+
+**Q2: Idempotency Storage** - How should idempotency cache be stored?
+
+**A2:** Use same Upstash Redis instance. Key pattern: `idem:{method}:{path}:{Idempotency-Key}`. Store bodyHash (SHA-256 of canonical JSON with stable key order) and full response. TTL = 60 seconds.
+- Same key + same bodyHash → 200 replay with `X-Idempotent-Replayed: true`
+- Same key + different bodyHash → 409 problem+json (type=/problems/idempotency-key-conflict)
+→ **Integrated into:** FR-018, FR-021, FR-022, New FR-032
+
+**Q3: Problem Type URIs** - Should problem type URIs use production domain or relative paths?
+
+**A3:** Use absolute type URIs hosted on production domain:
+- `https://<prod-domain>/problems/validation-error`
+- `https://<prod-domain>/problems/method-not-allowed`
+- `https://<prod-domain>/problems/rate-limit-exceeded`
+- `https://<prod-domain>/problems/idempotency-key-conflict`
+- `https://<prod-domain>/problems/internal-error`
+
+All 4xx/5xx return `application/problem+json` with {type, title, status, detail, instance}. Set instance to request path or request ID if available.
+→ **Integrated into:** FR-002, FR-005, New FR-033
+
+**Q4: Rate Limit Window** - Fixed or sliding window?
+
+**A4:** Sliding window (60 requests per rolling 60-minute period) using @upstash/ratelimit. Client IP extracted from FIRST value of `x-forwarded-for` header. On rate limit exceed, return 429 problem+json with `Retry-After` header (integer, seconds until reset). Always include X-RateLimit-* headers on all responses.
+→ **Integrated into:** FR-009, FR-011, FR-012, FR-014, New FR-034
+
+**Q5: Frontend Handling** - Should frontend be updated to parse problem+json?
+
+**A5:** On non-2xx responses, if `Content-Type: application/problem+json` detected, parse and display Alert with `problem.title + problem.detail`. 200 OK responses remain unchanged (backward compatible, no client schema changes).
+→ **Integrated into:** FR-027, FR-029, New FR-035
+
+---
+
+## Additional Requirements from Clarifications
+
+**Rate Limit Implementation**
+- **FR-031**: System MUST use Upstash Redis with @upstash/ratelimit library
+- **FR-031a**: Rate limit keys MUST use namespace pattern: `PAYPLAN:{env}:rl:{ip}`
+- **FR-031b**: System MUST use sliding window algorithm (60 requests per rolling 60 minutes)
+- **FR-031c**: Client IP MUST be extracted from first value of `x-forwarded-for` header
+
+**Idempotency Implementation**
+- **FR-032**: System MUST use Upstash Redis for idempotency cache
+- **FR-032a**: Idempotency keys MUST follow pattern: `idem:{method}:{path}:{Idempotency-Key}`
+- **FR-032b**: System MUST store SHA-256 hash of canonical JSON (stable key order) as bodyHash
+- **FR-032c**: System MUST cache full response JSON with 60-second TTL
+- **FR-032d**: On cache hit with matching bodyHash, return `X-Idempotent-Replayed: true` header
+- **FR-032e**: On cache hit with different bodyHash, return 409 problem+json
+
+**Problem Type URIs**
+- **FR-033**: Problem type URIs MUST be absolute URLs using production domain
+- **FR-033a**: Problem types MUST be accessible at `/problems/{type-name}` routes
+- **FR-033b**: Instance field MUST contain request path (e.g., `/api/plan`)
+
+**Rate Limit Headers**
+- **FR-034**: Retry-After header MUST be integer (seconds, not HTTP-date format)
+- **FR-034a**: X-RateLimit-Reset MUST be Unix timestamp (seconds since epoch)
+- **FR-034b**: Headers MUST be present on ALL responses (2xx, 4xx, 5xx)
+
+**Frontend Error Handling**
+- **FR-035**: Frontend MUST detect `application/problem+json` Content-Type
+- **FR-035a**: Frontend MUST display Alert with `problem.title` and `problem.detail`
+- **FR-035b**: Frontend MUST fallback to current error handling if problem+json parsing fails
+
+---
+
+## Updated Success Criteria
+
+**Primary Success Metric**: API consumers receive RFC 9457 compliant error responses with helpful documentation links, and can safely retry requests using Idempotency-Key headers while respecting rate limits.
+
+**Verification Tests:**
+
+**Test 1: Problem Details (400)**
+```bash
+curl -X POST https://<prod>/api/plan -H "Content-Type: application/json" -d '{}'
+# Expect: 400, Content-Type: application/problem+json
+# Body includes: type (absolute URL), title, status: 400, detail
+```
+
+**Test 2: Rate Limit (429)**
+```bash
+for i in {1..61}; do curl -X POST https://<prod>/api/plan -H "Content-Type: application/json" -d @valid.json; done
+# Request #61 returns: 429, Retry-After header, X-RateLimit-Remaining: 0
+```
+
+**Test 3: Idempotency Replay**
+```bash
+# Request 1
+curl -X POST https://<prod>/api/plan -H "Idempotency-Key: test123" -H "Content-Type: application/json" -d @valid.json
+# Request 2 (same key, same body, within 60s)
+curl -X POST https://<prod>/api/plan -H "Idempotency-Key: test123" -H "Content-Type: application/json" -d @valid.json
+# Expect: 200, X-Idempotent-Replayed: true, same response
+```
+
+**Test 4: Idempotency Conflict (409)**
+```bash
+curl -X POST https://<prod>/api/plan -H "Idempotency-Key: test123" -H "Content-Type: application/json" -d @different.json
+# Expect: 409, problem+json with type=/problems/idempotency-key-conflict
+```
+
+**Test 5: Rate Limit Headers (Success)**
+```bash
+curl -i -X POST https://<prod>/api/plan -H "Content-Type: application/json" -d @valid.json
+# Expect: X-RateLimit-Limit: 60, X-RateLimit-Remaining: 59, X-RateLimit-Reset: <timestamp>
+```
+
+---
+
+## Review & Acceptance Checklist
+
+### Content Quality
+- [x] No implementation details (languages, frameworks, APIs)
+- [x] Focused on user value and business needs
+- [x] Written for non-technical stakeholders
+- [x] All mandatory sections completed
+
+### Requirement Completeness
+- [x] No [NEEDS CLARIFICATION] markers remain (all 5 clarifications resolved)
+- [x] Requirements are testable and unambiguous
+- [x] Success criteria are measurable (problem+json format, 429 status, cache replay)
+- [x] Scope is clearly bounded (no auth, specific error types, clear storage choice)
+- [x] Dependencies identified (Upstash Redis, @upstash/ratelimit, SHA-256)
+
+---
+
+## Execution Status
+
+- [x] User description parsed
+- [x] Key concepts extracted
+- [x] Requirements generated
+- [x] Entities identified
+- [x] Clarifications obtained and integrated
+- [x] Review checklist passed
+
+**Status**: ✅ **READY FOR PLANNING PHASE**
