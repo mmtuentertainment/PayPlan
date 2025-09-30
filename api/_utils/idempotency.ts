@@ -108,13 +108,63 @@ export async function cacheResponse(
 }
 
 export function sendIdempotencyConflict(res: ServerResponse, host: string): void {
-  const problem = buildProblem(
-    PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT,
-    'The Idempotency-Key has been used with a different request body. Use a new key or wait 60 seconds for the cache to expire.',
-    host
-  );
+  const problem = buildProblem({
+    type: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.type,
+    title: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.title,
+    status: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.status,
+    detail: 'The Idempotency-Key has been used with a different request body. Use a new key or wait 60 seconds for the cache to expire.'
+  });
 
   res.statusCode = 409;
   res.setHeader('Content-Type', 'application/problem+json');
   res.end(JSON.stringify(problem));
+}
+
+/**
+ * Get Idempotency-Key from request headers
+ */
+export function getIdempotencyKey(req: any): string | undefined {
+  const key = req.headers?.['idempotency-key'];
+  if (!key) return undefined;
+  return Array.isArray(key) ? key[0] : key;
+}
+
+/**
+ * Compute SHA-256 hash of request body (wrapper for hashBody)
+ */
+export async function computeBodyHash(canonical: string): Promise<string> {
+  return createHash('sha256').update(canonical).digest('hex');
+}
+
+/**
+ * Check if we have a cached success response
+ */
+export async function hasCachedSuccess(
+  method: string,
+  path: string,
+  idempotencyKey: string,
+  bodyHash: string
+): Promise<{ hit: 'miss' | 'replay' | 'conflict'; response?: any }> {
+  const result = await checkIdempotency(method, path, idempotencyKey, bodyHash);
+
+  if (result.type === 'hit') {
+    return { hit: 'replay', response: result.cachedResponse };
+  }
+  if (result.type === 'conflict') {
+    return { hit: 'conflict' };
+  }
+  return { hit: 'miss' };
+}
+
+/**
+ * Wrapper for cacheResponse with cleaner signature
+ */
+export async function cacheSuccess(
+  method: string,
+  path: string,
+  idempotencyKey: string,
+  bodyHash: string,
+  response: any
+): Promise<void> {
+  return cacheResponse(method, path, idempotencyKey, bodyHash, response);
 }

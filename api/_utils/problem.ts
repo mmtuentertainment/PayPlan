@@ -37,17 +37,26 @@ export const PROBLEM_TYPES = {
 } as const;
 
 export function buildProblem(
-  problemType: typeof PROBLEM_TYPES[keyof typeof PROBLEM_TYPES],
-  detail: string,
-  host: string,
-  instance?: string
+  params: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+  }
 ): ProblemDetails {
+  // If type is relative path, make it absolute using current host
+  // Otherwise use as-is (for flexibility)
+  const typeUri = params.type.startsWith('/')
+    ? `https://${process.env.VERCEL_URL || 'localhost'}${params.type}`
+    : params.type;
+
   return {
-    type: `https://${host}${problemType.type}`,
-    title: problemType.title,
-    status: problemType.status,
-    detail,
-    instance: instance || '/api/plan'
+    type: typeUri,
+    title: params.title,
+    status: params.status,
+    detail: params.detail,
+    instance: params.instance || '/api/plan'
   };
 }
 

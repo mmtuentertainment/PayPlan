@@ -79,14 +79,47 @@ export function setRateLimitHeaders(res: ServerResponse, result: RateLimitResult
 }
 
 export function sendRateLimitExceeded(res: ServerResponse, result: RateLimitResult, host: string): void {
-  const problem = buildProblem(
-    PROBLEM_TYPES.RATE_LIMIT_EXCEEDED,
-    `Rate limit of ${result.limit} requests per hour exceeded. Please retry after ${result.retryAfterSeconds} seconds.`,
-    host
-  );
+  const problem = buildProblem({
+    type: PROBLEM_TYPES.RATE_LIMIT_EXCEEDED.type,
+    title: PROBLEM_TYPES.RATE_LIMIT_EXCEEDED.title,
+    status: PROBLEM_TYPES.RATE_LIMIT_EXCEEDED.status,
+    detail: `Rate limit of ${result.limit} requests per hour exceeded. Please retry after ${result.retryAfterSeconds} seconds.`
+  });
 
   setRateLimitHeaders(res, result);
   res.statusCode = 429;
   res.setHeader('Content-Type', 'application/problem+json');
   res.end(JSON.stringify(problem));
+}
+
+/**
+ * Wrapper for cleaner pipeline usage
+ */
+export async function checkLimit(ip: string | undefined): Promise<{
+  allowed: boolean;
+  retryAfterSeconds?: number;
+  headers: { limit: number; remaining: number; reset: number };
+}> {
+  const result = await checkRateLimit(ip || 'unknown');
+  return {
+    allowed: result.allowed,
+    retryAfterSeconds: result.retryAfterSeconds,
+    headers: {
+      limit: result.limit,
+      remaining: result.remaining,
+      reset: result.reset
+    }
+  };
+}
+
+export function setRateHeaders(res: ServerResponse, headers: { limit?: number; remaining?: number; reset?: number }): void {
+  if (headers.limit !== undefined) {
+    res.setHeader('X-RateLimit-Limit', headers.limit.toString());
+  }
+  if (headers.remaining !== undefined) {
+    res.setHeader('X-RateLimit-Remaining', headers.remaining.toString());
+  }
+  if (headers.reset !== undefined) {
+    res.setHeader('X-RateLimit-Reset', headers.reset.toString());
+  }
 }
