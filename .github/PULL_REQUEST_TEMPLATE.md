@@ -1,6 +1,6 @@
 # PayPlan v0.1 — Public Deploy & Landing
 
-**Live:** https://frontend-m0zx21kb0-matthew-utts-projects-89452c41.vercel.app
+**Live:** https://frontend-ku48gid48-matthew-utts-projects-89452c41.vercel.app
 
 ## Summary
 
@@ -55,7 +55,7 @@ Ships the public vertical slice: paste/upload CSV → plan → ICS calendar. Add
 ### API Smoke Test
 
 ```bash
-curl -s -X POST https://frontend-m0zx21kb0-matthew-utts-projects-89452c41.vercel.app/api/plan \
+curl -s -X POST https://frontend-ku48gid48-matthew-utts-projects-89452c41.vercel.app/api/plan \
   -H "content-type: application/json" \
   -d '{"items":[{"provider":"Klarna","installment_no":1,"due_date":"2025-10-02","amount":45,"currency":"USD","autopay":true,"late_fee":7}],"paycheckDates":["2025-10-05","2025-10-19","2025-11-02"],"minBuffer":100,"timeZone":"America/New_York"}' \
   | jq -r '.summary, (.actionsThisWeek|length), (.riskFlags|length), (.ics|length>0)'
