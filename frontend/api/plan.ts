@@ -3,13 +3,31 @@
 // Runtime: Node 20 (set in vercel.json)
 
 import type { IncomingMessage, ServerResponse } from 'http';
+import { DateTime } from 'luxon';
 
-// Import your deterministic libs from v0.1 (adjust names if needed)
-const { calculatePaydays } = require('../src/lib/payday-calculator.js');
-const { detectRisks } = require('../src/lib/risk-detector.js');
-const { generateWeeklyActions, generateSummary, formatRiskFlags, normalizeOutput } = require('../src/lib/action-prioritizer.js');
-const { generateICSWithTZID } = require('../src/lib/ics-generator.js');
-const { DateTime } = require('luxon');
+// Dynamic imports for CommonJS modules
+let calculatePaydays: any;
+let detectRisks: any;
+let generateWeeklyActions: any;
+let generateSummary: any;
+let formatRiskFlags: any;
+let normalizeOutput: any;
+let generateICSWithTZID: any;
+
+async function loadModules() {
+  const payday = await import('../src/lib/payday-calculator.js');
+  const risks = await import('../src/lib/risk-detector.js');
+  const actions = await import('../src/lib/action-prioritizer.js');
+  const icsGen = await import('../src/lib/ics-generator.js');
+
+  calculatePaydays = payday.calculatePaydays;
+  detectRisks = risks.detectRisks;
+  generateWeeklyActions = actions.generateWeeklyActions;
+  generateSummary = actions.generateSummary;
+  formatRiskFlags = actions.formatRiskFlags;
+  normalizeOutput = actions.normalizeOutput;
+  generateICSWithTZID = icsGen.generateICSWithTZID;
+}
 
 const ALLOWED_ORIGIN = process.env.CORS_ORIGIN || '*';
 const ALLOWED_HEADERS = 'Content-Type, Authorization';
@@ -56,6 +74,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   }
 
   try {
+    // Load modules on first request
+    if (!calculatePaydays) {
+      await loadModules();
+    }
+
     const body = await readJson(req);
 
     // Basic shape check
