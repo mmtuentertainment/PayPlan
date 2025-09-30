@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "PayPlan - A payment planning and management application",
   "main": "index.js",
+  "engines": {
+    "node": ">=20 <21"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
