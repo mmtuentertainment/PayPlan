@@ -45,10 +45,24 @@ export async function buildPlan(body: PlanRequest): Promise<PlanResponse> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
+
   if (!res.ok) {
+    const ctype = res.headers.get("content-type") || "";
+
+    // RFC 9457: application/problem+json
+    if (ctype.includes("application/problem+json")) {
+      const p = await res.json().catch(() => ({}));
+      const msg = [p.title, p.detail].filter(Boolean).join(" — ") || `API error ${res.status}`;
+      const e: any = new Error(msg);
+      e.problem = p;
+      throw e;
+    }
+
+    // Fallback for non-problem+json errors
     const err = await res.json().catch(() => ({}));
     throw new Error(err?.message || err?.error || `API error ${res.status}`);
   }
+
   const json = await res.json();
   return ResponseSchema.parse(json);
 }

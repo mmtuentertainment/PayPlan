@@ -1,12 +1,12 @@
 # PayPlan - BNPL Payment Manager
 
-**Live Demo:** https://frontend-ku48gid48-matthew-utts-projects-89452c41.vercel.app
+**Live Demo:** https://frontend-1t3f4ucp6-matthew-utts-projects-89452c41.vercel.app
 
 Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified payment timeline, risk detection, and calendar export.
 
 ## 🚀 Quick Start (Public Demo)
 
-1. Visit https://frontend-ku48gid48-matthew-utts-projects-89452c41.vercel.app
+1. Visit https://frontend-1t3f4ucp6-matthew-utts-projects-89452c41.vercel.app
 2. Click "Use Sample CSV" to load example data
 3. Adjust timezone and payday settings
 4. Click "Build Plan"
@@ -41,7 +41,7 @@ Afterpay,2,2025-10-09,32.50,USD,true,8
 **POST** `/api/plan`
 
 ```bash
-curl -X POST https://frontend-ku48gid48-matthew-utts-projects-89452c41.vercel.app/api/plan \
+curl -X POST https://frontend-1t3f4ucp6-matthew-utts-projects-89452c41.vercel.app/api/plan \
   -H "Content-Type: application/json" \
   -d '{
     "items": [...],
@@ -122,9 +122,53 @@ npm test
 - Luxon (timezone handling)
 - ICS generation
 
-## 📦 Version
+## 🛡️ API Hardening (v0.1.1)
 
-v0.1.0 - Initial Public Release
+### RFC 9457 Problem Details
+
+All error responses use [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457.html) format:
+
+```json
+{
+  "type": "https://frontend-1t3f4ucp6.vercel.app/problems/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "items array is required and must contain at least 1 installment",
+  "instance": "/api/plan"
+}
+```
+
+**Problem Types:** [/problems/validation-error](/problems/validation-error), [/problems/method-not-allowed](/problems/method-not-allowed), [/problems/rate-limit-exceeded](/problems/rate-limit-exceeded), [/problems/idempotency-key-conflict](/problems/idempotency-key-conflict), [/problems/internal-error](/problems/internal-error)
+
+### Rate Limiting
+
+- **Limit:** 60 requests per hour per IP (sliding window)
+- **Headers** (on all responses):
+  - `X-RateLimit-Limit: 60`
+  - `X-RateLimit-Remaining: 45`
+  - `X-RateLimit-Reset: 1759255504` (Unix timestamp)
+- **On exceed:** 429 with `Retry-After: <seconds>` header
+
+### Idempotency
+
+Use `Idempotency-Key` header for safe retries (60-second cache):
+
+```bash
+curl -X POST https://frontend-1t3f4ucp6.vercel.app/api/plan \
+  -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
+  -H "Content-Type: application/json" \
+  -d @data.json
+```
+
+**Behavior:**
+- Same key + same body within 60s → Cached response (200) with `X-Idempotent-Replayed: true`
+- Same key + different body → 409 conflict
+- No key → Process normally
+
+## 📦 Versions
+
+- **v0.1.1** (Current) - API Hardening: RFC 9457, rate limiting, idempotency
+- **v0.1.0** - Initial Public Release
 
 ## 📄 License
 
