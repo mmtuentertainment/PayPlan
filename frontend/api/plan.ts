@@ -3,15 +3,15 @@
 
 import type { IncomingMessage, ServerResponse } from "http";
 import { DateTime } from "luxon";
-import { buildProblem, sendProblem } from "./_utils/problem";
-import { getClientIp } from "./_utils/ip";
-import { checkLimit, setRateHeaders } from "./_utils/ratelimit";
+import { buildProblem, sendProblem } from "./_utils/problem.js";
+import { getClientIp } from "./_utils/ip.js";
+import { checkLimit, setRateHeaders } from "./_utils/ratelimit.js";
 import {
   hasCachedSuccess,
   cacheSuccess,
   computeBodyHash,
   getIdempotencyKey,
-} from "./_utils/idempotency";
+} from "./_utils/idempotency.js";
 
 // v0.1 core libs (ESM)
 let calculatePaydays: any;

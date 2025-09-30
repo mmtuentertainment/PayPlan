@@ -1,6 +1,6 @@
 import { Ratelimit } from '@upstash/ratelimit';
-import { getRedisClient } from './redis';
-import { buildProblem, PROBLEM_TYPES } from './problem';
+import { getRedisClient } from './redis.js';
+import { buildProblem, PROBLEM_TYPES } from './problem.js';
 import type { ServerResponse } from 'http';
 
 const RATE_LIMIT = parseInt(process.env.RATE_LIMIT_PER_HOUR || '60', 10);

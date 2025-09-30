@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
-import { getRedisClient } from './redis';
-import { buildProblem, PROBLEM_TYPES } from './problem';
+import { getRedisClient } from './redis.js';
+import { buildProblem, PROBLEM_TYPES } from './problem.js';
 import type { ServerResponse } from 'http';
 
 const TTL_SECONDS = parseInt(process.env.IDEMPOTENCY_TTL_SECONDS || '60', 10);
