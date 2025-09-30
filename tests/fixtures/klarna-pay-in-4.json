@@ -1,0 +1,44 @@
+{
+  "items": [
+    {
+      "provider": "Klarna",
+      "installment_no": 1,
+      "due_date": "2025-10-02",
+      "amount": 45.00,
+      "currency": "USD",
+      "autopay": true,
+      "late_fee": 7.00
+    },
+    {
+      "provider": "Klarna",
+      "installment_no": 2,
+      "due_date": "2025-10-16",
+      "amount": 45.00,
+      "currency": "USD",
+      "autopay": true,
+      "late_fee": 7.00
+    },
+    {
+      "provider": "Klarna",
+      "installment_no": 3,
+      "due_date": "2025-10-30",
+      "amount": 45.00,
+      "currency": "USD",
+      "autopay": true,
+      "late_fee": 7.00
+    },
+    {
+      "provider": "Klarna",
+      "installment_no": 4,
+      "due_date": "2025-11-13",
+      "amount": 45.00,
+      "currency": "USD",
+      "autopay": true,
+      "late_fee": 7.00
+    }
+  ],
+  "payCadence": "biweekly",
+  "nextPayday": "2025-10-05",
+  "minBuffer": 200.00,
+  "timeZone": "America/New_York"
+}
