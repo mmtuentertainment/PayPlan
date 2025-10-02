@@ -48,6 +48,8 @@ function shiftToBusinessDays(items, timeZone, options = {}) {
 
     let reason = undefined;
     let shifted = false;
+    let daysShifted = 0;
+    const MAX_SHIFT_DAYS = 365; // Prevent infinite loops from malformed data
 
     // Shift forward until we find a business day
     while (isNonBusinessDay(dateTime, skipSet, customSkipDates)) {
@@ -65,6 +67,15 @@ function shiftToBusinessDays(items, timeZone, options = {}) {
 
       dateTime = dateTime.plus({ days: 1 });
       shifted = true;
+      daysShifted++;
+
+      // Safety check: prevent infinite loops from malformed holiday/skip data
+      if (daysShifted >= MAX_SHIFT_DAYS) {
+        throw new Error(
+          `Unable to find business day after ${originalDate} within ${MAX_SHIFT_DAYS} days. ` +
+          `Check holiday data and customSkipDates for errors.`
+        );
+      }
     }
 
     if (shifted) {
