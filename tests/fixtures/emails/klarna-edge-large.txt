@@ -1,0 +1,16 @@
+From: Klarna <no-reply@klarna.com>
+Subject: Payment 1 of 12 Reminder
+
+Hi there,
+
+Large purchase payment reminder.
+
+Payment 1 of 12: $999.99
+Due: October 15, 2025
+Late fee if missed: $25.00
+AutoPay is enabled
+
+Payment method: Amex ending in 3333
+Payment ID: PAY-2025-LARGE-999
+
+Thank you for choosing Klarna for your large purchase!

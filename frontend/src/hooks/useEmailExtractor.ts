@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { extractItemsFromEmails } from '../lib/email-extractor';
 import type { ExtractionResult, Item } from '../lib/email-extractor';
 
@@ -6,6 +6,7 @@ export function useEmailExtractor(timezone: string) {
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [editableItems, setEditableItems] = useState<Item[]>([]);
+  const extractionIdRef = useRef(0);
 
   const extract = useCallback((emailText: string) => {
     if (!emailText.trim()) {
@@ -14,10 +15,17 @@ export function useEmailExtractor(timezone: string) {
       return;
     }
 
+    // Generate unique extraction ID to prevent race conditions
+    const currentExtractionId = ++extractionIdRef.current;
     setIsExtracting(true);
 
     // Use setTimeout to avoid blocking UI
     setTimeout(() => {
+      // Only update state if this is still the latest extraction
+      if (currentExtractionId !== extractionIdRef.current) {
+        return; // Stale extraction, ignore
+      }
+
       try {
         const extracted = extractItemsFromEmails(emailText, timezone);
         setResult(extracted);
@@ -25,7 +33,11 @@ export function useEmailExtractor(timezone: string) {
       } catch (err) {
         setResult({
           items: [],
-          issues: [{ snippet: '', reason: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}` }],
+          issues: [{
+            id: `error-${Date.now()}`,
+            snippet: '',
+            reason: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+          }],
           duplicatesRemoved: 0
         });
         setEditableItems([]);

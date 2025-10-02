@@ -15,17 +15,19 @@ export function EmailIssues({ issues }: EmailIssuesProps) {
         Issues ({issues.length})
       </h3>
       <div className="space-y-2">
-        {issues.map((issue, idx) => (
+        {issues.map((issue) => (
           <div
-            key={idx}
+            key={issue.id}
+            role="group"
+            aria-label={`Extraction issue: ${issue.reason}`}
             className="p-3 bg-yellow-50 border border-yellow-200 rounded"
           >
             <p className="text-sm font-medium text-yellow-800">
               ⚠️ {issue.reason}
             </p>
             {issue.snippet && (
-              <p className="text-xs text-gray-600 mt-1 font-mono">
-                "{issue.snippet}..."
+              <p className="text-xs text-gray-600 mt-1 font-mono" aria-describedby={`snippet-${issue.id}`}>
+                <span id={`snippet-${issue.id}`}>"{issue.snippet}..."</span>
               </p>
             )}
           </div>

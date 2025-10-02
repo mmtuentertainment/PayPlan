@@ -1,0 +1,16 @@
+From: Affirm <notifications@affirm.com>
+Subject: Final Payment - 3 of 3
+
+Hello,
+
+This is your final payment!
+
+Installment 3/3: $50.00
+Due date: November 6, 2025
+Late fee: $10.00
+Will be charged automatically
+
+Payment method: Bank account ending in 0000 (sample data)
+Transaction ID: AFF-2025-FIN-003
+
+Thanks for using Affirm!

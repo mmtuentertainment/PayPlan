@@ -1,0 +1,17 @@
+From: Klarna <no-reply@klarna.com>
+Subject: Payment 2 of 4 Reminder
+
+Hello,
+
+You're halfway through your payment plan!
+
+Payment 2 of 4: $25.00
+Due: October 20, 2025
+Late fee if missed: $7.00
+AutoPay is enabled
+
+Payment method: Mastercard ending in 5555
+Payment ID: PAY-2025-002-XYZ
+
+Thanks!
+Klarna

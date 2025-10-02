@@ -3,19 +3,28 @@ import { parseDate } from './date-parser';
 export type Provider = 'Klarna' | 'Affirm' | 'Unknown';
 
 export interface ProviderPatterns {
-  signatures: string[];
+  signatures: (string | RegExp)[];
   amountPatterns: RegExp[];
   datePatterns: RegExp[];
   installmentPatterns: RegExp[];
 }
 
+/**
+ * Provider-specific patterns for data extraction.
+ * Uses word boundaries and specific signatures to avoid false matches.
+ */
 export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
   klarna: {
-    signatures: ['klarna.com', 'klarna', 'from klarna'],
+    // More specific signatures with word boundaries and email domain
+    signatures: ['@klarna.com', /\bklarna\b/i],
     amountPatterns: [
-      /payment[:\s]+\$?([\d,]+\.?\d{0,2})/i,
-      /\$\s?([\d,]+\.?\d{0,2})\s+due/i,
-      /amount[:\s]+\$?([\d,]+\.?\d{0,2})/i
+      // Require word boundaries and 2 decimal places for precision
+      /\bpayment\b[:\s]+\$?([\d,]+\.\d{2})\b/i,
+      /\$\s?([\d,]+\.\d{2})\s+\bdue\b/i,
+      /\bamount\b[:\s]+\$?([\d,]+\.\d{2})\b/i,
+      // Fallback: allow 0-2 decimals
+      /\bpayment\b[:\s]+\$?([\d,]+\.?\d{0,2})\b/i,
+      /\$\s?([\d,]+\.?\d{0,2})\s+\bdue\b/i
     ],
     datePatterns: [
       /due\s+(?:date)?[:\s]*([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i,
@@ -29,11 +38,14 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
   },
 
   affirm: {
-    signatures: ['affirm.com', 'affirm', 'from affirm'],
+    signatures: ['@affirm.com', /\baffirm\b/i],
     amountPatterns: [
-      /installment[:\s]+\$?([\d,]+\.?\d{0,2})/i,
-      /\$\s?([\d,]+\.?\d{0,2})\s+due/i,
-      /amount[:\s]+\$?([\d,]+\.?\d{0,2})/i
+      /\binstallment\b[:\s]+\$?([\d,]+\.\d{2})\b/i,
+      /\$\s?([\d,]+\.\d{2})\s+\bdue\b/i,
+      /\bamount\b[:\s]+\$?([\d,]+\.\d{2})\b/i,
+      // Fallback: allow 0-2 decimals
+      /\binstallment\b[:\s]+\$?([\d,]+\.?\d{0,2})\b/i,
+      /\$\s?([\d,]+\.?\d{0,2})\s+\bdue\b/i
     ],
     datePatterns: [
       /due[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
@@ -48,42 +60,87 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
   }
 };
 
+/**
+ * Detects BNPL provider from email text.
+ * Uses email domain and keyword signatures for detection.
+ *
+ * @param emailText - Email content to analyze
+ * @returns Provider name ('Klarna', 'Affirm', or 'Unknown')
+ */
 export function detectProvider(emailText: string): Provider {
+  const matchesSignature = (text: string, sig: string | RegExp): boolean => {
+    if (typeof sig === 'string') {
+      return text.includes(sig);
+    }
+    return sig.test(text);
+  };
+
   const lower = emailText.toLowerCase();
 
-  if (PROVIDER_PATTERNS.klarna.signatures.some(sig => lower.includes(sig))) {
+  if (PROVIDER_PATTERNS.klarna.signatures.some(sig => matchesSignature(lower, sig))) {
     return 'Klarna';
   }
 
-  if (PROVIDER_PATTERNS.affirm.signatures.some(sig => lower.includes(sig))) {
+  if (PROVIDER_PATTERNS.affirm.signatures.some(sig => matchesSignature(lower, sig))) {
     return 'Affirm';
   }
 
   return 'Unknown';
 }
 
+/**
+ * Extracts payment amount from email text.
+ *
+ * @param text - Email text to search
+ * @param patterns - Array of regex patterns to try
+ * @returns Extracted amount as number
+ * @throws Error if text is null/undefined or amount cannot be found
+ */
 export function extractAmount(text: string, patterns: RegExp[]): number {
+  if (!text) {
+    throw new Error('Cannot extract amount from null or undefined text');
+  }
+
+  if (!patterns || patterns.length === 0) {
+    throw new Error('No amount patterns provided');
+  }
+
   for (const pattern of patterns) {
     const match = text.match(pattern);
-    if (match) {
+    if (match && match[1]) {
       const amountStr = match[1].replace(/,/g, '');
       const amount = parseFloat(amountStr);
-      if (!isNaN(amount) && amount > 0) {
+      if (!isNaN(amount) && amount >= 0) {
         return amount;
       }
     }
   }
-  throw new Error('Amount not found or invalid');
+  throw new Error('Amount not found. Ensure email contains text like "Payment: $25.00" or "$25.00 due"');
 }
 
+/**
+ * Extracts currency from email text.
+ * Currently defaults to USD for Phase A (US market only).
+ *
+ * @param text - Email text to analyze
+ * @returns Currency code (always 'USD' in Phase A)
+ */
 export function extractCurrency(text: string): string {
   // Simple: if $ symbol present, assume USD
   if (text.includes('$') || text.toLowerCase().includes('usd')) {
     return 'USD';
   }
-  return 'USD'; // default
+  return 'USD'; // default for Phase A
 }
 
+/**
+ * Extracts installment number from payment email.
+ * Looks for patterns like "Payment 2 of 4" or "2/4".
+ *
+ * @param text - Email text to search
+ * @param patterns - Array of regex patterns to try
+ * @returns Installment number (1-12), defaults to 1 if not found
+ */
 export function extractInstallmentNumber(text: string, patterns: RegExp[]): number {
   for (const pattern of patterns) {
     const match = text.match(pattern);
@@ -97,7 +154,20 @@ export function extractInstallmentNumber(text: string, patterns: RegExp[]): numb
   return 1; // default to first installment
 }
 
+/**
+ * Detects if autopay is enabled based on email keywords.
+ * Looks for phrases like "AutoPay is ON", "automatically charged", etc.
+ *
+ * Security note: Returns false for negative keywords like "AutoPay is OFF"
+ * because it only checks for positive autopay indicators.
+ *
+ * @param text - Email text to analyze
+ * @returns true if autopay is detected, false otherwise
+ */
 export function detectAutopay(text: string): boolean {
+  if (!text) {
+    return false; // Handle null, undefined, empty string
+  }
   const lower = text.toLowerCase();
   const keywords = [
     'autopay is on',
@@ -110,6 +180,13 @@ export function detectAutopay(text: string): boolean {
   return keywords.some(kw => lower.includes(kw));
 }
 
+/**
+ * Extracts late fee amount from email text.
+ * Looks for patterns like "Late fee: $7.00" or "Late charge: $10.00".
+ *
+ * @param text - Email text to search
+ * @returns Late fee amount, defaults to 0 if not found
+ */
 export function extractLateFee(text: string): number {
   const patterns = [
     /late\s+(?:payment\s+)?fee[:\s]+\$?([\d,]+\.?\d{0,2})/i,
@@ -128,6 +205,16 @@ export function extractLateFee(text: string): number {
   return 0; // default: no late fee
 }
 
+/**
+ * Extracts and parses due date from email text.
+ * Uses timezone-aware parsing to ensure correct date interpretation.
+ *
+ * @param text - Email text to search
+ * @param patterns - Array of regex patterns to try
+ * @param timezone - IANA timezone for date parsing
+ * @returns ISO date string (YYYY-MM-DD)
+ * @throws Error if due date cannot be found or parsed
+ */
 export function extractDueDate(
   text: string,
   patterns: RegExp[],
@@ -143,5 +230,5 @@ export function extractDueDate(
       }
     }
   }
-  throw new Error('Due date not found or invalid');
+  throw new Error('Due date not found. Please ensure email contains text like "Due: 10/6/2025" or "Due date: October 6, 2025"');
 }
