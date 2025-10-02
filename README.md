@@ -1,12 +1,12 @@
 # PayPlan - BNPL Payment Manager
 
-**Live Demo:** https://frontend-1t3f4ucp6-matthew-utts-projects-89452c41.vercel.app
+**Live Demo:** https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app
 
 Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified payment timeline, risk detection, and calendar export.
 
 ## 🚀 Quick Start (Public Demo)
 
-1. Visit https://frontend-1t3f4ucp6-matthew-utts-projects-89452c41.vercel.app
+1. Visit https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app
 2. Click "Use Sample CSV" to load example data
 3. Adjust timezone and payday settings
 4. Click "Build Plan"
@@ -41,7 +41,7 @@ Afterpay,2,2025-10-09,32.50,USD,true,8
 **POST** `/api/plan`
 
 ```bash
-curl -X POST https://frontend-1t3f4ucp6-matthew-utts-projects-89452c41.vercel.app/api/plan \
+curl -X POST https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app/api/plan \
   -H "Content-Type: application/json" \
   -d '{
     "items": [...],
@@ -130,7 +130,7 @@ All error responses use [RFC 9457 Problem Details](https://www.rfc-editor.org/rf
 
 ```json
 {
-  "type": "https://frontend-1t3f4ucp6.vercel.app/problems/validation-error",
+  "type": "https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app/problems/validation-error",
   "title": "Validation Error",
   "status": 400,
   "detail": "items array is required and must contain at least 1 installment",
@@ -154,7 +154,7 @@ All error responses use [RFC 9457 Problem Details](https://www.rfc-editor.org/rf
 Use `Idempotency-Key` header for safe retries (60-second cache):
 
 ```bash
-curl -X POST https://frontend-1t3f4ucp6.vercel.app/api/plan \
+curl -X POST https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app/api/plan \
   -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
   -H "Content-Type: application/json" \
   -d @data.json
@@ -188,7 +188,7 @@ Toggle business-day mode in the frontend UI:
 ### API Request
 
 ```bash
-curl -X POST https://frontend-1t3f4ucp6-matthew-utts-projects-89452c41.vercel.app/api/plan \
+curl -X POST https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app/api/plan \
   -H "Content-Type: application/json" \
   -d '{
     "items": [...],
