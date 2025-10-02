@@ -1,0 +1,13 @@
+From: payments@afterpay.com
+Subject: Payment Reminder
+Date: Mon, 30 Sep 2025 10:00:00 -0400
+
+Hi there,
+
+Your Afterpay installment of $25.00 is due on October 6, 2025.
+Payment 1 of 4. AutoPay is OFF. Late fee: $7.00.
+
+Pay now: https://afterpay.com/pay
+
+Thanks,
+Afterpay

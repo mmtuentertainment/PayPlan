@@ -1,6 +1,6 @@
 import { parseDate } from './date-parser';
 
-export type Provider = 'Klarna' | 'Affirm' | 'Unknown';
+export type Provider = 'Klarna' | 'Affirm' | 'Afterpay' | 'Unknown';
 
 export interface ProviderPatterns {
   signatures: (string | RegExp)[];
@@ -57,6 +57,27 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
       /payment\s+(\d+)\s+of\s+(\d+)/i,
       /(\d+)\s*\/\s*(\d+)/
     ]
+  },
+
+  afterpay: {
+    signatures: ['@afterpay.com', /\bafterpay\b/i],
+    amountPatterns: [
+      /\binstallment\b[:\s]+\$?([\d,]+\.\d{2})\b/i,
+      /\$\s?([\d,]+\.\d{2})\s+\bdue\b/i,
+      /\bamount\s+due\b[:\s]+\$?([\d,]+\.\d{2})\b/i,
+      // Fallback: allow 0-2 decimals
+      /\binstallment\b[:\s]+\$?([\d,]+\.?\d{0,2})\b/i
+    ],
+    datePatterns: [
+      /due[:\s]+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i,
+      /due\s+date[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
+      /(\d{4}-\d{2}-\d{2})/
+    ],
+    installmentPatterns: [
+      /payment\s+(\d+)\s+of\s+(\d+)/i,
+      /installment\s+(\d+)\/(\d+)/i,
+      /final\s+payment/i
+    ]
   }
 };
 
@@ -65,7 +86,7 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
  * Uses email domain and keyword signatures for detection.
  *
  * @param emailText - Email content to analyze
- * @returns Provider name ('Klarna', 'Affirm', or 'Unknown')
+ * @returns Provider name ('Klarna', 'Affirm', 'Afterpay', or 'Unknown')
  */
 export function detectProvider(emailText: string): Provider {
   const matchesSignature = (text: string, sig: string | RegExp): boolean => {
@@ -83,6 +104,10 @@ export function detectProvider(emailText: string): Provider {
 
   if (PROVIDER_PATTERNS.affirm.signatures.some(sig => matchesSignature(lower, sig))) {
     return 'Affirm';
+  }
+
+  if (PROVIDER_PATTERNS.afterpay.signatures.some(sig => matchesSignature(lower, sig))) {
+    return 'Afterpay';
   }
 
   return 'Unknown';

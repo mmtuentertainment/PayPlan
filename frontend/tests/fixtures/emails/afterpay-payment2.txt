@@ -1,0 +1,16 @@
+From: notifications@afterpay.com
+Subject: Upcoming Payment
+Date: Tue, 01 Oct 2025 14:30:00 -0400
+
+Hello,
+
+Your Afterpay payment is coming up.
+
+Installment: $50.00 due on October 15, 2025
+Payment 2 of 4
+AutoPay is ON
+
+View details: https://afterpay.com/account
+
+Best regards,
+Afterpay Team
