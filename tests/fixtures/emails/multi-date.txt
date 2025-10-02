@@ -1,0 +1,10 @@
+From: Klarna
+Subject: Payment schedule
+
+Previous payment: October 1, 2025
+Next payment due: October 15, 2025
+Amount: $50.00
+
+Payment 3 of 4
+Payment ID: PAY-2025-003-MUL
+Late fee: $7.00

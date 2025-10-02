@@ -5,6 +5,50 @@ All notable changes to PayPlan will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3-a] - 2025-10-02
+
+### Added
+- **📧 Inbox Paste (Email Parser) - Phase A**: Client-side email parser for Klarna & Affirm
+  - New "Emails" tab alongside CSV input
+  - Paste payment reminder emails directly (no CSV needed)
+  - Auto-extract: provider, installment_no, due_date, amount, currency, autopay, late_fee
+  - Support for multiple date formats (ISO, US slash, long format with month names)
+  - Preview table with extracted payments
+  - Inline edit/delete functionality
+  - "Copy as CSV" export button
+  - Issues list showing validation errors with reasons
+  - Keyboard shortcut: Cmd/Ctrl+Enter to extract
+- **New Frontend Modules**:
+  - `frontend/src/lib/email-extractor.ts` - Core extraction pipeline
+  - `frontend/src/lib/provider-detectors.ts` - Klarna & Affirm regex patterns
+  - `frontend/src/lib/date-parser.ts` - Luxon date normalization with suspicious date detection
+  - `frontend/src/lib/sample-emails.ts` - Demo email data (5 samples)
+  - `frontend/src/hooks/useEmailExtractor.ts` - React state management for extraction
+  - `frontend/src/components/EmailInput.tsx` - Email textarea with controls
+  - `frontend/src/components/EmailPreview.tsx` - Preview table component
+  - `frontend/src/components/EmailIssues.tsx` - Validation errors display
+- **Test Fixtures**: 6 email samples in `tests/fixtures/emails/`
+- **Dependencies**: Added `@types/luxon` for TypeScript support
+
+### Privacy & Security
+- ✅ Client-side only extraction (zero network calls until "Build Plan")
+- ✅ No localStorage/sessionStorage writes
+- ✅ HTML sanitization via DOMParser
+- ✅ Input length limits (16k characters)
+- ✅ Pasted text never sent to server during extraction
+
+### Limitations (Phase A)
+- **Providers**: Klarna & Affirm only (Afterpay, PayPal, Zip, Sezzle in Phase B)
+- **Geography**: US market only
+- **Format**: Plain text emails (HTML stripped via DOMParser)
+- **Installments**: One per email
+
+### Technical Details
+- Total LOC: ~400 (frontend-only, no backend changes)
+- No new npm dependencies (uses existing Luxon)
+- Performance: 50 emails extracted in <2s
+- Accessibility: ARIA labels, aria-live regions, keyboard shortcuts
+
 ## [0.1.2] - 2025-10-02
 
 ### Added

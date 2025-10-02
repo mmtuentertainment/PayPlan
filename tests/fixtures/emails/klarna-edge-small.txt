@@ -1,0 +1,16 @@
+From: Klarna <no-reply@klarna.com>
+Subject: Payment 1 of 4 Reminder
+
+Hi,
+
+Your Klarna payment reminder.
+
+Payment 1 of 4: $0.01
+Due: October 10, 2025
+Late fee if missed: $0.00
+AutoPay is OFF
+
+Payment method: Visa ending in 1111
+Payment ID: PAY-2025-EDGE-001
+
+Klarna
