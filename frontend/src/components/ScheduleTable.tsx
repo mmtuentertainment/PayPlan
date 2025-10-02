@@ -14,6 +14,13 @@ type Row = {
 
 type Props = { rows: Row[] };
 
+const getShiftReasonText = (reason?: string) => {
+  if (reason === "WEEKEND") return "weekend";
+  if (reason === "HOLIDAY") return "US Federal holiday";
+  if (reason === "CUSTOM") return "custom skip date";
+  return reason || "";
+};
+
 export default function ScheduleTable({ rows }: Props) {
   if (!rows?.length) return null;
 
@@ -36,31 +43,29 @@ export default function ScheduleTable({ rows }: Props) {
             </thead>
             <tbody>
               {rows.map((r, i) => {
-                const getShiftReasonText = (reason?: string) => {
-                  if (reason === "WEEKEND") return "weekend";
-                  if (reason === "HOLIDAY") return "US Federal holiday";
-                  if (reason === "CUSTOM") return "custom skip date";
-                  return reason || "";
-                };
-
                 const tooltipText = r.wasShifted
                   ? `Shifted from ${r.originalDueDate} due to ${getShiftReasonText(r.shiftReason)}`
                   : "";
 
                 return (
-                  <tr key={i} className="border-t">
+                  <tr key={`${r.provider}-${r.dueDate}`} className="border-t">
                     <td className="py-2">{r.provider}</td>
                     <td className="py-2">
                       <div className="flex items-center gap-2">
                         <span>{r.dueDate}</span>
                         {r.wasShifted && (
-                          <Badge
-                            variant="secondary"
-                            className="cursor-help"
-                            title={tooltipText}
-                          >
-                            Shifted
-                          </Badge>
+                          <>
+                            <Badge
+                              variant="secondary"
+                              className="cursor-help"
+                              aria-describedby={`shift-reason-${i}`}
+                            >
+                              Shifted
+                            </Badge>
+                            <span id={`shift-reason-${i}`} className="sr-only">
+                              {tooltipText}
+                            </span>
+                          </>
                         )}
                       </div>
                     </td>

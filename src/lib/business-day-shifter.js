@@ -27,7 +27,7 @@ function shiftToBusinessDays(items, timeZone, options = {}) {
   }
 
   // Build skip set: weekends + holidays + custom dates
-  const skipSet = buildSkipSet(country, customSkipDates, timeZone);
+  const skipSet = buildSkipSet(country, customSkipDates);
 
   const shiftedItems = [];
   const movedDates = [];
@@ -52,13 +52,13 @@ function shiftToBusinessDays(items, timeZone, options = {}) {
     const MAX_SHIFT_DAYS = 365; // Prevent infinite loops from malformed data
 
     // Shift forward until we find a business day
-    while (isNonBusinessDay(dateTime, skipSet, customSkipDates)) {
+    while (isNonBusinessDay(dateTime, skipSet)) {
       const dayOfWeek = dateTime.weekday; // 1=Mon, 7=Sun
       const dateKey = dateTime.toISODate();
 
       // Capture reason on FIRST non-business day only (priority: CUSTOM > HOLIDAY > WEEKEND)
       if (!reason) {
-        if (customSkipDates.includes(dateKey)) {
+        if (skipSet.customSkipDates.has(dateKey)) {
           reason = 'CUSTOM';
         } else if (skipSet.holidays.has(dateKey)) {
           reason = 'HOLIDAY';
@@ -115,7 +115,7 @@ function shiftToBusinessDays(items, timeZone, options = {}) {
 /**
  * Build set of non-business days
  */
-function buildSkipSet(country, customSkipDates, timeZone) {
+function buildSkipSet(country, customSkipDates) {
   const holidays = new Set();
 
   // Load holidays for the country
@@ -138,7 +138,7 @@ function buildSkipSet(country, customSkipDates, timeZone) {
 /**
  * Check if a date is a non-business day
  */
-function isNonBusinessDay(dateTime, skipSet, customSkipDates) {
+function isNonBusinessDay(dateTime, skipSet) {
   const dayOfWeek = dateTime.weekday; // 1=Mon, 7=Sun
   const dateKey = dateTime.toISODate();
 
@@ -153,7 +153,7 @@ function isNonBusinessDay(dateTime, skipSet, customSkipDates) {
   }
 
   // Check custom skip dates
-  if (customSkipDates.includes(dateKey)) {
+  if (skipSet.customSkipDates.has(dateKey)) {
     return true;
   }
 
@@ -169,7 +169,7 @@ function isNonBusinessDay(dateTime, skipSet, customSkipDates) {
  * @returns {boolean}
  */
 function isBusinessDay(dateStr, timeZone, country = 'US', customSkipDates = []) {
-  const skipSet = buildSkipSet(country, customSkipDates, timeZone);
+  const skipSet = buildSkipSet(country, customSkipDates);
   const dateTime = DateTime.fromISO(dateStr, { zone: timeZone });
 
   if (!dateTime.isValid) {
@@ -188,7 +188,7 @@ function isBusinessDay(dateStr, timeZone, country = 'US', customSkipDates = []) 
  * @returns {string} Next business day in YYYY-MM-DD format
  */
 function nextBusinessDay(dateStr, timeZone, country = 'US', customSkipDates = []) {
-  const skipSet = buildSkipSet(country, customSkipDates, timeZone);
+  const skipSet = buildSkipSet(country, customSkipDates);
   let dateTime = DateTime.fromISO(dateStr, { zone: timeZone });
 
   if (!dateTime.isValid) {

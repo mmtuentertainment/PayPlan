@@ -140,11 +140,22 @@ function validatePlanRequest(req, res, next) {
     });
   }
 
-  if (country !== undefined && !['US', 'None'].includes(country)) {
-    return res.status(400).json({
-      error: 'Validation Error',
-      message: 'country must be either "US" or "None"'
-    });
+  if (country !== undefined) {
+    if (typeof country !== 'string' || country.length > 10) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'country must be a string'
+      });
+    }
+    const normalizedCountry = country.trim().toUpperCase();
+    if (!['US', 'NONE'].includes(normalizedCountry)) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'country must be either "US" or "None" (case-insensitive)'
+      });
+    }
+    // Replace with normalized value for downstream handlers
+    req.body.country = normalizedCountry === 'NONE' ? 'None' : normalizedCountry;
   }
 
   if (customSkipDates !== undefined) {
