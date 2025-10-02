@@ -75,9 +75,9 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
     setError(null);
     setLoading(true);
     try {
-      // Validate custom skip dates first
-      const skipDates = validateSkipDates(customSkipDates);
-      if (skipDates === null) {
+      // Validate custom skip dates only if Business Day Mode is enabled
+      const skipDates = businessDayMode ? validateSkipDates(customSkipDates) : [];
+      if (businessDayMode && skipDates === null) {
         throw new Error(skipDatesError || "Invalid custom skip dates");
       }
 
@@ -112,7 +112,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
       // Add business-day fields (v0.1.2)
       body.businessDayMode = businessDayMode;
       body.country = country;
-      if (skipDates.length > 0) {
+      if (skipDates && skipDates.length > 0) {
         body.customSkipDates = skipDates;
       }
 
@@ -251,7 +251,13 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
               type="checkbox"
               id="businessDayMode"
               checked={businessDayMode}
-              onChange={e => setBusinessDayMode(e.target.checked)}
+              onChange={e => {
+                setBusinessDayMode(e.target.checked);
+                // Clear skip date validation error when disabling mode
+                if (!e.target.checked) {
+                  setSkipDatesError(null);
+                }
+              }}
               className="mt-1 h-4 w-4 rounded border-gray-300"
             />
             <div className="flex-1">
@@ -308,7 +314,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
         </fieldset>
 
         <div className="flex items-end">
-          <Button onClick={handleBuild} disabled={loading || !!skipDatesError} className="w-full">
+          <Button onClick={handleBuild} disabled={loading || (businessDayMode && !!skipDatesError)} className="w-full">
             {loading ? "Building…" : "Build Plan"}
           </Button>
         </div>
