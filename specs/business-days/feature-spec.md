@@ -36,9 +36,9 @@ A PayPlan user inputs payment data with some installments due on weekends or US 
    - normalized[] shows wasShifted: true, originalDueDate, shiftedDueDate
 
 2. **Given** an installment due on Thanksgiving (US Federal holiday, Thursday 2025-11-27), **When** country="US" and Business-Day Mode enabled, **Then**:
-   - Due date shifts to next business day (2025-12-01, skipping weekend)
+   - Due date shifts to next business day (**Fri 2025-11-28**)
    - Shift reason: "HOLIDAY"
-   - Calendar event created on 2025-12-01
+   - Calendar event created on **Fri 2025-11-28**
    - movedDates shows holiday shift
 
 3. **Given** user provides customSkipDates: ["2025-10-15"] (company closure), **When** an installment is due on 2025-10-15, **Then**:
@@ -184,9 +184,9 @@ Output:
 ```json
 Input: due_date = "2025-11-27" (Thanksgiving), country = "US"
 Output:
-- shiftedDueDate = "2025-12-01" (Monday, skipping Fri-Sun)
+- shiftedDueDate = "2025-11-28" (Friday, next business day)
 - shiftReason = "HOLIDAY"
-- ICS event on 2025-12-01
+- ICS event on 2025-11-28
 ```
 
 **Test 3: Custom Skip Date**

@@ -82,13 +82,26 @@ function generateICSWithTZID(installments, timezone) {
 
     const uid = `payplan-${installment.provider.toLowerCase()}-${installment.installment_no}-${installment.due_date}@payplan.app`;
 
+    // v0.1.2: Add "(shifted)" annotation if date was moved
+    let summary = `BNPL Payment: ${installment.provider} $${installment.amount.toFixed(2)}`;
+    if (installment.wasShifted) {
+      summary += ' (shifted)';
+    }
+
+    // v0.1.2: Add original due date to description if shifted
+    let description = `Payment due to ${installment.provider}\\nAmount: $${installment.amount.toFixed(2)}\\nInstallment: ${installment.installment_no}`;
+    if (installment.wasShifted) {
+      description += `\\nOriginally due: ${installment.originalDueDate}\\nShifted to: ${installment.shiftedDueDate}\\nReason: ${installment.shiftReason}`;
+    }
+    description += `\\nLate fee if missed: $${installment.late_fee.toFixed(2)}\\nAutopay: ${installment.autopay ? 'Enabled' : 'Disabled'}`;
+
     icsContent.push('BEGIN:VEVENT');
     icsContent.push(`UID:${uid}`);
     icsContent.push(`DTSTART;TZID=${timezone}:${formatICSDateTime(startDateTime)}`);
     icsContent.push(`DTEND;TZID=${timezone}:${formatICSDateTime(endDateTime)}`);
     icsContent.push(`DTSTAMP:${formatICSDateTime(DateTime.now().toUTC())}`);
-    icsContent.push(`SUMMARY:BNPL Payment: ${installment.provider} $${installment.amount.toFixed(2)}`);
-    icsContent.push(`DESCRIPTION:Payment due to ${installment.provider}\\nAmount: $${installment.amount.toFixed(2)}\\nInstallment: ${installment.installment_no}\\nLate fee if missed: $${installment.late_fee.toFixed(2)}\\nAutopay: ${installment.autopay ? 'Enabled' : 'Disabled'}`);
+    icsContent.push(`SUMMARY:${summary}`);
+    icsContent.push(`DESCRIPTION:${description}`);
     icsContent.push('STATUS:CONFIRMED');
     icsContent.push('BEGIN:VALARM');
     icsContent.push('TRIGGER:-P1DT0H0M0S');

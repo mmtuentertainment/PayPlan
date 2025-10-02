@@ -151,11 +151,29 @@ function formatRiskFlags(riskFlags) {
  * @returns {Array} Simplified normalized format
  */
 function normalizeOutput(installments) {
-  return installments.map(i => ({
-    provider: i.provider,
-    dueDate: i.due_date,
-    amount: i.amount
-  }));
+  return installments.map(i => {
+    const normalized = {
+      provider: i.provider,
+      dueDate: i.due_date,
+      amount: i.amount
+    };
+
+    // v0.1.2: Include business-day shift fields if present
+    if (i.wasShifted !== undefined) {
+      normalized.wasShifted = i.wasShifted;
+    }
+    if (i.originalDueDate) {
+      normalized.originalDueDate = i.originalDueDate;
+    }
+    if (i.shiftedDueDate) {
+      normalized.shiftedDueDate = i.shiftedDueDate;
+    }
+    if (i.shiftReason) {
+      normalized.shiftReason = i.shiftReason;
+    }
+
+    return normalized;
+  });
 }
 
 module.exports = {

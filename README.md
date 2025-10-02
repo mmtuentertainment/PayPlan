@@ -165,9 +165,73 @@ curl -X POST https://frontend-1t3f4ucp6.vercel.app/api/plan \
 - Same key + different body → 409 conflict
 - No key → Process normally
 
+## 🗓️ Business-Day Awareness (v0.1.2)
+
+PayPlan automatically shifts weekend and holiday payment dates to the next business day, eliminating false WEEKEND_AUTOPAY warnings and preventing payment processing delays.
+
+### Features
+
+- **Automatic Shifting**: Payments due on weekends/holidays moved to next business day
+- **US Federal Holidays**: Built-in 2025-2026 holiday calendar (New Year's, MLK Day, Presidents Day, Memorial Day, Independence Day, Labor Day, Columbus Day, Veterans Day, Thanksgiving, Christmas)
+- **Custom Skip Dates**: Add company closures or personal unavailable dates
+- **Shift Tracking**: View original vs. shifted dates in results table with "Shifted" badges
+- **Default ON**: businessDayMode=true, weekends-only mode available
+
+### UI Controls
+
+Toggle business-day mode in the frontend UI:
+
+1. **Business Day Mode**: Enable/disable automatic shifting (default: ON)
+2. **Holiday Calendar**: Choose "US" (Federal holidays) or "None" (weekends only)
+3. **Custom Skip Dates**: Add comma-separated dates in YYYY-MM-DD format (e.g., `2025-12-24, 2025-12-26`)
+
+### API Request
+
+```bash
+curl -X POST https://frontend-1t3f4ucp6-matthew-utts-projects-89452c41.vercel.app/api/plan \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [...],
+    "paycheckDates": ["2025-10-05", "2025-10-19"],
+    "minBuffer": 100,
+    "timeZone": "America/New_York",
+    "businessDayMode": true,
+    "country": "US",
+    "customSkipDates": ["2025-12-24", "2025-12-26"]
+  }'
+```
+
+### API Response (v0.1.2)
+
+```json
+{
+  "summary": "You have 3 BNPL payments...",
+  "actionsThisWeek": ["Monday Oct 6: Pay Affirm $58.00 (shifted from Sat Oct 4)"],
+  "riskFlags": ["ℹ️ Payment shifted from 2025-10-04 (weekend) to 2025-10-06 (Monday)"],
+  "ics": "QkVHSU46VkNBTEVOREFS...",
+  "normalized": [{
+    "provider": "Klarna",
+    "dueDate": "2025-10-06",
+    "amount": 45.00,
+    "wasShifted": true,
+    "originalDueDate": "2025-10-04",
+    "shiftedDueDate": "2025-10-06",
+    "shiftReason": "WEEKEND"
+  }],
+  "movedDates": [{
+    "provider": "Klarna",
+    "installment_no": 1,
+    "originalDueDate": "2025-10-04",
+    "shiftedDueDate": "2025-10-06",
+    "reason": "WEEKEND"
+  }]
+}
+```
+
 ## 📦 Versions
 
-- **v0.1.1** (Current) - API Hardening: RFC 9457, rate limiting, idempotency
+- **v0.1.2** (Current) - Business-Day Awareness: Weekend/holiday shifting
+- **v0.1.1** - API Hardening: RFC 9457, rate limiting, idempotency
 - **v0.1.0** - Initial Public Release
 
 ## 📄 License

@@ -29,9 +29,37 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
   const [payCadence, setPayCadence] = useState<"weekly" | "biweekly" | "semimonthly" | "monthly">("biweekly");
   const [nextPayday, setNextPayday] = useState("");
   const [minBuffer, setMinBuffer] = useState(100);
+  const [businessDayMode, setBusinessDayMode] = useState(true);
+  const [country, setCountry] = useState<"US" | "None">("US");
+  const [customSkipDates, setCustomSkipDates] = useState("");
+  const [skipDatesError, setSkipDatesError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const tzDetected = useMemo(() => tz, [tz]);
+
+  // Validate custom skip dates
+  function validateSkipDates(value: string): string[] | null {
+    if (!value.trim()) return [];
+
+    const dates = value.split(/[,\s]+/).map(d => d.trim()).filter(Boolean);
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+    for (const date of dates) {
+      if (!isoDateRegex.test(date)) {
+        setSkipDatesError(`Invalid date format: "${date}". Use YYYY-MM-DD.`);
+        return null;
+      }
+      // Validate it's a real date
+      const d = new Date(date);
+      if (isNaN(d.getTime())) {
+        setSkipDatesError(`Invalid date: "${date}"`);
+        return null;
+      }
+    }
+
+    setSkipDatesError(null);
+    return dates;
+  }
 
   function onUseSample() {
     setCsv(SAMPLE_CSV);
@@ -47,6 +75,12 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
     setError(null);
     setLoading(true);
     try {
+      // Validate custom skip dates first
+      const skipDates = validateSkipDates(customSkipDates);
+      if (skipDates === null) {
+        throw new Error(skipDatesError || "Invalid custom skip dates");
+      }
+
       const rows = tab === "paste"
         ? await parseCsvString(csv)
         : await (async () => {
@@ -73,6 +107,13 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
         if (!nextPayday) throw new Error("Select next payday.");
         body.payCadence = payCadence;
         body.nextPayday = nextPayday;
+      }
+
+      // Add business-day fields (v0.1.2)
+      body.businessDayMode = businessDayMode;
+      body.country = country;
+      if (skipDates.length > 0) {
+        body.customSkipDates = skipDates;
       }
 
       const res = await buildPlan(body);
@@ -200,11 +241,76 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
               onChange={e => setMinBuffer(Number(e.target.value || 0))}
             />
           </div>
-          <div className="flex items-end">
-            <Button onClick={handleBuild} disabled={loading} className="w-full">
-              {loading ? "Building…" : "Build Plan"}
-            </Button>
+        </div>
+
+        <fieldset className="space-y-3 border rounded-lg p-4">
+          <legend className="font-medium px-2">Business Day Mode (v0.1.2)</legend>
+
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="businessDayMode"
+              checked={businessDayMode}
+              onChange={e => setBusinessDayMode(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-gray-300"
+            />
+            <div className="flex-1">
+              <Label htmlFor="businessDayMode" className="cursor-pointer">
+                Shift weekend/holiday dates to next business day
+              </Label>
+              <p className="text-sm text-muted-foreground mt-1">
+                Automatically moves payments due on weekends or holidays to the next business day
+              </p>
+            </div>
           </div>
+
+          {businessDayMode && (
+            <>
+              <div>
+                <Label htmlFor="country">Holiday Calendar</Label>
+                <Select value={country} onValueChange={(v: "US" | "None") => setCountry(v)}>
+                  <SelectTrigger id="country">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="US">United States (US Federal Holidays)</SelectItem>
+                    <SelectItem value="None">None (Weekends Only)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="customSkipDates">Custom skip dates (optional)</Label>
+                <Textarea
+                  id="customSkipDates"
+                  value={customSkipDates}
+                  onChange={e => {
+                    setCustomSkipDates(e.target.value);
+                    validateSkipDates(e.target.value);
+                  }}
+                  placeholder="2025-12-24, 2025-12-26"
+                  rows={2}
+                  className="font-mono"
+                  aria-describedby="skip-dates-help"
+                  aria-invalid={!!skipDatesError}
+                />
+                <div id="skip-dates-help" className="text-sm text-muted-foreground mt-1">
+                  Company closures or personal unavailable dates (YYYY-MM-DD, comma/space separated)
+                </div>
+                {skipDatesError && (
+                  <div role="alert" aria-live="polite" className="text-sm text-destructive mt-1">
+                    {skipDatesError}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </fieldset>
+
+        <div className="flex items-end">
+          <Button onClick={handleBuild} disabled={loading || !!skipDatesError} className="w-full">
+            {loading ? "Building…" : "Build Plan"}
+          </Button>
         </div>
 
         {error && (

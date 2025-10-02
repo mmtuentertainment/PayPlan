@@ -4,7 +4,17 @@ const { DateTime } = require('luxon');
  * Validate POST /plan request body
  */
 function validatePlanRequest(req, res, next) {
-  const { items, paycheckDates, payCadence, nextPayday, minBuffer, timeZone } = req.body;
+  const {
+    items,
+    paycheckDates,
+    payCadence,
+    nextPayday,
+    minBuffer,
+    timeZone,
+    businessDayMode,
+    country,
+    customSkipDates
+  } = req.body;
 
   const errors = [];
 
@@ -119,6 +129,36 @@ function validatePlanRequest(req, res, next) {
     return res.status(400).json({
       error: 'Validation Error',
       message: `Invalid IANA timezone: '${timeZone}'. Examples: 'America/New_York', 'America/Los_Angeles'`
+    });
+  }
+
+  // Validate business day mode fields (v0.1.2)
+  if (businessDayMode !== undefined && typeof businessDayMode !== 'boolean') {
+    return res.status(400).json({
+      error: 'Validation Error',
+      message: 'businessDayMode must be a boolean'
+    });
+  }
+
+  if (country !== undefined && !['US', 'None'].includes(country)) {
+    return res.status(400).json({
+      error: 'Validation Error',
+      message: 'country must be either "US" or "None"'
+    });
+  }
+
+  if (customSkipDates !== undefined) {
+    if (!Array.isArray(customSkipDates)) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'customSkipDates must be an array'
+      });
+    }
+
+    customSkipDates.forEach((date, index) => {
+      if (!isValidISODate(date)) {
+        errors.push(`customSkipDates[${index}]: invalid date format, use yyyy-mm-dd`);
+      }
     });
   }
 
