@@ -1,0 +1,294 @@
+# CodeRabbit Configuration for PayPlan
+# BNPL Payment Manager - AI Code Review Settings
+# Last Updated: 2025-10-02
+# Project: https://github.com/matthew-utt/PayPlan
+
+# ==============================================================================
+# LANGUAGE & TONE
+# ==============================================================================
+language: en-US
+tone_instructions: "Focus on security, privacy, timezone handling, financial accuracy, and backward compatibility for this BNPL payment app."
+
+# ==============================================================================
+# REVIEW SETTINGS
+# ==============================================================================
+reviews:
+  # Review profile: "chill" (less strict) or "assertive" (more thorough)
+  # PayPlan uses assertive due to financial data sensitivity
+  profile: assertive
+
+  # High-level settings
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+
+  # Auto-review configuration
+  auto_review:
+    enabled: true
+    drafts: false  # Don't review draft PRs
+    base_branches:
+      - main
+
+  # Request changes for critical issues
+  request_changes_workflow: true
+
+  # Collapse walkthrough in PR description
+  collapse_walkthrough: false
+
+  # Path filters - exclude from review
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+    - "!**/package-lock.json"
+    - "!**/pnpm-lock.yaml"
+    - "!**/yarn.lock"
+    - "!**/.vercel/**"
+    - "!**/assets/**"
+    - "!**/public/**"
+    - "!**/*.md"  # We have separate markdown linter
+    - "!**/logs_result.json"
+    - "!**/CHANGELOG.md"  # Auto-generated
+
+  # Path-specific review instructions
+  path_instructions:
+    - path: "src/lib/**/*.js"
+      instructions: |
+        Review core business logic libraries with extreme care:
+        - Verify all Luxon DateTime operations use correct timezone handling
+        - Check for potential timezone conversion bugs
+        - Ensure all date calculations account for DST transitions
+        - Validate edge cases (leap years, month boundaries, year boundaries)
+        - Performance: Check for unnecessary DateTime instantiations in loops
+        - Flag any hardcoded dates or timezone assumptions
+
+    - path: "src/routes/**/*.js"
+      instructions: |
+        Review API endpoint handlers for:
+        - Input validation completeness (check middleware integration)
+        - RFC 9457 Problem Details compliance for errors
+        - Rate limiting bypass attempts
+        - Idempotency key handling correctness
+        - Response schema consistency with OpenAPI contract
+        - No sensitive data in logs or responses
+        - Proper HTTP status codes (200, 400, 409, 429, 500)
+
+    - path: "src/middleware/**/*.js"
+      instructions: |
+        Review middleware for:
+        - Proper error handling and next() calls
+        - Request validation completeness
+        - No bypass opportunities for security checks
+        - Performance implications (middleware runs on every request)
+        - Clear error messages for validation failures
+
+    - path: "tests/**/*.js"
+      instructions: |
+        Review tests for:
+        - Coverage of edge cases (weekends, holidays, DST, leap years)
+        - Timezone-aware test fixtures
+        - Negative test cases (invalid inputs, errors)
+        - Performance test thresholds are realistic
+        - Test isolation (no shared state between tests)
+        - Clear test names that describe scenarios
+
+    - path: "frontend/src/**/*.{ts,tsx}"
+      instructions: |
+        Review frontend React/TypeScript code for:
+        - Proper TypeScript types (no 'any' without justification)
+        - Zod schema validation before API calls
+        - Accessibility (ARIA attributes, keyboard navigation)
+        - Error handling for API failures
+        - Loading states and user feedback
+        - No hardcoded API URLs (use relative paths)
+        - Proper React hooks usage (no infinite loops)
+
+    - path: "frontend/src/lib/api.ts"
+      instructions: |
+        Review API client for:
+        - Zod schema matches backend response contract
+        - RFC 9457 Problem Details parsing
+        - Proper error handling and propagation
+        - No credential leaks in error messages
+        - Request/response type safety
+
+    - path: "specs/**/*.md"
+      instructions: |
+        Review specification documents for:
+        - Consistency with implementation
+        - Clear acceptance criteria
+        - Complete edge case coverage
+        - Security and privacy considerations documented
+        - Backward compatibility notes
+
+  # ===========================================================================
+  # TOOL INTEGRATIONS
+  # ===========================================================================
+  tools:
+    # JavaScript/Node.js
+    eslint:
+      enabled: true
+      config_file: "frontend/.eslintrc.cjs"
+
+    # Security - Secret scanning
+    gitleaks:
+      enabled: true
+      # Critical for financial app - catch API keys, tokens, credentials
+
+    # Security - Vulnerability detection
+    semgrep:
+      enabled: true
+      # Detect security anti-patterns, injection risks, crypto issues
+
+    # YAML validation
+    yamllint:
+      enabled: true
+      # Validate GitHub Actions, CodeRabbit config, OpenAPI specs
+
+    # Markdown style
+    markdownlint:
+      enabled: true
+      config_file: ".markdownlint.json"
+
+    # GitHub Actions validation
+    actionlint:
+      enabled: true
+
+    # Shell script validation
+    shellcheck:
+      enabled: true
+
+    # AST-based pattern matching (Pro plan)
+    ast-grep:
+      enabled: false  # Enable when we upgrade to Pro
+      rule_dirs:
+        - ".ast-grep/rules"
+
+  # ===========================================================================
+  # FINISHING TOUCHES
+  # ===========================================================================
+  finishing_touches:
+    # Docstring generation
+    docstrings:
+      enabled: true
+      language: "English"
+      style: "JSDoc"  # For JavaScript
+      path_instructions:
+        - path: "src/lib/**/*.js"
+          instructions: |
+            Generate comprehensive JSDoc with:
+            - @param with types and descriptions
+            - @returns with type and description
+            - @throws for error cases
+            - @example for complex functions
+            - Timezone handling notes for date functions
+
+    # Unit test generation
+    unit_tests:
+      enabled: false  # We write tests manually for financial logic
+      # Too risky to auto-generate tests for money calculations
+
+# ==============================================================================
+# CHAT SETTINGS
+# ==============================================================================
+chat:
+  # Auto-reply to user questions in PRs
+  auto_reply: true
+
+# ==============================================================================
+# KNOWLEDGE BASE
+# ==============================================================================
+knowledge_base:
+  # Learn from code reviews and discussions
+  opt_out: false
+
+  # Enable web search for external context
+  learnings:
+    scope: auto  # Share learnings across PayPlan repos
+
+  # Track issues and PRs for context
+  issues:
+    scope: auto
+
+  pull_requests:
+    scope: auto
+
+# ==============================================================================
+# CODE GENERATION (Pro Plan)
+# ==============================================================================
+# code_generation:
+#   docstrings:
+#     language: "English"
+#   unit_tests:
+#     enabled: false
+
+# ==============================================================================
+# EARLY ACCESS & EXPERIMENTAL
+# ==============================================================================
+early_access: false  # Stable features only for production app
+
+# ==============================================================================
+# ADDITIONAL SETTINGS
+# ==============================================================================
+
+# Ignore specific branches
+# ignore_branches:
+#   - "dev"
+#   - "test/**"
+
+# Ignore PRs with specific titles
+# ignore_title_keywords:
+#   - "WIP"
+#   - "DO NOT MERGE"
+#   - "[skip ci]"
+
+# Ignore draft PRs
+ignore_draft_pr: true
+
+# ==============================================================================
+# PAYPLAN-SPECIFIC RULES
+# ==============================================================================
+
+# These are custom guidelines that CodeRabbit should enforce:
+#
+# 1. TIMEZONE SAFETY
+#    - All DateTime operations must specify timezone explicitly
+#    - Use Luxon, never native Date for business logic
+#    - Test all date logic with multiple timezones (US/Eastern, US/Pacific, UTC)
+#
+# 2. FINANCIAL ACCURACY
+#    - Use exact decimal arithmetic (no floating point for money)
+#    - All amounts should be validated as positive numbers
+#    - Currency must always be specified
+#    - Round money values consistently (2 decimals)
+#
+# 3. PRIVACY & SECURITY
+#    - No storage of payment data (stateless only)
+#    - No logging of PII or financial amounts
+#    - Rate limiting on all public endpoints
+#    - Idempotency for all state-changing operations
+#
+# 4. API CONTRACTS
+#    - All changes must update OpenAPI spec
+#    - Backward compatibility required (no breaking changes without major version)
+#    - RFC 9457 Problem Details for all errors
+#    - Consistent HTTP status codes
+#
+# 5. TESTING REQUIREMENTS
+#    - Unit tests for all business logic
+#    - Integration tests for all API endpoints
+#    - Edge case coverage (weekends, holidays, DST, leap years, year boundaries)
+#    - Performance tests for bulk operations (>100 items)
+#
+# 6. DOCUMENTATION
+#    - Update README for new features
+#    - Update CHANGELOG for all changes
+#    - Add examples to feature specs
+#    - Update API documentation
+#
+# 7. CODE QUALITY
+#    - No commented-out code in PRs
+#    - Clear variable names (no single letters except loop counters)
+#    - Functions should do one thing
+#    - Max function length: ~50 lines
+#    - Max file length: ~300 lines

@@ -7,12 +7,12 @@ const { DateTime } = require('luxon');
  * @returns {Array} Prioritized action strings for the next 7 days
  */
 function generateWeeklyActions(installments, timezone) {
-  const now = DateTime.now().setZone(timezone);
-  const weekEnd = now.plus({ days: 7 });
+  const now = DateTime.now().setZone(timezone).startOf('day');
+  const weekEnd = now.plus({ days: 7 }).endOf('day');
 
-  // Filter installments due in next 7 days
+  // Filter installments due in next 7 days (inclusive of today)
   const upcomingInstallments = installments.filter(installment => {
-    const dueDate = DateTime.fromISO(installment.due_date, { zone: timezone });
+    const dueDate = DateTime.fromISO(installment.due_date, { zone: timezone }).startOf('day');
     return dueDate >= now && dueDate <= weekEnd;
   });
 
@@ -151,11 +151,29 @@ function formatRiskFlags(riskFlags) {
  * @returns {Array} Simplified normalized format
  */
 function normalizeOutput(installments) {
-  return installments.map(i => ({
-    provider: i.provider,
-    dueDate: i.due_date,
-    amount: i.amount
-  }));
+  return installments.map(i => {
+    const normalized = {
+      provider: i.provider,
+      dueDate: i.due_date,
+      amount: i.amount
+    };
+
+    // v0.1.2: Include business-day shift fields if present
+    if (i.wasShifted !== undefined) {
+      normalized.wasShifted = i.wasShifted;
+    }
+    if (i.originalDueDate) {
+      normalized.originalDueDate = i.originalDueDate;
+    }
+    if (i.shiftedDueDate) {
+      normalized.shiftedDueDate = i.shiftedDueDate;
+    }
+    if (i.shiftReason) {
+      normalized.shiftReason = i.shiftReason;
+    }
+
+    return normalized;
+  });
 }
 
 module.exports = {

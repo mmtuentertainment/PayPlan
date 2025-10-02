@@ -18,7 +18,11 @@ export const RequestSchema = z.object({
   payCadence: z.enum(["weekly", "biweekly", "semimonthly", "monthly"]).optional(),
   nextPayday: z.string().optional(),
   minBuffer: z.number().default(100),
-  timeZone: z.string().default("UTC")
+  timeZone: z.string().default("UTC"),
+  // v0.1.2: Business-day awareness
+  businessDayMode: z.boolean().optional().default(true),
+  country: z.enum(["US", "None"]).optional().default("US"),
+  customSkipDates: z.array(z.string()).optional()
 });
 
 export const ResponseSchema = z.object({
@@ -31,8 +35,21 @@ export const ResponseSchema = z.object({
     dueDate: z.string(),
     amount: z.number(),
     autopay: z.boolean().optional(),
-    lateFee: z.number().optional()
-  }))
+    lateFee: z.number().optional(),
+    // v0.1.2: Business-day shift fields
+    wasShifted: z.boolean().optional(),
+    originalDueDate: z.string().optional(),
+    shiftedDueDate: z.string().optional(),
+    shiftReason: z.string().optional()
+  })),
+  // v0.1.2: Metadata about shifted dates
+  movedDates: z.array(z.object({
+    provider: z.string(),
+    installment_no: z.number(),
+    originalDueDate: z.string(),
+    shiftedDueDate: z.string(),
+    reason: z.string()
+  })).optional()
 });
 
 export type PlanRequest = z.infer<typeof RequestSchema>;

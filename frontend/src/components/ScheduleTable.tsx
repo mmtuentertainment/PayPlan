@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 type Row = {
   provider: string;
@@ -6,9 +7,19 @@ type Row = {
   amount: number;
   autopay?: boolean;
   lateFee?: number;
+  wasShifted?: boolean;
+  originalDueDate?: string;
+  shiftReason?: string;
 };
 
 type Props = { rows: Row[] };
+
+const getShiftReasonText = (reason?: string) => {
+  if (reason === "WEEKEND") return "weekend";
+  if (reason === "HOLIDAY") return "US Federal holiday";
+  if (reason === "CUSTOM") return "custom skip date";
+  return reason || "";
+};
 
 export default function ScheduleTable({ rows }: Props) {
   if (!rows?.length) return null;
@@ -31,17 +42,42 @@ export default function ScheduleTable({ rows }: Props) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
-                <tr key={i} className="border-t">
-                  <td className="py-2">{r.provider}</td>
-                  <td className="py-2">{r.dueDate}</td>
-                  <td className="text-right py-2">${r.amount.toFixed(2)}</td>
-                  <td className="text-center py-2">{r.autopay ? "Yes" : "No"}</td>
-                  <td className="text-right py-2">
-                    {typeof r.lateFee === "number" ? `$${r.lateFee.toFixed(0)}` : "—"}
-                  </td>
-                </tr>
-              ))}
+              {rows.map((r, i) => {
+                const tooltipText = r.wasShifted
+                  ? `Shifted from ${r.originalDueDate} due to ${getShiftReasonText(r.shiftReason)}`
+                  : "";
+
+                return (
+                  <tr key={`${r.provider}-${r.dueDate}`} className="border-t">
+                    <td className="py-2">{r.provider}</td>
+                    <td className="py-2">
+                      <div className="flex items-center gap-2">
+                        <span>{r.dueDate}</span>
+                        {r.wasShifted && (
+                          <>
+                            <Badge
+                              variant="secondary"
+                              className="cursor-help"
+                              aria-describedby={`shift-reason-${i}`}
+                              title={tooltipText}
+                            >
+                              Shifted
+                            </Badge>
+                            <span id={`shift-reason-${i}`} className="sr-only">
+                              {tooltipText}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                    <td className="text-right py-2">${r.amount.toFixed(2)}</td>
+                    <td className="text-center py-2">{r.autopay ? "Yes" : "No"}</td>
+                    <td className="text-right py-2">
+                      {typeof r.lateFee === "number" ? `$${r.lateFee.toFixed(0)}` : "—"}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

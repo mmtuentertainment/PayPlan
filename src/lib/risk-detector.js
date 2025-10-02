@@ -6,9 +6,13 @@ const { DateTime } = require('luxon');
  * @param {Array} paydays - Array of payday dates (ISO format)
  * @param {number} minBuffer - Minimum cash buffer amount
  * @param {string} timezone - IANA timezone identifier
+ * @param {Object} options - Optional v0.1.2 parameters
+ * @param {boolean} options.businessDayMode - Whether business day shifting is enabled
+ * @param {Array} options.movedDates - Array of shifted dates from business-day-shifter
  * @returns {Array} Array of risk flags
  */
-function detectRisks(installments, paydays, minBuffer, timezone) {
+function detectRisks(installments, paydays, minBuffer, timezone, options = {}) {
+  const { businessDayMode = false, movedDates = [] } = options;
   const risks = [];
 
   // Group installments by due date for collision detection
@@ -22,8 +26,15 @@ function detectRisks(installments, paydays, minBuffer, timezone) {
     risks.push(...detectCashCrunch(installments, paydays, minBuffer, timezone));
   }
 
-  // Detect WEEKEND_AUTOPAY risks
-  risks.push(...detectWeekendAutopay(installments, timezone));
+  // Detect WEEKEND_AUTOPAY risks (only if business day mode is OFF)
+  if (!businessDayMode) {
+    risks.push(...detectWeekendAutopay(installments, timezone));
+  }
+
+  // Add SHIFTED_NEXT_BUSINESS_DAY informational flags (v0.1.2)
+  if (businessDayMode && movedDates.length > 0) {
+    risks.push(...generateShiftInfoFlags(movedDates, timezone));
+  }
 
   // Sort risks by date, then severity
   return risks.sort((a, b) => {
@@ -155,13 +166,53 @@ function detectWeekendAutopay(installments, timezone) {
 }
 
 /**
+ * Generate informational flags for shifted dates (v0.1.2)
+ */
+function generateShiftInfoFlags(movedDates, timezone) {
+  const infoFlags = [];
+
+  for (const moved of movedDates) {
+    const originalDt = DateTime.fromISO(moved.originalDueDate, { zone: timezone });
+    const shiftedDt = DateTime.fromISO(moved.shiftedDueDate, { zone: timezone });
+    const originalDayName = originalDt.toFormat('EEEE');
+    const shiftedDayName = shiftedDt.toFormat('EEEE');
+
+    let reasonDesc = moved.reason;
+    if (moved.reason === 'WEEKEND') {
+      reasonDesc = `weekend (${originalDayName})`;
+    } else if (moved.reason === 'HOLIDAY') {
+      reasonDesc = 'US Federal holiday';
+    } else if (moved.reason === 'CUSTOM') {
+      reasonDesc = 'custom skip date';
+    }
+
+    infoFlags.push({
+      type: 'SHIFTED_NEXT_BUSINESS_DAY',
+      severity: 'info',
+      date: moved.shiftedDueDate,
+      message: `Payment shifted from ${moved.originalDueDate} (${reasonDesc}) to ${moved.shiftedDueDate} (${shiftedDayName})`,
+      metadata: {
+        provider: moved.provider,
+        installment_no: moved.installment_no,
+        originalDueDate: moved.originalDueDate,
+        shiftedDueDate: moved.shiftedDueDate,
+        reason: moved.reason
+      }
+    });
+  }
+
+  return infoFlags;
+}
+
+/**
  * Get numeric score for severity level
  */
 function getSeverityScore(severity) {
   const scores = {
     high: 3,
     medium: 2,
-    low: 1
+    low: 1,
+    info: 0
   };
   return scores[severity] || 0;
 }
