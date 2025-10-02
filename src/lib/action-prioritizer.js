@@ -7,12 +7,12 @@ const { DateTime } = require('luxon');
  * @returns {Array} Prioritized action strings for the next 7 days
  */
 function generateWeeklyActions(installments, timezone) {
-  const now = DateTime.now().setZone(timezone);
-  const weekEnd = now.plus({ days: 7 });
+  const now = DateTime.now().setZone(timezone).startOf('day');
+  const weekEnd = now.plus({ days: 7 }).endOf('day');
 
-  // Filter installments due in next 7 days
+  // Filter installments due in next 7 days (inclusive of today)
   const upcomingInstallments = installments.filter(installment => {
-    const dueDate = DateTime.fromISO(installment.due_date, { zone: timezone });
+    const dueDate = DateTime.fromISO(installment.due_date, { zone: timezone }).startOf('day');
     return dueDate >= now && dueDate <= weekEnd;
   });
 
