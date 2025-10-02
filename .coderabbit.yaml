@@ -7,13 +7,7 @@
 # LANGUAGE & TONE
 # ==============================================================================
 language: en-US
-tone_instructions: |
-  - Focus on security, data privacy, and financial calculation accuracy
-  - Prioritize timezone-aware date handling correctness
-  - Flag potential PII/financial data leaks
-  - Emphasize backward compatibility for API changes
-  - Be constructive and specific with actionable feedback
-  - Consider performance implications for serverless functions
+tone_instructions: "Focus on security, privacy, timezone handling, financial accuracy, and backward compatibility for this BNPL payment app."
 
 # ==============================================================================
 # REVIEW SETTINGS
@@ -33,7 +27,6 @@ reviews:
     drafts: false  # Don't review draft PRs
     base_branches:
       - main
-      - feature/**
 
   # Request changes for critical issues
   request_changes_workflow: true
@@ -211,14 +204,14 @@ knowledge_base:
 
   # Enable web search for external context
   learnings:
-    scope: organization  # Share learnings across all PayPlan repos
+    scope: auto  # Share learnings across PayPlan repos
 
   # Track issues and PRs for context
   issues:
-    scope: organization
+    scope: auto
 
   pull_requests:
-    scope: organization
+    scope: auto
 
 # ==============================================================================
 # CODE GENERATION (Pro Plan)
