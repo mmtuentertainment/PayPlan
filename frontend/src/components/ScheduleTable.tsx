@@ -59,6 +59,7 @@ export default function ScheduleTable({ rows }: Props) {
                               variant="secondary"
                               className="cursor-help"
                               aria-describedby={`shift-reason-${i}`}
+                              title={tooltipText}
                             >
                               Shifted
                             </Badge>

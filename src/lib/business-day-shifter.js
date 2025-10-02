@@ -50,20 +50,25 @@ function shiftToBusinessDays(items, timeZone, options = {}) {
     let shifted = false;
     let daysShifted = 0;
     const MAX_SHIFT_DAYS = 365; // Prevent infinite loops from malformed data
+    const priority = { WEEKEND: 1, HOLIDAY: 2, CUSTOM: 3 };
 
     // Shift forward until we find a business day
     while (isNonBusinessDay(dateTime, skipSet)) {
       const dayOfWeek = dateTime.weekday; // 1=Mon, 7=Sun
       const dateKey = dateTime.toISODate();
 
-      // Capture reason on FIRST non-business day only (priority: CUSTOM > HOLIDAY > WEEKEND)
-      if (!reason) {
-        if (skipSet.customSkipDates.has(dateKey)) {
-          reason = 'CUSTOM';
-        } else if (skipSet.holidays.has(dateKey)) {
-          reason = 'HOLIDAY';
-        } else if (dayOfWeek === 6 || dayOfWeek === 7) {
-          reason = 'WEEKEND';
+      // Track highest-priority reason (CUSTOM > HOLIDAY > WEEKEND)
+      const candidate = skipSet.customSkipDates.has(dateKey)
+        ? 'CUSTOM'
+        : skipSet.holidays.has(dateKey)
+        ? 'HOLIDAY'
+        : dayOfWeek === 6 || dayOfWeek === 7
+        ? 'WEEKEND'
+        : undefined;
+
+      if (candidate) {
+        if (!reason || priority[candidate] > priority[reason]) {
+          reason = candidate;
         }
       }
 
