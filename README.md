@@ -18,6 +18,7 @@ Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified pay
 ## ✨ Features
 
 - **CSV Input**: Paste or upload payment data
+- **📧 Email Parser (v0.1.3-a)**: Paste payment reminder emails directly - no CSV needed
 - **Multi-Provider Support**: Klarna, Affirm, Afterpay, PayPal, Zip, Sezzle
 - **Risk Detection**:
   - ⚠️ COLLISION: Multiple payments same day
@@ -26,6 +27,45 @@ Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified pay
 - **Smart Prioritization**: Highest late fees first, smallest amounts to free cash
 - **Calendar Export**: .ics file with 24-hour reminders
 - **Privacy-First**: No data storage, in-memory processing only
+
+## 📧 Inbox Paste (Email Parser) - v0.1.3-a
+
+Paste BNPL payment reminder emails directly - no CSV needed.
+
+### Supported Providers (Phase A)
+- ✅ Klarna
+- ✅ Affirm
+
+### How to Use
+1. Click "Emails" tab
+2. Paste email text (copy from your inbox)
+3. Review extracted payments in preview table
+4. Click "Build Plan"
+
+### What Gets Extracted
+- Provider name (Klarna, Affirm)
+- Payment number (e.g., "2 of 4")
+- Due date (multiple formats supported)
+- Amount
+- Autopay status
+- Late fee (if mentioned)
+
+### Supported Date Formats
+- ISO: `2025-10-06`
+- US: `10/6/2025` or `10/06/2025`
+- Long: `October 6, 2025` or `Oct 6, 2025`
+- Ordinals: `October 6th, 2025`
+
+### Privacy
+- ✅ Client-side only (zero network calls during extraction)
+- ✅ No data storage or tracking
+- ✅ Pasted text never sent to server until "Build Plan"
+
+### Limitations (Phase A)
+- US providers only (Klarna, Affirm)
+- Plain text emails work best
+- Extracts one installment per email
+- Additional providers (Afterpay, PayPal, Zip, Sezzle) coming in Phase B
 
 ## 📋 CSV Format
 

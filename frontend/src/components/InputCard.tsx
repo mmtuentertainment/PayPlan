@@ -12,13 +12,17 @@ import { Badge } from "@/components/ui/badge";
 import { parseCsvFile, parseCsvString } from "@/lib/csv";
 import { buildPlan, type PlanResponse } from "@/lib/api";
 import { SAMPLE_CSV } from "@/lib/sample";
+import { EmailInput } from "@/components/EmailInput";
+import { EmailPreview } from "@/components/EmailPreview";
+import { EmailIssues } from "@/components/EmailIssues";
+import { useEmailExtractor } from "@/hooks/useEmailExtractor";
 
 type Props = { onResult: (r: PlanResponse) => void; onIcsReady: (b64: string) => void; };
 
 const COMMON_TZS = ["America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles", "UTC"];
 
 export default function InputCard({ onResult, onIcsReady }: Props) {
-  const [tab, setTab] = useState<"paste" | "upload">("paste");
+  const [tab, setTab] = useState<"paste" | "upload" | "emails">("paste");
   const [csv, setCsv] = useState(SAMPLE_CSV);
   const [edited, setEdited] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +40,9 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const tzDetected = useMemo(() => tz, [tz]);
+
+  // Email extractor hook
+  const emailExtractor = useEmailExtractor(tzDetected);
 
   // Validate custom skip dates
   function validateSkipDates(value: string): string[] | null {
@@ -84,23 +91,41 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
         throw new Error(skipDatesError || "Invalid custom skip dates");
       }
 
-      const rows = tab === "paste"
-        ? await parseCsvString(csv)
-        : await (async () => {
-            const f = fileRef.current?.files?.[0];
-            if (!f) throw new Error("Please choose a CSV file.");
-            return parseCsvFile(f);
-          })();
+      let items;
+      if (tab === "emails") {
+        // Use extracted items from email parser
+        items = emailExtractor.editableItems.map(r => ({
+          provider: r.provider,
+          installment_no: r.installment_no,
+          due_date: r.due_date,
+          amount: r.amount,
+          currency: r.currency,
+          autopay: r.autopay,
+          late_fee: r.late_fee
+        }));
+        if (items.length === 0) {
+          throw new Error("No valid payments extracted from emails.");
+        }
+      } else {
+        // CSV parsing (existing logic)
+        const rows = tab === "paste"
+          ? await parseCsvString(csv)
+          : await (async () => {
+              const f = fileRef.current?.files?.[0];
+              if (!f) throw new Error("Please choose a CSV file.");
+              return parseCsvFile(f);
+            })();
 
-      const items = rows.map(r => ({
-        provider: r.provider,
-        installment_no: r.installment_no,
-        due_date: r.due_date,
-        amount: r.amount,
-        currency: r.currency,
-        autopay: r.autopay,
-        late_fee: r.late_fee
-      }));
+        items = rows.map(r => ({
+          provider: r.provider,
+          installment_no: r.installment_no,
+          due_date: r.due_date,
+          amount: r.amount,
+          currency: r.currency,
+          autopay: r.autopay,
+          late_fee: r.late_fee
+        }));
+      }
 
       const body: any = { items, minBuffer, timeZone: tzDetected };
       if (mode === "explicit") {
@@ -129,6 +154,16 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
     }
   }
 
+  // Email tab handlers
+  function handleCopyCSV() {
+    const headers = 'provider,installment_no,due_date,amount,currency,autopay,late_fee';
+    const rows = emailExtractor.editableItems.map(item =>
+      `${item.provider},${item.installment_no},${item.due_date},${item.amount},${item.currency},${item.autopay},${item.late_fee}`
+    );
+    const csv = [headers, ...rows].join('\n');
+    navigator.clipboard.writeText(csv).catch(() => {});
+  }
+
   return (
     <Card aria-labelledby="input-card">
       <CardHeader>
@@ -155,6 +190,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
           <TabsList>
             <TabsTrigger value="paste">Paste CSV</TabsTrigger>
             <TabsTrigger value="upload">Upload CSV</TabsTrigger>
+            <TabsTrigger value="emails">Emails</TabsTrigger>
           </TabsList>
 
           <TabsContent value="paste" className="space-y-2">
@@ -179,6 +215,24 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
           <TabsContent value="upload" className="space-y-2">
             <Label htmlFor="file">Upload .csv</Label>
             <input id="file" ref={fileRef} type="file" accept=".csv,text/csv" className="block w-full border rounded px-3 py-2" />
+          </TabsContent>
+
+          <TabsContent value="emails" className="space-y-4">
+            <EmailInput
+              onExtract={emailExtractor.extract}
+              isExtracting={emailExtractor.isExtracting}
+            />
+            {emailExtractor.result && (
+              <>
+                <EmailPreview
+                  items={emailExtractor.editableItems}
+                  onDelete={emailExtractor.deleteItem}
+                  onCopyCSV={handleCopyCSV}
+                  onBuildPlan={handleBuild}
+                />
+                <EmailIssues issues={emailExtractor.result.issues} />
+              </>
+            )}
           </TabsContent>
         </Tabs>
 

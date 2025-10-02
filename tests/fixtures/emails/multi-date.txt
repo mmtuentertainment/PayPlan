@@ -1,0 +1,8 @@
+From: Klarna
+Subject: Payment schedule
+
+Previous payment: October 1, 2025
+Next payment: October 15, 2025
+Amount: $50.00
+
+Payment 3 of 4

@@ -1,0 +1,8 @@
+From: Affirm <notifications@affirm.com>
+Subject: Payment reminder
+
+Installment 2 of 3: $58.00
+Due date: Nov 6, 2025
+AutoPay is enabled
+
+Your payment will be processed automatically.
