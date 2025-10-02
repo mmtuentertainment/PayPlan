@@ -1,15 +1,16 @@
 {
   "name": "payplan",
-  "version": "1.0.0",
-  "description": "PayPlan - A payment planning and management application",
+  "version": "0.1.2",
+  "description": "PayPlan - BNPL Payment Manager with Business-Day Awareness",
   "main": "index.js",
   "engines": {
-    "node": ">=20 <21"
+    "node": "20.x"
   },
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest"
+    "test": "jest",
+    "vercel-build": "cd frontend && npm install && npm run build"
   },
   "keywords": [
     "payment",
