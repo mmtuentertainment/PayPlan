@@ -33,7 +33,7 @@ router.post('/', validatePlanRequest, async (req, res) => {
       nextPayday,
       minBuffer,
       timeZone,
-      businessDayMode = true,
+      businessDayMode = false,
       country = 'US',
       customSkipDates = []
     } = req.body;

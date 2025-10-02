@@ -198,9 +198,20 @@ function nextBusinessDay(dateStr, timeZone, country = 'US', customSkipDates = []
   // Start from next day
   dateTime = dateTime.plus({ days: 1 });
 
-  // Find next business day
+  // Find next business day with infinite loop protection
+  let daysShifted = 0;
+  const MAX_SHIFT_DAYS = 365;
+
   while (isNonBusinessDay(dateTime, skipSet, customSkipDates)) {
     dateTime = dateTime.plus({ days: 1 });
+    daysShifted++;
+
+    if (daysShifted >= MAX_SHIFT_DAYS) {
+      throw new Error(
+        `Unable to find business day after ${dateStr} within ${MAX_SHIFT_DAYS} days. ` +
+        `Check holiday data and customSkipDates for errors.`
+      );
+    }
   }
 
   return dateTime.toISODate();

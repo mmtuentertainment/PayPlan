@@ -155,6 +155,13 @@ function validatePlanRequest(req, res, next) {
       });
     }
 
+    if (customSkipDates.length > 100) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'customSkipDates cannot exceed 100 dates'
+      });
+    }
+
     customSkipDates.forEach((date, index) => {
       if (!isValidISODate(date)) {
         errors.push(`customSkipDates[${index}]: invalid date format, use yyyy-mm-dd`);

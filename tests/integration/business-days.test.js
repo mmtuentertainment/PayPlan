@@ -244,10 +244,10 @@ describe('Business-Day Awareness Integration Tests (v0.1.2)', () => {
         .send(input)
         .expect(200);
 
-      // Defaults: businessDayMode=true, country='US'
-      // Saturday should be shifted
-      expect(response.body.movedDates).toHaveLength(1);
-      expect(response.body.movedDates[0].shiftedDueDate).toBe('2025-10-06');
+      // Defaults: businessDayMode=false (backward compatibility)
+      // Saturday should NOT be shifted
+      expect(response.body.movedDates).toHaveLength(0);
+      expect(response.body.normalized[0].dueDate).toBe('2025-10-04');
     });
   });
 
