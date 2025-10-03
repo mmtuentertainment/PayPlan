@@ -25,11 +25,19 @@ export function redactPII(text: string): string {
   // Redact dollar amounts
   redacted = redacted.replace(/\$[\d,]+\.?\d*/g, '[AMOUNT]');
 
-  // Redact account numbers (4+ digits)
-  redacted = redacted.replace(/\b\d{4,}\b/g, '[ACCOUNT]');
+  // Redact account numbers (context-aware, avoid years/ZIP codes)
+  redacted = redacted.replace(/\baccount[:\s#]*(\d{4,})\b/gi, 'account: [ACCOUNT]');
+  redacted = redacted.replace(/\bcard[:\s#]*(\d{4,})\b/gi, 'card: [ACCOUNT]');
+  redacted = redacted.replace(/\bacct[:\s#]*(\d{4,})\b/gi, 'acct: [ACCOUNT]');
 
-  // Redact names (capitalized first/last name pairs)
-  redacted = redacted.replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[NAME]');
+  // Redact names (capitalized first/last name pairs, 3+ chars each, with common word exclusions)
+  const commonWords = /\b(Pay Later|Auto Pay|Buy Now|Pay In|Due Date|Late Fee|Payment Plan|Order Number|Item Total)\b/g;
+  const matches = text.match(commonWords) || [];
+  redacted = redacted.replace(/\b[A-Z][a-z]{2,} [A-Z][a-z]{2,}\b/g, '[NAME]');
+  // Restore common false positives
+  matches.forEach((match) => {
+    redacted = redacted.replace('[NAME]', match);
+  });
 
   return redacted;
 }
