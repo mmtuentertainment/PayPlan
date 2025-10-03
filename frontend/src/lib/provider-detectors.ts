@@ -227,15 +227,33 @@ export function detectProvider(emailText: string): Provider {
     return 'PayPalPayIn4';
   }
 
-  // Helper function to check proximity between two regex matches
+  // Helper function to check proximity between ALL occurrences of two regex patterns
+  // Returns true if ANY pair of matches are within maxDistance characters
   const checkProximity = (text: string, pattern1: RegExp, pattern2: RegExp, maxDistance: number): boolean => {
-    const match1 = text.match(pattern1);
-    const match2 = text.match(pattern2);
-    if (!match1 || !match2 || match1.index === undefined || match2.index === undefined) {
-      return false;
-    }
-    const distance = Math.abs(match1.index - match2.index);
-    return distance <= maxDistance;
+    const collectIndices = (pattern: RegExp): number[] => {
+      const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
+      const globalPattern = new RegExp(pattern.source, flags);
+      const indices: number[] = [];
+      let match: RegExpExecArray | null;
+      while ((match = globalPattern.exec(text)) !== null) {
+        if (match.index !== undefined) {
+          indices.push(match.index);
+        }
+        // Advance by at least one to avoid infinite loops on zero-length matches
+        if (match[0].length === 0) {
+          globalPattern.lastIndex += 1;
+        }
+      }
+      return indices;
+    };
+
+    const indices1 = collectIndices(pattern1);
+    const indices2 = collectIndices(pattern2);
+
+    // Check if any pair of indices are within maxDistance
+    return indices1.some(idx1 =>
+      indices2.some(idx2 => Math.abs(idx1 - idx2) <= maxDistance)
+    );
   };
 
   // Zip detection with guard against false positives ("zip this file", etc.)
