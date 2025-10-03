@@ -1,0 +1,209 @@
+# Confidence Thresholds for Inbox Paste Phase B
+# Version: 0.1.4
+# Date: 2025-10-02
+
+confidence_formula:
+  description: |
+    Weighted sum of matched extraction signals.
+    Each signal is binary (1 if matched, 0 if not).
+
+    IMPORTANT: Confidence is only calculated for successfully extracted items
+    where provider is detected (provider != 'Unknown'). Items with unknown
+    providers are added to issues[] instead of items[].
+
+    Therefore, the minimum confidence for any Item in ExtractionResult.items
+    is 0.35 (provider signal alone). Confidence values 0.0-0.34 are impossible
+    for returned items, but the formula supports them for testing purposes.
+  formula: >
+    confidence =
+      provider_signal * 0.35 +
+      date_signal * 0.25 +
+      amount_signal * 0.20 +
+      installment_signal * 0.15 +
+      autopay_signal * 0.05
+
+signals:
+  - name: provider_signal
+    weight: 0.35
+    condition: "Provider detected (not 'Unknown')"
+    rationale: "Most critical signal; gates all other extractions"
+
+  - name: date_signal
+    weight: 0.25
+    condition: "Due date successfully extracted and parsed"
+    rationale: "Essential for payment planning; second most important"
+
+  - name: amount_signal
+    weight: 0.20
+    condition: "Payment amount successfully extracted"
+    rationale: "Required for budgeting; third most important"
+
+  - name: installment_signal
+    weight: 0.15
+    condition: "Installment number extracted (1-12)"
+    rationale: "Helpful for tracking; less critical than amount/date"
+
+  - name: autopay_signal
+    weight: 0.05
+    condition: "Autopay status detected (true/false)"
+    rationale: "Useful but least critical; defaults to false if unclear"
+
+thresholds:
+  design_rationale: |
+    Thresholds use inclusive lower bounds (>=) to be permissive at boundaries.
+    - 0.8 High: All critical fields present (provider+date+amount+installment)
+    - 0.6 Med: Minimum useful data (provider+date) for manual completion
+    - <0.6 Low: Insufficient data for confident use
+
+  high:
+    range: ">= 0.8"
+    display_text: "High"
+    color: "green"
+    pill_class: "bg-green-100 text-green-800"
+    description: "All critical signals matched (provider, date, amount, installment)"
+    typical_score: 1.0
+    signal_count: 5
+
+  medium:
+    range: "0.6 - 0.79"
+    display_text: "Med"
+    color: "yellow"
+    pill_class: "bg-yellow-100 text-yellow-800"
+    description: "3-4 signals matched; minor data gaps"
+    typical_score: 0.75
+    signal_count: 3-4
+
+  low:
+    range: "< 0.6"
+    display_text: "Low"
+    color: "red"
+    pill_class: "bg-red-100 text-red-800"
+    description: "<=2 signals matched; significant data gaps; flagged in Issues"
+    typical_score: 0.40
+    signal_count: 0-2
+    action_required: "Flag in Issues section with field hints"
+
+ui_display:
+  confidence_pill:
+    format: "Pill badge with color and text"
+    aria_label_template: "Extraction confidence: {level}"
+    examples:
+      - level: "High"
+        html: '<span class="bg-green-100 text-green-800 px-2 py-1 rounded" aria-label="Extraction confidence: High">High</span>'
+      - level: "Med"
+        html: '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded" aria-label="Extraction confidence: Medium">Med</span>'
+      - level: "Low"
+        html: '<span class="bg-red-100 text-red-800 px-2 py-1 rounded" aria-label="Extraction confidence: Low">Low</span>'
+
+  csv_export:
+    column_name: "confidence"
+    position: "last column"
+    format: "decimal (0-1)"
+    example_row: "Afterpay,1,2025-10-06,25.00,USD,false,7.00,1.0"
+
+  issues_section:
+    trigger: "confidence < 0.6"
+    field_hints:
+      - signal: "provider_signal = 0"
+        hint: "Provider not recognized"
+      - signal: "date_signal = 0"
+        hint: "Due date not found"
+      - signal: "amount_signal = 0"
+        hint: "Amount not found"
+      - signal: "installment_signal = 0"
+        hint: "Installment number unclear"
+      - signal: "autopay_signal = 0"
+        hint: "Autopay status unclear"
+    aria_live: "polite"
+
+test_cases:
+  - scenario: "All signals matched"
+    signals:
+      provider_signal: 1
+      date_signal: 1
+      amount_signal: 1
+      installment_signal: 1
+      autopay_signal: 1
+    expected_confidence: 1.0
+    expected_level: "High"
+
+  - scenario: "Autopay missing (minor gap)"
+    signals:
+      provider_signal: 1
+      date_signal: 1
+      amount_signal: 1
+      installment_signal: 1
+      autopay_signal: 0
+    expected_confidence: 0.95
+    expected_level: "High"
+
+  - scenario: "Installment and autopay missing (medium)"
+    signals:
+      provider_signal: 1
+      date_signal: 1
+      amount_signal: 1
+      installment_signal: 0
+      autopay_signal: 0
+    expected_confidence: 0.8
+    expected_level: "High"  # Exactly at boundary
+
+  - scenario: "Amount missing (medium-low)"
+    signals:
+      provider_signal: 1
+      date_signal: 1
+      amount_signal: 0
+      installment_signal: 1
+      autopay_signal: 1
+    expected_confidence: 0.75
+    expected_level: "Med"
+
+  - scenario: "Only provider and date matched (low)"
+    signals:
+      provider_signal: 1
+      date_signal: 1
+      amount_signal: 0
+      installment_signal: 0
+      autopay_signal: 0
+    expected_confidence: 0.6
+    expected_level: "Med"  # Exactly at boundary
+
+  - scenario: "Only provider matched (very low)"
+    signals:
+      provider_signal: 1
+      date_signal: 0
+      amount_signal: 0
+      installment_signal: 0
+      autopay_signal: 0
+    expected_confidence: 0.35
+    expected_level: "Low"
+
+  - scenario: "No signals matched (test-only, impossible for returned Items)"
+    description: "Only used for unit testing calculateConfidence() in isolation"
+    signals:
+      provider_signal: 0
+      date_signal: 0
+      amount_signal: 0
+      installment_signal: 0
+      autopay_signal: 0
+    expected_confidence: 0.0
+    expected_level: "Low"
+    note: "This case cannot occur in ExtractionResult.items (unknown providers are filtered)"
+
+performance:
+  confidence_calculation:
+    complexity: "O(1)"
+    target_latency: "<1ms per item"
+    description: "Simple arithmetic sum of 5 weighted booleans"
+
+  extraction_pipeline:
+    description: "Full email parsing including provider detection, field extraction, and confidence"
+    max_items_per_batch: 50
+    max_batch_time: "2000ms"
+    target_per_item: "<40ms"  # 2000ms / 50 items
+    components:
+      - "HTML sanitization (DOMParser)"
+      - "Email splitting (regex)"
+      - "Provider detection (regex patterns)"
+      - "Date parsing (Luxon)"
+      - "Amount/installment extraction (regex)"
+      - "Confidence calculation (<1ms)"

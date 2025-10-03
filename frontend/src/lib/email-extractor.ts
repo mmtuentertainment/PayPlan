@@ -8,6 +8,7 @@ import {
   extractLateFee,
   PROVIDER_PATTERNS
 } from './provider-detectors';
+import { redactPII } from './redact';
 
 export interface Item {
   provider: string;
@@ -17,6 +18,7 @@ export interface Item {
   currency: string;
   autopay: boolean;
   late_fee: number;
+  confidence: number; // 0-1 confidence score (v0.1.4-a)
 }
 
 export interface Issue {
@@ -32,12 +34,43 @@ export interface ExtractionResult {
 }
 
 /**
+ * Calculates extraction confidence score using weighted signal sum.
+ *
+ * Formula: provider(0.35) + date(0.25) + amount(0.20) + installment(0.15) + autopay(0.05)
+ *
+ * NOTE: In practice, this function is only called for items where provider !== 'Unknown',
+ * so the minimum confidence for returned Items is 0.35. The formula supports lower scores
+ * for completeness and unit testing.
+ *
+ * @param signals - Object with boolean flags for each signal
+ * @returns Confidence score between 0 and 1 (0.35-1.0 in practice)
+ * @example
+ * calculateConfidence({ provider: true, date: true, amount: true, installment: true, autopay: true })
+ * // Returns: 1.0
+ */
+export function calculateConfidence(signals: {
+  provider: boolean;
+  date: boolean;
+  amount: boolean;
+  installment: boolean;
+  autopay: boolean;
+}): number {
+  return (
+    (signals.provider ? 0.35 : 0) +
+    (signals.date ? 0.25 : 0) +
+    (signals.amount ? 0.20 : 0) +
+    (signals.installment ? 0.15 : 0) +
+    (signals.autopay ? 0.05 : 0)
+  );
+}
+
+/**
  * Main extraction entry point.
  * Extracts payment items from pasted BNPL reminder emails.
  *
  * @param emailText - Raw text from pasted emails (HTML will be sanitized)
  * @param timezone - IANA timezone for date parsing (e.g., "America/New_York")
- * @returns Extraction result with items, issues, and duplicate count
+ * @returns Extraction result with items, issues, duplicate count, and confidence scores
  * @throws Error if input exceeds maximum length
  */
 export function extractItemsFromEmails(
@@ -135,13 +168,24 @@ function extractSingleEmail(emailText: string, timezone: string): Item {
   try {
     lateFee = extractLateFee(emailText);
   } catch (e) {
-    errors.push(`Late fee: ${e instanceof Error ? e.message : 'not found'}`);
+    // Late fee is optional, don't add to errors
+    lateFee = 0;
   }
 
   // If critical fields failed, throw aggregated error
   if (errors.length > 0) {
     throw new Error(`Failed to extract: ${errors.join(', ')}`);
   }
+
+  // Calculate confidence based on successful extractions
+  // Note: provider is always non-Unknown here (already threw error if Unknown)
+  const confidence = calculateConfidence({
+    provider: true,
+    date: !!dueDate,
+    amount: !!amount,
+    installment: !!installmentNo && installmentNo > 0,
+    autopay: autopay !== undefined
+  });
 
   return {
     provider,
@@ -150,7 +194,8 @@ function extractSingleEmail(emailText: string, timezone: string): Item {
     amount: amount!,
     currency: currency!,
     autopay: autopay!,
-    late_fee: lateFee!
+    late_fee: lateFee!,
+    confidence
   };
 }
 
@@ -164,28 +209,6 @@ function sanitizeHtml(text: string): string {
   }
   const doc = new DOMParser().parseFromString(text, 'text/html');
   return doc.body.textContent || text;
-}
-
-/**
- * Redacts PII and sensitive financial data from text snippets.
- * Protects: emails, amounts, account numbers, card numbers.
- */
-function redactPII(text: string): string {
-  let redacted = text;
-
-  // Redact email addresses
-  redacted = redacted.replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL]');
-
-  // Redact dollar amounts
-  redacted = redacted.replace(/\$[\d,]+\.?\d*/g, '[AMOUNT]');
-
-  // Redact account numbers (4+ digits)
-  redacted = redacted.replace(/\b\d{4,}\b/g, '[ACCOUNT]');
-
-  // Redact common PII patterns
-  redacted = redacted.replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[NAME]');
-
-  return redacted;
 }
 
 function splitEmails(text: string): string[] {

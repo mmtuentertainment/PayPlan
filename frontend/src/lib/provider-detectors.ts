@@ -1,6 +1,6 @@
 import { parseDate } from './date-parser';
 
-export type Provider = 'Klarna' | 'Affirm' | 'Unknown';
+export type Provider = 'Klarna' | 'Affirm' | 'Afterpay' | 'Unknown';
 
 export interface ProviderPatterns {
   signatures: (string | RegExp)[];
@@ -57,6 +57,27 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
       /payment\s+(\d+)\s+of\s+(\d+)/i,
       /(\d+)\s*\/\s*(\d+)/
     ]
+  },
+
+  afterpay: {
+    signatures: ['@afterpay.com', /\bafterpay\b/i],
+    amountPatterns: [
+      /\binstallment\b[:\s]+\$?([\d,]+\.\d{2})\b/i,
+      /\$\s?([\d,]+\.\d{2})\s+\bdue\b/i,
+      /\bamount\s+due\b[:\s]+\$?([\d,]+\.\d{2})\b/i,
+      // Fallback: allow 0-2 decimals
+      /\binstallment\b[:\s]+\$?([\d,]+\.?\d{0,2})\b/i
+    ],
+    datePatterns: [
+      /due[:\s]+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i,
+      /due\s+date[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
+      /(\d{4}-\d{2}-\d{2})/
+    ],
+    installmentPatterns: [
+      /payment\s+(\d+)\s+of\s+(\d+)/i,
+      /installment\s+(\d+)\/(\d+)/i,
+      /final\s+payment/i
+    ]
   }
 };
 
@@ -65,7 +86,7 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
  * Uses email domain and keyword signatures for detection.
  *
  * @param emailText - Email content to analyze
- * @returns Provider name ('Klarna', 'Affirm', or 'Unknown')
+ * @returns Provider name ('Klarna', 'Affirm', 'Afterpay', or 'Unknown')
  */
 export function detectProvider(emailText: string): Provider {
   const matchesSignature = (text: string, sig: string | RegExp): boolean => {
@@ -83,6 +104,10 @@ export function detectProvider(emailText: string): Provider {
 
   if (PROVIDER_PATTERNS.affirm.signatures.some(sig => matchesSignature(lower, sig))) {
     return 'Affirm';
+  }
+
+  if (PROVIDER_PATTERNS.afterpay.signatures.some(sig => matchesSignature(lower, sig))) {
+    return 'Afterpay';
   }
 
   return 'Unknown';
@@ -158,8 +183,8 @@ export function extractInstallmentNumber(text: string, patterns: RegExp[]): numb
  * Detects if autopay is enabled based on email keywords.
  * Looks for phrases like "AutoPay is ON", "automatically charged", etc.
  *
- * Security note: Returns false for negative keywords like "AutoPay is OFF"
- * because it only checks for positive autopay indicators.
+ * Security note: Explicitly checks for negative keywords ("off", "disabled")
+ * to avoid false positives when autopay is explicitly disabled.
  *
  * @param text - Email text to analyze
  * @returns true if autopay is detected, false otherwise
@@ -169,15 +194,31 @@ export function detectAutopay(text: string): boolean {
     return false; // Handle null, undefined, empty string
   }
   const lower = text.toLowerCase();
-  const keywords = [
+
+  // Check for explicit OFF/disabled signals first (higher priority)
+  const negativeKeywords = [
+    'autopay is off',
+    'autopay disabled',
+    'autopay: off',
+    'autopay not enabled',
+    'automatic payment is off',
+    'automatic payment disabled'
+  ];
+  if (negativeKeywords.some(kw => lower.includes(kw))) {
+    return false;
+  }
+
+  // Then check for positive signals
+  const positiveKeywords = [
     'autopay is on',
     'autopay enabled',
+    'autopay: on',
     'auto-pay',
     'automatic payment',
     'automatically charged',
     'will be charged automatically'
   ];
-  return keywords.some(kw => lower.includes(kw));
+  return positiveKeywords.some(kw => lower.includes(kw));
 }
 
 /**
