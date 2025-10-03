@@ -45,8 +45,13 @@ export interface ExtractionResult {
  * @param signals - Object with boolean flags for each signal
  * @returns Confidence score between 0 and 1 (0.35-1.0 in practice)
  * @example
+ * // Full confidence (all signals matched)
  * calculateConfidence({ provider: true, date: true, amount: true, installment: true, autopay: true })
  * // Returns: 1.0
+ * @example
+ * // PayPal Pay in 4 email with missing autopay signal
+ * calculateConfidence({ provider: true, date: true, amount: true, installment: true, autopay: false })
+ * // Returns: 0.95
  */
 export function calculateConfidence(signals: {
   provider: boolean;

@@ -1,0 +1,19 @@
+From: service@paypal.com
+Subject: Final Pay in 4 payment reminder
+Date: November 28, 2025
+
+Hello,
+
+This is a reminder that your final installment 4 of 4 for Pay in 4 is coming up.
+
+Payment details:
+- Final payment amount: $37.50
+- Due by: November 30, 2025
+- Payment method: Automatic payment is off
+- Late fee: $0.00
+
+This is the last of 4 payments. After this, your order will be fully paid.
+
+Questions? Visit paypal.com/payin4
+
+PayPal
