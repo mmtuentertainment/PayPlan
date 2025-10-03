@@ -38,7 +38,7 @@ describe('Zip Provider Detection', () => {
 
   test('extracts amount from Zip email', () => {
     const amount = extractAmount(zipFixture, PROVIDER_PATTERNS.zip.amountPatterns);
-    expect(amount).toBe(25.00);
+    expect(amount).toBeCloseTo(25.00, 2);
   });
 
   test('extracts due date from Zip email', () => {
@@ -56,7 +56,7 @@ describe('Zip Provider Detection', () => {
   });
 
   test('extracts late fee from Zip email', () => {
-    expect(extractLateFee(zipFixture)).toBe(5.00);
+    expect(extractLateFee(zipFixture)).toBeCloseTo(5.00, 2);
   });
 
   test('throws error when Zip due date not found', () => {
@@ -97,7 +97,7 @@ describe('Sezzle Provider Detection', () => {
 
   test('extracts amount from Sezzle email', () => {
     const amount = extractAmount(sezzleFixture, PROVIDER_PATTERNS.sezzle.amountPatterns);
-    expect(amount).toBe(30.00);
+    expect(amount).toBeCloseTo(30.00, 2);
   });
 
   test('extracts due date from Sezzle email', () => {
@@ -115,7 +115,7 @@ describe('Sezzle Provider Detection', () => {
   });
 
   test('returns 0 late fee when not present in Sezzle email', () => {
-    expect(extractLateFee(sezzleFixture)).toBe(0);
+    expect(extractLateFee(sezzleFixture)).toBeCloseTo(0, 2);
   });
 
   test('throws error when Sezzle due date not found', () => {

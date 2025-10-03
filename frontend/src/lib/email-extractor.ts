@@ -52,10 +52,6 @@ export interface ExtractionResult {
  * // PayPal Pay in 4 email with missing autopay signal
  * calculateConfidence({ provider: true, date: true, amount: true, installment: true, autopay: false })
  * // Returns: 0.95
- * @example
- * // Zip/Sezzle email with all signals
- * calculateConfidence({ provider: true, date: true, amount: true, installment: true, autopay: true })
- * // Returns: 1.0
  */
 export function calculateConfidence(signals: {
   provider: boolean;

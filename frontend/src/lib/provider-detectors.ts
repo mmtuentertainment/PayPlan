@@ -227,45 +227,41 @@ export function detectProvider(emailText: string): Provider {
     return 'PayPalPayIn4';
   }
 
+  // Helper function to check proximity between two regex matches
+  const checkProximity = (text: string, pattern1: RegExp, pattern2: RegExp, maxDistance: number): boolean => {
+    const match1 = text.match(pattern1);
+    const match2 = text.match(pattern2);
+    if (!match1 || !match2 || match1.index === undefined || match2.index === undefined) {
+      return false;
+    }
+    const distance = Math.abs(match1.index - match2.index);
+    return distance <= maxDistance;
+  };
+
   // Zip detection with guard against false positives ("zip this file", etc.)
   // Require domain match OR (keyword + nearby installment/pay-in-4 phrase within 80 chars)
   const hasZipDomain = lower.includes('@zip.co') || lower.includes('@quadpay.com');
-  const hasZipKeyword = /\b(?:Zip(?:\s+Pay)?|Quadpay)\b/i.test(emailText);
-  const hasInstallmentPhrase = /\b(?:pay\s+in\s+\d|installment|payment\s+\d\s+of\s+\d)\b/i.test(emailText);
+  const zipKeywordPattern = /\b(?:Zip(?:\s+Pay)?|Quadpay)\b/i;
+  const installmentPhrasePattern = /\b(?:pay\s+in\s+\d|installment|payment\s+\d\s+of\s+\d)\b/i;
 
-  if (hasZipDomain || (hasZipKeyword && hasInstallmentPhrase)) {
-    // Additional proximity check: ensure keyword and phrase are within 80 chars
-    if (hasZipDomain) {
-      return 'Zip';
-    }
-    // Check if Zip keyword and installment phrase are close enough
-    const zipMatch = emailText.match(/\b(?:Zip(?:\s+Pay)?|Quadpay)\b/i);
-    const installmentMatch = emailText.match(/\b(?:pay\s+in\s+\d|installment|payment\s+\d\s+of\s+\d)\b/i);
-    if (zipMatch && installmentMatch) {
-      const distance = Math.abs((zipMatch.index || 0) - (installmentMatch.index || 0));
-      if (distance <= 80) {
-        return 'Zip';
-      }
-    }
+  if (hasZipDomain) {
+    return 'Zip';
+  }
+
+  if (zipKeywordPattern.test(emailText) && checkProximity(emailText, zipKeywordPattern, installmentPhrasePattern, 80)) {
+    return 'Zip';
   }
 
   // Sezzle detection with guard (keyword requires nearby installment phrase)
   const hasSezzleDomain = lower.includes('@sezzle.com');
-  const hasSezzleKeyword = /\bSezzle\b/i.test(emailText);
+  const sezzleKeywordPattern = /\bSezzle\b/i;
 
-  if (hasSezzleDomain || (hasSezzleKeyword && hasInstallmentPhrase)) {
-    if (hasSezzleDomain) {
-      return 'Sezzle';
-    }
-    // Check proximity for Sezzle keyword and installment phrase
-    const sezzleMatch = emailText.match(/\bSezzle\b/i);
-    const installmentMatch = emailText.match(/\b(?:pay\s+in\s+\d|installment|payment\s+\d\s+of\s+\d)\b/i);
-    if (sezzleMatch && installmentMatch) {
-      const distance = Math.abs((sezzleMatch.index || 0) - (installmentMatch.index || 0));
-      if (distance <= 80) {
-        return 'Sezzle';
-      }
-    }
+  if (hasSezzleDomain) {
+    return 'Sezzle';
+  }
+
+  if (sezzleKeywordPattern.test(emailText) && checkProximity(emailText, sezzleKeywordPattern, installmentPhrasePattern, 80)) {
+    return 'Sezzle';
   }
 
   return 'Unknown';
