@@ -1,0 +1,17 @@
+From: hello@sezzle.com
+Subject: Sezzle payment reminder
+Date: Fri, 28 Nov 2025 10:30:00 -0800 (PST)
+
+Hello,
+
+This is a reminder that your Sezzle installment 2 of 4 is coming up.
+
+Payment details:
+- Payment amount: $30.00 USD
+- Due by: November 30, 2025
+- Payment method: Automatic payment is off
+- Late fee: $0.00 USD
+
+Questions? Visit https://sezzle.com.test/help (test URL)
+
+Sezzle
