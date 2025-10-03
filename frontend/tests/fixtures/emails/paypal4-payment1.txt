@@ -1,6 +1,6 @@
 From: service@paypal.com
 Subject: Your Pay in 4 payment is due soon
-Date: October 2, 2025
+Date: Wed, 2 Oct 2025 09:00:00 -0700 (PDT)
 
 Hi there,
 

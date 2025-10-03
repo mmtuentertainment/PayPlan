@@ -81,14 +81,16 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
   },
 
   paypalpayin4: {
-    signatures: ['@paypal.com', /\bpay\s*in\s*4\b/i],
+    // Order signatures by specificity: domain first (most specific), then keyword
+    signatures: [/\bpay\s*in\s*4\b/i, '@paypal.com'],
     amountPatterns: [
-      // PayPal specific: "payment X of Y: $Z.ZZ" or "installment: $X.XX"
-      /\b(?:payment|installment)\b[^\n$]{0,30}\$([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?)/i,
-      // Standard amount patterns
+      // PayPal specific: "payment 1 of 4: $37.50" - tightened for financial accuracy
+      // Only allows optional installment notation (X of Y) between keyword and amount
+      /\b(?:payment|installment)(?:\s+\d{1,2}\s+of\s+\d{1,2})?[:\s]+\$([0-9]{1,3}(?:,[0-9]{3})*\.[0-9]{2})\b/i,
+      // Standard amount patterns - require exactly 2 decimal places
       /\bamount\s+due\b[:\s]*\$?([\d,]+\.\d{2})\b/i,
       /\$\s?([\d,]+\.\d{2})\s+\b(?:due|owing)\b/i,
-      // Fallback: any dollar amount
+      // Fallback: any dollar amount with exactly 2 decimals
       /\$([0-9][0-9,]*\.[0-9]{2})\b/
     ],
     datePatterns: [

@@ -1,6 +1,6 @@
 From: service@paypal.com
 Subject: Final Pay in 4 payment reminder
-Date: November 28, 2025
+Date: Fri, 28 Nov 2025 10:30:00 -0800 (PST)
 
 Hello,
 
@@ -14,6 +14,6 @@ Payment details:
 
 This is the last of 4 payments. After this, your order will be fully paid.
 
-Questions? Visit paypal.com/payin4
+Questions? Visit https://paypal.com/payin4
 
 PayPal
