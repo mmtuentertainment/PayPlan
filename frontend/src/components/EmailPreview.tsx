@@ -9,6 +9,20 @@ interface EmailPreviewProps {
   onBuildPlan: () => void;
 }
 
+/**
+ * Returns confidence level and styling based on score.
+ * High: ≥0.8, Med: 0.6-0.79, Low: <0.6
+ */
+function getConfidenceLevel(score: number): { level: string; classes: string } {
+  if (score >= 0.8) {
+    return { level: 'High', classes: 'bg-green-100 text-green-800' };
+  } else if (score >= 0.6) {
+    return { level: 'Med', classes: 'bg-yellow-100 text-yellow-800' };
+  } else {
+    return { level: 'Low', classes: 'bg-red-100 text-red-800' };
+  }
+}
+
 export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan }: EmailPreviewProps) {
   const [isCopying, setIsCopying] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -102,29 +116,41 @@ export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan }: EmailP
               <th scope="col" className="text-left p-2">Amount</th>
               <th scope="col" className="text-left p-2">Autopay</th>
               <th scope="col" className="text-left p-2">Late Fee</th>
+              <th scope="col" className="text-left p-2">Confidence</th>
               <th scope="col" className="text-left p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {items.map((item, idx) => (
-              <tr key={`${item.provider}-${item.installment_no}-${item.due_date}-${idx}`} className="border-b">
-                <td className="p-2">{item.provider}</td>
-                <td className="p-2">{item.installment_no}</td>
-                <td className="p-2">{item.due_date}</td>
-                <td className="p-2">${item.amount.toFixed(2)}</td>
-                <td className="p-2">{item.autopay ? '✓' : '✗'}</td>
-                <td className="p-2">${item.late_fee.toFixed(2)}</td>
-                <td className="p-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(idx)}
-                  >
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {items.map((item, idx) => {
+              const { level, classes } = getConfidenceLevel(item.confidence);
+              return (
+                <tr key={`${item.provider}-${item.installment_no}-${item.due_date}-${idx}`} className="border-b">
+                  <td className="p-2">{item.provider}</td>
+                  <td className="p-2">{item.installment_no}</td>
+                  <td className="p-2">{item.due_date}</td>
+                  <td className="p-2">${item.amount.toFixed(2)}</td>
+                  <td className="p-2">{item.autopay ? '✓' : '✗'}</td>
+                  <td className="p-2">${item.late_fee.toFixed(2)}</td>
+                  <td className="p-2">
+                    <span
+                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${classes}`}
+                      aria-label={`Extraction confidence: ${level} (${item.confidence.toFixed(2)})`}
+                    >
+                      {level}
+                    </span>
+                  </td>
+                  <td className="p-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDelete(idx)}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

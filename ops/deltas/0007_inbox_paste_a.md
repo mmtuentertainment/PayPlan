@@ -197,8 +197,8 @@ npm run build
 ## Next Steps (Future Tasks)
 
 ### Immediate (v0.1.4-a continuation)
-- **T4**: Add confidence pills to `EmailPreview.tsx`
-- **T5**: Add low-confidence flagging to `EmailIssues.tsx`
+- ✅ **T4**: UI confidence pills shipped (`EmailPreview.tsx`)
+- ✅ **T5**: Low-confidence Issue flags shipped (`EmailIssues.tsx`)
 - **T6-T8**: Tests, integration, documentation
 
 ### Phase B (v0.1.4-b)

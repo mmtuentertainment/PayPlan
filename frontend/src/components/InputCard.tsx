@@ -156,9 +156,9 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
 
   // Email tab handlers
   function handleCopyCSV() {
-    const headers = 'provider,installment_no,due_date,amount,currency,autopay,late_fee';
+    const headers = 'provider,installment_no,due_date,amount,currency,autopay,late_fee,confidence';
     const rows = emailExtractor.editableItems.map(item =>
-      `${item.provider},${item.installment_no},${item.due_date},${item.amount},${item.currency},${item.autopay},${item.late_fee}`
+      `${item.provider},${item.installment_no},${item.due_date},${item.amount},${item.currency},${item.autopay},${item.late_fee},${item.confidence}`
     );
     const csv = [headers, ...rows].join('\n');
     navigator.clipboard.writeText(csv).catch(() => {});
@@ -230,7 +230,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
                   onCopyCSV={handleCopyCSV}
                   onBuildPlan={handleBuild}
                 />
-                <EmailIssues issues={emailExtractor.result.issues} />
+                <EmailIssues issues={emailExtractor.result.issues} items={emailExtractor.editableItems} />
               </>
             )}
           </TabsContent>
