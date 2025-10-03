@@ -81,7 +81,7 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
   },
 
   paypalpayin4: {
-    // Order signatures by specificity: domain first (most specific), then keyword
+    // Order signatures by specificity: keyword first (most specific), then domain
     signatures: [/\bpay\s*in\s*4\b/i, '@paypal.com'],
     amountPatterns: [
       // PayPal specific: "payment 1 of 4: $37.50" - tightened for financial accuracy
