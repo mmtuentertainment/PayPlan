@@ -80,8 +80,8 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
     ]
   },
 
-  paypal4: {
-    signatures: ['@paypal.com', /\bpay\s*in\s*4\b/i, /\binstallment\b/i],
+  paypalpayin4: {
+    signatures: ['@paypal.com', /\bpay\s*in\s*4\b/i],
     amountPatterns: [
       // PayPal specific: "payment X of Y: $Z.ZZ" or "installment: $X.XX"
       /\b(?:payment|installment)\b[^\n$]{0,30}\$([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?)/i,
@@ -145,7 +145,7 @@ export function detectProvider(emailText: string): Provider {
     return 'Afterpay';
   }
 
-  if (PROVIDER_PATTERNS.paypal4.signatures.some(sig => matchesSignature(lower, sig))) {
+  if (PROVIDER_PATTERNS.paypalpayin4.signatures.some(sig => matchesSignature(lower, sig))) {
     return 'PayPalPayIn4';
   }
 

@@ -18,33 +18,33 @@ describe('PayPal Pay in 4 Provider Detection', () => {
   });
 
   test('extracts amount from PayPal payment email', () => {
-    const amount = extractAmount(paypal1, PROVIDER_PATTERNS.paypal4.amountPatterns);
+    const amount = extractAmount(paypal1, PROVIDER_PATTERNS.paypalpayin4.amountPatterns);
     expect(amount).toBe(37.50);
   });
 
   test('extracts amount from final payment email', () => {
-    const amount = extractAmount(paypalFinal, PROVIDER_PATTERNS.paypal4.amountPatterns);
+    const amount = extractAmount(paypalFinal, PROVIDER_PATTERNS.paypalpayin4.amountPatterns);
     expect(amount).toBe(37.50);
   });
 
   test('extracts due date in MM/DD/YYYY format', () => {
-    const date = extractDueDate(paypal1, PROVIDER_PATTERNS.paypal4.datePatterns, 'America/New_York');
+    const date = extractDueDate(paypal1, PROVIDER_PATTERNS.paypalpayin4.datePatterns, 'America/New_York');
     expect(date).toBe('2025-10-15');
   });
 
   test('extracts due date with "by" keyword', () => {
-    const date = extractDueDate(paypalFinal, PROVIDER_PATTERNS.paypal4.datePatterns, 'America/New_York');
+    const date = extractDueDate(paypalFinal, PROVIDER_PATTERNS.paypalpayin4.datePatterns, 'America/New_York');
     expect(date).toBe('2025-11-30');
   });
 
   test('extracts installment number "1 of 4"', () => {
-    const installment = extractInstallmentNumber(paypal1, PROVIDER_PATTERNS.paypal4.installmentPatterns);
+    const installment = extractInstallmentNumber(paypal1, PROVIDER_PATTERNS.paypalpayin4.installmentPatterns);
     expect(installment).toBe(1);
   });
 
   test('detects final payment', () => {
     // Final payment should be detected as last installment (4)
-    const installment = extractInstallmentNumber(paypalFinal, PROVIDER_PATTERNS.paypal4.installmentPatterns);
+    const installment = extractInstallmentNumber(paypalFinal, PROVIDER_PATTERNS.paypalpayin4.installmentPatterns);
     expect(installment).toBe(4);
   });
 
