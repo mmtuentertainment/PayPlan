@@ -202,7 +202,7 @@ npm run build
 - **T6-T8**: Tests, integration, documentation
 
 ### Phase B (v0.1.4-b)
-- **T9**: PayPal Pay in 4 provider
+- ✅ **T9**: PayPal Pay in 4 provider shipped (v0.1.4-b)
 - **T10**: Zip + Sezzle providers
 
 ---

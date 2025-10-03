@@ -28,13 +28,15 @@ Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified pay
 - **Calendar Export**: .ics file with 24-hour reminders
 - **Privacy-First**: No data storage, in-memory processing only
 
-## 📧 Inbox Paste (Email Parser) - v0.1.3-a
+## 📧 Inbox Paste (Email Parser) - v0.1.4-b
 
 Paste BNPL payment reminder emails directly - no CSV needed.
 
-### Supported Providers (Phase A)
+### Supported Providers
 - ✅ Klarna
 - ✅ Affirm
+- ✅ Afterpay
+- ✅ PayPal Pay in 4 (beta)
 
 ### How to Use
 1. Click "Emails" tab

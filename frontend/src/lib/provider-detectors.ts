@@ -1,6 +1,6 @@
 import { parseDate } from './date-parser';
 
-export type Provider = 'Klarna' | 'Affirm' | 'Afterpay' | 'Unknown';
+export type Provider = 'Klarna' | 'Affirm' | 'Afterpay' | 'PayPalPayIn4' | 'Unknown';
 
 export interface ProviderPatterns {
   signatures: (string | RegExp)[];
@@ -78,6 +78,40 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
       /installment\s+(\d+)\/(\d+)/i,
       /final\s+payment/i
     ]
+  },
+
+  paypalpayin4: {
+    // Order signatures by specificity: keyword first (most specific), then domain
+    signatures: [/\bpay\s*in\s*4\b/i, '@paypal.com'],
+    amountPatterns: [
+      // PayPal specific: "payment 1 of 4: $37.50" - tightened for financial accuracy
+      // Only allows optional installment notation (X of Y) between keyword and amount
+      /\b(?:payment|installment)(?:\s+\d{1,2}\s+of\s+\d{1,2})?[:\s]+\$([0-9]{1,3}(?:,[0-9]{3})*\.[0-9]{2})\b/i,
+      // Standard amount patterns - require exactly 2 decimal places
+      /\bamount\s+due\b[:\s]*\$?([\d,]+\.\d{2})\b/i,
+      /\$\s?([\d,]+\.\d{2})\s+\b(?:due|owing)\b/i,
+      // Fallback: any dollar amount with exactly 2 decimals
+      /\$([0-9][0-9,]*\.[0-9]{2})\b/
+    ],
+    datePatterns: [
+      // PayPal uses MM/DD/YYYY or M/D/YYYY
+      /due[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
+      /\bby[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
+      // Also supports "Oct 6, 2025" or "October 6, 2025"
+      /due[:\s]+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i,
+      /\bby[:\s]+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i,
+      // Generic date patterns
+      /(\d{1,2}\/\d{1,2}\/\d{4})/,
+      /([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/
+    ],
+    installmentPatterns: [
+      // PayPal: "payment 1 of 4" or "installment 2/4"
+      /(?:payment|installment)\s*(\d{1,2})\s*(?:of|\/)\s*(\d{1,2})/i,
+      // Final payment indicator
+      /final\s*(?:payment|installment)/i,
+      // Fallback: X of Y or X/Y
+      /(\d{1,2})\s*(?:of|\/)\s*(\d{1,2})/
+    ]
   }
 };
 
@@ -86,7 +120,10 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
  * Uses email domain and keyword signatures for detection.
  *
  * @param emailText - Email content to analyze
- * @returns Provider name ('Klarna', 'Affirm', 'Afterpay', or 'Unknown')
+ * @returns Provider name ('Klarna', 'Affirm', 'Afterpay', 'PayPalPayIn4', or 'Unknown')
+ * @example
+ * detectProvider('From: service@paypal.com\nYour Pay in 4 payment 1 of 4 is due...')
+ * // Returns: 'PayPalPayIn4'
  */
 export function detectProvider(emailText: string): Provider {
   const matchesSignature = (text: string, sig: string | RegExp): boolean => {
@@ -108,6 +145,10 @@ export function detectProvider(emailText: string): Provider {
 
   if (PROVIDER_PATTERNS.afterpay.signatures.some(sig => matchesSignature(lower, sig))) {
     return 'Afterpay';
+  }
+
+  if (PROVIDER_PATTERNS.paypalpayin4.signatures.some(sig => matchesSignature(lower, sig))) {
+    return 'PayPalPayIn4';
   }
 
   return 'Unknown';
