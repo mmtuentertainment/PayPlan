@@ -19,7 +19,7 @@ Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified pay
 
 - **CSV Input**: Paste or upload payment data
 - **📧 Email Parser (v0.1.3-a)**: Paste payment reminder emails directly - no CSV needed
-- **Multi-Provider Support**: Klarna, Affirm, Afterpay, PayPal, Zip, Sezzle
+- **Multi-Provider Support**: Klarna, Affirm, Afterpay, PayPal Pay in 4, Zip, Sezzle
 - **Risk Detection**:
   - ⚠️ COLLISION: Multiple payments same day
   - 💰 CASH_CRUNCH: Heavy load near payday
@@ -36,7 +36,9 @@ Paste BNPL payment reminder emails directly - no CSV needed.
 - ✅ Klarna
 - ✅ Affirm
 - ✅ Afterpay
-- ✅ PayPal Pay in 4 (beta)
+- ✅ PayPal Pay in 4
+- ✅ Zip (includes Quadpay)
+- ✅ Sezzle
 
 ### How to Use
 1. Click "Emails" tab

@@ -1,0 +1,20 @@
+From: noreply@zip.co
+Subject: Your Zip payment is due soon
+Date: Wed, 2 Oct 2025 09:00:00 -0700 (PDT)
+
+Hi there,
+
+Your Zip payment 1 of 4 is due on 10/15/2025.
+
+Payment details:
+- Amount due: $25.00
+- Due date: 10/15/2025
+- Payment method: AutoPay is ON
+- Late fee: $5.00
+
+Please ensure sufficient funds are available in your linked account.
+
+Thank you for using Zip!
+
+Best regards,
+Zip Team

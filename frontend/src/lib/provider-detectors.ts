@@ -1,6 +1,6 @@
 import { parseDate } from './date-parser';
 
-export type Provider = 'Klarna' | 'Affirm' | 'Afterpay' | 'PayPalPayIn4' | 'Unknown';
+export type Provider = 'Klarna' | 'Affirm' | 'Afterpay' | 'PayPalPayIn4' | 'Zip' | 'Sezzle' | 'Unknown';
 
 export interface ProviderPatterns {
   signatures: (string | RegExp)[];
@@ -112,6 +112,73 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
       // Fallback: X of Y or X/Y
       /(\d{1,2})\s*(?:of|\/)\s*(\d{1,2})/
     ]
+  },
+
+  zip: {
+    // Guard against false positives: "zip" is a common file verb
+    // Require domain match OR (keyword + nearby installment phrase within 80 chars)
+    signatures: ['@zip.co', '@quadpay.com', /\bZip(?:\s+Pay)?\b/i, /\bQuadpay\b/i],
+    amountPatterns: [
+      // Zip specific: "payment 1 of 4: $25.00" - tightened for financial accuracy
+      /\b(?:payment|installment)(?:\s+\d{1,2}\s+of\s+\d{1,2})?[:\s]+\$([0-9]{1,3}(?:,[0-9]{3})*\.[0-9]{2})\b/i,
+      // Standard amount patterns - require exactly 2 decimal places
+      /\bamount\s+due\b[:\s]*\$?([\d,]+\.\d{2})\b/i,
+      /\$\s?([\d,]+\.\d{2})\s+\b(?:due|owing)\b/i,
+      // Fallback: any dollar amount with exactly 2 decimals
+      /\$([0-9][0-9,]*\.[0-9]{2})\b/
+    ],
+    datePatterns: [
+      // Zip uses MM/DD/YYYY or M/D/YYYY
+      /due[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
+      /\bby[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
+      // Also supports "Oct 6, 2025" or "October 6, 2025"
+      /due[:\s]+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i,
+      /\bby[:\s]+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i,
+      // Generic date patterns
+      /(\d{1,2}\/\d{1,2}\/\d{4})/,
+      /([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/
+    ],
+    installmentPatterns: [
+      // Zip: "payment 1 of 4" or "installment 2/4"
+      /(?:payment|installment)\s*(\d{1,2})\s*(?:of|\/)\s*(\d{1,2})/i,
+      // Final payment indicator
+      /final\s*(?:payment|installment)/i,
+      // Fallback: X of Y or X/Y
+      /(\d{1,2})\s*(?:of|\/)\s*(\d{1,2})/
+    ]
+  },
+
+  sezzle: {
+    // Sezzle keyword requires nearby installment phrase to avoid false positives
+    signatures: ['@sezzle.com', /\bSezzle\b/i],
+    amountPatterns: [
+      // Sezzle specific: "payment 1 of 4: $25.00" - tightened for financial accuracy
+      /\b(?:payment|installment)(?:\s+\d{1,2}\s+of\s+\d{1,2})?[:\s]+\$([0-9]{1,3}(?:,[0-9]{3})*\.[0-9]{2})\b/i,
+      // Standard amount patterns - require exactly 2 decimal places
+      /\bamount\s+due\b[:\s]*\$?([\d,]+\.\d{2})\b/i,
+      /\$\s?([\d,]+\.\d{2})\s+\b(?:due|owing)\b/i,
+      // Fallback: any dollar amount with exactly 2 decimals
+      /\$([0-9][0-9,]*\.[0-9]{2})\b/
+    ],
+    datePatterns: [
+      // Sezzle uses MM/DD/YYYY or M/D/YYYY
+      /due[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
+      /\bby[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
+      // Also supports "Oct 6, 2025" or "October 6, 2025"
+      /due[:\s]+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i,
+      /\bby[:\s]+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i,
+      // Generic date patterns
+      /(\d{1,2}\/\d{1,2}\/\d{4})/,
+      /([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/
+    ],
+    installmentPatterns: [
+      // Sezzle: "payment 1 of 4" or "installment 2/4"
+      /(?:payment|installment)\s*(\d{1,2})\s*(?:of|\/)\s*(\d{1,2})/i,
+      // Final payment indicator
+      /final\s*(?:payment|installment)/i,
+      // Fallback: X of Y or X/Y
+      /(\d{1,2})\s*(?:of|\/)\s*(\d{1,2})/
+    ]
   }
 };
 
@@ -119,11 +186,20 @@ export const PROVIDER_PATTERNS: Record<string, ProviderPatterns> = {
  * Detects BNPL provider from email text.
  * Uses email domain and keyword signatures for detection.
  *
+ * Guard logic for Zip/Sezzle: Prevents false positives (e.g., "zip this file")
+ * by requiring either domain match OR (keyword + nearby installment phrase).
+ *
  * @param emailText - Email content to analyze
- * @returns Provider name ('Klarna', 'Affirm', 'Afterpay', 'PayPalPayIn4', or 'Unknown')
+ * @returns Provider name ('Klarna', 'Affirm', 'Afterpay', 'PayPalPayIn4', 'Zip', 'Sezzle', or 'Unknown')
  * @example
  * detectProvider('From: service@paypal.com\nYour Pay in 4 payment 1 of 4 is due...')
  * // Returns: 'PayPalPayIn4'
+ * @example
+ * detectProvider('From: noreply@zip.co\nYour Zip payment 1 of 4 is due on 10/15/2025')
+ * // Returns: 'Zip'
+ * @example
+ * detectProvider('From: hello@sezzle.com\nSezzle installment 2 of 4 due soon')
+ * // Returns: 'Sezzle'
  */
 export function detectProvider(emailText: string): Provider {
   const matchesSignature = (text: string, sig: string | RegExp): boolean => {
@@ -149,6 +225,47 @@ export function detectProvider(emailText: string): Provider {
 
   if (PROVIDER_PATTERNS.paypalpayin4.signatures.some(sig => matchesSignature(lower, sig))) {
     return 'PayPalPayIn4';
+  }
+
+  // Zip detection with guard against false positives ("zip this file", etc.)
+  // Require domain match OR (keyword + nearby installment/pay-in-4 phrase within 80 chars)
+  const hasZipDomain = lower.includes('@zip.co') || lower.includes('@quadpay.com');
+  const hasZipKeyword = /\b(?:Zip(?:\s+Pay)?|Quadpay)\b/i.test(emailText);
+  const hasInstallmentPhrase = /\b(?:pay\s+in\s+\d|installment|payment\s+\d\s+of\s+\d)\b/i.test(emailText);
+
+  if (hasZipDomain || (hasZipKeyword && hasInstallmentPhrase)) {
+    // Additional proximity check: ensure keyword and phrase are within 80 chars
+    if (hasZipDomain) {
+      return 'Zip';
+    }
+    // Check if Zip keyword and installment phrase are close enough
+    const zipMatch = emailText.match(/\b(?:Zip(?:\s+Pay)?|Quadpay)\b/i);
+    const installmentMatch = emailText.match(/\b(?:pay\s+in\s+\d|installment|payment\s+\d\s+of\s+\d)\b/i);
+    if (zipMatch && installmentMatch) {
+      const distance = Math.abs((zipMatch.index || 0) - (installmentMatch.index || 0));
+      if (distance <= 80) {
+        return 'Zip';
+      }
+    }
+  }
+
+  // Sezzle detection with guard (keyword requires nearby installment phrase)
+  const hasSezzleDomain = lower.includes('@sezzle.com');
+  const hasSezzleKeyword = /\bSezzle\b/i.test(emailText);
+
+  if (hasSezzleDomain || (hasSezzleKeyword && hasInstallmentPhrase)) {
+    if (hasSezzleDomain) {
+      return 'Sezzle';
+    }
+    // Check proximity for Sezzle keyword and installment phrase
+    const sezzleMatch = emailText.match(/\bSezzle\b/i);
+    const installmentMatch = emailText.match(/\b(?:pay\s+in\s+\d|installment|payment\s+\d\s+of\s+\d)\b/i);
+    if (sezzleMatch && installmentMatch) {
+      const distance = Math.abs((sezzleMatch.index || 0) - (installmentMatch.index || 0));
+      if (distance <= 80) {
+        return 'Sezzle';
+      }
+    }
   }
 
   return 'Unknown';
