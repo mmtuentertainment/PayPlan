@@ -6,6 +6,14 @@ confidence_formula:
   description: |
     Weighted sum of matched extraction signals.
     Each signal is binary (1 if matched, 0 if not).
+
+    IMPORTANT: Confidence is only calculated for successfully extracted items
+    where provider is detected (provider != 'Unknown'). Items with unknown
+    providers are added to issues[] instead of items[].
+
+    Therefore, the minimum confidence for any Item in ExtractionResult.items
+    is 0.35 (provider signal alone). Confidence values 0.0-0.34 are impossible
+    for returned items, but the formula supports them for testing purposes.
   formula: >
     confidence =
       provider_signal * 0.35 +
@@ -41,6 +49,12 @@ signals:
     rationale: "Useful but least critical; defaults to false if unclear"
 
 thresholds:
+  design_rationale: |
+    Thresholds use inclusive lower bounds (>=) to be permissive at boundaries.
+    - 0.8 High: All critical fields present (provider+date+amount+installment)
+    - 0.6 Med: Minimum useful data (provider+date) for manual completion
+    - <0.6 Low: Insufficient data for confident use
+
   high:
     range: ">= 0.8"
     display_text: "High"
@@ -163,7 +177,8 @@ test_cases:
     expected_confidence: 0.35
     expected_level: "Low"
 
-  - scenario: "No signals matched (extraction failed)"
+  - scenario: "No signals matched (test-only, impossible for returned Items)"
+    description: "Only used for unit testing calculateConfidence() in isolation"
     signals:
       provider_signal: 0
       date_signal: 0
@@ -172,9 +187,23 @@ test_cases:
       autopay_signal: 0
     expected_confidence: 0.0
     expected_level: "Low"
+    note: "This case cannot occur in ExtractionResult.items (unknown providers are filtered)"
 
 performance:
-  calculation_complexity: "O(1)"
-  target_latency: "<1ms per item"
-  max_items_per_batch: 50
-  max_batch_time: "2000ms"
+  confidence_calculation:
+    complexity: "O(1)"
+    target_latency: "<1ms per item"
+    description: "Simple arithmetic sum of 5 weighted booleans"
+
+  extraction_pipeline:
+    description: "Full email parsing including provider detection, field extraction, and confidence"
+    max_items_per_batch: 50
+    max_batch_time: "2000ms"
+    target_per_item: "<40ms"  # 2000ms / 50 items
+    components:
+      - "HTML sanitization (DOMParser)"
+      - "Email splitting (regex)"
+      - "Provider detection (regex patterns)"
+      - "Date parsing (Luxon)"
+      - "Amount/installment extraction (regex)"
+      - "Confidence calculation (<1ms)"

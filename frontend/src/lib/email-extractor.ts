@@ -38,8 +38,12 @@ export interface ExtractionResult {
  *
  * Formula: provider(0.35) + date(0.25) + amount(0.20) + installment(0.15) + autopay(0.05)
  *
+ * NOTE: In practice, this function is only called for items where provider !== 'Unknown',
+ * so the minimum confidence for returned Items is 0.35. The formula supports lower scores
+ * for completeness and unit testing.
+ *
  * @param signals - Object with boolean flags for each signal
- * @returns Confidence score between 0 and 1
+ * @returns Confidence score between 0 and 1 (0.35-1.0 in practice)
  * @example
  * calculateConfidence({ provider: true, date: true, amount: true, installment: true, autopay: true })
  * // Returns: 1.0
