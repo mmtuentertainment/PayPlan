@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { extractItemsFromEmails } from '../lib/email-extractor';
-import type { ExtractionResult, Item } from '../lib/email-extractor';
+import type { ExtractionResult, Item, ExtractOptions } from '../lib/email-extractor';
+import { DateLocale } from '../lib/date-parser';
 
 export function useEmailExtractor(timezone: string) {
   const [result, setResult] = useState<ExtractionResult | null>(null);
@@ -8,7 +9,7 @@ export function useEmailExtractor(timezone: string) {
   const [editableItems, setEditableItems] = useState<Item[]>([]);
   const extractionIdRef = useRef(0);
 
-  const extract = useCallback((emailText: string) => {
+  const extract = useCallback((emailText: string, dateLocale?: DateLocale) => {
     if (!emailText.trim()) {
       setResult(null);
       setEditableItems([]);
@@ -27,7 +28,8 @@ export function useEmailExtractor(timezone: string) {
       }
 
       try {
-        const extracted = extractItemsFromEmails(emailText, timezone);
+        const options: ExtractOptions = dateLocale ? { dateLocale } : {};
+        const extracted = extractItemsFromEmails(emailText, timezone, options);
         setResult(extracted);
         setEditableItems(extracted.items);
       } catch (err) {

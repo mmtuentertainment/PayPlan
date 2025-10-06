@@ -9,6 +9,11 @@ import {
   PROVIDER_PATTERNS
 } from './provider-detectors';
 import { redactPII } from './redact';
+import { DateLocale } from './date-parser';
+
+export interface ExtractOptions {
+  dateLocale?: DateLocale;
+}
 
 export interface Item {
   provider: string;
@@ -75,12 +80,15 @@ export function calculateConfidence(signals: {
  *
  * @param emailText - Raw text from pasted emails (HTML will be sanitized)
  * @param timezone - IANA timezone for date parsing (e.g., "America/New_York")
+ * @param options - Optional extraction options
+ * @param options.dateLocale - Date locale for ambiguous dates (default: 'US')
  * @returns Extraction result with items, issues, duplicate count, and confidence scores
  * @throws Error if input exceeds maximum length
  */
 export function extractItemsFromEmails(
   emailText: string,
-  timezone: string
+  timezone: string,
+  options?: ExtractOptions
 ): ExtractionResult {
   // Validation: enforce maximum input length (prevent abuse)
   const MAX_LENGTH = 16000;
@@ -100,7 +108,7 @@ export function extractItemsFromEmails(
   for (let i = 0; i < emailBlocks.length; i++) {
     const block = emailBlocks[i];
     try {
-      const item = extractSingleEmail(block, timezone);
+      const item = extractSingleEmail(block, timezone, options);
       items.push(item);
     } catch (err) {
       const rawSnippet = block.slice(0, 100);
@@ -122,7 +130,7 @@ export function extractItemsFromEmails(
   };
 }
 
-function extractSingleEmail(emailText: string, timezone: string): Item {
+function extractSingleEmail(emailText: string, timezone: string, options?: ExtractOptions): Item {
   const provider = detectProvider(emailText);
 
   if (provider === 'Unknown') {
@@ -130,6 +138,7 @@ function extractSingleEmail(emailText: string, timezone: string): Item {
   }
 
   const patterns = PROVIDER_PATTERNS[provider.toLowerCase()];
+  const dateLocale = options?.dateLocale || 'US';
 
   // Collect all extraction errors instead of failing on first error
   const errors: string[] = [];
@@ -153,7 +162,7 @@ function extractSingleEmail(emailText: string, timezone: string): Item {
   }
 
   try {
-    dueDate = extractDueDate(emailText, patterns.datePatterns, timezone);
+    dueDate = extractDueDate(emailText, patterns.datePatterns, timezone, dateLocale);
   } catch (e) {
     errors.push(`Due date: ${e instanceof Error ? e.message : 'not found'}`);
   }

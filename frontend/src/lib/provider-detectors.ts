@@ -1,4 +1,4 @@
-import { parseDate } from './date-parser';
+import { parseDate, DateLocale } from './date-parser';
 
 export type Provider = 'Klarna' | 'Affirm' | 'Afterpay' | 'PayPalPayIn4' | 'Zip' | 'Sezzle' | 'Unknown';
 
@@ -425,19 +425,21 @@ export function extractLateFee(text: string): number {
  * @param text - Email text to search
  * @param patterns - Array of regex patterns to try
  * @param timezone - IANA timezone for date parsing
+ * @param dateLocale - Date locale for ambiguous dates (default: 'US')
  * @returns ISO date string (YYYY-MM-DD)
  * @throws Error if due date cannot be found or parsed
  */
 export function extractDueDate(
   text: string,
   patterns: RegExp[],
-  timezone: string
+  timezone: string,
+  dateLocale: DateLocale = 'US'
 ): string {
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match && match[1]) {
       try {
-        return parseDate(match[1], timezone);
+        return parseDate(match[1], timezone, { dateLocale });
       } catch {
         continue;
       }
