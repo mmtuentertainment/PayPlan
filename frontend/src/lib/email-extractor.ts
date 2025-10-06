@@ -10,6 +10,7 @@ import {
 } from './extraction/extractors';
 import { redactPII } from './redact';
 import { getErrorMessage } from './extraction/helpers/error-messages';
+import { extractionCache } from './extraction/helpers/cache';
 
 // Import types from new extraction module
 export type {
@@ -104,6 +105,14 @@ export function extractItemsFromEmails(
     ? validatedOptions.data || {}
     : {};
 
+  // Check cache before processing (unless bypass requested)
+  if (!safeOptions.bypassCache) {
+    const cached = extractionCache.get(emailText, timezone, safeOptions);
+    if (cached) {
+      return cached;
+    }
+  }
+
   // 1. Sanitize HTML if pasted
   const sanitized = sanitizeHtml(emailText);
 
@@ -131,12 +140,19 @@ export function extractItemsFromEmails(
   // 3. Deduplicate
   const deduplicated = deduplicateItems(items);
 
-  return {
+  const result: ExtractionResult = {
     items: deduplicated,
     issues,
     duplicatesRemoved: items.length - deduplicated.length,
     dateLocale: safeOptions.dateLocale || 'US'
   };
+
+  // Store in cache for future requests
+  if (!safeOptions.bypassCache) {
+    extractionCache.set(emailText, timezone, result, safeOptions);
+  }
+
+  return result;
 }
 
 function extractSingleEmail(emailText: string, timezone: string, options?: ExtractOptions): Item {

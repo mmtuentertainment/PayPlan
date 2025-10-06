@@ -6,11 +6,13 @@ import { z } from 'zod';
  * Ensures dateLocale is either 'US' or 'EU' if provided.
  */
 export const ExtractOptionsSchema = z.object({
-  dateLocale: z.enum(['US', 'EU']).optional()
+  dateLocale: z.enum(['US', 'EU']).optional(),
+  bypassCache: z.boolean().optional()
 }).optional();
 
 export interface ExtractOptions {
   dateLocale?: DateLocale;
+  bypassCache?: boolean; // If true, skip cache and force fresh extraction
 }
 
 /**
