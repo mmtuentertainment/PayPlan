@@ -1,12 +1,12 @@
 import { detectProvider, PROVIDER_PATTERNS } from './extraction/providers';
-import { extractDueDate } from './extraction/extractors/date';
 import {
+  extractDueDate,
   extractAmount,
   extractCurrency,
   extractInstallmentNumber,
   detectAutopay,
   extractLateFee
-} from './provider-detectors';
+} from './extraction/extractors';
 import { redactPII } from './redact';
 
 // Import types from new extraction module
