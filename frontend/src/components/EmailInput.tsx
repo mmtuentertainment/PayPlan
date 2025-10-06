@@ -2,14 +2,18 @@ import { useState } from 'react';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { SAMPLE_EMAILS } from '../lib/sample-emails';
+import { LocaleToggle } from './LocaleToggle';
+import { DateLocale } from '../lib/date-parser';
 
 interface EmailInputProps {
-  onExtract: (text: string) => void;
+  onExtract: (text: string, locale: DateLocale) => void;
   isExtracting: boolean;
+  hasExtractedData: boolean;
 }
 
-export function EmailInput({ onExtract, isExtracting }: EmailInputProps) {
+export function EmailInput({ onExtract, isExtracting, hasExtractedData }: EmailInputProps) {
   const [text, setText] = useState('');
+  const [dateLocale, setDateLocale] = useState<DateLocale>('US');
   const maxChars = 16000;
 
   const handleUseSample = () => {
@@ -18,8 +22,12 @@ export function EmailInput({ onExtract, isExtracting }: EmailInputProps) {
 
   const handleExtract = () => {
     if (text.trim()) {
-      onExtract(text);
+      onExtract(text, dateLocale);
     }
+  };
+
+  const handleReExtract = () => {
+    handleExtract();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -44,6 +52,14 @@ export function EmailInput({ onExtract, isExtracting }: EmailInputProps) {
           Use Sample Emails
         </Button>
       </div>
+
+      <LocaleToggle
+        locale={dateLocale}
+        onLocaleChange={setDateLocale}
+        onReExtract={handleReExtract}
+        hasExtractedData={hasExtractedData}
+        isExtracting={isExtracting}
+      />
 
       <Textarea
         id="email-input"
