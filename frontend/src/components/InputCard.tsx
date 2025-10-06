@@ -1,5 +1,5 @@
 // Implements T005 + T006 + T007 trigger. Uses shadcn/ui primitives.
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -83,7 +83,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
     setEdited(true);
   }
 
-  async function handleBuild() {
+  const handleBuild = useCallback(async () => {
     setError(null);
     setLoading(true);
     try {
@@ -157,10 +157,10 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [tab, csv, businessDayMode, customSkipDates, skipDatesError, emailExtractor.editableItems, mode, paycheckDates, payCadence, nextPayday, minBuffer, tzDetected, country, onResult, onIcsReady]);
 
   // Email tab handlers
-  function handleCopyCSV() {
+  const handleCopyCSV = useCallback(() => {
     // Import centsToDollars inline (can refactor to top-level import later)
     const centsToDollars = (cents: number) => cents / 100;
 
@@ -171,7 +171,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
     );
     const csv = [headers, ...rows].join('\n');
     navigator.clipboard.writeText(csv).catch(() => {});
-  }
+  }, [emailExtractor.editableItems]);
 
   return (
     <Card aria-labelledby="input-card">
