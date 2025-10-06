@@ -45,6 +45,7 @@ export interface ExtractionResult {
   items: Item[];
   issues: Issue[];
   duplicatesRemoved: number;
+  dateLocale: DateLocale; // Audit trail: which locale was used for parsing (always provided, defaults to 'US')
 }
 
 /**
@@ -147,7 +148,8 @@ export function extractItemsFromEmails(
   return {
     items: deduplicated,
     issues,
-    duplicatesRemoved: items.length - deduplicated.length
+    duplicatesRemoved: items.length - deduplicated.length,
+    dateLocale: safeOptions.dateLocale || 'US'
   };
 }
 

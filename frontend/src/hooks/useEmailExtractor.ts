@@ -3,6 +3,31 @@ import { extractItemsFromEmails } from '../lib/email-extractor';
 import type { ExtractionResult, Item, ExtractOptions } from '../lib/email-extractor';
 import type { DateLocale } from '../lib/date-parser';
 
+/**
+ * Sanitizes error messages to prevent information disclosure while preserving debugging context.
+ * Removes absolute file paths and stack traces, but keeps error type and safe details.
+ * Cross-platform: Handles both Unix (/) and Windows (\, C:\) path separators.
+ */
+function sanitizeError(err: unknown): string {
+  if (err instanceof Error) {
+    // Keep error message but remove absolute file paths
+    const message = err.message.split('\n')[0]; // Take only first line
+    // Remove absolute paths but keep relative context like "Invalid date: ..."
+    const sanitized = message
+      // Match Windows absolute paths with spaces: C:\Program Files\app.ts or C:\path\file.ts
+      .replace(/[A-Z]:\\(?:[^\\:*?"<>|\r\n]+\\)*[^\\:*?"<>|\r\n]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
+      // Match Windows UNC paths with spaces: \\server\share\path\file.ts
+      .replace(/\\\\(?:[^\\:*?"<>|\r\n]+\\)+[^\\:*?"<>|\r\n]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
+      // Match Unix absolute paths: /home/user/path/file.ts (requires multiple path segments)
+      .replace(/\/(?:[^/\r\n]+\/)+[^/\r\n]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/g, '')
+      // Remove "at <location>" suffixes
+      .replace(/\bat\b.*$/, '')
+      .trim();
+    return sanitized || 'An error occurred during extraction';
+  }
+  return 'An unexpected error occurred';
+}
+
 export function useEmailExtractor(timezone: string) {
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
@@ -32,15 +57,16 @@ export function useEmailExtractor(timezone: string) {
         const extracted = extractItemsFromEmails(emailText, timezone, options);
         setResult(extracted);
         setEditableItems(extracted.items);
-      } catch (err) {
+      } catch (err: unknown) {
         setResult({
           items: [],
           issues: [{
             id: `error-${Date.now()}`,
             snippet: '',
-            reason: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+            reason: `Extraction failed: ${sanitizeError(err)}`
           }],
-          duplicatesRemoved: 0
+          duplicatesRemoved: 0,
+          dateLocale: dateLocale || 'US'
         });
         setEditableItems([]);
       } finally {
