@@ -9,6 +9,20 @@ import {
   PROVIDER_PATTERNS
 } from './provider-detectors';
 import { redactPII } from './redact';
+import { DateLocale } from './date-parser';
+import { z } from 'zod';
+
+/**
+ * Zod schema for extraction options validation.
+ * Ensures dateLocale is either 'US' or 'EU' if provided.
+ */
+export const ExtractOptionsSchema = z.object({
+  dateLocale: z.enum(['US', 'EU']).optional()
+}).optional();
+
+export interface ExtractOptions {
+  dateLocale?: DateLocale;
+}
 
 export interface Item {
   provider: string;
@@ -73,20 +87,35 @@ export function calculateConfidence(signals: {
  * Main extraction entry point.
  * Extracts payment items from pasted BNPL reminder emails.
  *
+ * **Financial Impact:**
+ * The dateLocale option affects how ambiguous slash-separated dates are interpreted:
+ * - US mode (default): "01/02/2026" → January 2, 2026
+ * - EU mode: "01/02/2026" → February 1, 2026
+ * Changing locale can resequence payment due dates and affect payment ordering.
+ *
  * @param emailText - Raw text from pasted emails (HTML will be sanitized)
  * @param timezone - IANA timezone for date parsing (e.g., "America/New_York")
+ * @param options - Optional extraction options
+ * @param options.dateLocale - Date locale for ambiguous dates (default: 'US')
  * @returns Extraction result with items, issues, duplicate count, and confidence scores
- * @throws Error if input exceeds maximum length
+ * @throws Error if input exceeds maximum length or options validation fails
  */
 export function extractItemsFromEmails(
   emailText: string,
-  timezone: string
+  timezone: string,
+  options?: ExtractOptions
 ): ExtractionResult {
   // Validation: enforce maximum input length (prevent abuse)
   const MAX_LENGTH = 16000;
   if (emailText.length > MAX_LENGTH) {
     throw new Error(`Input too large: ${emailText.length} characters (max ${MAX_LENGTH})`);
   }
+
+  // Validate options with Zod; default to 'US' if invalid or undefined
+  const validatedOptions = ExtractOptionsSchema.safeParse(options);
+  const safeOptions: ExtractOptions = validatedOptions.success
+    ? validatedOptions.data || {}
+    : {};
 
   // 1. Sanitize HTML if pasted
   const sanitized = sanitizeHtml(emailText);
@@ -100,7 +129,7 @@ export function extractItemsFromEmails(
   for (let i = 0; i < emailBlocks.length; i++) {
     const block = emailBlocks[i];
     try {
-      const item = extractSingleEmail(block, timezone);
+      const item = extractSingleEmail(block, timezone, safeOptions);
       items.push(item);
     } catch (err) {
       const rawSnippet = block.slice(0, 100);
@@ -122,7 +151,7 @@ export function extractItemsFromEmails(
   };
 }
 
-function extractSingleEmail(emailText: string, timezone: string): Item {
+function extractSingleEmail(emailText: string, timezone: string, options?: ExtractOptions): Item {
   const provider = detectProvider(emailText);
 
   if (provider === 'Unknown') {
@@ -130,6 +159,7 @@ function extractSingleEmail(emailText: string, timezone: string): Item {
   }
 
   const patterns = PROVIDER_PATTERNS[provider.toLowerCase()];
+  const dateLocale = options?.dateLocale || 'US';
 
   // Collect all extraction errors instead of failing on first error
   const errors: string[] = [];
@@ -153,7 +183,7 @@ function extractSingleEmail(emailText: string, timezone: string): Item {
   }
 
   try {
-    dueDate = extractDueDate(emailText, patterns.datePatterns, timezone);
+    dueDate = extractDueDate(emailText, patterns.datePatterns, timezone, dateLocale);
   } catch (e) {
     errors.push(`Due date: ${e instanceof Error ? e.message : 'not found'}`);
   }

@@ -221,6 +221,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
             <EmailInput
               onExtract={emailExtractor.extract}
               isExtracting={emailExtractor.isExtracting}
+              hasExtractedData={!!emailExtractor.result}
             />
             {emailExtractor.result && (
               <>
