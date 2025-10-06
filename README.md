@@ -60,6 +60,27 @@ Paste BNPL payment reminder emails directly - no CSV needed.
 - Long: `October 6, 2025` or `Oct 6, 2025`
 - Ordinals: `October 6th, 2025`
 
+### Locale & Financial Impact (v0.1.5-a)
+
+**Date Format Toggle:**
+- 🌍 **US (MM/DD/YYYY)** — default for US-based BNPL providers
+- 🌍 **EU (DD/MM/YYYY)** — opt-in for European date formats
+
+**⚠️ Important: Changing locale affects payment interpretation**
+
+Switching date format can alter how ambiguous dates are interpreted, which may **resequence payment due dates and affect payment ordering**:
+
+- **US mode (default):** `01/02/2026` → **January 2, 2026**
+- **EU mode:** `01/02/2026` → **February 1, 2026**
+
+**Example Impact:**
+If you have 3 payments extracted with US format and switch to EU:
+- Payment originally due Jan 2 becomes Feb 1
+- Payment originally due Feb 1 becomes Jan 2
+- **Payment order may reverse**, affecting which payment is due first
+
+**Re-extraction:** Using "Re-extract with new format" will discard any Quick Fixes you've applied and reprocess all emails with the selected locale.
+
 ### Privacy
 - ✅ Client-side only (zero network calls during extraction)
 - ✅ No data storage or tracking

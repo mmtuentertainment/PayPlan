@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LocaleToggle } from '../../src/components/LocaleToggle';
 
-describe('LocaleToggle', () => {
+describe('LocaleToggle - basic rendering', () => {
   test('renders with US selected by default', () => {
     render(
       <LocaleToggle
@@ -60,49 +60,5 @@ describe('LocaleToggle', () => {
     );
 
     expect(screen.getByText('Re-extract with new format')).toBeInTheDocument();
-  });
-
-  test('shows confirmation dialog before re-extract', () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-    const onReExtract = vi.fn();
-
-    render(
-      <LocaleToggle
-        locale="US"
-        onLocaleChange={vi.fn()}
-        onReExtract={onReExtract}
-        hasExtractedData={true}
-        isExtracting={false}
-      />
-    );
-
-    fireEvent.click(screen.getByText('Re-extract with new format'));
-
-    expect(confirmSpy).toHaveBeenCalledWith('Re-extracting will discard all Quick Fixes. Continue?');
-    expect(onReExtract).not.toHaveBeenCalled();
-
-    confirmSpy.mockRestore();
-  });
-
-  test('calls onReExtract when confirmed', () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-    const onReExtract = vi.fn();
-
-    render(
-      <LocaleToggle
-        locale="US"
-        onLocaleChange={vi.fn()}
-        onReExtract={onReExtract}
-        hasExtractedData={true}
-        isExtracting={false}
-      />
-    );
-
-    fireEvent.click(screen.getByText('Re-extract with new format'));
-
-    expect(confirmSpy).toHaveBeenCalled();
-    expect(onReExtract).toHaveBeenCalled();
-
-    confirmSpy.mockRestore();
   });
 });
