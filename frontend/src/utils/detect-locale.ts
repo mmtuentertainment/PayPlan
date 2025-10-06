@@ -34,14 +34,15 @@ export function detectUserLocale(): DateLocale {
     // Priority 1: Browser language (navigator.language)
     const lang = navigator.language.toLowerCase();
 
-    // DD/MM/YYYY format locales (includes EU + Commonwealth countries)
+    // DD/MM/YYYY format locales (includes EU + Commonwealth + select African countries)
     // Note: Excludes Swiss German (de-CH) and Liechtenstein (de-LI) which use DD.MM.YYYY with dots
     const ddmmFormatLocales = [
-      'en-gb', 'en-ie', 'en-au', 'en-nz', // English (non-US)
+      'en-gb', 'en-ie', 'en-au', 'en-nz', 'en-za', 'en-in', 'en-my', 'en-sg', // English (Commonwealth)
       'de-de', 'de-at', // German (Germany, Austria) - excludes de-CH
-      'fr', 'es', 'it', 'nl', 'pt', 'pl', 'sv', 'no', 'da', 'fi',
+      'fr', 'es', 'it', 'nl', 'pt', 'pl', 'sv', 'nb', 'nn', 'da', 'fi', // nb/nn = Norwegian Bokmål/Nynorsk (modern codes)
       'cs', 'sk', 'hu', 'ro', 'bg', 'hr', 'sl', 'lt', 'lv', 'et',
-      'el', 'tr', 'is', 'mt'
+      'el', 'tr', 'is', 'mt',
+      'ar-eg', 'ar-ma', 'ar-tn', 'ar-dz' // Arabic (Egypt, Morocco, Tunisia, Algeria - DD/MM/YYYY)
     ];
 
     if (ddmmFormatLocales.some(locale => lang.startsWith(locale))) {

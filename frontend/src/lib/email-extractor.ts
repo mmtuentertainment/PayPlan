@@ -45,7 +45,7 @@ export interface ExtractionResult {
   items: Item[];
   issues: Issue[];
   duplicatesRemoved: number;
-  dateLocale?: DateLocale; // Audit trail: which locale was used for parsing (optional for backward compatibility)
+  dateLocale: DateLocale; // Audit trail: which locale was used for parsing (always provided, defaults to 'US')
 }
 
 /**

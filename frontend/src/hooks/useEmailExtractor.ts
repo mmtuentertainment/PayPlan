@@ -4,15 +4,18 @@ import type { ExtractionResult, Item, ExtractOptions } from '../lib/email-extrac
 import type { DateLocale } from '../lib/date-parser';
 
 /**
- * Sanitizes error messages to prevent information disclosure.
- * Removes stack traces and sensitive details while keeping error type.
+ * Sanitizes error messages to prevent information disclosure while preserving debugging context.
+ * Removes absolute file paths and stack traces, but keeps error type and safe details.
  */
 function sanitizeError(err: unknown): string {
   if (err instanceof Error) {
-    // Only expose error name and sanitized message (no stack traces)
+    // Keep error message but remove absolute file paths
     const message = err.message.split('\n')[0]; // Take only first line
-    // Remove file paths and line numbers
-    const sanitized = message.replace(/\s+at\s+.*/g, '').replace(/\([^)]*\)/g, '');
+    // Remove absolute paths but keep relative context like "Invalid date: ..."
+    const sanitized = message
+      .replace(/\/[^\s]+\.(ts|js|tsx|jsx)/g, '') // Remove absolute file paths
+      .replace(/\bat\b.*$/g, '') // Remove "at <location>" suffixes
+      .trim();
     return sanitized || 'An error occurred during extraction';
   }
   return 'An unexpected error occurred';

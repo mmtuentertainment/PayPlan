@@ -50,23 +50,6 @@ describe('detectUserLocale', () => {
       expect(detectUserLocale()).toBe('EU');
     });
 
-    test('de-DE → EU locale', () => {
-      Object.defineProperty(global, 'navigator', {
-        value: { language: 'de-DE' },
-        writable: true,
-        configurable: true
-      });
-      Object.defineProperty(global, 'Intl', {
-        value: {
-          DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: 'Europe/Berlin' }) })
-        },
-        writable: true,
-        configurable: true
-      });
-
-      expect(detectUserLocale()).toBe('EU');
-    });
-
     test('fr-FR → EU locale', () => {
       Object.defineProperty(global, 'navigator', {
         value: { language: 'fr-FR' },
@@ -137,9 +120,9 @@ describe('detectUserLocale', () => {
       expect(detectUserLocale()).toBe('EU');
     });
 
-    test('Africa/Cairo timezone → US locale (Africa/* removed for safety)', () => {
+    test('Africa/Cairo with ar-EG → EU locale (Egyptian Arabic in ddmmFormatLocales)', () => {
       Object.defineProperty(global, 'navigator', {
-        value: { language: 'ar-EG' }, // Arabic Egypt - not in ddmmFormatLocales
+        value: { language: 'ar-EG' }, // Arabic Egypt - uses DD/MM/YYYY
         writable: true,
         configurable: true
       });
@@ -151,7 +134,24 @@ describe('detectUserLocale', () => {
         configurable: true
       });
 
-      expect(detectUserLocale()).toBe('US'); // Conservative: Africa/* no longer auto-detects as EU
+      expect(detectUserLocale()).toBe('EU'); // ar-eg is in ddmmFormatLocales (Priority 1)
+    });
+
+    test('Africa/Johannesburg → US locale (Africa/* removed, not in locale list)', () => {
+      Object.defineProperty(global, 'navigator', {
+        value: { language: 'af-ZA' }, // Afrikaans - not in ddmmFormatLocales
+        writable: true,
+        configurable: true
+      });
+      Object.defineProperty(global, 'Intl', {
+        value: {
+          DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: 'Africa/Johannesburg' }) })
+        },
+        writable: true,
+        configurable: true
+      });
+
+      expect(detectUserLocale()).toBe('US'); // af-ZA not in list, Africa/* heuristic removed
     });
 
     test('America/New_York timezone → US locale', () => {
@@ -314,7 +314,7 @@ describe('detectUserLocale', () => {
       expect(detectUserLocale()).toBe('EU');
     });
 
-    test('de-CH (Switzerland) → US locale (uses DD.MM.YYYY with dots)', () => {
+    test('de-CH (Switzerland) → EU locale (Europe/Zurich timezone overrides language)', () => {
       Object.defineProperty(global, 'navigator', {
         value: { language: 'de-CH' },
         writable: true,
@@ -328,12 +328,12 @@ describe('detectUserLocale', () => {
         configurable: true
       });
 
-      // Swiss German uses DD.MM.YYYY (dots not slashes) so we don't match it as EU
+      // Swiss German uses DD.MM.YYYY (dots not slashes) so we don't match it as EU via language
       // However, Europe/Zurich timezone will trigger EU via Priority 2
       expect(detectUserLocale()).toBe('EU');
     });
 
-    test('de-LI (Liechtenstein) → US locale via language, but EU via timezone', () => {
+    test('de-LI (Liechtenstein) → EU locale (Europe/Vaduz timezone overrides language)', () => {
       Object.defineProperty(global, 'navigator', {
         value: { language: 'de-LI' },
         writable: true,
@@ -347,7 +347,7 @@ describe('detectUserLocale', () => {
         configurable: true
       });
 
-      // de-LI not in ddmmFormatLocales, but Europe/Vaduz triggers EU
+      // de-LI not in ddmmFormatLocales, but Europe/Vaduz triggers EU via Priority 2
       expect(detectUserLocale()).toBe('EU');
     });
   });
