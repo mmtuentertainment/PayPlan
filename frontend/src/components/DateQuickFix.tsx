@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { DateTime } from 'luxon';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -32,7 +32,7 @@ export interface DateQuickFixProps {
   locale: DateLocale;
 }
 
-export function DateQuickFix({ rowId, rawDueDate, timezone, onFix, onUndo }: DateQuickFixProps) {
+export const DateQuickFix = React.memo(function DateQuickFix({ rowId, rawDueDate, timezone, onFix, onUndo }: DateQuickFixProps) {
   const [manualDate, setManualDate] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [showUndo, setShowUndo] = useState(false);
@@ -169,4 +169,4 @@ export function DateQuickFix({ rowId, rawDueDate, timezone, onFix, onUndo }: Dat
       </div>
     </div>
   );
-}
+});

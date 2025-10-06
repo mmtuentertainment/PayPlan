@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { DateQuickFix } from './DateQuickFix';
 import type { Item } from '../lib/email-extractor';
@@ -30,7 +30,7 @@ function getConfidenceLevel(score: number): { level: string; classes: string } {
   }
 }
 
-export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyFix, onUndoFix, locale = 'US', timezone = 'America/New_York' }: EmailPreviewProps) {
+export const EmailPreview = React.memo(function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyFix, onUndoFix, locale = 'US', timezone = 'America/New_York' }: EmailPreviewProps) {
   const [isCopying, setIsCopying] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [isBuilding, setIsBuilding] = useState(false);
@@ -193,4 +193,4 @@ export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyF
       </Button>
     </div>
   );
-}
+});
