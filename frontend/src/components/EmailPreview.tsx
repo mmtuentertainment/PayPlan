@@ -130,7 +130,8 @@ export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyF
           <tbody>
             {items.map((item, idx) => {
               const { level, classes } = getConfidenceLevel(item.confidence);
-              const rowId = `${idx}::${item.provider}::${item.installment_no}::${item.due_date}`;
+              // Use UUID for stable row identifier (prevents React key instability)
+              const rowId = item.id;
               const showQuickFix = item.confidence < 0.6 && onApplyFix && onUndoFix;
 
               return (

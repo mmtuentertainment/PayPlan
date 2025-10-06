@@ -39,7 +39,7 @@ describe('Zip Provider Detection', () => {
 
   test('extracts amount from Zip email', () => {
     const amount = extractAmount(zipFixture, PROVIDER_PATTERNS.zip.amountPatterns);
-    expect(amount).toBeCloseTo(25.00, 2);
+    expect(amount).toBe(2500);  // Integer cents
   });
 
   test('extracts due date from Zip email', () => {
@@ -57,7 +57,7 @@ describe('Zip Provider Detection', () => {
   });
 
   test('extracts late fee from Zip email', () => {
-    expect(extractLateFee(zipFixture)).toBeCloseTo(5.00, 2);
+    expect(extractLateFee(zipFixture)).toBe(500);  // Integer cents
   });
 
   test('throws error when Zip due date not found', () => {
@@ -98,7 +98,7 @@ describe('Sezzle Provider Detection', () => {
 
   test('extracts amount from Sezzle email', () => {
     const amount = extractAmount(sezzleFixture, PROVIDER_PATTERNS.sezzle.amountPatterns);
-    expect(amount).toBeCloseTo(30.00, 2);
+    expect(amount).toBe(3000);  // Integer cents
   });
 
   test('extracts due date from Sezzle email', () => {

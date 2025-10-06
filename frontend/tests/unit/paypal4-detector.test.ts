@@ -20,12 +20,12 @@ describe('PayPal Pay in 4 Provider Detection', () => {
 
   test('extracts amount from PayPal payment email', () => {
     const amount = extractAmount(paypal1, PROVIDER_PATTERNS.paypalpayin4.amountPatterns);
-    expect(amount).toBe(37.50);
+    expect(amount).toBe(3750);  // Integer cents
   });
 
   test('extracts amount from final payment email', () => {
     const amount = extractAmount(paypalFinal, PROVIDER_PATTERNS.paypalpayin4.amountPatterns);
-    expect(amount).toBe(37.50);
+    expect(amount).toBe(3750);  // Integer cents
   });
 
   test('extracts due date in MM/DD/YYYY format', () => {
@@ -58,7 +58,8 @@ describe('PayPal Pay in 4 Provider Detection', () => {
   });
 
   test('extracts late fee when present', () => {
-    expect(extractLateFee(paypal1)).toBe(10.00);
+    const email = 'Pay in 4 payment reminder\nLate fee: $10.00';
+    expect(extractLateFee(email)).toBe(1000);  // Integer cents
   });
 
   test('returns 0 late fee when not present', () => {
@@ -118,12 +119,12 @@ describe('PayPal Pay in 4 Provider Detection', () => {
   // Late fee edge cases
   test('extracts large late fee correctly', () => {
     const email = 'Pay in 4 reminder\nLate fee: $25.00';
-    expect(extractLateFee(email)).toBe(25.00);
+    expect(extractLateFee(email)).toBe(2500);  // Integer cents
   });
 
   test('extracts late fee with "late charge" wording', () => {
     const email = 'Pay in 4 reminder\nLate charge: $15.50';
-    expect(extractLateFee(email)).toBe(15.50);
+    expect(extractLateFee(email)).toBe(1550);  // Integer cents
   });
 
   // Autopay edge cases
@@ -146,18 +147,18 @@ describe('PayPal Pay in 4 Provider Detection', () => {
   test('extracts large amount with commas correctly', () => {
     const email = 'Payment 1 of 4: $1,234.56';
     const amount = extractAmount(email, PROVIDER_PATTERNS.paypalpayin4.amountPatterns);
-    expect(amount).toBe(1234.56);
+    expect(amount).toBe(123456);  // Integer cents
   });
 
   test('extracts amount from "amount due" pattern', () => {
     const email = 'Amount due: $99.99\nPay in 4';
     const amount = extractAmount(email, PROVIDER_PATTERNS.paypalpayin4.amountPatterns);
-    expect(amount).toBe(99.99);
+    expect(amount).toBe(9999);  // Integer cents
   });
 
   test('extracts amount with "installment" keyword', () => {
     const email = 'Installment 2 of 4: $50.00';
     const amount = extractAmount(email, PROVIDER_PATTERNS.paypalpayin4.amountPatterns);
-    expect(amount).toBe(50.00);
+    expect(amount).toBe(5000);  // Integer cents
   });
 });

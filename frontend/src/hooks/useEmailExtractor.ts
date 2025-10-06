@@ -98,14 +98,13 @@ export function useEmailExtractor(timezone: string) {
    * Apply a quick fix to a specific row (e.g., corrected due date).
    * Recomputes confidence based on the fixed data and updates Issues list.
    *
-   * @param rowId - Unique identifier for the row (format: `idx::provider::installment_no::due_date`)
+   * @param rowId - Unique UUID identifier for the row (stable across updates)
    * @param patch - Partial item updates, typically { due_date: 'YYYY-MM-DD' }
    */
   const applyRowFix = useCallback((rowId: string, patch: { due_date: string }) => {
     setEditableItems(prev => {
-      const index = prev.findIndex((item, idx) =>
-        `${idx}::${item.provider}::${item.installment_no}::${item.due_date}` === rowId
-      );
+      // Find item by UUID (stable identifier)
+      const index = prev.findIndex((item) => item.id === rowId);
 
       if (index === -1) return prev;
 
@@ -145,20 +144,17 @@ export function useEmailExtractor(timezone: string) {
    * Undo the last fix applied to a specific row.
    * Restores the original item from the snapshot if available.
    *
-   * @param rowId - Unique identifier for the row (format: `idx::provider::installment_no::due_date`)
+   * @param rowId - Unique UUID identifier for the row (stable across updates)
    */
   const undoRowFix = useCallback((rowId: string) => {
     const snapshot = undoSnapshotsRef.current.get(rowId);
     if (!snapshot) return;
 
-    // Extract the index from the rowId (first part before ::)
-    const parts = rowId.split('::');
-    const index = parseInt(parts[0], 10);
-
-    if (isNaN(index)) return;
-
     setEditableItems(prev => {
-      if (index < 0 || index >= prev.length) return prev;
+      // Find item by UUID (stable identifier)
+      const index = prev.findIndex((item) => item.id === rowId);
+
+      if (index === -1) return prev;
 
       const next = [...prev];
       next[index] = snapshot;

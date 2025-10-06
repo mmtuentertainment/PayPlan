@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { detectProvider, PROVIDER_PATTERNS } from './extraction/providers';
 import {
   extractDueDate,
@@ -202,6 +203,7 @@ function extractSingleEmail(emailText: string, timezone: string, options?: Extra
   });
 
   return {
+    id: uuidv4(),  // Generate stable UUID for React keys and undo/redo
     provider,
     installment_no: installmentNo!,
     due_date: dueDate!,

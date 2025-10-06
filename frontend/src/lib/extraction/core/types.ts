@@ -17,6 +17,7 @@ export interface ExtractOptions {
  * Represents a single BNPL payment item extracted from an email.
  */
 export interface Item {
+  id: string; // UUID v4 - stable identifier for React keys and undo/redo
   provider: string;
   installment_no: number;
   due_date: string; // ISO YYYY-MM-DD

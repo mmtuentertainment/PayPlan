@@ -10,6 +10,7 @@ describe('EmailPreview - Confidence Pills', () => {
 
   test('renders High confidence pill for score >= 0.8', () => {
     const items: Item[] = [{
+      id: "test-uuid-100",
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
@@ -37,6 +38,7 @@ describe('EmailPreview - Confidence Pills', () => {
 
   test('renders Med confidence pill for score 0.6-0.79', () => {
     const items: Item[] = [{
+      id: "test-uuid-101",
       provider: 'Affirm',
       installment_no: 2,
       due_date: '2025-10-15',
@@ -64,6 +66,7 @@ describe('EmailPreview - Confidence Pills', () => {
 
   test('renders Low confidence pill for score < 0.6', () => {
     const items: Item[] = [{
+      id: "test-uuid-102",
       provider: 'Afterpay',
       installment_no: 1,
       due_date: '2025-10-20',
@@ -91,6 +94,7 @@ describe('EmailPreview - Confidence Pills', () => {
 
   test('renders confidence column header', () => {
     const items: Item[] = [{
+      id: "test-uuid-103",
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',

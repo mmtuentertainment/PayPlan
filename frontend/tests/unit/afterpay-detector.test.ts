@@ -20,7 +20,7 @@ describe('Afterpay detector', () => {
   test('extracts amount from Afterpay email', () => {
     const text = 'Installment: $25.00 due';
     const amount = extractAmount(text, PROVIDER_PATTERNS.afterpay.amountPatterns);
-    expect(amount).toBe(25.00);
+    expect(amount).toBe(2500);  // Integer cents
   });
 
   test('extracts due date from Afterpay email', () => {
@@ -47,6 +47,6 @@ describe('Afterpay detector', () => {
 
   test('extracts late fee', () => {
     const text = 'Late fee: $7.00';
-    expect(extractLateFee(text)).toBe(7.00);
+    expect(extractLateFee(text)).toBe(700);  // Integer cents
   });
 });

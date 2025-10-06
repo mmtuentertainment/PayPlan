@@ -6,6 +6,7 @@ import type { Item, Issue } from '../../src/lib/email-extractor';
 describe('EmailIssues - Low Confidence Detection', () => {
   test('shows low-confidence item in Issues when confidence < 0.6', () => {
     const items: Item[] = [{
+      id: "test-uuid-1",
       provider: 'Afterpay',
       installment_no: 1,
       due_date: '2025-10-20',
@@ -23,6 +24,7 @@ describe('EmailIssues - Low Confidence Detection', () => {
 
   test('does not show high-confidence items in Issues', () => {
     const items: Item[] = [{
+      id: "test-uuid-2",
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
@@ -41,6 +43,7 @@ describe('EmailIssues - Low Confidence Detection', () => {
 
   test('redacts PII in low-confidence snippets', () => {
     const items: Item[] = [{
+      id: "test-uuid-3",
       provider: 'Afterpay',
       installment_no: 1,
       due_date: '2025-10-20',
@@ -68,6 +71,7 @@ describe('EmailIssues - Low Confidence Detection', () => {
     }];
 
     const items: Item[] = [{
+      id: "test-uuid-4",
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
@@ -88,6 +92,7 @@ describe('EmailIssues - Low Confidence Detection', () => {
 
   test('shows field hints for low-confidence items', () => {
     const items: Item[] = [{
+      id: "test-uuid-5",
       provider: 'Afterpay',
       installment_no: 1,
       due_date: '',  // Missing date
@@ -107,6 +112,7 @@ describe('EmailIssues - Low Confidence Detection', () => {
 
   test('respects aria-live="polite" for accessibility', () => {
     const items: Item[] = [{
+      id: "test-uuid-6",
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
@@ -125,6 +131,7 @@ describe('EmailIssues - Low Confidence Detection', () => {
 
   test('returns null when no issues and all items high confidence', () => {
     const items: Item[] = [{
+      id: "test-uuid-7",
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
