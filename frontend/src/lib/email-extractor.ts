@@ -11,6 +11,7 @@ import {
 import { redactPII } from './redact';
 import { getErrorMessage } from './extraction/helpers/error-messages';
 import { extractionCache } from './extraction/helpers/cache';
+import { safeExtract } from './extraction/helpers/field-extractor';
 
 // Import types from new extraction module
 export type {
@@ -167,52 +168,17 @@ function extractSingleEmail(emailText: string, timezone: string, options?: Extra
 
   // Collect all extraction errors instead of failing on first error
   const errors: string[] = [];
-  let amount: number | undefined;
-  let currency: string | undefined;
-  let dueDate: string | undefined;
-  let rawDueDate: string | undefined;
-  let installmentNo: number | undefined;
-  let autopay: boolean | undefined;
-  let lateFee: number | undefined;
 
-  try {
-    amount = extractAmount(emailText, patterns.amountPatterns);
-  } catch (e) {
-    errors.push(`Amount: ${e instanceof Error ? e.message : 'not found'}`);
-  }
+  const amount = safeExtract(() => extractAmount(emailText, patterns.amountPatterns), 'Amount', errors);
+  const currency = safeExtract(() => extractCurrency(emailText), 'Currency', errors);
 
-  try {
-    currency = extractCurrency(emailText);
-  } catch (e) {
-    errors.push(`Currency: ${e instanceof Error ? e.message : 'not found'}`);
-  }
+  const dateResult = safeExtract(() => extractDueDate(emailText, patterns.datePatterns, timezone, dateLocale), 'Due date', errors);
+  const dueDate = dateResult?.isoDate;
+  const rawDueDate = dateResult?.rawText;
 
-  try {
-    const dateResult = extractDueDate(emailText, patterns.datePatterns, timezone, dateLocale);
-    dueDate = dateResult.isoDate;
-    rawDueDate = dateResult.rawText;
-  } catch (e) {
-    errors.push(`Due date: ${e instanceof Error ? e.message : 'not found'}`);
-  }
-
-  try {
-    installmentNo = extractInstallmentNumber(emailText, patterns.installmentPatterns);
-  } catch (e) {
-    errors.push(`Installment: ${e instanceof Error ? e.message : 'not found'}`);
-  }
-
-  try {
-    autopay = detectAutopay(emailText);
-  } catch (e) {
-    errors.push(`Autopay: ${e instanceof Error ? e.message : 'detection failed'}`);
-  }
-
-  try {
-    lateFee = extractLateFee(emailText);
-  } catch (e) {
-    // Late fee is optional, don't add to errors
-    lateFee = 0;
-  }
+  const installmentNo = safeExtract(() => extractInstallmentNumber(emailText, patterns.installmentPatterns), 'Installment', errors);
+  const autopay = safeExtract(() => detectAutopay(emailText), 'Autopay', errors);
+  const lateFee = safeExtract(() => extractLateFee(emailText), 'Late fee', errors, true) || 0; // Optional field
 
   // If critical fields failed, throw aggregated error with user-friendly messages
   if (errors.length > 0) {
