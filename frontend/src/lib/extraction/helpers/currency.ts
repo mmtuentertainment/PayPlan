@@ -25,8 +25,9 @@
 /**
  * Maximum dollar amount allowed (1 million USD).
  * Prevents overflow and abuse scenarios.
+ * Exported for client-side validation and testing.
  */
-const MAX_DOLLAR_AMOUNT = 1_000_000;
+export const MAX_DOLLAR_AMOUNT = 1_000_000;
 
 /**
  * Converts dollar amount to integer cents.
@@ -50,6 +51,9 @@ const MAX_DOLLAR_AMOUNT = 1_000_000;
 export function dollarsToCents(dollars: number): number {
   if (isNaN(dollars)) {
     throw new Error(`Invalid dollar amount: ${dollars}`);
+  }
+  if (!isFinite(dollars)) {
+    throw new Error(`Dollar amount cannot be Infinity: ${dollars}`);
   }
   if (dollars < 0) {
     throw new Error(`Dollar amount cannot be negative: ${dollars}`);
@@ -141,13 +145,25 @@ export function formatCurrency(cents: number, currency: string = 'USD'): string 
  * ```
  */
 export function parseCurrencyToCents(currencyString: string): number {
+  // Validate input is a non-empty string
+  if (typeof currencyString !== 'string' || !currencyString.trim()) {
+    throw new Error(`Cannot parse currency string: "${currencyString}"`);
+  }
+
   // Remove currency symbols and whitespace
   const cleaned = currencyString.replace(/[$€£¥,\s]/g, '');
+
+  // Validate cleaned string contains only valid numeric characters
+  if (!/^-?\d+\.?\d*$/.test(cleaned)) {
+    throw new Error(`Invalid currency format: "${currencyString}"`);
+  }
+
   const dollars = parseFloat(cleaned);
 
   if (isNaN(dollars)) {
     throw new Error(`Cannot parse currency string: "${currencyString}"`);
   }
 
+  // dollarsToCents will validate: Infinity, negative, bounds
   return dollarsToCents(dollars);
 }

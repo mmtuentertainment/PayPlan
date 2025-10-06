@@ -47,6 +47,8 @@ describe('dollarsToCents', () => {
 
   it('throws on invalid amounts', () => {
     expect(() => dollarsToCents(NaN)).toThrow('Invalid dollar amount');
+    expect(() => dollarsToCents(Infinity)).toThrow('cannot be Infinity');
+    expect(() => dollarsToCents(-Infinity)).toThrow('cannot be Infinity');
     expect(() => dollarsToCents(-5.00)).toThrow('cannot be negative');
     expect(() => dollarsToCents(-0.01)).toThrow('cannot be negative');
   });
@@ -145,9 +147,9 @@ describe('parseCurrencyToCents', () => {
   });
 
   it('throws on invalid strings', () => {
-    expect(() => parseCurrencyToCents('invalid')).toThrow('Cannot parse');
+    expect(() => parseCurrencyToCents('invalid')).toThrow('Invalid currency format');
     expect(() => parseCurrencyToCents('')).toThrow('Cannot parse');
-    expect(() => parseCurrencyToCents('abc123')).toThrow('Cannot parse');
+    expect(() => parseCurrencyToCents('abc123')).toThrow('Invalid currency format');
   });
 });
 
