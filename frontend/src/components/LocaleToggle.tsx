@@ -21,6 +21,7 @@ interface LocaleToggleProps {
   onReExtract: () => void;
   hasExtractedData: boolean;
   isExtracting: boolean;
+  extractionError?: string; // Error message from last re-extraction attempt
 }
 
 /**
@@ -46,7 +47,8 @@ export function LocaleToggle({
   onLocaleChange,
   onReExtract,
   hasExtractedData,
-  isExtracting
+  isExtracting,
+  extractionError
 }: LocaleToggleProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -103,6 +105,12 @@ export function LocaleToggle({
                 Switching to {locale === 'US' ? 'EU (DD/MM/YYYY)' : 'US (MM/DD/YYYY)'} may change due dates and payment ordering.
                 For example, "01/02/2026" will be interpreted as {locale === 'US' ? 'February 1, 2026' : 'January 2, 2026'} instead of {locale === 'US' ? 'January 2, 2026' : 'February 1, 2026'}.
                 This action will discard any Quick Fixes you've applied.
+
+                {extractionError && (
+                  <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                    ⚠️ Previous re-extraction failed: {extractionError}
+                  </div>
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

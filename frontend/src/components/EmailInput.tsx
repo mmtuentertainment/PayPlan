@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { SAMPLE_EMAILS } from '../lib/sample-emails';
 import { LocaleToggle } from './LocaleToggle';
 import type { DateLocale } from '../lib/date-parser';
+import { detectUserLocale } from '../utils/detect-locale';
 
 interface EmailInputProps {
   onExtract: (text: string, locale: DateLocale) => void;
@@ -13,7 +14,7 @@ interface EmailInputProps {
 
 export function EmailInput({ onExtract, isExtracting, hasExtractedData }: EmailInputProps) {
   const [text, setText] = useState('');
-  const [dateLocale, setDateLocale] = useState<DateLocale>('US');
+  const [dateLocale, setDateLocale] = useState<DateLocale>(() => detectUserLocale());
   const maxChars = 16000;
 
   const handleUseSample = () => {
