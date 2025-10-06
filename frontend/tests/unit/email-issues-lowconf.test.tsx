@@ -9,10 +9,10 @@ describe('EmailIssues - Low Confidence Detection', () => {
       provider: 'Afterpay',
       installment_no: 1,
       due_date: '2025-10-20',
-      amount: 30.00,
+      amount: 3000,  // Integer cents ($30.00)
       currency: 'USD',
       autopay: false,
-      late_fee: 5.00,
+      late_fee: 500,  // Integer cents ($5.00)
       confidence: 0.35  // Low confidence
     }];
 
@@ -26,10 +26,10 @@ describe('EmailIssues - Low Confidence Detection', () => {
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
-      amount: 25.00,
+      amount: 2500,  // Integer cents ($25.00)
       currency: 'USD',
       autopay: false,
-      late_fee: 7.00,
+      late_fee: 700,  // Integer cents ($7.00)
       confidence: 1.0  // High confidence
     }];
 
@@ -44,10 +44,10 @@ describe('EmailIssues - Low Confidence Detection', () => {
       provider: 'Afterpay',
       installment_no: 1,
       due_date: '2025-10-20',
-      amount: 30.00,
+      amount: 3000,  // Integer cents ($30.00)
       currency: 'USD',
       autopay: false,
-      late_fee: 5.00,
+      late_fee: 500,  // Integer cents ($5.00)
       confidence: 0.35
     }];
 
@@ -71,10 +71,10 @@ describe('EmailIssues - Low Confidence Detection', () => {
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
-      amount: 25.00,
+      amount: 2500,  // Integer cents ($25.00)
       currency: 'USD',
       autopay: false,
-      late_fee: 7.00,
+      late_fee: 700,  // Integer cents ($7.00)
       confidence: 0.5  // Low confidence
     }];
 
@@ -94,7 +94,7 @@ describe('EmailIssues - Low Confidence Detection', () => {
       amount: 0,     // Missing amount
       currency: 'USD',
       autopay: false,
-      late_fee: 5.00,
+      late_fee: 500,  // Integer cents ($5.00)
       confidence: 0.35
     }];
 
@@ -110,10 +110,10 @@ describe('EmailIssues - Low Confidence Detection', () => {
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
-      amount: 25.00,
+      amount: 2500,  // Integer cents ($25.00)
       currency: 'USD',
       autopay: false,
-      late_fee: 7.00,
+      late_fee: 700,  // Integer cents ($7.00)
       confidence: 0.4
     }];
 
@@ -128,10 +128,10 @@ describe('EmailIssues - Low Confidence Detection', () => {
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
-      amount: 25.00,
+      amount: 2500,  // Integer cents ($25.00)
       currency: 'USD',
       autopay: false,
-      late_fee: 7.00,
+      late_fee: 700,  // Integer cents ($7.00)
       confidence: 0.95
     }];
 

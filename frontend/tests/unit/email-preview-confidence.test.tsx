@@ -13,10 +13,10 @@ describe('EmailPreview - Confidence Pills', () => {
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
-      amount: 25.00,
+      amount: 2500,  // Integer cents ($2500 ÷ 100)
       currency: 'USD',
       autopay: false,
-      late_fee: 7.00,
+      late_fee: 700,  // Integer cents ($700 ÷ 100)
       confidence: 1.0
     }];
 
@@ -40,10 +40,10 @@ describe('EmailPreview - Confidence Pills', () => {
       provider: 'Affirm',
       installment_no: 2,
       due_date: '2025-10-15',
-      amount: 50.00,
+      amount: 5000,  // Integer cents ($50.00)
       currency: 'USD',
       autopay: true,
-      late_fee: 0.00,
+      late_fee: 0,  // Integer cents ($0.00)
       confidence: 0.75
     }];
 
@@ -67,10 +67,10 @@ describe('EmailPreview - Confidence Pills', () => {
       provider: 'Afterpay',
       installment_no: 1,
       due_date: '2025-10-20',
-      amount: 30.00,
+      amount: 3000,  // Integer cents ($3000 ÷ 100)
       currency: 'USD',
       autopay: false,
-      late_fee: 5.00,
+      late_fee: 500,  // Integer cents ($500 ÷ 100)
       confidence: 0.35
     }];
 
@@ -94,10 +94,10 @@ describe('EmailPreview - Confidence Pills', () => {
       provider: 'Klarna',
       installment_no: 1,
       due_date: '2025-10-06',
-      amount: 25.00,
+      amount: 2500,  // Integer cents ($2500 ÷ 100)
       currency: 'USD',
       autopay: false,
-      late_fee: 7.00,
+      late_fee: 700,  // Integer cents ($700 ÷ 100)
       confidence: 1.0
     }];
 

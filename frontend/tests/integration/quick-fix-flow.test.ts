@@ -19,10 +19,10 @@ describe('Quick Fix Flow Integration', () => {
             provider: 'Klarna',
             installment_no: 1,
             due_date: '2026-01-02', // Ambiguous date
-            amount: 45.00,
+            amount: 4500,
             currency: 'USD',
             autopay: true,
-            late_fee: 7.00,
+            late_fee: 700,  // Integer cents
             confidence: 0.55 // Low confidence
           }
         ]);
@@ -50,17 +50,17 @@ describe('Quick Fix Flow Integration', () => {
             provider: 'Klarna',
             installment_no: 1,
             due_date: '2026-01-02',
-            amount: 45.00,
+            amount: 4500,
             currency: 'USD',
             autopay: true,
-            late_fee: 7.00,
+            late_fee: 700,  // Integer cents
             confidence: 0.55
           },
           {
             provider: 'Affirm',
             installment_no: 2,
             due_date: '2026-02-03',
-            amount: 50.00,
+            amount: 5000,
             currency: 'USD',
             autopay: false,
             late_fee: 0,
@@ -96,10 +96,10 @@ describe('Quick Fix Flow Integration', () => {
         provider: 'Klarna',
         installment_no: 1,
         due_date: '2026-01-02',
-        amount: 45.00,
+        amount: 4500,
         currency: 'USD',
         autopay: true,
-        late_fee: 7.00,
+        late_fee: 700,  // Integer cents
         confidence: 0.55
       };
 
@@ -135,10 +135,10 @@ describe('Quick Fix Flow Integration', () => {
             provider: 'Klarna',
             installment_no: 1,
             due_date: '2026-01-02',
-            amount: 45.00,
+            amount: 4500,
             currency: 'USD',
             autopay: true,
-            late_fee: 7.00,
+            late_fee: 700,  // Integer cents
             confidence: 0.55
           }
         ]);
@@ -177,10 +177,10 @@ describe('Quick Fix Flow Integration', () => {
             provider: 'Klarna',
             installment_no: 1,
             due_date: '2026-01-02',
-            amount: 45.00,
+            amount: 4500,
             currency: 'USD',
             autopay: true,
-            late_fee: 7.00,
+            late_fee: 700,  // Integer cents
             confidence: 0.55
           }
         ]);
@@ -197,10 +197,10 @@ describe('Quick Fix Flow Integration', () => {
         provider: 'Klarna',
         installment_no: 1,
         due_date: '2026-03-04', // Updated
-        amount: 45.00,
+        amount: 4500,
         currency: 'USD',
         autopay: true,
-        late_fee: 7.00,
+        late_fee: 700,  // Integer cents
         confidence: 1.0 // Recalculated
       });
     });
@@ -216,10 +216,10 @@ describe('Quick Fix Flow Integration', () => {
             provider: 'Klarna',
             installment_no: 1,
             due_date: '2026-03-04',
-            amount: 45.00,
+            amount: 4500,
             currency: 'USD',
             autopay: true,
-            late_fee: 7.00,
+            late_fee: 700,  // Integer cents
             confidence: 0.8 // High confidence
           }
         ]);
@@ -270,10 +270,10 @@ describe('Quick Fix Flow Integration', () => {
             provider: 'Klarna',
             installment_no: 1,
             due_date: '2026-01-02',
-            amount: 45.00,
+            amount: 4500,
             currency: 'USD',
             autopay: true,
-            late_fee: 7.00,
+            late_fee: 700,  // Integer cents
             confidence: 0.55
           }
         ]);
@@ -298,10 +298,10 @@ describe('Quick Fix Flow Integration', () => {
             provider: 'Klarna',
             installment_no: 1,
             due_date: '2026-01-02',
-            amount: 45.00,
+            amount: 4500,
             currency: 'USD',
             autopay: true,
-            late_fee: 7.00,
+            late_fee: 700,  // Integer cents
             confidence: 0.55
           }
         ]);
@@ -325,10 +325,10 @@ describe('Quick Fix Flow Integration', () => {
             provider: 'Klarna',
             installment_no: 1,
             due_date: '2026-01-02',
-            amount: 45.00,
+            amount: 4500,
             currency: 'USD',
             autopay: true,
-            late_fee: 7.00,
+            late_fee: 700,  // Integer cents
             confidence: 0.55
           }
         ]);
