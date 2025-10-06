@@ -20,6 +20,11 @@ import { PROVIDER_PATTERNS, type Provider } from './patterns';
  * // Returns: 'Sezzle'
  */
 export function detectProvider(emailText: string): Provider {
+  // Input validation: handle invalid inputs safely
+  if (!emailText || typeof emailText !== 'string') {
+    return 'Unknown';
+  }
+
   const matchesSignature = (text: string, sig: string | RegExp): boolean => {
     if (typeof sig === 'string') {
       return text.includes(sig);
