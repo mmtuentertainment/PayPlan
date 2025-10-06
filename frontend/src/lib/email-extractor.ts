@@ -86,8 +86,8 @@ export function extractItemsFromEmails(
     return {
       items: [],
       issues: [],
-      rawText: '',
-      confidence: 0,
+      duplicatesRemoved: 0,
+      dateLocale: 'US',
     };
   }
 
