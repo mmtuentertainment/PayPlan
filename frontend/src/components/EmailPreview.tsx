@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
+import { DateQuickFix } from './DateQuickFix';
 import type { Item } from '../lib/email-extractor';
+import type { DateLocale } from '../lib/date-parser';
 
 interface EmailPreviewProps {
   items: Item[];
   onDelete: (index: number) => void;
   onCopyCSV: () => void;
   onBuildPlan: () => void;
+  onApplyFix?: (rowId: string, patch: { due_date: string }) => void;
+  onUndoFix?: (rowId: string) => void;
+  locale?: DateLocale;
 }
 
 /**
@@ -23,7 +28,7 @@ function getConfidenceLevel(score: number): { level: string; classes: string } {
   }
 }
 
-export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan }: EmailPreviewProps) {
+export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyFix, onUndoFix, locale = 'US' }: EmailPreviewProps) {
   const [isCopying, setIsCopying] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [isBuilding, setIsBuilding] = useState(false);
@@ -123,32 +128,50 @@ export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan }: EmailP
           <tbody>
             {items.map((item, idx) => {
               const { level, classes } = getConfidenceLevel(item.confidence);
+              const rowId = `${item.provider}-${item.installment_no}-${item.due_date}-${idx}`;
+              const showQuickFix = item.confidence < 0.6 && onApplyFix && onUndoFix;
+
               return (
-                <tr key={`${item.provider}-${item.installment_no}-${item.due_date}-${idx}`} className="border-b">
-                  <td className="p-2">{item.provider}</td>
-                  <td className="p-2">{item.installment_no}</td>
-                  <td className="p-2">{item.due_date}</td>
-                  <td className="p-2">${item.amount.toFixed(2)}</td>
-                  <td className="p-2">{item.autopay ? '✓' : '✗'}</td>
-                  <td className="p-2">${item.late_fee.toFixed(2)}</td>
-                  <td className="p-2">
-                    <span
-                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${classes}`}
-                      aria-label={`Extraction confidence: ${level} (${item.confidence.toFixed(2)})`}
-                    >
-                      {level}
-                    </span>
-                  </td>
-                  <td className="p-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDelete(idx)}
-                    >
-                      Delete
-                    </Button>
-                  </td>
-                </tr>
+                <>
+                  <tr key={rowId} className="border-b">
+                    <td className="p-2">{item.provider}</td>
+                    <td className="p-2">{item.installment_no}</td>
+                    <td className="p-2">{item.due_date}</td>
+                    <td className="p-2">${item.amount.toFixed(2)}</td>
+                    <td className="p-2">{item.autopay ? '✓' : '✗'}</td>
+                    <td className="p-2">${item.late_fee.toFixed(2)}</td>
+                    <td className="p-2">
+                      <span
+                        className={`inline-block px-2 py-1 rounded text-xs font-medium ${classes}`}
+                        aria-label={`Extraction confidence: ${level} (${item.confidence.toFixed(2)})`}
+                      >
+                        {level}
+                      </span>
+                    </td>
+                    <td className="p-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDelete(idx)}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                  {showQuickFix && (
+                    <tr key={`${rowId}-fix`}>
+                      <td colSpan={8} className="p-2">
+                        <DateQuickFix
+                          rowId={rowId}
+                          isoDate={item.due_date}
+                          onFix={(dateISO) => onApplyFix(rowId, { due_date: dateISO })}
+                          onUndo={() => onUndoFix(rowId)}
+                          locale={locale}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </>
               );
             })}
           </tbody>

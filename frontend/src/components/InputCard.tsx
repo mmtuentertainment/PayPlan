@@ -230,6 +230,9 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
                   onDelete={emailExtractor.deleteItem}
                   onCopyCSV={handleCopyCSV}
                   onBuildPlan={handleBuild}
+                  onApplyFix={emailExtractor.applyRowFix}
+                  onUndoFix={emailExtractor.undoRowFix}
+                  locale={emailExtractor.result.dateLocale}
                 />
                 <EmailIssues issues={emailExtractor.result.issues} items={emailExtractor.editableItems} />
               </>

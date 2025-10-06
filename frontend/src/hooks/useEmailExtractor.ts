@@ -33,6 +33,7 @@ export function useEmailExtractor(timezone: string) {
   const [isExtracting, setIsExtracting] = useState(false);
   const [editableItems, setEditableItems] = useState<Item[]>([]);
   const extractionIdRef = useRef(0);
+  const undoSnapshotsRef = useRef<Map<string, Item>>(new Map());
 
   const extract = useCallback((emailText: string, dateLocale?: DateLocale) => {
     if (!emailText.trim()) {
@@ -90,6 +91,82 @@ export function useEmailExtractor(timezone: string) {
   const clear = useCallback(() => {
     setResult(null);
     setEditableItems([]);
+    undoSnapshotsRef.current.clear();
+  }, []);
+
+  /**
+   * Apply a quick fix to a specific row (e.g., corrected due date).
+   * Recomputes confidence based on the fixed data and updates Issues list.
+   *
+   * @param rowId - Unique identifier for the row (typically `provider-installment_no-due_date`)
+   * @param patch - Partial item updates, typically { due_date: 'YYYY-MM-DD' }
+   */
+  const applyRowFix = useCallback((rowId: string, patch: { due_date: string }) => {
+    setEditableItems(prev => {
+      const index = prev.findIndex((item, idx) =>
+        `${item.provider}-${item.installment_no}-${item.due_date}-${idx}` === rowId
+      );
+
+      if (index === -1) return prev;
+
+      // Save snapshot for undo (one-level)
+      undoSnapshotsRef.current.set(rowId, prev[index]);
+
+      // Apply patch
+      const updated = { ...prev[index], ...patch };
+
+      // Recompute confidence: if due_date was fixed, assume date signal is now true
+      const signals = {
+        provider: updated.provider !== 'Unknown',
+        date: true, // Fixed date is valid
+        amount: updated.amount > 0,
+        installment: updated.installment_no > 0,
+        autopay: typeof updated.autopay === 'boolean'
+      };
+
+      // Import calculateConfidence function inline to avoid circular dependency
+      const recalculatedConfidence = (
+        (signals.provider ? 0.35 : 0) +
+        (signals.date ? 0.25 : 0) +
+        (signals.amount ? 0.20 : 0) +
+        (signals.installment ? 0.15 : 0) +
+        (signals.autopay ? 0.05 : 0)
+      );
+
+      updated.confidence = recalculatedConfidence;
+
+      const next = [...prev];
+      next[index] = updated;
+      return next;
+    });
+  }, []);
+
+  /**
+   * Undo the last fix applied to a specific row.
+   * Restores the original item from the snapshot if available.
+   *
+   * @param rowId - Unique identifier for the row (uses original due_date before fix)
+   */
+  const undoRowFix = useCallback((rowId: string) => {
+    const snapshot = undoSnapshotsRef.current.get(rowId);
+    if (!snapshot) return;
+
+    // Extract the index from the rowId (last part after final -)
+    const parts = rowId.split('-');
+    const index = parseInt(parts[parts.length - 1], 10);
+
+    if (isNaN(index)) return;
+
+    setEditableItems(prev => {
+      if (index < 0 || index >= prev.length) return prev;
+
+      const next = [...prev];
+      next[index] = snapshot;
+      return next;
+    });
+
+    // Clear snapshot after undo
+    undoSnapshotsRef.current.delete(rowId);
   }, []);
 
   return {
@@ -99,6 +176,9 @@ export function useEmailExtractor(timezone: string) {
     extract,
     updateItem,
     deleteItem,
-    clear
+    clear,
+    applyRowFix,
+    undoRowFix,
+    setEditableItems // Exposed for testing purposes
   };
 }

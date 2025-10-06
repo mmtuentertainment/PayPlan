@@ -81,6 +81,27 @@ If you have 3 payments extracted with US format and switch to EU:
 
 **Re-extraction:** Using "Re-extract with new format" will discard any Quick Fixes you've applied and reprocess all emails with the selected locale.
 
+### Date Quick Fix & Undo (v0.1.5-a.3)
+
+When extraction produces low-confidence rows (< 0.6), an inline **Date Quick Fix** UI appears to let you correct the due date immediately:
+
+**Features:**
+- **Re-parse buttons:** Reinterpret ambiguous dates as US or EU format (e.g., `01/02/2026` → Jan 2 or Feb 1)
+- **Manual entry:** Type a specific yyyy-MM-dd date directly
+- **One-level Undo:** Revert your last fix if needed
+- **Instant feedback:** Confidence score updates immediately after fix
+- **Accessibility:** Full keyboard navigation, ARIA live regions for status messages
+
+**When it appears:**
+- Rows with confidence < 0.6 automatically show the Quick Fix UI
+- Common scenarios: ambiguous dates (`01/02/2026`), missing provider, or unclear autopay status
+
+**Example:**
+1. Extract email → Row shows confidence 0.55 (Low)
+2. Click "Re-parse EU" → Confidence jumps to 1.0 (High)
+3. Issues panel updates automatically
+4. Click "Undo" if you made a mistake → Original values restored
+
 ### Privacy
 - ✅ Client-side only (zero network calls during extraction)
 - ✅ No data storage or tracking
