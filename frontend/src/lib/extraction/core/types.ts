@@ -21,10 +21,10 @@ export interface Item {
   installment_no: number;
   due_date: string; // ISO YYYY-MM-DD
   raw_due_date?: string; // Original ambiguous date text for re-parsing (e.g., "01/02/2026")
-  amount: number;
+  amount: number; // Integer cents for financial accuracy (e.g., 2500 = $25.00)
   currency: string;
   autopay: boolean;
-  late_fee: number;
+  late_fee: number; // Integer cents (e.g., 700 = $7.00)
   confidence: number; // 0-1 confidence score (v0.1.4-a)
 }
 

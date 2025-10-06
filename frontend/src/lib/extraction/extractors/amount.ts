@@ -1,9 +1,14 @@
+import { dollarsToCents } from '../helpers/currency';
+
 /**
  * Extracts payment amount from email text.
  *
+ * **Returns integer cents for financial accuracy.**
+ * Example: "$25.00" → 2500 cents
+ *
  * @param text - Email text to search
  * @param patterns - Array of regex patterns to try
- * @returns Extracted amount as number
+ * @returns Extracted amount in integer cents (e.g., 2500 = $25.00)
  * @throws Error if text is null/undefined or amount cannot be found
  */
 export function extractAmount(text: string, patterns: RegExp[]): number {
@@ -19,9 +24,10 @@ export function extractAmount(text: string, patterns: RegExp[]): number {
     const match = text.match(pattern);
     if (match && match[1]) {
       const amountStr = match[1].replace(/,/g, '');
-      const amount = parseFloat(amountStr);
-      if (!isNaN(amount) && amount >= 0) {
-        return amount;
+      const dollars = parseFloat(amountStr);
+      if (!isNaN(dollars) && dollars >= 0) {
+        // Convert to integer cents for financial accuracy
+        return dollarsToCents(dollars);
       }
     }
   }

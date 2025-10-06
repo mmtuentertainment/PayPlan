@@ -94,14 +94,17 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
       let items;
       if (tab === "emails") {
         // Use extracted items from email parser
+        // Convert cents to dollars for backend API
+        const centsToDollars = (cents: number) => cents / 100;
+
         items = emailExtractor.editableItems.map(r => ({
           provider: r.provider,
           installment_no: r.installment_no,
           due_date: r.due_date,
-          amount: r.amount,
+          amount: centsToDollars(r.amount),  // Backend expects dollars
           currency: r.currency,
           autopay: r.autopay,
-          late_fee: r.late_fee
+          late_fee: centsToDollars(r.late_fee)  // Backend expects dollars
         }));
         if (items.length === 0) {
           throw new Error("No valid payments extracted from emails.");
@@ -156,9 +159,13 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
 
   // Email tab handlers
   function handleCopyCSV() {
+    // Import centsToDollars inline (can refactor to top-level import later)
+    const centsToDollars = (cents: number) => cents / 100;
+
     const headers = 'provider,installment_no,due_date,amount,currency,autopay,late_fee,confidence';
     const rows = emailExtractor.editableItems.map(item =>
-      `${item.provider},${item.installment_no},${item.due_date},${item.amount},${item.currency},${item.autopay},${item.late_fee},${item.confidence}`
+      // Convert cents back to dollars for CSV export (backend expects dollars)
+      `${item.provider},${item.installment_no},${item.due_date},${centsToDollars(item.amount).toFixed(2)},${item.currency},${item.autopay},${centsToDollars(item.late_fee).toFixed(2)},${item.confidence}`
     );
     const csv = [headers, ...rows].join('\n');
     navigator.clipboard.writeText(csv).catch(() => {});

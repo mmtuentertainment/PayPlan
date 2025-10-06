@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { DateQuickFix } from './DateQuickFix';
 import type { Item } from '../lib/email-extractor';
 import type { DateLocale } from '../lib/date-parser';
+import { formatCurrency } from '../lib/extraction/helpers/currency';
 
 interface EmailPreviewProps {
   items: Item[];
@@ -138,9 +139,9 @@ export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyF
                     <td className="p-2">{item.provider}</td>
                     <td className="p-2">{item.installment_no}</td>
                     <td className="p-2">{item.due_date}</td>
-                    <td className="p-2">${item.amount.toFixed(2)}</td>
+                    <td className="p-2">{formatCurrency(item.amount, item.currency)}</td>
                     <td className="p-2">{item.autopay ? '✓' : '✗'}</td>
-                    <td className="p-2">${item.late_fee.toFixed(2)}</td>
+                    <td className="p-2">{formatCurrency(item.late_fee, item.currency)}</td>
                     <td className="p-2">
                       <span
                         className={`inline-block px-2 py-1 rounded text-xs font-medium ${classes}`}
