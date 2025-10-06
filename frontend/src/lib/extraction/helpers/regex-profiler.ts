@@ -30,7 +30,7 @@ class RegexProfiler {
   /**
    * Profile a regex test operation
    */
-  profileTest(pattern: RegExp, text: string, operation: () => any): any {
+  profileTest(pattern: RegExp, _text: string, operation: () => any): any {
     if (!this.enabled) {
       return operation();
     }
