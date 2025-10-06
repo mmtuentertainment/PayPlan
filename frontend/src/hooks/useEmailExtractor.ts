@@ -5,6 +5,32 @@ import type { DateLocale } from '../lib/date-parser';
 import { sanitizeError } from '../lib/extraction/helpers/error-sanitizer';
 import { calculateItemConfidence } from '../lib/extraction/helpers/confidence-calculator';
 
+/**
+ * React hook for extracting payment items from BNPL reminder emails.
+ *
+ * Provides stateful email extraction with CRUD operations on extracted items,
+ * success messaging, and one-level undo for quick fixes.
+ *
+ * @param timezone - IANA timezone string for date parsing (e.g., "America/New_York")
+ * @returns Hook interface with extraction state and operations
+ *
+ * @example
+ * ```tsx
+ * function EmailInputForm() {
+ *   const { extract, editableItems, isExtracting, applyRowFix, undoRowFix } = useEmailExtractor('America/New_York');
+ *
+ *   const handlePaste = (emailText: string) => {
+ *     extract(emailText, 'US'); // Extract with US date locale
+ *   };
+ *
+ *   const handleQuickFix = (rowId: string, newDate: string) => {
+ *     applyRowFix(rowId, { due_date: newDate });
+ *   };
+ *
+ *   return <EmailInput onPaste={handlePaste} items={editableItems} />;
+ * }
+ * ```
+ */
 export function useEmailExtractor(timezone: string) {
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
