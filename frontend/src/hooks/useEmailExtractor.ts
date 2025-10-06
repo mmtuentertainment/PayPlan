@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { extractItemsFromEmails } from '../lib/email-extractor';
 import type { ExtractionResult, Item, ExtractOptions } from '../lib/email-extractor';
-import { DateLocale } from '../lib/date-parser';
+import type { DateLocale } from '../lib/date-parser';
 
 export function useEmailExtractor(timezone: string) {
   const [result, setResult] = useState<ExtractionResult | null>(null);

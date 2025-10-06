@@ -9,7 +9,7 @@ import {
   PROVIDER_PATTERNS
 } from './provider-detectors';
 import { redactPII } from './redact';
-import { DateLocale } from './date-parser';
+import type { DateLocale } from './date-parser';
 import { z } from 'zod';
 
 /**

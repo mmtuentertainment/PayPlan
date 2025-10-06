@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from './ui/alert-dialog';
-import { DateLocale } from '../lib/date-parser';
+import type { DateLocale } from '../lib/date-parser';
 
 interface LocaleToggleProps {
   locale: DateLocale;

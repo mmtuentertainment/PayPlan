@@ -1,4 +1,5 @@
-import { parseDate, DateLocale } from './date-parser';
+import { parseDate } from './date-parser';
+import type { DateLocale } from './date-parser';
 
 export type Provider = 'Klarna' | 'Affirm' | 'Afterpay' | 'PayPalPayIn4' | 'Zip' | 'Sezzle' | 'Unknown';
 
