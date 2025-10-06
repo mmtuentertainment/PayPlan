@@ -1,12 +1,11 @@
+import { detectProvider, PROVIDER_PATTERNS } from './extraction/providers';
 import {
-  detectProvider,
   extractAmount,
   extractCurrency,
   extractDueDate,
   extractInstallmentNumber,
   detectAutopay,
-  extractLateFee,
-  PROVIDER_PATTERNS
+  extractLateFee
 } from './provider-detectors';
 import { redactPII } from './redact';
 
