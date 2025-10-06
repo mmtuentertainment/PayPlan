@@ -6,14 +6,15 @@ import type { DateLocale } from '../lib/date-parser';
 /**
  * Sanitizes error messages to prevent information disclosure while preserving debugging context.
  * Removes absolute file paths and stack traces, but keeps error type and safe details.
+ * Cross-platform: Handles both Unix (/) and Windows (\) path separators.
  */
 function sanitizeError(err: unknown): string {
   if (err instanceof Error) {
     // Keep error message but remove absolute file paths
     const message = err.message.split('\n')[0]; // Take only first line
-    // Remove absolute paths but keep relative context like "Invalid date: ..."
+    // Remove absolute paths (Unix and Windows) but keep relative context like "Invalid date: ..."
     const sanitized = message
-      .replace(/\/[^\s]+\.(ts|js|tsx|jsx)/g, '') // Remove absolute file paths
+      .replace(/[/\\][^\s]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '') // Remove absolute file paths (cross-platform)
       .replace(/\bat\b.*$/g, '') // Remove "at <location>" suffixes
       .trim();
     return sanitized || 'An error occurred during extraction';
