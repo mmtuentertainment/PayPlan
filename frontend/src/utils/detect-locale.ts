@@ -5,7 +5,7 @@ import type { DateLocale } from '../lib/date-parser';
  *
  * Detection priority:
  * 1. Browser language (navigator.language)
- * 2. Timezone heuristic (Europe/*, Africa/*)
+ * 2. Timezone heuristic (Europe/* only)
  * 3. Fallback to 'US'
  *
  * **User Override:**
@@ -34,27 +34,29 @@ export function detectUserLocale(): DateLocale {
     // Priority 1: Browser language (navigator.language)
     const lang = navigator.language.toLowerCase();
 
-    // EU locales: British English, German, French, Spanish, Italian, Dutch, Portuguese, Polish, Swedish, Norwegian, Danish, Finnish
-    const euLocales = [
+    // DD/MM/YYYY format locales (includes EU + Commonwealth countries)
+    // Note: Excludes Swiss German (de-CH) and Liechtenstein (de-LI) which use DD.MM.YYYY with dots
+    const ddmmFormatLocales = [
       'en-gb', 'en-ie', 'en-au', 'en-nz', // English (non-US)
-      'de', 'fr', 'es', 'it', 'nl', 'pt', 'pl', 'sv', 'no', 'da', 'fi',
+      'de-de', 'de-at', // German (Germany, Austria) - excludes de-CH
+      'fr', 'es', 'it', 'nl', 'pt', 'pl', 'sv', 'no', 'da', 'fi',
       'cs', 'sk', 'hu', 'ro', 'bg', 'hr', 'sl', 'lt', 'lv', 'et',
       'el', 'tr', 'is', 'mt'
     ];
 
-    if (euLocales.some(locale => lang.startsWith(locale))) {
+    if (ddmmFormatLocales.some(locale => lang.startsWith(locale))) {
       return 'EU';
     }
 
-    // Priority 2: Timezone heuristic
+    // Priority 2: Timezone heuristic (Europe only - conservative approach)
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (tz.startsWith('Europe/') || tz.startsWith('Africa/')) {
+    if (tz.startsWith('Europe/')) {
       return 'EU';
     }
 
-    // Default: US (Americas, Asia, Oceania default to MM/DD/YYYY)
+    // Default: US (Americas, Asia, Africa, Oceania default to MM/DD/YYYY)
     return 'US';
-  } catch (err) {
+  } catch (err: unknown) {
     // Fallback on any error
     console.warn('Failed to detect user locale, defaulting to US:', err);
     return 'US';

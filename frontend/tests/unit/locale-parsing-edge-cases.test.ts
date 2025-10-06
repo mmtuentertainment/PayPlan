@@ -36,6 +36,40 @@ describe('Locale parsing edge cases (financial validation)', () => {
     });
   });
 
+  describe('Cross-locale parsing (THE core feature)', () => {
+    test('03/04/2026: US=March 4, EU=April 3 (DIFFERENT dates)', () => {
+      const us = parseDate('03/04/2026', timezone, { dateLocale: 'US' });
+      const eu = parseDate('03/04/2026', timezone, { dateLocale: 'EU' });
+      expect(us).toBe('2026-03-04'); // March 4
+      expect(eu).toBe('2026-04-03'); // April 3
+      expect(us).not.toBe(eu); // CRITICAL: Must differ!
+    });
+
+    test('06/07/2026: US=June 7, EU=July 6 (DIFFERENT dates)', () => {
+      const us = parseDate('06/07/2026', timezone, { dateLocale: 'US' });
+      const eu = parseDate('06/07/2026', timezone, { dateLocale: 'EU' });
+      expect(us).toBe('2026-06-07'); // June 7
+      expect(eu).toBe('2026-07-06'); // July 6
+      expect(us).not.toBe(eu); // CRITICAL: Must differ!
+    });
+
+    test('01/12/2026: US=January 12, EU=December 1 (DIFFERENT dates)', () => {
+      const us = parseDate('01/12/2026', timezone, { dateLocale: 'US' });
+      const eu = parseDate('01/12/2026', timezone, { dateLocale: 'EU' });
+      expect(us).toBe('2026-01-12'); // January 12
+      expect(eu).toBe('2026-12-01'); // December 1
+      expect(us).not.toBe(eu); // CRITICAL: Must differ!
+    });
+
+    test('02/05/2027: US=February 5, EU=May 2 (DIFFERENT dates)', () => {
+      const us = parseDate('02/05/2027', timezone, { dateLocale: 'US' });
+      const eu = parseDate('02/05/2027', timezone, { dateLocale: 'EU' });
+      expect(us).toBe('2027-02-05'); // February 5
+      expect(eu).toBe('2027-05-02'); // May 2
+      expect(us).not.toBe(eu); // CRITICAL: Must differ!
+    });
+  });
+
   describe('Ambiguous date collision (critical financial risk)', () => {
     test('12/12/2026 is same in both locales (Dec 12)', () => {
       const us = parseDate('12/12/2026', timezone, { dateLocale: 'US' });

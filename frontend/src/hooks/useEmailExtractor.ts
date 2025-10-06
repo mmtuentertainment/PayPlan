@@ -3,6 +3,21 @@ import { extractItemsFromEmails } from '../lib/email-extractor';
 import type { ExtractionResult, Item, ExtractOptions } from '../lib/email-extractor';
 import type { DateLocale } from '../lib/date-parser';
 
+/**
+ * Sanitizes error messages to prevent information disclosure.
+ * Removes stack traces and sensitive details while keeping error type.
+ */
+function sanitizeError(err: unknown): string {
+  if (err instanceof Error) {
+    // Only expose error name and sanitized message (no stack traces)
+    const message = err.message.split('\n')[0]; // Take only first line
+    // Remove file paths and line numbers
+    const sanitized = message.replace(/\s+at\s+.*/g, '').replace(/\([^)]*\)/g, '');
+    return sanitized || 'An error occurred during extraction';
+  }
+  return 'An unexpected error occurred';
+}
+
 export function useEmailExtractor(timezone: string) {
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
@@ -32,13 +47,13 @@ export function useEmailExtractor(timezone: string) {
         const extracted = extractItemsFromEmails(emailText, timezone, options);
         setResult(extracted);
         setEditableItems(extracted.items);
-      } catch (err) {
+      } catch (err: unknown) {
         setResult({
           items: [],
           issues: [{
             id: `error-${Date.now()}`,
             snippet: '',
-            reason: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+            reason: `Extraction failed: ${sanitizeError(err)}`
           }],
           duplicatesRemoved: 0,
           dateLocale: dateLocale || 'US'

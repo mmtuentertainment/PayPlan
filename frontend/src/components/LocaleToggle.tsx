@@ -62,7 +62,14 @@ export function LocaleToggle({
       <Label className="text-sm font-medium">Date Format:</Label>
       <RadioGroup
         value={locale}
-        onValueChange={(value) => onLocaleChange(value as DateLocale)}
+        onValueChange={(value) => {
+          // Type-safe validation before casting
+          if (value === 'US' || value === 'EU') {
+            onLocaleChange(value);
+          } else {
+            console.error(`Invalid locale value: ${value}`);
+          }
+        }}
         className="flex gap-4"
         disabled={isExtracting}
         aria-label="Date format locale"
