@@ -81,6 +81,16 @@ export function extractItemsFromEmails(
   timezone: string,
   options?: ExtractOptions
 ): ExtractionResult {
+  // Input validation: handle null/undefined/non-string inputs
+  if (!emailText || typeof emailText !== 'string') {
+    return {
+      items: [],
+      issues: [],
+      rawText: '',
+      confidence: 0,
+    };
+  }
+
   // Validation: enforce maximum input length (prevent abuse)
   const MAX_LENGTH = 16000;
   if (emailText.length > MAX_LENGTH) {
