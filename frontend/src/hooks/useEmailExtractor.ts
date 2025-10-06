@@ -40,7 +40,8 @@ export function useEmailExtractor(timezone: string) {
             snippet: '',
             reason: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}`
           }],
-          duplicatesRemoved: 0
+          duplicatesRemoved: 0,
+          dateLocale: dateLocale || 'US'
         });
         setEditableItems([]);
       } finally {
