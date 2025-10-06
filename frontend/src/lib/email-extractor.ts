@@ -1,8 +1,8 @@
 import { detectProvider, PROVIDER_PATTERNS } from './extraction/providers';
+import { extractDueDate } from './extraction/extractors/date';
 import {
   extractAmount,
   extractCurrency,
-  extractDueDate,
   extractInstallmentNumber,
   detectAutopay,
   extractLateFee
@@ -142,6 +142,7 @@ function extractSingleEmail(emailText: string, timezone: string, options?: Extra
   let amount: number | undefined;
   let currency: string | undefined;
   let dueDate: string | undefined;
+  let rawDueDate: string | undefined;
   let installmentNo: number | undefined;
   let autopay: boolean | undefined;
   let lateFee: number | undefined;
@@ -159,7 +160,9 @@ function extractSingleEmail(emailText: string, timezone: string, options?: Extra
   }
 
   try {
-    dueDate = extractDueDate(emailText, patterns.datePatterns, timezone, dateLocale);
+    const dateResult = extractDueDate(emailText, patterns.datePatterns, timezone, dateLocale);
+    dueDate = dateResult.isoDate;
+    rawDueDate = dateResult.rawText;
   } catch (e) {
     errors.push(`Due date: ${e instanceof Error ? e.message : 'not found'}`);
   }
@@ -202,6 +205,7 @@ function extractSingleEmail(emailText: string, timezone: string, options?: Extra
     provider,
     installment_no: installmentNo!,
     due_date: dueDate!,
+    raw_due_date: rawDueDate,
     amount: amount!,
     currency: currency!,
     autopay: autopay!,
