@@ -2,31 +2,8 @@ import { useState, useCallback, useRef } from 'react';
 import { extractItemsFromEmails } from '../lib/email-extractor';
 import type { ExtractionResult, Item, ExtractOptions } from '../lib/email-extractor';
 import type { DateLocale } from '../lib/date-parser';
-
-/**
- * Sanitizes error messages to prevent information disclosure while preserving debugging context.
- * Removes absolute file paths and stack traces, but keeps error type and safe details.
- * Cross-platform: Handles both Unix (/) and Windows (\, C:\) path separators.
- */
-function sanitizeError(err: unknown): string {
-  if (err instanceof Error) {
-    // Keep error message but remove absolute file paths
-    const message = err.message.split('\n')[0]; // Take only first line
-    // Remove absolute paths but keep relative context like "Invalid date: ..."
-    const sanitized = message
-      // Match Windows absolute paths with spaces: C:\Program Files\app.ts or C:\path\file.ts
-      .replace(/[A-Z]:\\(?:[^\\:*?"<>|\r\n]+\\)*[^\\:*?"<>|\r\n]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
-      // Match Windows UNC paths with spaces: \\server\share\path\file.ts
-      .replace(/\\\\(?:[^\\:*?"<>|\r\n]+\\)+[^\\:*?"<>|\r\n]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
-      // Match Unix absolute paths: /home/user/path/file.ts (requires multiple path segments)
-      .replace(/\/(?:[^/\r\n]+\/)+[^/\r\n]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/g, '')
-      // Remove "at <location>" suffixes
-      .replace(/\bat\b.*$/, '')
-      .trim();
-    return sanitized || 'An error occurred during extraction';
-  }
-  return 'An unexpected error occurred';
-}
+import { sanitizeError } from '../lib/extraction/helpers/error-sanitizer';
+import { calculateItemConfidence } from '../lib/extraction/helpers/confidence-calculator';
 
 export function useEmailExtractor(timezone: string) {
   const [result, setResult] = useState<ExtractionResult | null>(null);
@@ -121,25 +98,8 @@ export function useEmailExtractor(timezone: string) {
       // Apply patch
       const updated = { ...prev[index], ...patch };
 
-      // Recompute confidence: if due_date was fixed, assume date signal is now true
-      const signals = {
-        provider: updated.provider !== 'Unknown',
-        date: true, // Fixed date is valid
-        amount: updated.amount > 0,
-        installment: updated.installment_no > 0,
-        autopay: typeof updated.autopay === 'boolean'
-      };
-
-      // Import calculateConfidence function inline to avoid circular dependency
-      const recalculatedConfidence = (
-        (signals.provider ? 0.35 : 0) +
-        (signals.date ? 0.25 : 0) +
-        (signals.amount ? 0.20 : 0) +
-        (signals.installment ? 0.15 : 0) +
-        (signals.autopay ? 0.05 : 0)
-      );
-
-      updated.confidence = recalculatedConfidence;
+      // Recompute confidence after applying fix
+      updated.confidence = calculateItemConfidence(updated);
 
       const next = [...prev];
       next[index] = updated;
