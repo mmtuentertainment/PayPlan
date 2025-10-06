@@ -6,16 +6,21 @@ import type { DateLocale } from '../lib/date-parser';
 /**
  * Sanitizes error messages to prevent information disclosure while preserving debugging context.
  * Removes absolute file paths and stack traces, but keeps error type and safe details.
- * Cross-platform: Handles both Unix (/) and Windows (\) path separators.
+ * Cross-platform: Handles both Unix (/) and Windows (\, C:\) path separators.
  */
 function sanitizeError(err: unknown): string {
   if (err instanceof Error) {
     // Keep error message but remove absolute file paths
     const message = err.message.split('\n')[0]; // Take only first line
-    // Remove absolute paths (Unix and Windows) but keep relative context like "Invalid date: ..."
+    // Remove absolute paths but keep relative context like "Invalid date: ..."
     const sanitized = message
-      .replace(/[/\\][^\s]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '') // Remove absolute file paths (cross-platform)
-      .replace(/\bat\b.*$/g, '') // Remove "at <location>" suffixes
+      // Match Windows absolute paths: C:\ or \\server\
+      .replace(/[A-Z]:\\[^\s]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
+      .replace(/\\\\[^\s]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
+      // Match Unix absolute paths: starts with / and contains path-like structure
+      .replace(/\/(?:[^\s/]+\/)+[^\s]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/g, '')
+      // Remove "at <location>" suffixes
+      .replace(/\bat\b.*$/g, '')
       .trim();
     return sanitized || 'An error occurred during extraction';
   }
