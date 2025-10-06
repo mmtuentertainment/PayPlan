@@ -2,6 +2,7 @@ import { describe, test, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EmailPreview } from '../../src/components/EmailPreview';
 import type { Item } from '../../src/lib/email-extractor';
+import { createMockItem, HIGH_CONFIDENCE_ITEM } from '../fixtures/mock-items';
 
 describe('EmailPreview - Confidence Pills', () => {
   const mockOnDelete = vi.fn();
@@ -9,17 +10,7 @@ describe('EmailPreview - Confidence Pills', () => {
   const mockOnBuildPlan = vi.fn();
 
   test('renders High confidence pill for score >= 0.8', () => {
-    const items: Item[] = [{
-      id: "test-uuid-100",
-      provider: 'Klarna',
-      installment_no: 1,
-      due_date: '2025-10-06',
-      amount: 2500,  // Integer cents ($2500 ÷ 100)
-      currency: 'USD',
-      autopay: false,
-      late_fee: 700,  // Integer cents ($700 ÷ 100)
-      confidence: 1.0
-    }];
+    const items: Item[] = [HIGH_CONFIDENCE_ITEM];
 
     render(
       <EmailPreview
@@ -37,17 +28,16 @@ describe('EmailPreview - Confidence Pills', () => {
   });
 
   test('renders Med confidence pill for score 0.6-0.79', () => {
-    const items: Item[] = [{
+    const items: Item[] = [createMockItem({
       id: "test-uuid-101",
       provider: 'Affirm',
       installment_no: 2,
       due_date: '2025-10-15',
-      amount: 5000,  // Integer cents ($50.00)
-      currency: 'USD',
+      amount: 5000,
       autopay: true,
-      late_fee: 0,  // Integer cents ($0.00)
+      late_fee: 0,
       confidence: 0.75
-    }];
+    })];
 
     render(
       <EmailPreview
@@ -93,17 +83,7 @@ describe('EmailPreview - Confidence Pills', () => {
   });
 
   test('renders confidence column header', () => {
-    const items: Item[] = [{
-      id: "test-uuid-103",
-      provider: 'Klarna',
-      installment_no: 1,
-      due_date: '2025-10-06',
-      amount: 2500,  // Integer cents ($2500 ÷ 100)
-      currency: 'USD',
-      autopay: false,
-      late_fee: 700,  // Integer cents ($700 ÷ 100)
-      confidence: 1.0
-    }];
+    const items: Item[] = [HIGH_CONFIDENCE_ITEM];
 
     render(
       <EmailPreview

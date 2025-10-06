@@ -2,19 +2,13 @@ import { describe, test, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EmailPreview } from '../../src/components/EmailPreview';
 import type { Item } from '../../src/lib/email-extractor';
+import { createMockItem, KLARNA_ITEM, AFFIRM_ITEM } from '../fixtures/mock-items';
 
 describe('EmailPreview - React.memo behavior', () => {
-  const mockItem: Item = {
+  const mockItem: Item = createMockItem({
     id: '123e4567-e89b-12d3-a456-426614174000',
-    provider: 'Klarna',
-    installment_no: 1,
-    due_date: '2025-10-15',
-    amount: 2500,
-    currency: 'USD',
-    autopay: false,
-    late_fee: 700,
     confidence: 0.95
-  };
+  });
 
   const defaultProps = {
     items: [mockItem],
@@ -53,7 +47,7 @@ describe('EmailPreview - React.memo behavior', () => {
     expect(screen.getByText('Klarna')).toBeInTheDocument();
 
     // Change items array
-    const newItem: Item = { ...mockItem, provider: 'Affirm' };
+    const newItem: Item = AFFIRM_ITEM;
     rerender(<EmailPreview {...defaultProps} items={[newItem]} />);
 
     // Should re-render and show new content
