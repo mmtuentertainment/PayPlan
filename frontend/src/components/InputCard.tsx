@@ -15,6 +15,8 @@ import { SAMPLE_CSV } from "@/lib/sample";
 import { EmailInput } from "@/components/EmailInput";
 import { EmailPreview } from "@/components/EmailPreview";
 import { EmailIssues } from "@/components/EmailIssues";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { SuccessToast } from "@/components/SuccessToast";
 import { useEmailExtractor } from "@/hooks/useEmailExtractor";
 
 type Props = { onResult: (r: PlanResponse) => void; onIcsReady: (b64: string) => void; };
@@ -230,7 +232,10 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
               isExtracting={emailExtractor.isExtracting}
               hasExtractedData={!!emailExtractor.result}
             />
-            {emailExtractor.result && (
+            {emailExtractor.isExtracting && (
+              <LoadingSpinner text="Extracting payment information..." />
+            )}
+            {!emailExtractor.isExtracting && emailExtractor.result && (
               <>
                 <EmailPreview
                   items={emailExtractor.editableItems}
@@ -394,6 +399,13 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
           </Alert>
         )}
       </CardContent>
+
+      {emailExtractor.successMessage && (
+        <SuccessToast
+          message={emailExtractor.successMessage}
+          onDismiss={emailExtractor.clearSuccessMessage}
+        />
+      )}
     </Card>
   );
 }

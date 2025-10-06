@@ -9,6 +9,7 @@ import {
   extractLateFee
 } from './extraction/extractors';
 import { redactPII } from './redact';
+import { getErrorMessage } from './extraction/helpers/error-messages';
 
 // Import types from new extraction module
 export type {
@@ -122,7 +123,7 @@ export function extractItemsFromEmails(
       issues.push({
         id: `issue-${Date.now()}-${i}`,
         snippet: redactPII(rawSnippet),
-        reason: err instanceof Error ? err.message : 'Extraction failed'
+        reason: getErrorMessage(err)
       });
     }
   }
@@ -197,9 +198,12 @@ function extractSingleEmail(emailText: string, timezone: string, options?: Extra
     lateFee = 0;
   }
 
-  // If critical fields failed, throw aggregated error
+  // If critical fields failed, throw aggregated error with user-friendly messages
   if (errors.length > 0) {
-    throw new Error(`Failed to extract: ${errors.join(', ')}`);
+    // Take the first error and make it user-friendly
+    const firstError = errors[0];
+    const friendlyError = getErrorMessage(new Error(firstError));
+    throw new Error(friendlyError);
   }
 
   // Calculate confidence based on successful extractions

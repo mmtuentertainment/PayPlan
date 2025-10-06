@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import type { Issue, Item } from '../lib/email-extractor';
 import { redactPII } from '../lib/redact';
+import { ErrorList } from './ErrorAlert';
 
 interface EmailIssuesProps {
   issues: Issue[];
@@ -23,6 +25,8 @@ function getFieldHints(item: Item): string[] {
 }
 
 export function EmailIssues({ issues, items = [] }: EmailIssuesProps) {
+  const [dismissedIndices, setDismissedIndices] = useState<Set<number>>(new Set());
+
   // Detect low-confidence items (confidence < 0.6)
   const lowConfidenceItems = items.filter(item => item.confidence < 0.6);
 
@@ -40,34 +44,31 @@ export function EmailIssues({ issues, items = [] }: EmailIssuesProps) {
     })
   ];
 
-  if (allIssues.length === 0) {
+  // Format issues as error messages with snippet included
+  const errorMessages = allIssues
+    .map((issue, idx) => ({
+      index: idx,
+      message: issue.snippet
+        ? `${issue.reason}\n"${issue.snippet}..."`
+        : issue.reason
+    }))
+    .filter(({ index }) => !dismissedIndices.has(index))
+    .map(({ message }) => message);
+
+  const handleDismiss = (index: number) => {
+    setDismissedIndices(prev => new Set(prev).add(index));
+  };
+
+  if (errorMessages.length === 0) {
     return null;
   }
 
   return (
-    <div className="mt-6" role="status" aria-live="polite">
-      <h3 className="font-medium text-yellow-700 mb-2">
-        Issues ({allIssues.length})
+    <div className="mt-6">
+      <h3 className="font-medium text-red-700 mb-3">
+        Extraction Issues ({errorMessages.length})
       </h3>
-      <div className="space-y-2">
-        {allIssues.map((issue) => (
-          <div
-            key={issue.id}
-            role="group"
-            aria-label={`Extraction issue: ${issue.reason}`}
-            className="p-3 bg-yellow-50 border border-yellow-200 rounded"
-          >
-            <p className="text-sm font-medium text-yellow-800">
-              ⚠️ {issue.reason}
-            </p>
-            {issue.snippet && (
-              <p className="text-xs text-gray-600 mt-1 font-mono" aria-describedby={`snippet-${issue.id}`}>
-                <span id={`snippet-${issue.id}`}>"{issue.snippet}..."</span>
-              </p>
-            )}
-          </div>
-        ))}
-      </div>
+      <ErrorList errors={errorMessages} onDismiss={handleDismiss} autoDismissMs={10000} />
     </div>
   );
 }

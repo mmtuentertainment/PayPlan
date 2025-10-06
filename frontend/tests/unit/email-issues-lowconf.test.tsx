@@ -85,7 +85,7 @@ describe('EmailIssues - Low Confidence Detection', () => {
     render(<EmailIssues issues={issues} items={items} />);
 
     // Should show both the original issue and the low-confidence warning
-    expect(screen.getByText('Issues (2)')).toBeInTheDocument();
+    expect(screen.getByText('Extraction Issues (2)')).toBeInTheDocument();
     expect(screen.getByText(/Provider not recognized/)).toBeInTheDocument();
     expect(screen.getByText(/Low confidence \(0.50\)/)).toBeInTheDocument();
   });
@@ -110,7 +110,7 @@ describe('EmailIssues - Low Confidence Detection', () => {
     expect(issueText.textContent).toContain('Amount not found');
   });
 
-  test('respects aria-live="polite" for accessibility', () => {
+  test('displays errors with proper ARIA attributes', () => {
     const items: Item[] = [{
       id: "test-uuid-6",
       provider: 'Klarna',
@@ -123,10 +123,11 @@ describe('EmailIssues - Low Confidence Detection', () => {
       confidence: 0.4
     }];
 
-    const { container } = render(<EmailIssues issues={[]} items={items} />);
+    render(<EmailIssues issues={[]} items={items} />);
 
-    const issuesContainer = container.querySelector('[aria-live="polite"]');
-    expect(issuesContainer).toBeInTheDocument();
+    // ErrorAlert components have role="alert"
+    const alerts = screen.getAllByRole('alert');
+    expect(alerts.length).toBeGreaterThan(0);
   });
 
   test('returns null when no issues and all items high confidence', () => {

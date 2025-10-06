@@ -32,6 +32,7 @@ export function useEmailExtractor(timezone: string) {
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [editableItems, setEditableItems] = useState<Item[]>([]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const extractionIdRef = useRef(0);
   const undoSnapshotsRef = useRef<Map<string, Item>>(new Map());
 
@@ -58,6 +59,12 @@ export function useEmailExtractor(timezone: string) {
         const extracted = extractItemsFromEmails(emailText, timezone, options);
         setResult(extracted);
         setEditableItems(extracted.items);
+
+        // Set success message with count
+        const itemCount = extracted.items.length;
+        if (itemCount > 0) {
+          setSuccessMessage(`Found ${itemCount} payment${itemCount === 1 ? '' : 's'}`);
+        }
       } catch (err: unknown) {
         setResult({
           items: [],
@@ -165,16 +172,22 @@ export function useEmailExtractor(timezone: string) {
     undoSnapshotsRef.current.delete(rowId);
   }, []);
 
+  const clearSuccessMessage = useCallback(() => {
+    setSuccessMessage(null);
+  }, []);
+
   return {
     result,
     editableItems,
     isExtracting,
+    successMessage,
     extract,
     updateItem,
     deleteItem,
     clear,
     applyRowFix,
     undoRowFix,
+    clearSuccessMessage,
     setEditableItems // Exposed for testing purposes
   };
 }
