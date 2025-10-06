@@ -1,7 +1,8 @@
 import { describe, test, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { detectProvider, extractAmount, extractDueDate, extractInstallmentNumber, detectAutopay, extractLateFee, PROVIDER_PATTERNS } from '../../src/lib/provider-detectors';
+import { detectProvider, PROVIDER_PATTERNS } from '../../src/lib/extraction/providers';
+import { extractAmount, extractDueDate, extractInstallmentNumber, detectAutopay, extractLateFee } from '../../src/lib/extraction/extractors';
 
 describe('PayPal Pay in 4 Provider Detection', () => {
   const paypal1 = readFileSync(join(__dirname, '../fixtures/emails/paypal4-payment1.txt'), 'utf-8');
@@ -29,12 +30,12 @@ describe('PayPal Pay in 4 Provider Detection', () => {
 
   test('extracts due date in MM/DD/YYYY format', () => {
     const date = extractDueDate(paypal1, PROVIDER_PATTERNS.paypalpayin4.datePatterns, 'America/New_York');
-    expect(date).toBe('2025-10-15');
+    expect(date.isoDate).toBe('2025-10-15');
   });
 
   test('extracts due date with "by" keyword', () => {
     const date = extractDueDate(paypalFinal, PROVIDER_PATTERNS.paypalpayin4.datePatterns, 'America/New_York');
-    expect(date).toBe('2025-11-30');
+    expect(date.isoDate).toBe('2025-11-30');
   });
 
   test('extracts installment number "1 of 4"', () => {
@@ -73,19 +74,19 @@ describe('PayPal Pay in 4 Provider Detection', () => {
   test('extracts date correctly across different timezones (PST)', () => {
     const email = 'Your Pay in 4 payment is due on 12/15/2025\nFrom: service@paypal.com';
     const date = extractDueDate(email, PROVIDER_PATTERNS.paypalpayin4.datePatterns, 'America/Los_Angeles');
-    expect(date).toBe('2025-12-15');
+    expect(date.isoDate).toBe('2025-12-15');
   });
 
   test('extracts date correctly across different timezones (EST)', () => {
     const email = 'Your Pay in 4 payment is due on 12/15/2025\nFrom: service@paypal.com';
     const date = extractDueDate(email, PROVIDER_PATTERNS.paypalpayin4.datePatterns, 'America/New_York');
-    expect(date).toBe('2025-12-15');
+    expect(date.isoDate).toBe('2025-12-15');
   });
 
   test('extracts date correctly across different timezones (UTC)', () => {
     const email = 'Your Pay in 4 payment is due on 12/15/2025\nFrom: service@paypal.com';
     const date = extractDueDate(email, PROVIDER_PATTERNS.paypalpayin4.datePatterns, 'UTC');
-    expect(date).toBe('2025-12-15');
+    expect(date.isoDate).toBe('2025-12-15');
   });
 
   // Middle installment tests

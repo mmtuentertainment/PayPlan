@@ -1,13 +1,12 @@
 import { describe, test, expect } from 'vitest';
+import { detectProvider, PROVIDER_PATTERNS } from '../../src/lib/extraction/providers';
 import {
-  detectProvider,
   extractAmount,
   extractDueDate,
   extractInstallmentNumber,
   detectAutopay,
-  extractLateFee,
-  PROVIDER_PATTERNS
-} from '../../src/lib/provider-detectors';
+  extractLateFee
+} from '../../src/lib/extraction/extractors';
 
 describe('Afterpay detector', () => {
   test('detects Afterpay from email domain', () => {
@@ -27,7 +26,7 @@ describe('Afterpay detector', () => {
   test('extracts due date from Afterpay email', () => {
     const text = 'Due: October 6, 2025';
     const date = extractDueDate(text, PROVIDER_PATTERNS.afterpay.datePatterns, 'America/New_York');
-    expect(date).toBe('2025-10-06');
+    expect(date.isoDate).toBe('2025-10-06');
   });
 
   test('extracts installment number', () => {

@@ -30,8 +30,8 @@ describe('Quick Fix Flow Integration', () => {
 
       expect(result.current.editableItems[0].confidence).toBe(0.55);
 
-      // Apply date fix
-      const rowId = 'Klarna-1-2026-01-02-0';
+      // Apply date fix (new rowId format: idx::provider::installment_no::due_date)
+      const rowId = '0::Klarna::1::2026-01-02';
       act(() => {
         result.current.applyRowFix(rowId, { due_date: '2026-03-04' });
       });
@@ -71,7 +71,7 @@ describe('Quick Fix Flow Integration', () => {
 
       // Fix first row
       act(() => {
-        result.current.applyRowFix('Klarna-1-2026-01-02-0', { due_date: '2026-03-04' });
+        result.current.applyRowFix('0::Klarna::1::2026-01-02', { due_date: '2026-03-04' });
       });
 
       expect(result.current.editableItems[0].due_date).toBe('2026-03-04');
@@ -80,7 +80,7 @@ describe('Quick Fix Flow Integration', () => {
 
       // Fix second row
       act(() => {
-        result.current.applyRowFix('Affirm-2-2026-02-03-1', { due_date: '2026-04-05' });
+        result.current.applyRowFix('1::Affirm::2::2026-02-03', { due_date: '2026-04-05' });
       });
 
       expect(result.current.editableItems[1].due_date).toBe('2026-04-05');
@@ -107,7 +107,7 @@ describe('Quick Fix Flow Integration', () => {
         result.current.setEditableItems([originalItem]);
       });
 
-      const rowId = 'Klarna-1-2026-01-02-0';
+      const rowId = '0::Klarna::1::2026-01-02';
 
       // Apply fix
       act(() => {
@@ -144,7 +144,7 @@ describe('Quick Fix Flow Integration', () => {
         ]);
       });
 
-      const rowId = 'Klarna-1-2026-01-02-0';
+      const rowId = '0::Klarna::1::2026-01-02';
 
       // Apply fix
       act(() => {
@@ -188,7 +188,7 @@ describe('Quick Fix Flow Integration', () => {
 
       // Apply fix
       act(() => {
-        result.current.applyRowFix('Klarna-1-2026-01-02-0', { due_date: '2026-03-04' });
+        result.current.applyRowFix('0::Klarna::1::2026-01-02', { due_date: '2026-03-04' });
       });
 
       const exportedItems = result.current.editableItems;
@@ -251,7 +251,7 @@ describe('Quick Fix Flow Integration', () => {
 
       // Apply fix
       act(() => {
-        result.current.applyRowFix('Unknown-0-2026-01-02-0', { due_date: '2026-03-04' });
+        result.current.applyRowFix('0::Unknown::0::2026-01-02', { due_date: '2026-03-04' });
       });
 
       // Confidence increases (date signal = 0.25, autopay = 0.05)
@@ -281,7 +281,7 @@ describe('Quick Fix Flow Integration', () => {
 
       // Attempt fix with wrong rowId
       act(() => {
-        result.current.applyRowFix('NonExistent-0-2026-01-01-99', { due_date: '2026-03-04' });
+        result.current.applyRowFix('99::NonExistent::0::2026-01-01', { due_date: '2026-03-04' });
       });
 
       // Original item should be unchanged
@@ -309,7 +309,7 @@ describe('Quick Fix Flow Integration', () => {
 
       // Attempt undo without prior fix
       act(() => {
-        result.current.undoRowFix('Klarna-1-2026-01-02-0');
+        result.current.undoRowFix('0::Klarna::1::2026-01-02');
       });
 
       // Should remain unchanged
@@ -334,7 +334,7 @@ describe('Quick Fix Flow Integration', () => {
         ]);
       });
 
-      const rowId = 'Klarna-1-2026-01-02-0';
+      const rowId = '0::Klarna::1::2026-01-02';
 
       // Apply fix
       act(() => {

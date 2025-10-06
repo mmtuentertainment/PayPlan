@@ -1,7 +1,8 @@
 import { describe, test, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { detectProvider, extractAmount, extractDueDate, extractInstallmentNumber, detectAutopay, extractLateFee, PROVIDER_PATTERNS } from '../../src/lib/provider-detectors';
+import { detectProvider, PROVIDER_PATTERNS } from '../../src/lib/extraction/providers';
+import { extractAmount, extractDueDate, extractInstallmentNumber, detectAutopay, extractLateFee } from '../../src/lib/extraction/extractors';
 
 describe('Zip Provider Detection', () => {
   const zipFixture = readFileSync(join(__dirname, '../fixtures/emails/zip-payment1.txt'), 'utf-8');
@@ -43,7 +44,7 @@ describe('Zip Provider Detection', () => {
 
   test('extracts due date from Zip email', () => {
     const date = extractDueDate(zipFixture, PROVIDER_PATTERNS.zip.datePatterns, 'America/New_York');
-    expect(date).toBe('2025-10-15');
+    expect(date.isoDate).toBe('2025-10-15');
   });
 
   test('extracts installment number from Zip email', () => {
@@ -102,7 +103,7 @@ describe('Sezzle Provider Detection', () => {
 
   test('extracts due date from Sezzle email', () => {
     const date = extractDueDate(sezzleFixture, PROVIDER_PATTERNS.sezzle.datePatterns, 'America/New_York');
-    expect(date).toBe('2025-11-30');
+    expect(date.isoDate).toBe('2025-11-30');
   });
 
   test('extracts installment number from Sezzle email', () => {
