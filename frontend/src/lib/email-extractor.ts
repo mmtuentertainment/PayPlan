@@ -9,44 +9,19 @@ import {
   PROVIDER_PATTERNS
 } from './provider-detectors';
 import { redactPII } from './redact';
-import type { DateLocale } from './date-parser';
-import { z } from 'zod';
 
-/**
- * Zod schema for extraction options validation.
- * Ensures dateLocale is either 'US' or 'EU' if provided.
- */
-export const ExtractOptionsSchema = z.object({
-  dateLocale: z.enum(['US', 'EU']).optional()
-}).optional();
-
-export interface ExtractOptions {
-  dateLocale?: DateLocale;
-}
-
-export interface Item {
-  provider: string;
-  installment_no: number;
-  due_date: string; // ISO YYYY-MM-DD
-  amount: number;
-  currency: string;
-  autopay: boolean;
-  late_fee: number;
-  confidence: number; // 0-1 confidence score (v0.1.4-a)
-}
-
-export interface Issue {
-  id: string; // Unique identifier for React keys
-  snippet: string; // First 100 chars of problematic email (redacted)
-  reason: string;
-}
-
-export interface ExtractionResult {
-  items: Item[];
-  issues: Issue[];
-  duplicatesRemoved: number;
-  dateLocale: DateLocale; // Audit trail: which locale was used for parsing (always provided, defaults to 'US')
-}
+// Import types from new extraction module
+export type {
+  Item,
+  Issue,
+  ExtractionResult,
+  ExtractOptions,
+  DateExtractionResult,
+  ExtractionContext
+} from './extraction/core/types';
+export { ExtractOptionsSchema } from './extraction/core/types';
+import type { Item, Issue, ExtractionResult, ExtractOptions } from './extraction/core/types';
+import { ExtractOptionsSchema } from './extraction/core/types';
 
 /**
  * Calculates extraction confidence score using weighted signal sum.
