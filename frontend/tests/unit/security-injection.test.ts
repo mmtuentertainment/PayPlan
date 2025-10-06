@@ -2,9 +2,11 @@ import { describe, test, expect } from 'vitest';
 import { extractItemsFromEmails } from '../../src/lib/email-extractor';
 import { extractDomain } from '../../src/lib/extraction/helpers/domain-validator';
 import { redact, unredact, redactPatterns, PII_PATTERNS } from '../../src/lib/extraction/helpers/redaction';
+import { DEFAULT_TIMEZONE } from '../fixtures/mock-items';
+import { PROVIDERS } from '../fixtures/providers';
 
 // Helper to extract from single email
-function extractItemsFromEmail(email: string, timezone: string) {
+function extractItemsFromEmail(email: string, timezone: string = DEFAULT_TIMEZONE) {
   return extractItemsFromEmails(email, timezone);
 }
 
@@ -36,7 +38,7 @@ describe('Security: Script Injection (XSS)', () => {
     `;
 
     // Should not crash or execute scripts
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Verify extraction completes safely (no crashes)
     expect(result).toBeDefined();
@@ -44,7 +46,7 @@ describe('Security: Script Injection (XSS)', () => {
 
     // If data extracted, verify it's legitimate
     if (result.items.length > 0) {
-      expect(result.items[0].provider).toBe('Klarna');
+      expect(result.items[0].provider).toBe(PROVIDERS.KLARNA);
       expect(result.items[0].amount).toBeGreaterThan(0);
     }
   });
@@ -56,7 +58,7 @@ describe('Security: Script Injection (XSS)', () => {
       </div>
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract amount safely
     expect(result.items).toHaveLength(1);
@@ -73,7 +75,7 @@ describe('Security: Script Injection (XSS)', () => {
       Due: 2025-10-08
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should safely ignore malicious URLs, extract data
     expect(result.items[0].amount).toBe(10000);
@@ -89,7 +91,7 @@ describe('Security: SQL Injection Patterns', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract only the valid amount portion
     expect(result.items).toHaveLength(1);
@@ -103,7 +105,7 @@ describe('Security: SQL Injection Patterns', () => {
       Amount: $50.00
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract valid date, ignore SQL
     expect(result.items[0].due_date).toContain('2025-10-06');
@@ -117,7 +119,7 @@ describe('Security: SQL Injection Patterns', () => {
       Due: 2025-10-07
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract installment number (1), ignore injection
     expect(result.items[0].installment_no).toBe(1);
@@ -134,7 +136,7 @@ describe('Security: Command Injection', () => {
       Installment: 1 && cat /etc/passwd
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract valid data, ignore commands
     expect(result.items[0].amount).toBe(5000);
@@ -147,7 +149,7 @@ describe('Security: Command Injection', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract amount safely (or fail gracefully)
     expect(result.items.length).toBeGreaterThanOrEqual(0);
@@ -161,7 +163,7 @@ describe('Security: Command Injection', () => {
       Due: 2025-10-06 > /tmp/stolen
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract valid amount, ignore shell operators
     expect(result.items[0].amount).toBe(10000);
@@ -178,7 +180,7 @@ describe('Security: Path Traversal', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract data normally, ignore path traversal
     expect(result.items[0].amount).toBe(2500);
@@ -193,7 +195,7 @@ describe('Security: Path Traversal', () => {
       Due: 2025-10-07
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     expect(result.items[0].amount).toBe(5000);
   });
@@ -208,7 +210,7 @@ describe('Security: HTML/XML Injection', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract valid amount
     expect(result.items[0].amount).toBe(2500);
@@ -224,7 +226,7 @@ describe('Security: HTML/XML Injection', () => {
       </payment>
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract amount from XML-like content
     expect(result.items.length).toBeGreaterThanOrEqual(0);
@@ -238,7 +240,7 @@ describe('Security: HTML/XML Injection', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     expect(result.items[0].amount).toBe(5000);
   });
@@ -264,7 +266,7 @@ describe('Security: Unicode and Encoding Exploits', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should handle null bytes safely
     expect(result.items[0].amount).toBe(2500);
@@ -279,7 +281,7 @@ describe('Security: Unicode and Encoding Exploits', () => {
       \xC0\xAE\xC0\xAE/etc/passwd
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     expect(result.items[0].amount).toBe(2500);
   });
@@ -291,7 +293,7 @@ describe('Security: Unicode and Encoding Exploits', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract valid amount or fail gracefully
     expect(result.items.length).toBeGreaterThanOrEqual(0);
@@ -305,7 +307,7 @@ describe('Security: Unicode and Encoding Exploits', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should detect provider despite zero-width space
     expect(result.items).toHaveLength(1);
@@ -324,7 +326,7 @@ describe('Security: Buffer Overflow / DOS Attempts', () => {
     `;
 
     // Should not crash or hang
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
     expect(result.items[0].amount).toBe(2500);
   });
 
@@ -333,7 +335,7 @@ describe('Security: Buffer Overflow / DOS Attempts', () => {
     const email = `Due: 2025-10-06\n${nested}`;
 
     // Should handle without stack overflow
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
     expect(result.items.length).toBeGreaterThanOrEqual(0);
   });
 
@@ -346,7 +348,7 @@ describe('Security: Buffer Overflow / DOS Attempts', () => {
     const email = `Klarna payments\n${manyInstallments}`;
 
     // Should handle gracefully (may limit results)
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
     expect(result.items.length).toBeLessThan(500);  // Reasonable limit
   });
 
@@ -355,7 +357,7 @@ describe('Security: Buffer Overflow / DOS Attempts', () => {
     const email = 'A'.repeat(30) + '!';  // Would cause ReDoS with vulnerable regex
 
     const start = Date.now();
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
     const duration = Date.now() - start;
 
     // Should complete in reasonable time (< 1 second)
@@ -373,7 +375,7 @@ describe('Security: CRLF Injection', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should extract data normally, CRLF treated as whitespace
     expect(result.items[0].amount).toBe(2500);
@@ -387,7 +389,7 @@ describe('Security: CRLF Injection', () => {
       Due: 2025-10-07
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     expect(result.items[0].amount).toBe(5000);
   });
@@ -437,13 +439,13 @@ describe('Security: Edge Cases and Boundary Conditions', () => {
 
   test('handles email with only whitespace', () => {
     const email = '   \n\n\t\t   \r\n   ';
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
     expect(result.items).toHaveLength(0);
   });
 
   test('handles email with only special characters', () => {
     const email = '!@#$%^&*()_+-=[]{}|;:,.<>?/~`';
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
     expect(result.items).toHaveLength(0);
   });
 
@@ -454,7 +456,7 @@ describe('Security: Edge Cases and Boundary Conditions', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should either reject negative or convert to positive
     if (result.items.length > 0) {
@@ -468,7 +470,7 @@ describe('Security: Edge Cases and Boundary Conditions', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should handle or reject scientific notation
     expect(result.items.length).toBeGreaterThanOrEqual(0);
@@ -481,7 +483,7 @@ describe('Security: Edge Cases and Boundary Conditions', () => {
       Due: 2025-10-06
     `;
 
-    const result = extractItemsFromEmail(email, 'America/New_York');
+    const result = extractItemsFromEmail(email);
 
     // Should handle large numbers or apply reasonable limits
     if (result.items.length > 0) {

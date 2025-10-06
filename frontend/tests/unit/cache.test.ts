@@ -1,33 +1,20 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { ExtractionCache } from '../../src/lib/extraction/helpers/cache';
 import type { ExtractionResult } from '../../src/lib/email-extractor';
+import { createMockResult, KLARNA_ITEM } from '../fixtures/mock-items';
+import { KLARNA_SIMPLE } from '../fixtures/email-samples';
 
 describe('ExtractionCache', () => {
   let cache: ExtractionCache;
 
-  const mockResult: ExtractionResult = {
-    items: [{
-      id: 'test-1',
-      provider: 'Klarna',
-      installment_no: 1,
-      due_date: '2025-10-15',
-      amount: 2500,
-      currency: 'USD',
-      autopay: false,
-      late_fee: 700,
-      confidence: 1.0
-    }],
-    issues: [],
-    duplicatesRemoved: 0,
-    dateLocale: 'US'
-  };
+  const mockResult: ExtractionResult = createMockResult();
 
   beforeEach(() => {
     cache = new ExtractionCache(3, 1000); // size=3, ttl=1000ms
   });
 
   test('stores and retrieves results', () => {
-    const email = 'Klarna payment 1/4: $25.00 due 10/15/2025';
+    const email = KLARNA_SIMPLE;
     const timezone = 'America/New_York';
 
     cache.set(email, timezone, mockResult);

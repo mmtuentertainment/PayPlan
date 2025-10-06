@@ -1,16 +1,12 @@
 import { describe, test, expect, beforeEach } from 'vitest';
 import { extractItemsFromEmails } from '../../src/lib/email-extractor';
 import { extractionCache } from '../../src/lib/extraction/helpers/cache';
+import { KLARNA_FULL, scaleEmail } from '../fixtures/email-samples';
+import { DEFAULT_TIMEZONE } from '../fixtures/mock-items';
 
 describe('Cache Integration', () => {
-  const timezone = 'America/New_York';
-  const klarnaEmail = `
-    Your Klarna payment is due soon!
-    Payment 1 of 4
-    Due: October 15, 2025
-    Amount: $25.00
-    Order #12345
-  `;
+  const timezone = DEFAULT_TIMEZONE;
+  const klarnaEmail = KLARNA_FULL;
 
   beforeEach(() => {
     extractionCache.clear();
@@ -113,7 +109,7 @@ describe('Cache Integration', () => {
   });
 
   test('performance: cache is significantly faster', () => {
-    const largeEmail = klarnaEmail.repeat(5); // 5x larger input
+    const largeEmail = scaleEmail(klarnaEmail, 'large'); // 10x larger input
 
     // First extraction (no cache)
     const start1 = performance.now();
