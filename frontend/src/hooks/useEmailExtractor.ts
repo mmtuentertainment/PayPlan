@@ -14,13 +14,14 @@ function sanitizeError(err: unknown): string {
     const message = err.message.split('\n')[0]; // Take only first line
     // Remove absolute paths but keep relative context like "Invalid date: ..."
     const sanitized = message
-      // Match Windows absolute paths: C:\ or \\server\
-      .replace(/[A-Z]:\\[^\s]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
-      .replace(/\\\\[^\s]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
-      // Match Unix absolute paths: starts with / and contains path-like structure
-      .replace(/\/(?:[^\s/]+\/)+[^\s]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/g, '')
+      // Match Windows absolute paths with spaces: C:\Program Files\app.ts or C:\path\file.ts
+      .replace(/[A-Z]:\\(?:[^\\:*?"<>|\r\n]+\\)*[^\\:*?"<>|\r\n]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
+      // Match Windows UNC paths with spaces: \\server\share\path\file.ts
+      .replace(/\\\\(?:[^\\:*?"<>|\r\n]+\\)+[^\\:*?"<>|\r\n]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/gi, '')
+      // Match Unix absolute paths: /home/user/path/file.ts (requires multiple path segments)
+      .replace(/\/(?:[^/\r\n]+\/)+[^/\r\n]+\.(ts|js|tsx|jsx|mjs|cjs|mts|cts)/g, '')
       // Remove "at <location>" suffixes
-      .replace(/\bat\b.*$/g, '')
+      .replace(/\bat\b.*$/, '')
       .trim();
     return sanitized || 'An error occurred during extraction';
   }
