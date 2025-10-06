@@ -8,6 +8,8 @@ describe('DateQuickFix', () => {
   const defaultProps = {
     rowId: 'Klarna-1-2026-01-02-0',
     isoDate: '2026-01-02',
+    rawDueDate: '01/02/2026',
+    timezone: 'America/New_York',
     onFix: mockOnFix,
     onUndo: mockOnUndo,
     locale: 'US' as const
@@ -49,13 +51,14 @@ describe('DateQuickFix', () => {
       expect(mockOnFix).toHaveBeenCalledWith('2026-01-02');
     });
 
-    test('Re-parse EU calls onFix with current ISO date', () => {
+    test('Re-parse EU calls onFix with re-parsed ISO date', () => {
       render(<DateQuickFix {...defaultProps} />);
 
       const euButton = screen.getByLabelText('Re-parse as EU date format');
       fireEvent.click(euButton);
 
-      expect(mockOnFix).toHaveBeenCalledWith('2026-01-02');
+      // "01/02/2026" parsed as EU (DD/MM/YYYY) = February 1, 2026
+      expect(mockOnFix).toHaveBeenCalledWith('2026-02-01');
     });
 
     test('Re-parse shows status message and undo button', async () => {
@@ -65,7 +68,7 @@ describe('DateQuickFix', () => {
       fireEvent.click(usButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Re-parsed as US')).toBeInTheDocument();
+        expect(screen.getByText('Re-parsed as US locale')).toBeInTheDocument();
         expect(screen.getByLabelText('Undo last fix')).toBeInTheDocument();
       });
     });
@@ -205,12 +208,12 @@ describe('DateQuickFix', () => {
       const usButton = screen.getByLabelText('Re-parse as US date format');
       fireEvent.click(usButton);
 
-      expect(screen.getByText('Re-parsed as US')).toBeInTheDocument();
+      expect(screen.getByText('Re-parsed as US locale')).toBeInTheDocument();
 
       // Wait for message to auto-clear (3 seconds + buffer)
       await waitFor(
         () => {
-          expect(screen.queryByText('Re-parsed as US')).not.toBeInTheDocument();
+          expect(screen.queryByText('Re-parsed as US locale')).not.toBeInTheDocument();
         },
         { timeout: 4000 }
       );
@@ -218,15 +221,17 @@ describe('DateQuickFix', () => {
   });
 
   describe('Edge cases', () => {
-    test('handles missing isoDate gracefully', () => {
-      const props = { ...defaultProps, isoDate: undefined };
+    test('handles missing rawDueDate gracefully', () => {
+      const props = { ...defaultProps, rawDueDate: undefined };
       render(<DateQuickFix {...props} />);
 
       const usButton = screen.getByLabelText('Re-parse as US date format');
       fireEvent.click(usButton);
 
-      // Should not call onFix if isoDate is missing
+      // Should not call onFix if rawDueDate is missing (can't re-parse)
       expect(mockOnFix).not.toHaveBeenCalled();
+      // Should show error message
+      expect(screen.getByText('No raw date text available for re-parsing')).toBeInTheDocument();
     });
 
     test('accepts boundary dates (2020-01-01 and 2032-12-31)', () => {

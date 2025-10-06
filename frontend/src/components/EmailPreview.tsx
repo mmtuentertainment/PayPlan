@@ -12,6 +12,7 @@ interface EmailPreviewProps {
   onApplyFix?: (rowId: string, patch: { due_date: string }) => void;
   onUndoFix?: (rowId: string) => void;
   locale?: DateLocale;
+  timezone?: string;
 }
 
 /**
@@ -28,7 +29,7 @@ function getConfidenceLevel(score: number): { level: string; classes: string } {
   }
 }
 
-export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyFix, onUndoFix, locale = 'US' }: EmailPreviewProps) {
+export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyFix, onUndoFix, locale = 'US', timezone = 'America/New_York' }: EmailPreviewProps) {
   const [isCopying, setIsCopying] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [isBuilding, setIsBuilding] = useState(false);
@@ -128,7 +129,7 @@ export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyF
           <tbody>
             {items.map((item, idx) => {
               const { level, classes } = getConfidenceLevel(item.confidence);
-              const rowId = `${item.provider}-${item.installment_no}-${item.due_date}-${idx}`;
+              const rowId = `${idx}::${item.provider}::${item.installment_no}::${item.due_date}`;
               const showQuickFix = item.confidence < 0.6 && onApplyFix && onUndoFix;
 
               return (
@@ -164,6 +165,8 @@ export function EmailPreview({ items, onDelete, onCopyCSV, onBuildPlan, onApplyF
                         <DateQuickFix
                           rowId={rowId}
                           isoDate={item.due_date}
+                          rawDueDate={item.raw_due_date}
+                          timezone={timezone}
                           onFix={(dateISO) => onApplyFix(rowId, { due_date: dateISO })}
                           onUndo={() => onUndoFix(rowId)}
                           locale={locale}

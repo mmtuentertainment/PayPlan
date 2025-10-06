@@ -233,6 +233,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
                   onApplyFix={emailExtractor.applyRowFix}
                   onUndoFix={emailExtractor.undoRowFix}
                   locale={emailExtractor.result.dateLocale}
+                  timezone={tzDetected}
                 />
                 <EmailIssues issues={emailExtractor.result.issues} items={emailExtractor.editableItems} />
               </>

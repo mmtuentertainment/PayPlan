@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import type { DateLocale } from '../lib/date-parser';
+import { reparseDate } from '../lib/extraction/helpers';
 
 /**
  * DateQuickFix component - inline date correction UI for low-confidence rows
@@ -15,6 +16,8 @@ import type { DateLocale } from '../lib/date-parser';
  *
  * @param props.rowId - Unique identifier for the row
  * @param props.isoDate - Current date in ISO format (YYYY-MM-DD)
+ * @param props.rawDueDate - Original date text from email (e.g., "01/02/2026")
+ * @param props.timezone - IANA timezone for date parsing
  * @param props.onFix - Callback when date is fixed, receives new ISO date
  * @param props.onUndo - Callback when undo is triggered
  * @param props.locale - Current date locale preference
@@ -22,12 +25,14 @@ import type { DateLocale } from '../lib/date-parser';
 export interface DateQuickFixProps {
   rowId: string;
   isoDate?: string;
+  rawDueDate?: string;
+  timezone: string;
   onFix: (dateISO: string) => void;
   onUndo: () => void;
   locale: DateLocale;
 }
 
-export function DateQuickFix({ rowId, isoDate, onFix, onUndo }: DateQuickFixProps) {
+export function DateQuickFix({ rowId, rawDueDate, timezone, onFix, onUndo }: DateQuickFixProps) {
   const [manualDate, setManualDate] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [showUndo, setShowUndo] = useState(false);
@@ -71,12 +76,19 @@ export function DateQuickFix({ rowId, isoDate, onFix, onUndo }: DateQuickFixProp
   };
 
   const handleReparse = (targetLocale: DateLocale) => {
-    if (!isoDate) return;
+    if (!rawDueDate) {
+      setStatusMessage('No raw date text available for re-parsing');
+      return;
+    }
 
-    // Already in ISO format, just mark as fixed
-    onFix(isoDate);
-    setStatusMessage(`Re-parsed as ${targetLocale}`);
-    setShowUndo(true);
+    try {
+      const newIsoDate = reparseDate(rawDueDate, timezone, targetLocale);
+      onFix(newIsoDate);
+      setStatusMessage(`Re-parsed as ${targetLocale} locale`);
+      setShowUndo(true);
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'Re-parse failed');
+    }
   };
 
   const handleUndo = () => {
