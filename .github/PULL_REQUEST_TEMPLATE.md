@@ -15,8 +15,10 @@ Single revert of this commit. No data migrations.
 
 ## Verification
 ```bash
-npm run spec:path   # prints OpenAPI spec path or "No OpenAPI spec found; skipping"
+npm run spec:path        # prints OpenAPI spec path or "No OpenAPI spec found; skipping"
+npm run lint:api-drift   # checks for API changes without spec updates
 # CI will lint OpenAPI if present and post results to the Summary (non-blocking).
+# CI will run "API Drift Sentinel" — if API changed without spec, you'll see a Problem Details JSON excerpt.
 ```
 
 ## LOC Budget

@@ -14,7 +14,8 @@
     "test:all": "npm test && npm run test:frontend",
     "vercel-build": "cd frontend && npm install && npm run build",
     "audit:specs": "node scripts/audit-spec-paths.mjs",
-    "spec:path": "node -e \"const fs=require('fs');const c=['openapi.yaml','openapi.yml','api/openapi.yaml','api/openapi.yml'].find(p=>fs.existsSync(p));console.log(c?('OpenAPI spec: '+c):'No OpenAPI spec found; skipping')\""
+    "spec:path": "node -e \"const fs=require('fs');const c=['openapi.yaml','openapi.yml','api/openapi.yaml','api/openapi.yml'].find(p=>fs.existsSync(p));console.log(c?('OpenAPI spec: '+c):'No OpenAPI spec found; skipping')\"",
+    "lint:api-drift": "node scripts/check-api-drift.mjs"
   },
   "keywords": [
     "payment",
