@@ -1,0 +1,65 @@
+name: PR Hygiene (Delta 0015)
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  openapi-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Detect OpenAPI spec
+        id: detect
+        run: |
+          for p in "openapi.yaml" "openapi.yml" "api/openapi.yaml" "api/openapi.yml"; do
+            if [[ -f "$p" ]]; then
+              echo "path=$p" >> "$GITHUB_OUTPUT"
+              echo "Found OpenAPI spec at: $p"
+              exit 0
+            fi
+          done
+          echo "path=" >> "$GITHUB_OUTPUT"
+          echo "No OpenAPI spec found"
+
+      - name: Lint OpenAPI with Spectral
+        if: steps.detect.outputs.path != ''
+        continue-on-error: true
+        run: |
+          npx -y @stoplight/spectral-cli lint "${{ steps.detect.outputs.path }}" --quiet --format json > spectral.json || true
+
+      - name: Summarize to GitHub Actions Summary
+        if: always()
+        run: |
+          echo "## Delta 0015 — OpenAPI Lint" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ -z "${{ steps.detect.outputs.path }}" ]]; then
+            echo "> Skipped (no OpenAPI spec found)." >> "$GITHUB_STEP_SUMMARY"
+          elif [[ ! -f spectral.json ]] || ! jq empty spectral.json 2>/dev/null; then
+            echo "ℹ️ Spectral did not run (no spec or earlier step skipped)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            COUNT=$(jq 'length' spectral.json)
+            if [[ "$COUNT" -eq 0 ]]; then
+              echo "✅ No Spectral issues detected." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "Found **$COUNT** issue(s)." >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "### Problem Details (excerpt)" >> "$GITHUB_STEP_SUMMARY"
+              echo '```json' >> "$GITHUB_STEP_SUMMARY"
+              jq '.[0:25]' spectral.json >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "_Note:_ Non-blocking for now. Make blocking later by removing \`continue-on-error: true\`." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi

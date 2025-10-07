@@ -1,0 +1,46 @@
+name: API Drift Sentinel (Delta 0016)
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run drift check (non-blocking)
+        id: drift
+        continue-on-error: true
+        run: node scripts/check-api-drift.mjs | tee drift.jsonl
+
+      - name: Summary (RFC9457 excerpt)
+        if: always()
+        run: |
+          echo "## Delta 0016 — API Drift Sentinel" >> "$GITHUB_STEP_SUMMARY"
+
+          if grep -q '"title": "API drift detected' drift.jsonl 2>/dev/null; then
+            echo "**❌ Drift detected** — API changed but spec not updated." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat drift.jsonl | head -n 1 >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "_Note:_ Non-blocking for now. Add label 'api-no-spec' if intentional, or update openapi.(yml|yaml)." >> "$GITHUB_STEP_SUMMARY"
+          elif grep -q '"spec_touched": true' drift.jsonl 2>/dev/null; then
+            echo "✅ API changes with spec update." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ℹ️ No API changes detected; skipped." >> "$GITHUB_STEP_SUMMARY"
+          fi
