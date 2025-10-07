@@ -10,6 +10,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "jest",
+    "test:frontend": "cd frontend && npm test",
+    "test:all": "npm test && npm run test:frontend",
     "vercel-build": "cd frontend && npm install && npm run build"
   },
   "keywords": [
