@@ -738,8 +738,8 @@ frontend/src/
 │   └── EmailIssues.tsx         # New: Validation errors list
 ├── lib/
 │   ├── email-extractor.ts      # New: Core parser (pure functions)
-│   ├── provider-detectors.ts   # New: Per-provider regex patterns
-│   └── date-parser.ts          # New: Date normalization utilities
+│   ├── extraction/providers/detector.ts   # New: Per-provider regex patterns
+│   └── extraction/extractors/date.ts          # New: Date normalization utilities
 └── hooks/
     └── useEmailExtractor.ts    # New: React hook wrapping extractor
 ```
@@ -865,7 +865,7 @@ type Provider = 'Klarna' | 'Affirm' | 'Afterpay' | 'PayPal' | 'Zip' | 'Sezzle' |
 
 ---
 
-### Provider-Specific Patterns: `provider-detectors.ts`
+### Provider-Specific Patterns: `extraction/providers/detector.ts`
 
 **Purpose:** Regex patterns and heuristics per provider.
 
@@ -908,7 +908,7 @@ export const PROVIDER_PATTERNS = {
 
 ---
 
-### Date Parser: `date-parser.ts`
+### Date Parser: `extraction/extractors/date.ts`
 
 **Purpose:** Normalize various date formats to ISO YYYY-MM-DD using Luxon.
 

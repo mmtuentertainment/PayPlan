@@ -29,7 +29,7 @@
 
 ### Implementation
 
-**File:** `frontend/src/lib/date-parser.ts`
+**File:** `frontend/src/lib/extraction/extractors/date.ts`
 
 1. Add `DateLocale` type:
    ```typescript
@@ -100,7 +100,7 @@ describe('parseDate with locale', () => {
 
 ### Acceptance Criteria
 
-- [ ] `DateLocale` type exported from `date-parser.ts`
+- [ ] `DateLocale` type exported from `extraction/extractors/date.ts`
 - [ ] `parseDate()` accepts optional `{ dateLocale: 'US' | 'EU' }` parameter
 - [ ] US mode: "01/02/2025" → 2025-01-02
 - [ ] EU mode: "01/02/2025" → 2025-02-01
@@ -773,7 +773,7 @@ Frontend-only: Add US/EU date locale toggle + inline date Quick Fix for low-conf
 ## Files Changed (6)
 - NEW: frontend/src/components/LocaleToggle.tsx (+60 LOC)
 - NEW: frontend/src/components/DateQuickFix.tsx (+80 LOC)
-- UPDATE: frontend/src/lib/date-parser.ts (+15 LOC)
+- UPDATE: frontend/src/lib/extraction/extractors/date.ts (+15 LOC)
 - UPDATE: frontend/src/lib/email-extractor.ts (+10 LOC)
 - UPDATE: frontend/src/components/EmailInput.tsx (+15 LOC)
 - UPDATE: frontend/src/components/EmailPreview.tsx (+40 LOC)

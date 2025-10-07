@@ -58,7 +58,7 @@ export function extractItemsFromEmails
 **Dependencies:** Task 1
 
 ### Description
-Create `frontend/src/lib/provider-detectors.ts` with regex patterns for Klarna and Affirm detection and data extraction.
+Create `frontend/src/lib/extraction/providers/detector.ts` with regex patterns for Klarna and Affirm detection and data extraction.
 
 ### Acceptance Criteria
 - [ ] `PROVIDER_PATTERNS` object with Klarna and Affirm patterns
@@ -71,7 +71,7 @@ Create `frontend/src/lib/provider-detectors.ts` with regex patterns for Klarna a
 - [ ] All functions handle missing data gracefully (throw descriptive errors)
 
 ### Implementation Steps
-1. Create file `frontend/src/lib/provider-detectors.ts`
+1. Create file `frontend/src/lib/extraction/providers/detector.ts`
 2. Define `ProviderPatterns` interface
 3. Create `PROVIDER_PATTERNS` with Klarna regex patterns
 4. Add Affirm patterns to `PROVIDER_PATTERNS`
@@ -85,14 +85,14 @@ Create `frontend/src/lib/provider-detectors.ts` with regex patterns for Klarna a
 ```bash
 # Test provider detection manually
 node -e "
-const { detectProvider } = require('./frontend/src/lib/provider-detectors.ts');
+const { detectProvider } = require('./frontend/src/lib/extraction/providers/detector.ts');
 console.log(detectProvider('From: Klarna')); // Should output: Klarna
 console.log(detectProvider('From: Affirm')); // Should output: Affirm
 console.log(detectProvider('From: Unknown')); // Should output: Unknown
 "
 
 # Check all exports present
-grep "export function" frontend/src/lib/provider-detectors.ts | wc -l
+grep "export function" frontend/src/lib/extraction/providers/detector.ts | wc -l
 # Expected: 6 functions
 ```
 
@@ -105,7 +105,7 @@ grep "export function" frontend/src/lib/provider-detectors.ts | wc -l
 **Dependencies:** Task 1
 
 ### Description
-Create `frontend/src/lib/date-parser.ts` to normalize various date formats to ISO YYYY-MM-DD using Luxon.
+Create `frontend/src/lib/extraction/extractors/date.ts` to normalize various date formats to ISO YYYY-MM-DD using Luxon.
 
 ### Acceptance Criteria
 - [ ] `parseDate(dateStr, timezone)` handles 6+ date formats
@@ -116,7 +116,7 @@ Create `frontend/src/lib/date-parser.ts` to normalize various date formats to IS
 - [ ] Uses Luxon's timezone support
 
 ### Implementation Steps
-1. Create file `frontend/src/lib/date-parser.ts`
+1. Create file `frontend/src/lib/extraction/extractors/date.ts`
 2. Import DateTime from luxon
 3. Define array of supported date formats
 4. Implement `parseDate()` trying each format sequentially
@@ -127,11 +127,11 @@ Create `frontend/src/lib/date-parser.ts` to normalize various date formats to IS
 ### Verification
 ```bash
 # Run unit tests
-npm test -- date-parser.test.ts
+npm test -- date.test.ts
 
 # Manual verification
 node -e "
-const { parseDate } = require('./frontend/src/lib/date-parser.ts');
+const { parseDate } = require('./frontend/src/lib/extraction/extractors/date.ts');
 console.log(parseDate('Oct 6, 2025', 'America/New_York')); // 2025-10-06
 console.log(parseDate('10/6/2025', 'America/New_York'));   // 2025-10-06
 console.log(parseDate('October 6th, 2025', 'America/New_York')); // 2025-10-06
@@ -423,7 +423,7 @@ Create comprehensive unit tests, integration test, fixtures, and update document
 ### Implementation Steps
 
 **Unit Tests:**
-1. Create `tests/unit/email-extractor.test.ts`:
+1. Create `frontend/tests/unit/email-extractor.test.ts`:
    - Test Klarna extraction
    - Test Affirm extraction
    - Test deduplication
@@ -431,18 +431,18 @@ Create comprehensive unit tests, integration test, fixtures, and update document
    - Test multiple dates handling
    - Test HTML sanitization
 
-2. Create `tests/unit/provider-detectors.test.ts`:
+2. Create `frontend/tests/unit/provider-detectors.test.ts`:
    - Test provider detection
    - Test amount extraction
    - Test installment number parsing
    - Test autopay detection
 
-3. Create `tests/unit/date-parser.test.ts`:
+3. Create `frontend/tests/unit/date-parser.test.ts`:
    - Test date format parsing
    - Test suspicious date flagging
 
 **Integration Test:**
-4. Create `tests/integration/emails-to-plan.test.ts`:
+4. Create `frontend/tests/integration/emails-to-plan.test.ts`:
    - Full flow: SAMPLE_EMAILS → extract → POST /api/plan → verify response
 
 **Fixtures:**
@@ -472,10 +472,10 @@ Create comprehensive unit tests, integration test, fixtures, and update document
 npm test
 
 # Expected output:
-# PASS tests/unit/email-extractor.test.ts (6 tests)
-# PASS tests/unit/provider-detectors.test.ts (4 tests)
-# PASS tests/unit/date-parser.test.ts (2 tests)
-# PASS tests/integration/emails-to-plan.test.ts (1 test)
+# PASS frontend/tests/unit/email-extractor.test.ts (6 tests)
+# PASS frontend/tests/unit/provider-detectors.test.ts (4 tests)
+# PASS frontend/tests/unit/date-parser.test.ts (2 tests)
+# PASS frontend/tests/integration/emails-to-plan.test.ts (1 test)
 #
 # Test Suites: 4 passed, 4 total
 # Tests: 13 passed, 13 total

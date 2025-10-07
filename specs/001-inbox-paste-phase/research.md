@@ -45,7 +45,7 @@ Research email patterns for 4 new BNPL providers: Afterpay, PayPal Pay in 4, Zip
 - "Late fee: $7.00"
 - Default: $0 (if not mentioned)
 
-**Decision**: Add `afterpay` entry to `PROVIDER_PATTERNS` in `provider-detectors.ts` with above patterns.
+**Decision**: Add `afterpay` entry to `PROVIDER_PATTERNS` in `extraction/providers/detector.ts` with above patterns.
 
 #### 1.2 PayPal Pay in 4
 
@@ -215,7 +215,7 @@ Survey OWASP PII guidelines and existing Phase A `redactPII` function in `email-
 
 ### Extension Strategy
 Existing `redactPII` function in `email-extractor.ts:173-189` already implements these patterns. We'll:
-1. Extract `redactPII` into a standalone module: `frontend/src/lib/redact.ts`
+1. Extract `redactPII` into a standalone module: `frontend/src/lib/extraction/helpers/redaction.ts`
 2. Add unit tests to ensure all patterns work
 3. Import and reuse in `email-extractor.ts` and `EmailIssues.tsx`
 
@@ -236,7 +236,7 @@ Understand extension points in Phase A code to ensure backward compatibility (FR
 
 ### Files Reviewed
 
-#### 4.1 `frontend/src/lib/provider-detectors.ts`
+#### 4.1 `frontend/src/lib/extraction/providers/detector.ts`
 
 **Current Structure**:
 - `Provider` type: `'Klarna' | 'Affirm' | 'Unknown'`
@@ -291,12 +291,12 @@ Understand extension points in Phase A code to ensure backward compatibility (FR
      autopay: autopay !== undefined
    });
    ```
-3. Move `redactPII` to `frontend/src/lib/redact.ts` and import
+3. Move `redactPII` to `frontend/src/lib/extraction/helpers/redaction.ts` and import
 4. Update `Issue` interface to add `fieldHints: string[]` for low-confidence items
 
 **Backward Compatibility**: Existing extraction logic unchanged; confidence added as new field, defaults to 1.0 for backward compat if needed.
 
-#### 4.3 `frontend/src/lib/date-parser.ts`
+#### 4.3 `frontend/src/lib/extraction/extractors/date.ts`
 
 **Current Structure**:
 - `parseDate(dateStr: string, timezone: string): string` - timezone-aware parsing

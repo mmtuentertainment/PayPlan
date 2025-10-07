@@ -673,7 +673,7 @@ Due: 2025-11-15
 
 - **v0.1.4-b spec:** [specs/001-inbox-paste-phase/spec.md](../001-inbox-paste-phase/spec.md)
 - **Confidence architecture:** [frontend/src/lib/confidence.ts](../../frontend/src/lib/confidence.ts)
-- **Provider detectors:** [frontend/src/lib/provider-detectors.ts](../../frontend/src/lib/provider-detectors.ts)
+- **Provider detectors:** [frontend/src/lib/extraction/providers/detector.ts](../../frontend/src/lib/extraction/providers/detector.ts)
 - **shadcn/ui components:** [ui.shadcn.com](https://ui.shadcn.com)
 
 ---

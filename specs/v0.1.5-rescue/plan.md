@@ -30,7 +30,7 @@ Implement frontend-only date locale support (US/EU) and inline date Quick Fix fo
 5. Issues shown in `EmailIssues.tsx` for confidence <0.6
 
 **Key Files:**
-- `frontend/src/lib/date-parser.ts` — Date parsing logic
+- `frontend/src/lib/extraction/extractors/date.ts` — Date parsing logic
 - `frontend/src/lib/email-extractor.ts` — Main extraction orchestrator
 - `frontend/src/components/EmailInput.tsx` — Paste UI
 - `frontend/src/components/EmailPreview.tsx` — Results table
@@ -62,7 +62,7 @@ Implement frontend-only date locale support (US/EU) and inline date Quick Fix fo
 
 ### 1.1 Date Parser Enhancement
 
-**File:** `frontend/src/lib/date-parser.ts`
+**File:** `frontend/src/lib/extraction/extractors/date.ts`
 
 **Changes:**
 ```typescript
@@ -614,7 +614,7 @@ Frontend-only: Add US/EU date locale toggle + inline date Quick Fix for low-conf
 ## Files Changed (6)
 - NEW: frontend/src/components/LocaleToggle.tsx (+60 LOC)
 - NEW: frontend/src/components/DateQuickFix.tsx (+80 LOC)
-- UPDATE: frontend/src/lib/date-parser.ts (+15 LOC)
+- UPDATE: frontend/src/lib/extraction/extractors/date.ts (+15 LOC)
 - UPDATE: frontend/src/lib/email-extractor.ts (+10 LOC)
 - UPDATE: frontend/src/components/EmailInput.tsx (+15 LOC)
 - UPDATE: frontend/src/components/EmailPreview.tsx (+40 LOC)
@@ -673,7 +673,7 @@ Add section:
 ### Task Breakdown (8 tasks)
 
 **T1: Date Parser Locale Support** (1-2 hours)
-- [ ] Add `DateLocale` type to `date-parser.ts`
+- [ ] Add `DateLocale` type to `extraction/extractors/date.ts`
 - [ ] Add `options` parameter with `dateLocale`
 - [ ] Update format array logic (US vs EU)
 - [ ] Write 6 unit tests (US/EU disambiguation)

@@ -34,26 +34,26 @@ This is a **web application** with separated frontend and backend:
 
 ### T1: Extract PII Redaction to Standalone Module
 
-**Description**: Extract existing `redactPII()` function from `email-extractor.ts` into a new standalone module `redact.ts` with unit tests. This enables reuse in `EmailIssues.tsx` and enforces DRY.
+**Description**: Extract existing `redactPII()` function from `email-extractor.ts` into a new standalone module `redaction.ts` with unit tests. This enables reuse in `EmailIssues.tsx` and enforces DRY.
 
 **Status**: ⏳ Not Started
 
 **Files to Modify**:
-- ✏️ Create: `frontend/src/lib/redact.ts`
-- ✏️ Modify: `frontend/src/lib/email-extractor.ts` (remove `redactPII`, import from redact.ts)
+- ✏️ Create: `frontend/src/lib/extraction/helpers/redaction.ts`
+- ✏️ Modify: `frontend/src/lib/email-extractor.ts` (remove `redactPII`, import from redaction.ts)
 - ✏️ Create: `frontend/tests/unit/redact.test.ts`
 
 **Acceptance Criteria**:
-- [x] `redactPII()` exported from `frontend/src/lib/redact.ts`
+- [x] `redactPII()` exported from `frontend/src/lib/extraction/helpers/redaction.ts`
 - [x] Email addresses replaced with `[EMAIL]`
 - [x] Dollar amounts replaced with `[AMOUNT]`
 - [x] Account numbers (4+ digits) replaced with `[ACCOUNT]`
 - [x] Names (capitalized pairs) replaced with `[NAME]`
 - [x] Unit tests cover all 4 redaction patterns + combined PII
-- [x] `email-extractor.ts` imports and uses `redactPII` from `redact.ts`
+- [x] `email-extractor.ts` imports and uses `redactPII` from `redaction.ts`
 - [x] JSDoc on `redactPII()` with @param, @returns, @example
 
-**Code Stub** (`frontend/src/lib/redact.ts`):
+**Code Stub** (`frontend/src/lib/extraction/helpers/redaction.ts`):
 ```typescript
 /**
  * Redacts PII and sensitive financial data from text snippets.
@@ -126,7 +126,7 @@ cd frontend
 npm test -- redact.test.ts
 
 # Verify JSDoc coverage
-npx typedoc --entryPoints src/lib/redact.ts --out docs/redact --excludePrivate
+npx typedoc --entryPoints src/lib/extraction/helpers/redaction.ts --out docs/redact --excludePrivate
 ```
 
 **Verification Steps**:
@@ -136,14 +136,14 @@ npx typedoc --entryPoints src/lib/redact.ts --out docs/redact --excludePrivate
 4. JSDoc renders correctly in IDE hover
 
 **Definition of Done**:
-- [ ] `redact.ts` created with `redactPII()` function
+- [ ] `redaction.ts` created with `redactPII()` function
 - [ ] 5 unit tests pass (email, amount, account, name, combined)
-- [ ] `email-extractor.ts` imports and uses `redactPII` from `redact.ts`
+- [ ] `email-extractor.ts` imports and uses `redactPII` from `redaction.ts`
 - [ ] JSDoc complete with @param, @returns, @example
 - [ ] No lint errors
 - [ ] Git commit: `feat: Extract PII redaction to standalone module`
 
-**Estimated LOC**: +40 (redact.ts: ~30, tests: ~50, email-extractor.ts: -10)
+**Estimated LOC**: +40 (redaction.ts: ~30, tests: ~50, email-extractor.ts: -10)
 
 ---
 
@@ -365,13 +365,13 @@ npm run build
 
 ### T3: Add Afterpay Provider Detector
 
-**Description**: Extend `provider-detectors.ts` to support Afterpay emails. Add `'Afterpay'` to `Provider` type union and add `afterpay` entry to `PROVIDER_PATTERNS` with email domain and keyword signatures.
+**Description**: Extend `extraction/providers/detector.ts` to support Afterpay emails. Add `'Afterpay'` to `Provider` type union and add `afterpay` entry to `PROVIDER_PATTERNS` with email domain and keyword signatures.
 
 **Status**: ⏳ Not Started
 **Depends On**: T2 (confidence engine must exist for integration)
 
 **Files to Modify**:
-- ✏️ Modify: `frontend/src/lib/provider-detectors.ts`
+- ✏️ Modify: `frontend/src/lib/extraction/providers/detector.ts`
 - ✏️ Create: `frontend/tests/unit/afterpay-detector.test.ts`
 - ✏️ Create: `frontend/tests/fixtures/emails/afterpay-payment1.txt`
 - ✏️ Create: `frontend/tests/fixtures/emails/afterpay-payment2.txt`
@@ -384,7 +384,7 @@ npm run build
 - [x] Unit tests cover happy path + edge cases (HTML, text, missing fields)
 - [x] JSDoc updated on `Provider` type
 
-**Code Stub** (`frontend/src/lib/provider-detectors.ts`):
+**Code Stub** (`frontend/src/lib/extraction/providers/detector.ts`):
 ```typescript
 // Extend Provider type
 export type Provider =
@@ -951,7 +951,7 @@ npm test -- --coverage
 
 **Verification Steps**:
 1. All unit tests pass
-2. Coverage report shows ≥80% on redact.ts, email-extractor.ts, provider-detectors.ts
+2. Coverage report shows ≥80% on redaction.ts, email-extractor.ts, extraction/providers/detector.ts
 3. No test failures in CI
 
 **Definition of Done**:
@@ -1100,7 +1100,7 @@ npm test -- inbox-paste-e2e.test.ts
 
 **Files to Modify**:
 - ✏️ Modify: `README.md` (add providers, confidence legend)
-- ✏️ Verify JSDoc on: `redact.ts`, `email-extractor.ts`, `provider-detectors.ts`
+- ✏️ Verify JSDoc on: `redaction.ts`, `email-extractor.ts`, `extraction/providers/detector.ts`
 - ✏️ Create: `docs/confidence-scoring.md` (detailed algorithm explanation)
 
 **Acceptance Criteria**:
@@ -1205,13 +1205,13 @@ npm run build
 
 ### T9: Add PayPal Pay in 4 Provider Detector
 
-**Description**: Extend `provider-detectors.ts` to support PayPal Pay in 4 emails. Add `'PayPal Pay in 4'` to `Provider` type and add `paypal4` entry to `PROVIDER_PATTERNS`.
+**Description**: Extend `extraction/providers/detector.ts` to support PayPal Pay in 4 emails. Add `'PayPal Pay in 4'` to `Provider` type and add `paypal4` entry to `PROVIDER_PATTERNS`.
 
 **Status**: ⏳ Not Started
 **Depends On**: T1-T8 (Phase A' complete)
 
 **Files to Modify**:
-- ✏️ Modify: `frontend/src/lib/provider-detectors.ts`
+- ✏️ Modify: `frontend/src/lib/extraction/providers/detector.ts`
 - ✏️ Create: `frontend/tests/unit/paypal4-detector.test.ts`
 - ✏️ Create: `frontend/tests/fixtures/emails/paypal4-payment1.txt`
 - ✏️ Create: `frontend/tests/fixtures/emails/paypal4-payment2.txt`
@@ -1224,7 +1224,7 @@ npm run build
 - [x] Unit tests cover happy path + edge cases
 - [x] JSDoc updated
 
-**Code Stub** (`frontend/src/lib/provider-detectors.ts`):
+**Code Stub** (`frontend/src/lib/extraction/providers/detector.ts`):
 ```typescript
 // Extend Provider type
 export type Provider =
@@ -1349,13 +1349,13 @@ npm run build
 
 ### T10: Add Zip & Sezzle Provider Detectors
 
-**Description**: Extend `provider-detectors.ts` to support Zip and Sezzle emails. Add both to `Provider` type and add entries to `PROVIDER_PATTERNS`.
+**Description**: Extend `extraction/providers/detector.ts` to support Zip and Sezzle emails. Add both to `Provider` type and add entries to `PROVIDER_PATTERNS`.
 
 **Status**: ⏳ Not Started
 **Depends On**: T9 (PayPal Pay in 4 complete)
 
 **Files to Modify**:
-- ✏️ Modify: `frontend/src/lib/provider-detectors.ts`
+- ✏️ Modify: `frontend/src/lib/extraction/providers/detector.ts`
 - ✏️ Create: `frontend/tests/unit/zip-detector.test.ts`
 - ✏️ Create: `frontend/tests/unit/sezzle-detector.test.ts`
 - ✏️ Create: `frontend/tests/fixtures/emails/zip-payment1.txt`
@@ -1370,7 +1370,7 @@ npm run build
 - [x] JSDoc updated
 - [x] Final README update with all 6 providers
 
-**Code Stub** (`frontend/src/lib/provider-detectors.ts`):
+**Code Stub** (`frontend/src/lib/extraction/providers/detector.ts`):
 ```typescript
 // Final Provider type
 export type Provider =
@@ -1556,7 +1556,7 @@ npm test # Run all tests to ensure no regressions
 
 | Task | Description | LOC | Depends On | Parallel |
 |------|-------------|-----|------------|----------|
-| T1 | Extract PII redaction to redact.ts | +40 | None | ✅ |
+| T1 | Extract PII redaction to redaction.ts | +40 | None | ✅ |
 | T2 | Add confidence scoring | +50 | T1 | ✅ |
 | T3 | Add Afterpay detector | +40 | T2 | ✅ |
 | T4 | Add confidence pills UI | +60 | T2 | ✅ |
@@ -1575,7 +1575,7 @@ npm test # Run all tests to ensure no regressions
 ## Dependencies
 
 ```
-T1 (redact.ts) → T2, T5
+T1 (redaction.ts) → T2, T5
 T2 (confidence) → T3, T4, T5
 T1-T5 → T6 (unit tests)
 T6 → T7 (integration)
@@ -1589,7 +1589,7 @@ T9 → T10 (Zip, Sezzle)
 ## Parallel Execution Strategy
 
 **Phase 1 (v0.1.4-a foundation)**:
-- T1 (redact.ts) alone (no dependencies)
+- T1 (redaction.ts) alone (no dependencies)
 - Wait for T1 → Launch T2, T3, T4, T5 in parallel
 
 **Phase 2 (v0.1.4-a tests)**:

@@ -31,9 +31,14 @@
 ```
 frontend/src/
 ├── lib/
-│   ├── email-extractor.ts          # Core extraction logic (100 LOC)
-│   ├── provider-detectors.ts       # Klarna/Affirm regex patterns (80 LOC)
-│   ├── date-parser.ts              # Date normalization + validation (60 LOC)
+│   ├── email-extractor.ts          # Core orchestrator (now calls extraction/* modules)
+│   ├── extraction/
+│   │   ├── providers/
+│   │   │   └── detector.ts         # Klarna/Affirm regex patterns (80 LOC)
+│   │   ├── extractors/
+│   │   │   └── date.ts             # Date normalization + validation (60 LOC)
+│   │   └── helpers/
+│   │       └── (various utilities)
 │   └── sample-emails.ts            # Sample data for demo (40 LOC)
 ├── hooks/
 │   └── useEmailExtractor.ts        # React state management (40 LOC)
@@ -43,7 +48,7 @@ frontend/src/
 │   └── EmailIssues.tsx             # Validation errors list (40 LOC)
 └── App.tsx                         # Wire Emails tab (modify existing)
 
-tests/
+frontend/tests/
 ├── unit/
 │   ├── email-extractor.test.ts     # Core logic tests
 │   ├── provider-detectors.test.ts  # Pattern matching tests
@@ -59,6 +64,8 @@ tests/
         ├── multi-date.txt
         └── unknown-provider.txt
 ```
+
+**Note (2025-10-07)**: As of v0.1.5-a.2, extraction logic has been refactored into modular architecture under `frontend/src/lib/extraction/{providers,extractors,helpers}/`. See `ops/deltas/0013_realignment.md` for full migration details.
 
 **Total Estimated LOC:** ~400
 
@@ -190,7 +197,7 @@ function deduplicateItems(items: Item[]): Item[] {
 
 ---
 
-### 2. Provider Detection: `provider-detectors.ts`
+### 2. Provider Detection: `extraction/providers/detector.ts`
 
 **Purpose:** Regex patterns for Klarna & Affirm.
 
@@ -329,7 +336,7 @@ export function extractDueDate(
   patterns: RegExp[],
   timezone: string
 ): string {
-  import { parseDate } from './date-parser';
+  import { parseDate } from '../extractors/date';
 
   for (const pattern of patterns) {
     const match = text.match(pattern);
@@ -347,7 +354,7 @@ export function extractDueDate(
 
 ---
 
-### 3. Date Parser: `date-parser.ts`
+### 3. Date Parser: `extraction/extractors/date.ts`
 
 **Purpose:** Normalize various date formats using Luxon.
 
@@ -919,9 +926,9 @@ function sanitizeHtml(text: string): string {
 ## Deliverables
 
 1. **Code:**
-   - `frontend/src/lib/email-extractor.ts`
-   - `frontend/src/lib/provider-detectors.ts`
-   - `frontend/src/lib/date-parser.ts`
+   - `frontend/src/lib/email-extractor.ts` (orchestrator)
+   - `frontend/src/lib/extraction/providers/detector.ts`
+   - `frontend/src/lib/extraction/extractors/date.ts`
    - `frontend/src/lib/sample-emails.ts`
    - `frontend/src/hooks/useEmailExtractor.ts`
    - `frontend/src/components/EmailInput.tsx`
@@ -930,11 +937,11 @@ function sanitizeHtml(text: string): string {
    - Modified: `frontend/src/App.tsx` (add Emails tab)
 
 2. **Tests:**
-   - `tests/unit/email-extractor.test.ts`
-   - `tests/unit/provider-detectors.test.ts`
-   - `tests/unit/date-parser.test.ts`
-   - `tests/integration/emails-to-plan.test.ts`
-   - `tests/fixtures/emails/*.txt` (6 files)
+   - `frontend/tests/unit/email-extractor.test.ts`
+   - `frontend/tests/unit/provider-detectors.test.ts`
+   - `frontend/tests/unit/date-parser.test.ts`
+   - `frontend/tests/integration/emails-to-plan.test.ts`
+   - `frontend/tests/fixtures/emails/*.txt` (6 files)
 
 3. **Documentation:**
    - Updated `README.md` (Inbox Paste section)
