@@ -100,7 +100,7 @@ confidence = (
 
 **Purpose**: Pattern-matching definition for each BNPL provider's email structure.
 
-**Location**: `frontend/src/lib/provider-detectors.ts`
+**Location**: `frontend/src/lib/extraction/providers/detector.ts`
 
 **TypeScript Interface**:
 ```typescript
@@ -247,7 +247,7 @@ All `snippet` and `reason` fields MUST pass through `redactPII()` function (see 
 
 **Purpose**: Protect user privacy by masking sensitive data in error messages and issue snippets.
 
-**Location**: `frontend/src/lib/redact.ts` (NEW module extracted from Phase A)
+**Location**: `frontend/src/lib/extraction/helpers/redaction.ts` (NEW module extracted from Phase A)
 
 **Function Signature**:
 ```typescript
@@ -408,7 +408,7 @@ Threshold check:
 
 ### Unit Test Coverage
 
-**provider-detectors.ts**:
+**extraction/providers/detector.ts**:
 - [ ] Test Afterpay detection (happy path + edge cases)
 - [ ] Test PayPal Pay in 4 detection (happy path + edge cases)
 - [ ] Test Zip detection (happy path + edge cases)

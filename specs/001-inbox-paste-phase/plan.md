@@ -45,7 +45,7 @@ Expand PayPlan's Inbox Paste feature to support 4 new BNPL providers (Afterpay, 
 
 Since the project constitution is a template and not yet ratified, we apply general software engineering best practices:
 
-✓ **Library-First Thinking**: New provider detectors in `provider-detectors.ts` are pure functions; confidence engine in `email-extractor.ts` is self-contained
+✓ **Library-First Thinking**: New provider detectors in `extraction/providers/detector.ts` are pure functions; confidence engine in `email-extractor.ts` is self-contained
 ✓ **Test-First (TDD)**: Contract tests and unit tests will be written before implementation in Phase 1
 ✓ **Simplicity**: Confidence scoring uses weighted sum (no ML); PII redaction uses simple regex patterns; no new dependencies
 ✓ **Backward Compatibility**: Phase A providers (Klarna, Affirm) remain unchanged; existing CSV/preview components extended, not replaced
@@ -87,10 +87,10 @@ frontend/
 │   │   ├── EmailPreview.tsx        # MODIFIED: Add confidence pills, CSV column
 │   │   └── EmailIssues.tsx         # MODIFIED: Add low-confidence flags
 │   ├── lib/              # Frontend business logic
-│   │   ├── provider-detectors.ts   # MODIFIED: Add Afterpay, PayPal Pay in 4, Zip, Sezzle
+│   │   ├── extraction/providers/detector.ts   # MODIFIED: Add Afterpay, PayPal Pay in 4, Zip, Sezzle
 │   │   ├── email-extractor.ts      # MODIFIED: Add confidence scoring
-│   │   ├── date-parser.ts          # REUSED: No changes (Phase A)
-│   │   └── redact.ts               # NEW: PII redaction utility
+│   │   ├── extraction/extractors/date.ts          # REUSED: No changes (Phase A)
+│   │   └── extraction/helpers/redaction.ts               # NEW: PII redaction utility
 │   └── pages/
 └── tests/
     ├── unit/
@@ -124,7 +124,7 @@ frontend/
    - Rationale: Privacy requirement (FR-139)
 
 4. **Existing Phase A Architecture Review**:
-   - Task: Review provider-detectors.ts, email-extractor.ts, date-parser.ts structure
+   - Task: Review extraction/providers/detector.ts, email-extractor.ts, extraction/extractors/date.ts structure
    - Method: Read existing code to understand extension points
    - Output: Extension strategy document
    - Rationale: Ensure backward compatibility (FR-145)
@@ -185,8 +185,8 @@ No agent-specific file update needed (constitution template suggests this, but r
 - Generate from user-provided task list in initial request:
   1. Confidence engine scaffold (email-extractor.ts)
   2. Confidence pill UI + CSV column (EmailPreview.tsx)
-  3. PII redaction enforcement (redact.ts + EmailIssues.tsx)
-  4. Afterpay detector (provider-detectors.ts)
+  3. PII redaction enforcement (extraction/helpers/redaction.ts + EmailIssues.tsx)
+  4. Afterpay detector (extraction/providers/detector.ts)
   5. Thresholded Issues (EmailIssues.tsx)
   6. Tests Phase A' (40+ unit total target)
   7. Integration test (emails→preview→CSV→/api/plan)
@@ -196,7 +196,7 @@ No agent-specific file update needed (constitution template suggests this, but r
 
 **Ordering Strategy**:
 - TDD order: Contract tests → Implementation → Integration tests
-- Dependency order: redact.ts → provider-detectors.ts → email-extractor.ts → UI components
+- Dependency order: extraction/helpers/redaction.ts → extraction/providers/detector.ts → email-extractor.ts → UI components
 - Mark [P] for parallel execution where files are independent
 
 **Estimated Output**: 10 numbered, ordered tasks in tasks.md (as specified in user input)
