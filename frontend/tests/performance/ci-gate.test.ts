@@ -4,7 +4,7 @@
  * Delta 0017: Added warmup run and dynamic median calculation
  */
 import { describe, test, expect } from 'vitest';
-import { extractFromEmail } from '@/lib/email-extractor';
+import { extractItemsFromEmails } from '@/lib/email-extractor';
 import { KLARNA_SMALL, KLARNA_MEDIUM_BASE } from '../fixtures/email-samples';
 
 // Generate 50 varied emails for benchmarking
@@ -12,6 +12,8 @@ const emails50 = [
   ...Array(25).fill(KLARNA_SMALL),
   ...Array(25).fill(KLARNA_MEDIUM_BASE),
 ];
+
+const timezone = 'America/New_York';
 
 /**
  * Calculate median of a numeric array
@@ -27,10 +29,10 @@ function median(arr: number[]): number {
 }
 
 describe('CI Performance Gate', () => {
-  test('50 emails extracted in <250ms (median of 3 runs)', async () => {
+  test('50 emails extracted in <250ms (median of 3 runs)', () => {
     // Warmup: discard first run to eliminate cold-start variance
     for (const email of emails50) {
-      await extractFromEmail(email);
+      extractItemsFromEmails(email, timezone);
     }
 
     const runs: number[] = [];
@@ -40,7 +42,7 @@ describe('CI Performance Gate', () => {
       const start = performance.now();
 
       for (const email of emails50) {
-        await extractFromEmail(email);
+        extractItemsFromEmails(email, timezone);
       }
 
       const duration = performance.now() - start;
