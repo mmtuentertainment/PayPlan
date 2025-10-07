@@ -44,7 +44,7 @@
 
 ## Phase 3.1: Core Implementation
 
-### T001 [P] Create PR Template
+### T001 [P] Create PR Template ✅
 **File**: `.github/PULL_REQUEST_TEMPLATE.md`
 **LOC**: ~35 lines
 **Contract**: [contracts/pr-template.md](./contracts/pr-template.md)
@@ -87,7 +87,7 @@ grep -c "^\* \[ \]" .github/PULL_REQUEST_TEMPLATE.md  # Expected: 10 (4 risk + 6
 
 ---
 
-### T002 [P] Create CI Workflow
+### T002 [P] Create CI Workflow ✅
 **File**: `.github/workflows/pr-hygiene.yml`
 **LOC**: ~50 lines
 **Contract**: [contracts/ci-workflow.md](./contracts/ci-workflow.md)
@@ -177,7 +177,7 @@ grep -c "openapi\\.ya\\?ml" .github/workflows/pr-hygiene.yml  # Expected: ≥4
 
 ---
 
-### T003 [P] Add Helper Script to package.json
+### T003 [P] Add Helper Script to package.json ✅
 **File**: `package.json` (root)
 **LOC**: ~1 line (script entry)
 **Contract**: [data-model.md](./data-model.md#8-packagejson-script-entry)
@@ -215,7 +215,7 @@ npm run spec:path && echo "✅ Exit code 0"
 
 ---
 
-### T004 [P] Create Delta Documentation
+### T004 [P] Create Delta Documentation ✅
 **File**: `ops/deltas/0015_pr_hygiene_openapi.md`
 **LOC**: ~30 lines
 **Contract**: [contracts/delta-doc.md](./contracts/delta-doc.md)
@@ -321,7 +321,7 @@ grep -q "~116 lines" ops/deltas/0015_pr_hygiene_openapi.md && echo "✅ LOC tota
 
 ## Phase 3.2: Validation & Preparation
 
-### T005 Prepare PR Body
+### T005 Prepare PR Body ✅
 **File**: None (prepared text, not committed)
 **LOC**: 0 (documentation only)
 **Dependencies**: T001-T004 (all files created)
@@ -407,7 +407,7 @@ grep -q "116" /tmp/pr-body-0015.md && echo "✅ LOC total matches"
 
 ---
 
-### T006 Verify Locally
+### T006 Verify Locally ✅
 **File**: None (manual verification)
 **LOC**: 0 (testing only)
 **Dependencies**: T003 (helper script must exist)
