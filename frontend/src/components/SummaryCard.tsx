@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 type Props = { summary: string };
@@ -5,7 +6,8 @@ type Props = { summary: string };
 export default function SummaryCard({ summary }: Props) {
   if (!summary) return null;
 
-  const summaryLines = summary.split("\n").filter(Boolean);
+  // Memoize to avoid re-computing on every render
+  const summaryLines = useMemo(() => summary.split("\n").filter(Boolean), [summary]);
 
   return (
     <Card>
@@ -18,8 +20,8 @@ export default function SummaryCard({ summary }: Props) {
           aria-labelledby="summary-title"
           role="list"
         >
-          {summaryLines.map((line, i) => (
-            <li key={i} className="text-sm">{line}</li>
+          {summaryLines.map((line) => (
+            <li key={line} className="text-sm">{line}</li>
           ))}
         </ul>
       </CardContent>

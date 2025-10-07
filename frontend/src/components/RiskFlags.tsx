@@ -15,13 +15,6 @@ export default function RiskFlags({ flags }: Props) {
       ? "Autopay on Sat/Sun—watch for bank delays."
       : "";
 
-  const getRiskType = (f: string): string => {
-    if (f.includes("COLLISION")) return "COLLISION";
-    if (f.includes("CASH_CRUNCH")) return "CASH_CRUNCH";
-    if (f.includes("WEEKEND_AUTOPAY")) return "WEEKEND_AUTOPAY";
-    return "RISK";
-  };
-
   return (
     <Card role="region" aria-labelledby="risk-flags-title">
       <CardHeader>
@@ -29,7 +22,6 @@ export default function RiskFlags({ flags }: Props) {
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {flags.map((f, i) => {
-          const riskType = getRiskType(f);
           const explanation = explain(f);
 
           return (

@@ -34,7 +34,6 @@ export default function ScheduleTable({ rows }: Props) {
           <table
             className="w-full text-sm"
             aria-labelledby="schedule-table-title"
-            role="table"
           >
             <caption className="sr-only">
               Payment schedule showing {rows.length} payment{rows.length !== 1 ? 's' : ''} with due dates, amounts, and autopay status

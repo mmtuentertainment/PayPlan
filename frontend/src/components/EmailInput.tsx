@@ -83,10 +83,15 @@ export function EmailInput({ onExtract, isExtracting, hasExtractedData }: EmailI
         onClick={handleExtract}
         disabled={!text.trim() || isExtracting}
         className="w-full"
-        aria-label={isExtracting ? 'Extracting payment information from emails' : 'Extract payment information from pasted emails'}
+        aria-busy={isExtracting}
       >
         {isExtracting ? 'Extracting...' : 'Extract Payments'}
       </Button>
+      {isExtracting && (
+        <span className="sr-only" aria-live="polite">
+          Extracting payment information from emails...
+        </span>
+      )}
     </div>
   );
 }

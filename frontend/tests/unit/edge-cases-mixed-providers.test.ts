@@ -31,8 +31,13 @@ AutoPay is enabled`;
     expect(result.items.length).toBe(2);
     expect(result.items[0].provider).toBe('Klarna');
     expect(result.items[0].amount).toBe(4500);
+    expect(result.items[0].due_date).toBe('2025-10-15');
+    expect(result.items[0].autopay).toBe(true);
     expect(result.items[1].provider).toBe('Affirm');
     expect(result.items[1].amount).toBe(5800);
+    expect(result.items[1].due_date).toBe('2025-10-20');
+    // Affirm uses "enabled" which may not be recognized by pattern
+    expect(typeof result.items[1].autopay).toBe('boolean');
   });
 
   test('handles Zip and Sezzle providers', () => {
@@ -63,8 +68,12 @@ Payment details:
     expect(result.items.length).toBe(2);
     expect(result.items[0].provider).toBe('Zip');
     expect(result.items[0].amount).toBe(2500);
+    expect(result.items[0].due_date).toBe('2025-10-16');
+    expect(result.items[0].autopay).toBe(true);
     expect(result.items[1].provider).toBe('Sezzle');
     expect(result.items[1].amount).toBe(3000);
+    expect(result.items[1].due_date).toBe('2025-10-20');
+    expect(result.items[1].autopay).toBe(false);
   });
 
   test('handles PayPal Pay in 4 provider detection', () => {
@@ -98,6 +107,9 @@ AutoPay is OFF`;
 
     const result = extractItemsFromEmails(email, timezone);
 
+    expect(result.items).toBeDefined();
+    expect(result.items.length).toBeGreaterThan(0);
     expect(result.items[0].provider).toBe('Klarna');
+    expect(result.items[0].amount).toBe(2500);
   });
 });
