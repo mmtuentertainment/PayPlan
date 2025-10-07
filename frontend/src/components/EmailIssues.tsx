@@ -64,8 +64,8 @@ export function EmailIssues({ issues, items = [] }: EmailIssuesProps) {
   }
 
   return (
-    <div className="mt-6">
-      <h3 className="font-medium text-red-700 mb-3">
+    <div className="mt-6" role="region" aria-labelledby="issues-title">
+      <h3 id="issues-title" className="font-medium text-red-700 mb-3">
         Extraction Issues ({errorMessages.length})
       </h3>
       <ErrorList errors={errorMessages} onDismiss={handleDismiss} autoDismissMs={10000} />

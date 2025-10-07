@@ -49,6 +49,7 @@ export function EmailInput({ onExtract, isExtracting, hasExtractedData }: EmailI
           size="sm"
           onClick={handleUseSample}
           disabled={isExtracting}
+          aria-label="Fill textarea with sample BNPL payment emails for testing"
         >
           Use Sample Emails
         </Button>
@@ -82,6 +83,7 @@ export function EmailInput({ onExtract, isExtracting, hasExtractedData }: EmailI
         onClick={handleExtract}
         disabled={!text.trim() || isExtracting}
         className="w-full"
+        aria-label={isExtracting ? 'Extracting payment information from emails' : 'Extract payment information from pasted emails'}
       >
         {isExtracting ? 'Extracting...' : 'Extract Payments'}
       </Button>

@@ -156,6 +156,7 @@ export const EmailPreview = React.memo(function EmailPreview({ items, onDelete, 
                         variant="ghost"
                         size="sm"
                         onClick={() => onDelete(idx)}
+                        aria-label={`Delete payment from ${item.provider} for ${formatCurrency(item.amount, item.currency)} due ${item.due_date}`}
                       >
                         Delete
                       </Button>

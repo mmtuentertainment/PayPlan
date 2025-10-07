@@ -5,14 +5,20 @@ type Props = { summary: string };
 export default function SummaryCard({ summary }: Props) {
   if (!summary) return null;
 
+  const summaryLines = summary.split("\n").filter(Boolean);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Summary</CardTitle>
+        <CardTitle id="summary-title">Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="list-disc pl-6 space-y-1">
-          {summary.split("\n").map((line, i) => (
+        <ul
+          className="list-disc pl-6 space-y-1"
+          aria-labelledby="summary-title"
+          role="list"
+        >
+          {summaryLines.map((line, i) => (
             <li key={i} className="text-sm">{line}</li>
           ))}
         </ul>

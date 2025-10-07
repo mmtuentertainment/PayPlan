@@ -27,18 +27,25 @@ export default function ScheduleTable({ rows }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Normalized Schedule</CardTitle>
+        <CardTitle id="schedule-table-title">Normalized Schedule</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table
+            className="w-full text-sm"
+            aria-labelledby="schedule-table-title"
+            role="table"
+          >
+            <caption className="sr-only">
+              Payment schedule showing {rows.length} payment{rows.length !== 1 ? 's' : ''} with due dates, amounts, and autopay status
+            </caption>
             <thead>
               <tr className="border-b">
-                <th className="text-left py-2">Provider</th>
-                <th className="text-left py-2">Due Date</th>
-                <th className="text-right py-2">Amount</th>
-                <th className="text-center py-2">Autopay</th>
-                <th className="text-right py-2">Late Fee</th>
+                <th scope="col" className="text-left py-2">Provider</th>
+                <th scope="col" className="text-left py-2">Due Date</th>
+                <th scope="col" className="text-right py-2">Amount</th>
+                <th scope="col" className="text-center py-2">Autopay</th>
+                <th scope="col" className="text-right py-2">Late Fee</th>
               </tr>
             </thead>
             <tbody>

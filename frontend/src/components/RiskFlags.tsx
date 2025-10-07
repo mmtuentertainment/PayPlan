@@ -15,21 +15,43 @@ export default function RiskFlags({ flags }: Props) {
       ? "Autopay on Sat/Sun—watch for bank delays."
       : "";
 
+  const getRiskType = (f: string): string => {
+    if (f.includes("COLLISION")) return "COLLISION";
+    if (f.includes("CASH_CRUNCH")) return "CASH_CRUNCH";
+    if (f.includes("WEEKEND_AUTOPAY")) return "WEEKEND_AUTOPAY";
+    return "RISK";
+  };
+
   return (
-    <Card>
+    <Card role="region" aria-labelledby="risk-flags-title">
       <CardHeader>
-        <CardTitle>Risk Flags</CardTitle>
+        <CardTitle id="risk-flags-title">Risk Flags</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {flags.map((f, i) => (
-          <div key={i} className="flex items-start gap-2">
-            <Badge variant="destructive">{f.split(":")[0]}</Badge>
-            <div className="text-sm">
-              <span className="font-medium">{explain(f)}</span>
-              <span className="text-muted-foreground block">{f}</span>
+        {flags.map((f, i) => {
+          const riskType = getRiskType(f);
+          const explanation = explain(f);
+
+          return (
+            <div
+              key={i}
+              className="flex items-start gap-2"
+              role="alert"
+              aria-labelledby={`risk-${i}-type`}
+              aria-describedby={`risk-${i}-desc`}
+            >
+              <Badge variant="destructive" id={`risk-${i}-type`}>
+                {f.split(":")[0]}
+              </Badge>
+              <div className="text-sm">
+                <span className="font-medium" id={`risk-${i}-desc`}>
+                  {explanation}
+                </span>
+                <span className="text-muted-foreground block">{f}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </CardContent>
     </Card>
   );
