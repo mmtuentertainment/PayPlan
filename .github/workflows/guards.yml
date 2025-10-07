@@ -1,0 +1,43 @@
+name: CI Guards
+
+on:
+  push:
+    branches: [main, 'feature/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          cd frontend && npm install
+
+      - name: ESLint Path Guard
+        run: cd frontend && npm run lint
+
+      - name: Performance Budget Guard
+        run: |
+          cd frontend
+          npm run test:perf > perf.log 2>&1 || true
+          METRIC=$(grep 'PERF_METRIC:' perf.log | cut -d= -f2)
+          THRESHOLD=$(grep 'PERF_THRESHOLD:' perf.log | awk '{print $NF}')
+          BASELINE=150
+          DELTA=$((METRIC - BASELINE))
+          echo "| Metric | Value | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Extraction Time | ${METRIC}ms | $([ $METRIC -lt $THRESHOLD ] && echo '✅ PASS' || echo '❌ FAIL') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Threshold | ${THRESHOLD}ms | - |" >> $GITHUB_STEP_SUMMARY
+          echo "| Baseline | ${BASELINE}ms | - |" >> $GITHUB_STEP_SUMMARY
+          echo "| Delta | ${DELTA}ms | $([ $DELTA -le 0 ] && echo '✅' || echo '⚠️') |" >> $GITHUB_STEP_SUMMARY
+          [ $METRIC -lt $THRESHOLD ] || exit 1
+
+      - name: Spec Path Audit Guard
+        run: npm run audit:specs
