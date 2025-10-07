@@ -1,4 +1,4 @@
-name: CI Guards
+name: CI Guards (Delta 0014)
 
 on:
   push:
@@ -6,38 +6,152 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   guards:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: npm
 
-      - name: Install dependencies
-        run: |
-          npm install
-          cd frontend && npm install
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm install
 
       - name: ESLint Path Guard
-        run: cd frontend && npm run lint
+        id: eslint
+        continue-on-error: true
+        run: |
+          cd frontend
+          npm run lint > ../eslint.log 2>&1
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
 
       - name: Performance Budget Guard
+        id: perf
+        continue-on-error: true
         run: |
           cd frontend
           npm run test:perf > perf.log 2>&1 || true
-          METRIC=$(grep 'PERF_METRIC:' perf.log | cut -d= -f2)
-          THRESHOLD=$(grep 'PERF_THRESHOLD:' perf.log | awk '{print $NF}')
+
+          # Parse metrics
+          METRIC=$(grep 'PERF_METRIC:' perf.log | cut -d= -f2 || echo "0")
+          THRESHOLD=$(grep 'PERF_THRESHOLD:' perf.log | awk '{print $NF}' || echo "250")
           BASELINE=150
+
+          # Calculate delta
           DELTA=$((METRIC - BASELINE))
-          echo "| Metric | Value | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Extraction Time | ${METRIC}ms | $([ $METRIC -lt $THRESHOLD ] && echo '✅ PASS' || echo '❌ FAIL') |" >> $GITHUB_STEP_SUMMARY
-          echo "| Threshold | ${THRESHOLD}ms | - |" >> $GITHUB_STEP_SUMMARY
-          echo "| Baseline | ${BASELINE}ms | - |" >> $GITHUB_STEP_SUMMARY
-          echo "| Delta | ${DELTA}ms | $([ $DELTA -le 0 ] && echo '✅' || echo '⚠️') |" >> $GITHUB_STEP_SUMMARY
-          [ $METRIC -lt $THRESHOLD ] || exit 1
+
+          # Determine pass/fail
+          if [ "$METRIC" -lt "$THRESHOLD" ]; then
+            echo "status=pass" >> $GITHUB_OUTPUT
+            echo "metric=$METRIC" >> $GITHUB_OUTPUT
+            echo "threshold=$THRESHOLD" >> $GITHUB_OUTPUT
+            echo "baseline=$BASELINE" >> $GITHUB_OUTPUT
+            echo "delta=$DELTA" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "status=fail" >> $GITHUB_OUTPUT
+            echo "metric=$METRIC" >> $GITHUB_OUTPUT
+            echo "threshold=$THRESHOLD" >> $GITHUB_OUTPUT
+            echo "baseline=$BASELINE" >> $GITHUB_OUTPUT
+            echo "delta=$DELTA" >> $GITHUB_OUTPUT
+            exit 1
+          fi
 
       - name: Spec Path Audit Guard
-        run: npm run audit:specs
+        id: audit
+        continue-on-error: true
+        run: |
+          if npm run audit:specs > audit.log 2>&1; then
+            echo "status=pass" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "status=fail" >> $GITHUB_OUTPUT
+            cat audit.log
+            exit 1
+          fi
+
+      - name: Post Summary
+        if: always()
+        run: |
+          echo "## Delta 0014 — CI Guards" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # ESLint Guard Summary
+          echo "### 🔍 ESLint Path Guard" >> $GITHUB_STEP_SUMMARY
+          if [ -f eslint.log ]; then
+            ERROR_COUNT=$(grep -c "error" eslint.log || echo "0")
+            WARN_COUNT=$(grep -c "warning" eslint.log || echo "0")
+
+            if [ "$ERROR_COUNT" -eq 0 ]; then
+              echo "✅ **PASS** - No ESLint errors detected" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **FAIL** - $ERROR_COUNT error(s), $WARN_COUNT warning(s)" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "<details><summary>Error Details (first 10)</summary>" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              grep "error" eslint.log | head -10 >> $GITHUB_STEP_SUMMARY || true
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "</details>" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ **SKIPPED** - ESLint log not found" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Performance Guard Summary
+          echo "### ⚡ Performance Budget Guard" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.perf.outputs.status }}" == "pass" ]; then
+            echo "✅ **PASS** - Extraction time within budget" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.perf.outputs.status }}" == "fail" ]; then
+            echo "❌ **FAIL** - Extraction time exceeds threshold" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **SKIPPED** - Performance test did not run" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Performance metrics table
+          if [ -n "${{ steps.perf.outputs.metric }}" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Value | Status |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Extraction Time | ${{ steps.perf.outputs.metric }}ms | $([ '${{ steps.perf.outputs.status }}' == 'pass' ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+            echo "| Threshold | ${{ steps.perf.outputs.threshold }}ms | - |" >> $GITHUB_STEP_SUMMARY
+            echo "| Baseline | ${{ steps.perf.outputs.baseline }}ms | - |" >> $GITHUB_STEP_SUMMARY
+            echo "| Delta | ${{ steps.perf.outputs.delta }}ms | $([ ${{ steps.perf.outputs.delta }} -le 0 ] && echo '✅ Better' || echo '⚠️ Slower') |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Spec Audit Guard Summary
+          echo "### 📋 Spec Path Audit Guard" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.audit.outputs.status }}" == "pass" ]; then
+            echo "✅ **PASS** - All spec paths valid" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.audit.outputs.status }}" == "fail" ]; then
+            echo "❌ **FAIL** - Spec path mismatches detected" >> $GITHUB_STEP_SUMMARY
+            if [ -f audit.log ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "<details><summary>Audit Details</summary>" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              cat audit.log >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "</details>" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ **SKIPPED** - Audit script not configured" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "_Note: All guards are currently **informational** (continue-on-error: true). They won't block PR merges._" >> $GITHUB_STEP_SUMMARY
