@@ -1,0 +1,173 @@
+
+ RUN  v3.2.4 /home/matt/PROJECTS/PayPlan/frontend
+
+stderr | tests/unit/email-preview-memo.test.tsx > EmailPreview - React.memo behavior > does not re-render when unrelated parent state changes
+Each child in a list should have a unique "key" prop.
+
+Check the render method of `EmailPreview2`. See https://react.dev/link/warning-keys for more information.
+
+stderr | tests/unit/email-preview-confidence.test.tsx > EmailPreview - Confidence Pills > renders High confidence pill for score >= 0.8
+Each child in a list should have a unique "key" prop.
+
+Check the render method of `EmailPreview2`. See https://react.dev/link/warning-keys for more information.
+
+ ✓ tests/unit/email-preview-confidence.test.tsx (5 tests) 221ms
+ ✓ tests/unit/loading-spinner.test.tsx (11 tests) 354ms
+ ✓ tests/unit/email-preview-memo.test.tsx (6 tests) 290ms
+stdout | tests/performance/extraction-benchmark.test.ts > Extraction Performance Benchmarks > baseline: small email extraction (100 chars)
+Benchmark: Small Email
+Iterations: 50
+Average: 0.028ms
+Median: 0.009ms
+Min: 0.003ms
+Max: 0.497ms
+Total: 1.381ms
+
+stdout | tests/performance/extraction-benchmark.test.ts > Extraction Performance Benchmarks > baseline: medium email extraction (~1KB)
+Benchmark: Medium Email
+Iterations: 50
+Average: 0.022ms
+Median: 0.004ms
+Min: 0.003ms
+Max: 0.630ms
+Total: 1.077ms
+
+ ✓ tests/integration/cache-integration.test.ts (8 tests) 177ms
+stdout | tests/performance/extraction-benchmark.test.ts > Extraction Performance Benchmarks > baseline: large email extraction (~10KB)
+Benchmark: Large Email
+Iterations: 30
+Average: 0.007ms
+Median: 0.004ms
+Min: 0.004ms
+Max: 0.030ms
+Total: 0.204ms
+
+stdout | tests/performance/extraction-benchmark.test.ts > Extraction Performance Benchmarks > baseline: rapid extractions (10 consecutive)
+Benchmark: 10 Rapid Extractions
+Iterations: 10
+Average: 0.060ms
+Median: 0.067ms
+Min: 0.033ms
+Max: 0.099ms
+Total: 0.597ms
+
+ ✓ tests/performance/extraction-benchmark.test.ts (5 tests) 186ms
+ ✓ tests/unit/security-injection.test.ts (34 tests | 17 skipped) 181ms
+stdout | tests/performance/cache-benchmark.test.ts > Cache Performance Benchmarks > cache miss performance (first extraction)
+
+📊 CACHE MISS PERFORMANCE:
+Benchmark: Cache Miss (Fresh Extraction)
+Iterations: 50
+Average: 5.676ms
+Median: 4.955ms
+Min: 2.602ms
+Max: 18.612ms
+Total: 283.783ms
+
+stdout | tests/performance/cache-benchmark.test.ts > Cache Performance Benchmarks > cache hit performance (repeated extraction)
+
+⚡ CACHE HIT PERFORMANCE:
+Benchmark: Cache Hit (Cached Result)
+Iterations: 100
+Average: 0.005ms
+Median: 0.004ms
+Min: 0.003ms
+Max: 0.023ms
+Total: 0.545ms
+
+ ✓ tests/unit/email-issues-lowconf.test.tsx (7 tests) 508ms
+   ✓ EmailIssues - Low Confidence Detection > displays errors with proper ARIA attributes  320ms
+stdout | tests/performance/cache-benchmark.test.ts > Cache Performance Benchmarks > cache performance comparison
+
+📈 CACHE PERFORMANCE COMPARISON:
+Without Cache (Fresh Extraction):
+Benchmark: Without Cache
+Iterations: 30
+Average: 4.293ms
+Median: 2.523ms
+Min: 1.814ms
+Max: 35.078ms
+Total: 128.779ms
+
+With Cache (Cached Result):
+Benchmark: With Cache
+Iterations: 30
+Average: 0.014ms
+Median: 0.004ms
+Min: 0.003ms
+Max: 0.233ms
+Total: 0.413ms
+
+🚀 Cache Speedup: 311.8x faster
+
+ ✓ tests/unit/error-boundary.test.tsx (9 tests) 804ms
+stdout | tests/performance/cache-benchmark.test.ts > Cache Performance Benchmarks > large email cache performance
+
+📊 LARGE EMAIL CACHE COMPARISON:
+Without Cache:
+Benchmark: Large Email Without Cache
+Iterations: 20
+Average: 8.519ms
+Median: 6.527ms
+Min: 3.524ms
+Max: 30.956ms
+Total: 170.377ms
+
+With Cache:
+Benchmark: Large Email With Cache
+Iterations: 20
+Average: 0.008ms
+Median: 0.006ms
+Min: 0.003ms
+Max: 0.017ms
+Total: 0.161ms
+
+🚀 Large Email Cache Speedup: 1060.0x faster
+
+stdout | tests/performance/cache-benchmark.test.ts > Cache Performance Benchmarks > cache hit rate for repeated extractions
+
+📈 CACHE HIT RATE STATISTICS:
+Total Requests: 10
+Cache Hits: 8
+Cache Misses: 2
+Hit Rate: 80.00%
+Cache Size: 2/10
+
+ ✓ tests/unit/date-quick-fix-memo.test.tsx (7 tests) 945ms
+   ✓ DateQuickFix - React.memo behavior > does not re-render when parent re-renders with same props  354ms
+ ✓ tests/performance/cache-benchmark.test.ts (5 tests) 720ms
+   ✓ Cache Performance Benchmarks > cache miss performance (first extraction)  355ms
+ ✓ tests/unit/locale-toggle.test.tsx (3 tests) 784ms
+   ✓ LocaleToggle - basic rendering > renders with US selected by default  494ms
+ ✓ tests/unit/error-alert.test.tsx (13 tests) 1090ms
+   ✓ ErrorAlert > dismisses on X button click  301ms
+ ✓ tests/unit/success-toast.test.tsx (12 tests) 1438ms
+   ✓ SuccessToast > dismisses on X button click  648ms
+ ✓ tests/unit/locale-parsing-timezone.test.ts (7 tests) 137ms
+ ✓ tests/unit/locale-parsing-edge-cases.test.ts (24 tests) 140ms
+ ✓ tests/unit/paypal4-detector.test.ts (28 tests) 94ms
+ ✓ tests/unit/timezone.test.ts (32 tests) 85ms
+ ✓ tests/unit/locale-parsing.test.ts (7 tests) 88ms
+ ✓ tests/unit/zip-sezzle-detector.test.ts (25 tests) 87ms
+ ✓ tests/unit/locale-toggle-state.test.tsx (10 tests) 2359ms
+   ✓ LocaleToggle state and modal behavior > isExtracting=true disables re-extract button  546ms
+   ✓ LocaleToggle state and modal behavior > modal opens when re-extract button clicked  371ms
+   ✓ LocaleToggle state and modal behavior > clicking confirm calls onReExtract and closes modal  305ms
+ ✓ tests/unit/domain-validator.test.ts (42 tests) 36ms
+ ✓ tests/unit/currency.test.ts (27 tests) 66ms
+ ✓ tests/unit/afterpay-detector.test.ts (8 tests) 65ms
+ ✓ tests/unit/detect-locale.test.ts (19 tests) 23ms
+ ✓ tests/integration/quick-fix-flow.test.ts (10 tests) 81ms
+ ✓ tests/unit/redaction.test.ts (30 tests) 20ms
+ ✓ tests/unit/cache.test.ts (11 tests) 16ms
+ ✓ tests/unit/error-messages.test.ts (27 tests) 9ms
+ ✓ tests/unit/redact.test.ts (5 tests) 8ms
+ ✓ tests/unit/confidence.test.ts (7 tests) 5ms
+ ✓ tests/unit/date-quick-fix.test.tsx (17 tests) 3975ms
+   ✓ DateQuickFix > Status message auto-clear > status message disappears after 3 seconds  3028ms
+
+ Test Files  31 passed (31)
+      Tests  444 passed | 17 skipped (461)
+   Start at  17:01:04
+   Duration  6.35s (transform 2.21s, setup 4.20s, collect 11.07s, tests 14.99s, environment 34.57s, prepare 5.56s)
+
