@@ -72,7 +72,11 @@ export default function Import() {
         return { title: `${i.provider} $${i.amount} ${i.currency}`, start: [dt.year, dt.month, dt.day], duration: { hours: 1 }, description: desc };
       });
       const { value, error: icsError } = createEvents(events);
-      if (icsError) { console.error('ICS generation failed:', icsError); return; }
+      if (icsError) {
+        console.error('ICS generation failed:', icsError);
+        setError('Failed to generate calendar file. Please try again.');
+        return;
+      }
       const blob = new Blob([value || ''], { type: 'text/calendar' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -102,7 +106,7 @@ export default function Import() {
       {file && (
         <div style={{ marginBottom: '1rem' }}>
           <p>Selected: {file.name}</p>
-          <button onClick={handleProcessCSV} disabled={processing}>
+          <button type="button" onClick={handleProcessCSV} disabled={processing}>
             {processing ? 'Processing...' : 'Process CSV'}
           </button>
         </div>
@@ -135,7 +139,7 @@ export default function Import() {
               })}
             </tbody>
           </table>
-          <button onClick={handleDownloadIcs}>Download .ics</button>
+          <button type="button" onClick={handleDownloadIcs}>Download .ics</button>
         </div>
       )}
     </div>
