@@ -63,3 +63,9 @@ jobs:
               echo "_Note:_ Non-blocking for now. Make blocking later by removing \`continue-on-error: true\`." >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
+
+      - name: OpenAPI LOC Guard (non-blocking)
+        if: steps.detect.outputs.path != ''
+        continue-on-error: true
+        run: |
+          node scripts/openapi-loc-guard.mjs --max 180 --target 120 | tee -a "$GITHUB_STEP_SUMMARY"
