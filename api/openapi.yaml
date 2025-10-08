@@ -4,20 +4,13 @@ info:
   version: "1.0.0"
   description: Authoritative contract for POST /api/plan. Non-auth, privacy-first. Spectral lint must pass with 0 errors; warnings allowed.
   contact: { name: PayPlan API, url: "https://github.com/mmtuentertainment/PayPlan" }
-tags:
-  - name: plan
-    description: Payment planning operations
-servers:
-  - url: https://api.example.com
-    description: Informational placeholder only; clients typically call relative path.
+tags: [{ name: plan, description: Payment planning operations }]
+servers: [{ url: "https://api.example.com", description: "Illustrative; clients typically call relative path" }]
 paths:
   /api/plan:
     post:
       summary: Create a payment plan from normalized items
-      description: >
-        Processes a client-provided items array and returns a normalized plan with risk flags and metadata.
-        Rate limit: 60 requests/hour per IP (Upstash). The server URL in this spec is illustrative;
-        typical clients call a relative path when deployed on Vercel edge/serverless.
+      description: Processes items array, returns plan with risk flags and metadata. Rate limit 60 requests/hour per IP (Upstash). Clients typically call relative path.
       operationId: postPlan
       tags: [plan]
       security: []
