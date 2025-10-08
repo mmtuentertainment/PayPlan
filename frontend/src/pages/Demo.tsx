@@ -66,7 +66,7 @@ export default function Demo() {
           </details>
         ))}
       </div>
-      <button onClick={handleRunDemo} disabled={loading} className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400">
+      <button type="button" onClick={handleRunDemo} disabled={loading} className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400">
         {loading ? 'Processing...' : 'Run Demo'}
       </button>
       {results && (
@@ -100,7 +100,7 @@ export default function Demo() {
               {results.risks.map((r, i) => <span key={i} className={riskClass(r.type)}>{r.message}</span>)}
             </div>
           )}
-          <button onClick={handleDownloadIcs} className="bg-green-600 text-white px-4 py-2 rounded">Download .ics Calendar</button>
+          <button type="button" onClick={handleDownloadIcs} className="bg-green-600 text-white px-4 py-2 rounded">Download .ics Calendar</button>
         </>
       )}
     </div>
