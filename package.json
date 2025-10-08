@@ -14,7 +14,9 @@
     "test:all": "npm test && npm run test:frontend",
     "vercel-build": "cd frontend && npm install && npm run build",
     "spec:path": "node -e \"const fs=require('fs');const c=['openapi.yaml','openapi.yml','api/openapi.yaml','api/openapi.yml'].find(p=>fs.existsSync(p));console.log(c?('OpenAPI spec: '+c):'No OpenAPI spec found; skipping')\"",
-    "lint:api-drift": "node scripts/check-api-drift.mjs"
+    "lint:api-drift": "node scripts/check-api-drift.mjs",
+    "api:lint": "npx -y @stoplight/spectral-cli lint api/openapi.yaml",
+    "api:loc": "wc -l api/openapi.yaml"
   },
   "keywords": [
     "payment",

@@ -122,29 +122,57 @@ Klarna,1,2025-10-02,45.00,USD,true,7
 Afterpay,2,2025-10-09,32.50,USD,true,8
 ```
 
-## 🔌 API Endpoint
+## 🔌 API: OpenAPI v1 (POST /api/plan)
 
-**POST** `/api/plan`
+![Spectral: 0 errors / 0 warnings](https://img.shields.io/badge/Spectral-0%20errors%20%2F%200%20warnings-brightgreen)
+![OpenAPI LOC: 173/180](https://img.shields.io/badge/OpenAPI%20LOC-173%2F180-blue)
+
+OpenAPI 3.1 is the authoritative source of truth for the POST /api/plan contract. The specification is spectrally linted, docs-only (no implementation changes), and privacy-first.
+
+**Documentation:**
+- [api/openapi.yaml](api/openapi.yaml) — Full OpenAPI 3.1 specification
+- [ops/deltas/0022_openapi_v1_plan.md](ops/deltas/0022_openapi_v1_plan.md) — Delta documentation
+
+**Rate limit:** 60 requests/hour per IP (Upstash). Clients typically call relative path `/api/plan`.
+
+**Example Request:**
 
 ```bash
-curl -X POST https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app/api/plan \
+curl -X POST /api/plan \
   -H "Content-Type: application/json" \
   -d '{
-    "items": [...],
-    "paycheckDates": ["2025-10-05", "2025-10-19", "2025-11-02"],
-    "minBuffer": 100,
-    "timeZone": "America/New_York"
+    "items": [
+      {
+        "provider": "Klarna",
+        "due_date": "2025-10-15",
+        "amount": 25.00,
+        "currency": "USD",
+        "confidence": 0.92
+      }
+    ],
+    "timezone": "America/New_York"
   }'
 ```
 
 **Response:**
 ```json
 {
-  "summary": "You have 3 BNPL payments totaling $165.50 due this week...",
-  "actionsThisWeek": ["Wednesday Oct 2: Pay Affirm $58.00..."],
-  "riskFlags": ["⚠️ COLLISION: 2 payments due on Oct 2"],
-  "ics": "QkVHSU46VkNBTEVOREFS...",
-  "normalized": [{"provider": "Klarna", "dueDate": "2025-10-02", "amount": 45.00}]
+  "normalized": [
+    {
+      "provider": "Klarna",
+      "due_date": "2025-10-15",
+      "amount": 25.00,
+      "currency": "USD",
+      "confidence": 0.92
+    }
+  ],
+  "riskFlags": [],
+  "movedDates": [],
+  "icsMetadata": {
+    "filename": "payplan.ics",
+    "calendarName": "PayPlan",
+    "note": "No risks"
+  }
 }
 ```
 
