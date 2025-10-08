@@ -16,6 +16,8 @@ paths:
         Processes a client-provided items array and returns a normalized plan with risk flags and metadata.
         Rate limit: 60 requests/hour per IP (Upstash). The server URL in this spec is illustrative;
         typical clients call a relative path when deployed on Vercel edge/serverless.
+      operationId: postPlan
+      security: []
       parameters:
         - name: Idempotency-Key
           in: header
@@ -80,6 +82,7 @@ components:
           description: Extraction confidence (0.0–1.0)
     PlanRequest:
       type: object
+      description: "Items-only contract for POST /api/plan. Each PlanItem includes confidence (0..1). Note: CSV Import feature is client-only and does not call this endpoint."
       required: [items, timezone]
       properties:
         items:
