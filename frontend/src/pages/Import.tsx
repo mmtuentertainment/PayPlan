@@ -37,7 +37,7 @@ export default function Import() {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dueISO)) throw new Error(`Invalid date format in row ${rowNum}. Expected YYYY-MM-DD`);
     const autopayStr = row.autopay.trim().toLowerCase();
     if (autopayStr !== 'true' && autopayStr !== 'false') throw new Error(`Invalid autopay value in row ${rowNum}`);
-    return { id: `csv-${rowNum}`, provider, amount, currency, due_date: dueISO, autopay: autopayStr === 'true', installment_no: 1, late_fee: 0, confidence: 'High' as const };
+    return { id: `csv-${rowNum}`, provider, amount, currency, due_date: dueISO, autopay: autopayStr === 'true', installment_no: 1, late_fee: 0, confidence: 1.0 };
   };
 
   const handleProcessCSV = async () => {
@@ -132,7 +132,7 @@ export default function Import() {
                     <td style={s.td}>{item.currency}</td>
                     <td style={s.td}>{item.due_date}</td>
                     <td style={s.td}>{item.autopay ? 'Yes' : 'No'}</td>
-                    <td style={s.td}><span style={s.pill}>High</span></td>
+                    <td style={s.td}><span style={s.pill}>{item.confidence >= 0.8 ? 'High' : item.confidence >= 0.6 ? 'Medium' : 'Low'} ({Math.round(item.confidence * 100)}%)</span></td>
                     <td style={s.td}>{itemRisks.map((r, ridx) => <span key={ridx} style={s.risk(r.severity)}>{r.message}</span>)}</td>
                   </tr>
                 );
