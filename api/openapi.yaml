@@ -2,9 +2,11 @@ openapi: "3.1.0"
 info:
   title: PayPlan API v1
   version: "1.0.0"
-  description: >
-    Authoritative contract for POST /api/plan. Non-auth, privacy-first.
-    Spectral lint must pass with 0 errors; warnings allowed.
+  description: Authoritative contract for POST /api/plan. Non-auth, privacy-first. Spectral lint must pass with 0 errors; warnings allowed.
+  contact: { name: PayPlan API, url: "https://github.com/mmtuentertainment/PayPlan" }
+tags:
+  - name: plan
+    description: Payment planning operations
 servers:
   - url: https://api.example.com
     description: Informational placeholder only; clients typically call relative path.
@@ -17,6 +19,7 @@ paths:
         Rate limit: 60 requests/hour per IP (Upstash). The server URL in this spec is illustrative;
         typical clients call a relative path when deployed on Vercel edge/serverless.
       operationId: postPlan
+      tags: [plan]
       security: []
       parameters:
         - name: Idempotency-Key
@@ -55,11 +58,9 @@ components:
       properties:
         provider:
           type: string
-          description: BNPL provider name (e.g., Klarna, Affirm)
         installment_no:
           type: integer
           minimum: 1
-          description: Installment sequence number (optional)
         due_date:
           type: string
           format: date
