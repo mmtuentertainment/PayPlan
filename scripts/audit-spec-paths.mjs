@@ -25,12 +25,15 @@ const LEGACY_PATTERNS = [
 
 // Extract file paths from markdown
 function extractPaths(content) {
-  const pathRegex = /(?:`|^|\s)([a-zA-Z0-9_\-\.\/]+\.(ts|tsx|js|jsx|mjs|md|json|yml|yaml))(?:`|$|\s|\))/g;
-  const paths = [];
-  let match;
-  while ((match = pathRegex.exec(content)) !== null) {
-    paths.push(match[1]);
-  }
+  // Delta 0017: Use dual regex patterns for better coverage
+  const codeSpanRegex = /`([^`]+\.(ts|tsx|js|jsx|mjs|md|json|yml|yaml))`/g;
+  const linkRegex = /\[.*?\]\(([^)]+\.(ts|tsx|js|jsx|mjs|md|json|yml|yaml))\)/g;
+
+  const paths = [
+    ...Array.from(content.matchAll(codeSpanRegex), m => m[1]),
+    ...Array.from(content.matchAll(linkRegex), m => m[1])
+  ];
+
   return [...new Set(paths)];
 }
 
