@@ -1,0 +1,179 @@
+openapi: "3.1.0"
+info:
+  title: PayPlan API v1
+  version: "1.0.0"
+  description: >
+    Authoritative contract for POST /api/plan. Non-auth, privacy-first.
+    Spectral lint must pass with 0 errors; warnings allowed.
+servers:
+  - url: https://api.example.com
+    description: Informational placeholder only; clients typically call relative path.
+paths:
+  /api/plan:
+    post:
+      summary: Create a payment plan from normalized items
+      description: >
+        Processes a client-provided items array and returns a normalized plan with risk flags and metadata.
+        Rate limit: 60 requests/hour per IP (Upstash). The server URL in this spec is illustrative;
+        typical clients call a relative path when deployed on Vercel edge/serverless.
+      operationId: postPlan
+      security: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Optional idempotency key; cached responses may be replayed for 60s TTL.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+            example: { items: [ {provider: Klarna, due_date: "2025-10-15", amount: 25.00, currency: USD, confidence: 0.92}, {provider: Affirm, due_date: "2025-10-17", amount: 42.50, currency: USD, confidence: 0.85}, {provider: Afterpay, due_date: "2025-10-19", amount: 30.00, currency: USD, confidence: 0.78} ], timezone: America/New_York }
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit: { schema: { type: string } }
+            X-RateLimit-Remaining: { schema: { type: string } }
+            X-RateLimit-Reset: { schema: { type: string } }
+            X-Idempotent-Replayed: { schema: { type: boolean } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanResponse' }
+              example: { normalized: [ {provider: Klarna, due_date: "2025-10-15", amount: 25.00, currency: USD, confidence: 0.92} ], riskFlags: [], movedDates: [], icsMetadata: { filename: payplan.ics, calendarName: PayPlan, note: "No risks" } }
+        '400': { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/Problem' }, example: { type: "https://api.example.com/problems/validation-error", title: "Bad Request", status: 400, detail: "Invalid or missing fields", instance: "https://api.example.com/api/plan" } } } }
+        '429': { description: Too Many Requests, headers: { Retry-After: { schema: { type: string } } }, content: { application/json: { schema: { $ref: '#/components/schemas/Problem' }, example: { type: "https://api.example.com/problems/rate-limit", title: "Too Many Requests", status: 429, detail: "Rate limit exceeded; retry later", instance: "https://api.example.com/api/plan" } } } }
+        '500': { description: Internal Server Error, content: { application/json: { schema: { $ref: '#/components/schemas/Problem' }, example: { type: "https://api.example.com/problems/internal-error", title: "Internal Server Error", status: 500, detail: "Unexpected error", instance: "https://api.example.com/api/plan" } } } }
+components:
+  schemas:
+    PlanItem:
+      type: object
+      required: [provider, due_date, amount, currency, confidence]
+      properties:
+        provider:
+          type: string
+          description: BNPL provider name (e.g., Klarna, Affirm)
+        installment_no:
+          type: integer
+          minimum: 1
+          description: Installment sequence number (optional)
+        due_date:
+          type: string
+          format: date
+          description: ISO 8601 date (YYYY-MM-DD)
+        amount:
+          type: number
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: ISO 4217 code (e.g., USD)
+        autopay:
+          type: boolean
+        late_fee:
+          type: number
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Extraction confidence (0.0–1.0)
+    PlanRequest:
+      type: object
+      description: "Items-only contract for POST /api/plan. Each PlanItem includes confidence (0..1). Note: CSV Import feature is client-only and does not call this endpoint."
+      required: [items, timezone]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/PlanItem'
+          description: Array of normalized installments.
+        timezone:
+          type: string
+          description: IANA timezone (e.g., America/New_York).
+        dateLocale:
+          type: string
+          description: Optional BCP47 locale (e.g., en-US).
+    RiskFlag:
+      type: object
+      required: [type, date, message, affectedInstallments]
+      properties:
+        type:
+          type: string
+          enum: [COLLISION, WEEKEND_AUTOPAY]
+        date:
+          type: string
+          format: date
+        message:
+          type: string
+        affectedInstallments:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [index]
+            properties:
+              index:
+                type: integer
+                minimum: 0
+                description: Index into PlanResponse.normalized
+    MovedDate:
+      type: object
+      required: [from, to, reason]
+      properties:
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        reason:
+          type: string
+          enum: [WEEKEND, US_FEDERAL_HOLIDAY]
+    ICSMetadata:
+      type: object
+      required: [filename, calendarName, note]
+      properties:
+        filename:
+          type: string
+        calendarName:
+          type: string
+        note:
+          type: string
+    PlanResponse:
+      type: object
+      required: [normalized, riskFlags, movedDates, icsMetadata]
+      properties:
+        normalized:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanItem'
+        riskFlags:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskFlag'
+        movedDates:
+          type: array
+          items:
+            $ref: '#/components/schemas/MovedDate'
+        icsMetadata:
+          $ref: '#/components/schemas/ICSMetadata'
+    Problem:
+      type: object
+      required: [type, title, status, detail, instance]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
