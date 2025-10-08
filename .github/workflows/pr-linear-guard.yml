@@ -1,0 +1,66 @@
+name: Linear PR Hygiene (MCP-enabled)
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  guard:
+    name: Check Linear Issue Linkage
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Parse PR for Linear issue key
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const body = context.payload.pull_request.body || '';
+            const combined = `${title}\n${body}`;
+
+            // Match Linear issue keys: 2-5 uppercase letters, dash, 1-6 digits
+            // Examples: PAY-123, FEAT-1, ISSUE-999999
+            const regex = /\b([A-Z]{2,5}-\d{1,6})\b/;
+            const match = combined.match(regex);
+
+            if (match) {
+              const issueKey = match[1];
+              core.setOutput('found', 'true');
+              core.setOutput('key', issueKey);
+              core.info(`✅ Found Linear issue key: ${issueKey}`);
+            } else {
+              core.setOutput('found', 'false');
+              core.warning('⚠️ No Linear issue key detected in PR title or description');
+            }
+
+      - name: Write summary
+        run: |
+          echo "## Linear Issue Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.parse.outputs.found }}" = "true" ]; then
+            echo "✅ **Linear issue detected**: \`${{ steps.parse.outputs.key }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Next steps for reviewer:**" >> $GITHUB_STEP_SUMMARY
+            echo "1. Use Claude with Linear MCP to fetch issue details: \`${{ steps.parse.outputs.key }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "2. Verify acceptance criteria match this PR's changes" >> $GITHUB_STEP_SUMMARY
+            echo "3. Confirm issue status is set to 'In Review'" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **No Linear issue key found** in PR title or description" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Recommended actions:**" >> $GITHUB_STEP_SUMMARY
+            echo "1. Use Linear MCP in Claude to create an issue for this work" >> $GITHUB_STEP_SUMMARY
+            echo "2. Update PR title or description to include the issue key (e.g., \`PAY-123: Feature description\`)" >> $GITHUB_STEP_SUMMARY
+            echo "3. See [prompts/linear-mcp-actions.md](../prompts/linear-mcp-actions.md) for copy-paste prompts" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "_Expected format: \`KEY-123\` where KEY is 2-5 uppercase letters and 123 is 1-6 digits_" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "_This check is **non-blocking**. Linear integration is managed via MCP in Claude—no CI secrets required._" >> $GITHUB_STEP_SUMMARY
