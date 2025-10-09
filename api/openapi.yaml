@@ -4,8 +4,8 @@ info:
   version: "1.0.0"
   description: Authoritative contract for POST /api/plan. Non-auth, privacy-first. Spectral lint must pass with 0 errors; warnings allowed.
   contact: { name: PayPlan API, url: "https://github.com/mmtuentertainment/PayPlan" }
-tags: [{ name: plan, description: Payment planning operations }]
-servers: [{ url: "https://api.example.com", description: "Illustrative; clients typically call relative path" }]
+tags: [{name: plan, description: Payment planning operations}]
+servers: [{url: "https://api.example.com", description: "Illustrative; clients typically call relative path"}]
 paths:
   /api/plan:
     post:
