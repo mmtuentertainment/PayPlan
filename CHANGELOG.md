@@ -5,6 +5,61 @@ All notable changes to PayPlan will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.6-a.2] - 2025-10-09
+
+### Added
+- **CSV Import v1.1 — Currency Regex + Clear Button**: Enhanced validation and UX improvements
+  - Strict currency validation: `^[A-Z]{3}$` regex after `.trim().toUpperCase()` normalization
+    - Accepts: USD, EUR, GBP, lowercase variants (e.g., `usd` → `USD`), whitespace variants (e.g., ` USD ` → `USD`)
+    - Rejects: 2-letter codes (`US`), 4-letter codes (`USDX`), special characters (`U$D`), numbers
+  - New **Clear** button after **Process CSV** (keyboard accessible: Enter/Space)
+    - Resets file, error, results, and DOM input value
+    - Button type: `type="button"` (prevents form submission)
+    - DOM order: Process CSV → Clear → Download .ics
+  - Improved error messaging: `"Invalid currency code in row X: <value> (expected 3-letter ISO 4217 code)"`
+    - Includes original invalid value for easier debugging
+
+### Testing
+- 19 integration tests passing (7 currency validation, 8 Clear button, 4 accessibility)
+- Coverage includes: CRLF line endings, case normalization, whitespace handling, keyboard navigation
+- Network isolation enforced via test spies with proper cleanup
+
+### Quality & Accessibility
+- WCAG 2.2 baseline maintained (label association, alert region, table caption)
+- Keyboard accessibility: Enter and Space key activation for Clear button
+- Zero new dependencies, zero network calls
+- Pattern-only currency validation (intentional design to avoid client-side ISO 4217 list drift)
+
+### Technical Details
+- Files touched: 3 (frontend/src/pages/Import.tsx, tests, delta doc)
+- LOC delta: +14 code, +425 tests (target ≤140 code, cap ≤140)
+- Single revert capability: `git revert 576d9e9`
+- Constitution compliant: ≤4 files, ≤140 LOC, reversible, zero network
+- Test-to-code ratio: 30:1
+
+### Observability Notes
+Console filter for currency validation errors: `"Invalid currency code in row"`
+
+Expected user flow:
+- Valid CSV (USD/EUR/GBP) → schedule table with risk detection → Download .ics
+- Invalid currency (US/USDX/U$D) → error message shows original input
+- Clear button → all state resets, file input cleared
+
+### Code Review
+- CodeRabbit: Approved (1 fix applied for global mock cleanup)
+- Claude Code: ⭐⭐⭐⭐⭐ "Excellent" rating
+- All CI checks passing (8/8)
+
+### Related
+- PR #23: https://github.com/mmtuentertainment/PayPlan/pull/23
+- Linear MMT-13: CSV Import v1.1 (shipped)
+- Linear MMT-14: Code review follow-ups (low-priority backlog):
+  - Use React ref for file input (React best practice)
+  - Add explicit special character currency tests (U$D, €UR, etc.)
+  - Review blob URL revocation on Clear (micro-optimization)
+- Release: v0.1.6-a.2
+- Monitoring guide: `ops/post-merge-monitoring-v1.1.md`
+
 ## [v0.1.6-a.1] - 2025-10-09
 
 ### Added
