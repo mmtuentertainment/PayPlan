@@ -5,6 +5,52 @@ All notable changes to PayPlan will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.6-a.1] - 2025-10-09
+
+### Added
+- **CSV Import Safety & Accessibility Hardening**: Production-ready safeguards for `/import` page
+  - File size limit: 1MB maximum
+  - Row count limit: 1000 non-empty rows
+  - Delimiter detection: Comma-only (rejects semicolons)
+  - Real calendar date validation using Luxon DateTime (catches invalid dates like 2025-02-30)
+  - WCAG 2.2 Level A/AA compliance:
+    - Label association (`<label for="csv-file-input">`)
+    - Error announcements (`role="alert" aria-live="polite"`)
+    - Table caption for screen readers
+  - CRLF-friendly line splitting for Windows CSV exports
+  - UTF-8 BOM handling
+  - Per-field whitespace trimming
+  - Stale results cleared on errors
+
+### Security
+- XSS/formula injection protection: CSV formulas (=, +, -, @) rendered as plain text via React 18+ auto-escaping
+- Zero network calls during CSV processing (privacy-first)
+
+### Testing
+- 21 integration tests covering all hardening scenarios
+- Manual QA verified in production
+
+### Error Messages (Locked Copy)
+- E-001: "CSV too large (max 1MB)"
+- E-002: "Too many rows (max 1000)"
+- E-003: "Parse failure: expected comma-delimited CSV"
+- E-004: "Invalid CSV headers. Expected: provider,amount,currency,dueISO,autopay"
+- E-007: "Invalid date in row X: YYYY-MM-DD"
+
+### Technical Details
+- Files touched: 2 (frontend/src/pages/Import.tsx, tests)
+- LOC delta: +31 (target ≤90, cap ≤140)
+- No new dependencies (uses existing Luxon)
+- Single revert capability: `git revert f670d03`
+- Constitution compliant: ≤4 files, ≤140 LOC, reversible, zero network
+
+### Observability Notes
+Watch for locked error copy occurrences in console/monitoring to confirm users receive clear feedback:
+- "CSV too large (max 1MB)" → file size guard
+- "Too many rows (max 1000)" → row count guard
+- "Parse failure: expected comma-delimited CSV" → delimiter detection
+- "Invalid date in row X: YYYY-MM-DD" → real calendar validation
+
 ## [0.1.3-a] - 2025-10-02
 
 ### Added
