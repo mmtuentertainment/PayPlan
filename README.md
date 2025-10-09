@@ -15,9 +15,33 @@ Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified pay
 
 **Complete flow: <60 seconds**
 
+## 🆕 What's New
+
+### v0.1.6-a.2 (2025-10-09) - CSV Import Enhancements
+- **Strict currency validation**: 3-letter ISO 4217 codes (USD, EUR, GBP) with automatic normalization
+- **Clear button**: Explicit reset with keyboard support (Enter/Space keys)
+- **Better error messages**: Shows original invalid values for easier debugging
+- **19 tests**: Comprehensive coverage including CRLF, keyboard navigation, and accessibility
+- [Release notes](https://github.com/mmtuentertainment/PayPlan/releases/tag/v0.1.6-a.2) | [CHANGELOG](CHANGELOG.md#v016-a2---2025-10-09)
+
+### v0.1.6-a.1 (2025-10-09) - CSV Import Safety & A11y
+- **Production safeguards**: 1MB file limit, 1000 row limit, real calendar validation
+- **WCAG 2.2 compliance**: Label association, alert regions, table captions
+- **XSS protection**: Formula injection prevention via React auto-escaping
+- [CHANGELOG](CHANGELOG.md#v016-a1---2025-10-09)
+
+### v0.1.5-a.3 (2025-10-09) - Date Quick Fix & Undo
+- **Inline date correction**: Fix ambiguous dates (01/02/2026) with one click
+- **One-level undo**: Revert your last fix instantly
+- **Accessibility**: Full keyboard navigation, ARIA live regions
+- [CHANGELOG](CHANGELOG.md)
+
 ## ✨ Features
 
-- **CSV Input**: Paste or upload payment data
+- **CSV Input (v0.1.6-a.2)**: Paste or upload payment data with strict validation
+  - ✅ Currency validation: 3-letter ISO codes (USD, EUR, GBP) with normalization
+  - ✅ Clear button: Reset file/error/results with keyboard support (Enter/Space)
+  - ✅ Improved error messages with original invalid values
 - **📧 Email Parser (v0.1.3-a)**: Paste payment reminder emails directly - no CSV needed
 - **Multi-Provider Support**: Klarna, Affirm, Afterpay, PayPal Pay in 4, Zip, Sezzle
 - **Risk Detection**:
