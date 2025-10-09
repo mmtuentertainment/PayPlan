@@ -20,8 +20,8 @@ export default function Import() {
     const lines = normalized.split(/\r?\n/);
     if (lines.length === 1) throw new Error('No data rows found');
 
-    // T010: Delimiter detection - normalize header for BOM/spaces
-    const header = lines[0].replace(/^\uFEFF/, '').trim();
+    // T010: Delimiter detection - normalize header (BOM already stripped at line 17)
+    const header = lines[0].trim();
     if (header !== 'provider,amount,currency,dueISO,autopay') {
       // Check for semicolon delimiter or wrong field count
       if (header.includes(';') || header.split(',').length !== 5) {
