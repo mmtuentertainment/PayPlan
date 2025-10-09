@@ -1,0 +1,7 @@
+provider,amount,currency,dueISO,autopay
+Klarna,45.00,USD,2025-10-15,true
+Affirm,58.00,EUR,2025-10-22,false
+Afterpay,32.50,GBP,2025-10-29,true
+PayPalPayIn4,37.50,USD,2025-11-05,true
+Zip,28.00,USD,2025-11-12,false
+Sezzle,41.25,EUR,2025-11-19,true

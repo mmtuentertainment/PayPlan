@@ -1,0 +1,4 @@
+provider;amount;currency;dueISO;autopay
+Klarna;45.00;USD;2025-10-15;true
+Affirm;58.00;EUR;2025-10-22;false
+Afterpay;32.50;GBP;2025-10-29;true
