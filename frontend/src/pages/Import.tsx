@@ -13,15 +13,23 @@ export default function Import() {
   const [processing, setProcessing] = useState(false);
 
   const parseCSV = (text: string): CSVRow[] => {
-    const lines = text.trim().split('\n');
+    const lines = text.trim().split(/\r?\n/);
     if (lines.length === 0) throw new Error('CSV file is empty');
-    if (lines[0].trim() !== 'provider,amount,currency,dueISO,autopay') {
+    if (lines.length === 1) throw new Error('No data rows found');
+
+    // T010: Delimiter detection
+    const header = lines[0].trim();
+    if (header !== 'provider,amount,currency,dueISO,autopay') {
+      // Check for semicolon delimiter or wrong field count
+      if (header.includes(';') || header.split(',').length !== 5) {
+        throw new Error('Parse failure: expected comma-delimited CSV');
+      }
       throw new Error('Invalid CSV headers. Expected: provider,amount,currency,dueISO,autopay');
     }
-    if (lines.length === 1) throw new Error('No data rows found');
-    return lines.slice(1).map((line, idx) => {
+
+    return lines.slice(1).filter(line => line.trim().length > 0).map(line => {
       const v = line.split(',');
-      if (v.length !== 5) throw new Error(`Invalid row ${idx + 1}: expected 5 fields`);
+      if (v.length !== 5) throw new Error('Parse failure: expected comma-delimited CSV');
       return { provider: v[0], amount: v[1], currency: v[2], dueISO: v[3], autopay: v[4] };
     });
   };
@@ -35,6 +43,13 @@ export default function Import() {
     if (currency.length !== 3) throw new Error(`Invalid currency in row ${rowNum}`);
     const dueISO = row.dueISO.trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dueISO)) throw new Error(`Invalid date format in row ${rowNum}. Expected YYYY-MM-DD`);
+
+    // T011: Real calendar date validation
+    const dt = DateTime.fromISO(dueISO, { zone: 'America/New_York' });
+    if (!dt.isValid) {
+      throw new Error(`Invalid date in row ${rowNum}: ${dueISO}`);
+    }
+
     const autopayStr = row.autopay.trim().toLowerCase();
     if (autopayStr !== 'true' && autopayStr !== 'false') throw new Error(`Invalid autopay value in row ${rowNum}`);
     return { id: `csv-${rowNum}`, provider, amount, currency, due_date: dueISO, autopay: autopayStr === 'true', installment_no: 1, late_fee: 0, confidence: 1.0 };
@@ -45,7 +60,24 @@ export default function Import() {
     setError(null);
     setProcessing(true);
     try {
-      const rows = parseCSV(await file.text());
+      // T009: Pre-parse guards - file size
+      if (file.size > 1_048_576) {
+        setError('CSV too large (max 1MB)');
+        setProcessing(false);
+        return;
+      }
+
+      // T009: Pre-parse guards - row count (non-empty rows)
+      const text = await file.text();
+      const lines = text.trim().split(/\r?\n/);
+      const nonEmptyLines = lines.filter(line => line.trim().length > 0);
+      if (nonEmptyLines.length > 1001) { // 1 header + 1000 data rows
+        setError('Too many rows (max 1000)');
+        setProcessing(false);
+        return;
+      }
+
+      const rows = parseCSV(text);
       const items: Item[] = rows.map((row, idx) => csvRowToItem(row, idx + 1));
       const risks: Risk[] = [];
       const dateGroups = new Map<string, Item[]>();
@@ -90,7 +122,7 @@ export default function Import() {
     if (f) { setFile(f); setError(null); setResults(null); }
   };
 
-  const s = { box: { maxWidth: '1200px', margin: '0 auto', padding: '2rem' }, helper: { marginBottom: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }, drop: { border: '2px dashed #ccc', borderRadius: '4px', padding: '2rem', textAlign: 'center' as const, marginBottom: '1rem', background: '#fafafa' }, error: { padding: '1rem', background: '#fee', border: '1px solid #fcc', borderRadius: '4px', marginBottom: '1rem' }, table: { width: '100%', borderCollapse: 'collapse' as const, marginBottom: '1rem' }, td: { padding: '0.5rem', border: '1px solid #ddd' }, pill: { padding: '0.25rem 0.5rem', background: '#d4edda', color: '#155724', borderRadius: '4px', fontSize: '0.85rem' }, risk: (sev: string) => ({ padding: '0.25rem 0.5rem', background: sev === 'high' ? '#f8d7da' : '#fff3cd', color: sev === 'high' ? '#721c24' : '#856404', borderRadius: '4px', fontSize: '0.85rem', marginRight: '0.25rem' }) };
+  const s = { box: { maxWidth: '1200px', margin: '0 auto', padding: '2rem' }, helper: { marginBottom: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }, drop: { border: '2px dashed #ccc', borderRadius: '4px', padding: '2rem', textAlign: 'center' as const, marginBottom: '1rem', background: '#fafafa' }, error: { padding: '1rem', background: '#fee', border: '1px solid #fcc', borderRadius: '4px', marginBottom: '1rem' }, table: { width: '100%', borderCollapse: 'collapse' as const, marginBottom: '1rem' }, td: { padding: '0.5rem', border: '1px solid #ddd' }, pill: { padding: '0.25rem 0.5rem', background: '#d4edda', color: '#155724', borderRadius: '4px', fontSize: '0.85rem' }, risk: (sev: 'high' | 'medium' | 'low') => ({ padding: '0.25rem 0.5rem', background: sev === 'high' ? '#f8d7da' : '#fff3cd', color: sev === 'high' ? '#721c24' : '#856404', borderRadius: '4px', fontSize: '0.85rem', marginRight: '0.25rem' }) };
 
   return (
     <div style={s.box}>
@@ -100,8 +132,10 @@ export default function Import() {
         <p style={{ margin: '0.5rem 0 0', fontSize: '0.9rem', color: '#666' }}>Simple comma-delimited. No quotes or commas in values.</p>
       </div>
       <div style={s.drop}>
-        <p>Drag CSV file here or choose file</p>
-        <input type="file" accept=".csv,text/csv" onChange={handleFileChange} />
+        <label htmlFor="csv-file-input" style={{ display: 'block', marginBottom: '0.5rem' }}>
+          Drag CSV file here or choose file
+        </label>
+        <input id="csv-file-input" type="file" accept=".csv,text/csv" onChange={handleFileChange} />
       </div>
       {file && (
         <div style={{ marginBottom: '1rem' }}>
@@ -111,11 +145,14 @@ export default function Import() {
           </button>
         </div>
       )}
-      {error && <div style={s.error}>{error}</div>}
+      {error && <div style={s.error} role="alert" aria-live="polite">{error}</div>}
       {results && (
         <div>
           <h2>Schedule ({results.items.length} payments)</h2>
           <table style={s.table}>
+            <caption style={{ captionSide: 'top', textAlign: 'left', fontWeight: 'bold', padding: '0.5rem 0' }}>
+              Payment schedule with {results.items.length} installments
+            </caption>
             <thead>
               <tr style={{ background: '#f5f5f5' }}>
                 <th style={s.td}>Provider</th><th style={s.td}>Amount</th><th style={s.td}>Currency</th>
