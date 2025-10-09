@@ -13,12 +13,15 @@ export default function Import() {
   const [processing, setProcessing] = useState(false);
 
   const parseCSV = (text: string): CSVRow[] => {
-    const lines = text.trim().split(/\r?\n/);
-    if (lines.length === 0) throw new Error('CSV file is empty');
+    // Strip UTF-8 BOM and check for empty file
+    const normalized = text.replace(/^\uFEFF/, '').trim();
+    if (!normalized) throw new Error('CSV file is empty');
+
+    const lines = normalized.split(/\r?\n/);
     if (lines.length === 1) throw new Error('No data rows found');
 
-    // T010: Delimiter detection
-    const header = lines[0].trim();
+    // T010: Delimiter detection - normalize header for BOM/spaces
+    const header = lines[0].replace(/^\uFEFF/, '').trim();
     if (header !== 'provider,amount,currency,dueISO,autopay') {
       // Check for semicolon delimiter or wrong field count
       if (header.includes(';') || header.split(',').length !== 5) {
@@ -27,11 +30,14 @@ export default function Import() {
       throw new Error('Invalid CSV headers. Expected: provider,amount,currency,dueISO,autopay');
     }
 
-    return lines.slice(1).filter(line => line.trim().length > 0).map(line => {
-      const v = line.split(',');
-      if (v.length !== 5) throw new Error('Parse failure: expected comma-delimited CSV');
-      return { provider: v[0], amount: v[1], currency: v[2], dueISO: v[3], autopay: v[4] };
-    });
+    return lines
+      .slice(1)
+      .filter(line => line.trim().length > 0)
+      .map(line => {
+        const v = line.split(',').map(s => s.trim());
+        if (v.length !== 5) throw new Error('Parse failure: expected comma-delimited CSV');
+        return { provider: v[0], amount: v[1], currency: v[2], dueISO: v[3], autopay: v[4] };
+      });
   };
 
   const csvRowToItem = (row: CSVRow, rowNum: number): Item => {
@@ -62,6 +68,7 @@ export default function Import() {
     try {
       // T009: Pre-parse guards - file size
       if (file.size > 1_048_576) {
+        setResults(null);
         setError('CSV too large (max 1MB)');
         setProcessing(false);
         return;
@@ -72,6 +79,7 @@ export default function Import() {
       const lines = text.trim().split(/\r?\n/);
       const nonEmptyLines = lines.filter(line => line.trim().length > 0);
       if (nonEmptyLines.length > 1001) { // 1 header + 1000 data rows
+        setResults(null);
         setError('Too many rows (max 1000)');
         setProcessing(false);
         return;
