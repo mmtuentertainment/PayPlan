@@ -24,6 +24,11 @@ const CRLF_VALID_CURRENCY_CSV = `provider,amount,currency,dueISO,autopay\r
 Klarna,25.00,USD,2025-10-15,false\r
 Affirm,50.00,EUR,2025-10-16,true`;
 
+const originalFetch = global.fetch;
+const originalCreateObjectURL = global.URL.createObjectURL;
+const originalRevokeObjectURL = global.URL.revokeObjectURL;
+const originalFileText = File.prototype.text;
+
 beforeEach(() => {
   // Mock fetch to ensure zero network calls
   global.fetch = vi.fn(() => Promise.reject(new Error('No network allowed')));
@@ -46,6 +51,13 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks(); // Prevent spy leakage
+});
+
+afterAll(() => {
+  global.fetch = originalFetch;
+  global.URL.createObjectURL = originalCreateObjectURL;
+  global.URL.revokeObjectURL = originalRevokeObjectURL;
+  File.prototype.text = originalFileText;
 });
 
 // T001: Currency validation tests
