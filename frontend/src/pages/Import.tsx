@@ -46,7 +46,9 @@ export default function Import() {
     const amount = parseFloat(row.amount);
     if (isNaN(amount) || amount <= 0) throw new Error(`Invalid amount in row ${rowNum}`);
     const currency = row.currency.trim().toUpperCase();
-    if (currency.length !== 3) throw new Error(`Invalid currency in row ${rowNum}`);
+    if (!/^[A-Z]{3}$/.test(currency)) {
+      throw new Error(`Invalid currency code in row ${rowNum}: ${row.currency.trim()} (expected 3-letter ISO 4217 code)`);
+    }
     const dueISO = row.dueISO.trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dueISO)) throw new Error(`Invalid date format in row ${rowNum}. Expected YYYY-MM-DD`);
 
@@ -130,6 +132,14 @@ export default function Import() {
     if (f) { setFile(f); setError(null); setResults(null); }
   };
 
+  const handleClear = () => {
+    setFile(null);
+    setError(null);
+    setResults(null);
+    const fileInput = document.getElementById('csv-file-input') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  };
+
   const s = { box: { maxWidth: '1200px', margin: '0 auto', padding: '2rem' }, helper: { marginBottom: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }, drop: { border: '2px dashed #ccc', borderRadius: '4px', padding: '2rem', textAlign: 'center' as const, marginBottom: '1rem', background: '#fafafa' }, error: { padding: '1rem', background: '#fee', border: '1px solid #fcc', borderRadius: '4px', marginBottom: '1rem' }, table: { width: '100%', borderCollapse: 'collapse' as const, marginBottom: '1rem' }, td: { padding: '0.5rem', border: '1px solid #ddd' }, pill: { padding: '0.25rem 0.5rem', background: '#d4edda', color: '#155724', borderRadius: '4px', fontSize: '0.85rem' }, risk: (sev: 'high' | 'medium' | 'low') => ({ padding: '0.25rem 0.5rem', background: sev === 'high' ? '#f8d7da' : '#fff3cd', color: sev === 'high' ? '#721c24' : '#856404', borderRadius: '4px', fontSize: '0.85rem', marginRight: '0.25rem' }) };
 
   return (
@@ -150,6 +160,10 @@ export default function Import() {
           <p>Selected: {file.name}</p>
           <button type="button" onClick={handleProcessCSV} disabled={processing}>
             {processing ? 'Processing...' : 'Process CSV'}
+          </button>
+          {' '}
+          <button type="button" onClick={handleClear}>
+            Clear
           </button>
         </div>
       )}
