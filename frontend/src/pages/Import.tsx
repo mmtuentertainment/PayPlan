@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { type Item } from '@/lib/email-extractor';
 import { DateTime } from 'luxon';
 import { createEvents, type EventAttributes } from 'ics';
+import { TelemetryConsentBanner } from '@/components/TelemetryConsentBanner';
+import * as telemetry from '@/lib/telemetry';
 
 interface Risk { type: 'COLLISION'|'WEEKEND_AUTOPAY'; severity: 'high'|'medium'|'low'; message: string; affectedItems?: string[]; }
 interface CSVRow { provider: string; amount: string; currency: string; dueISO: string; autopay: string; }
@@ -12,7 +14,7 @@ export default function Import() {
   const [results, setResults] = useState<{items: Item[]; risks: Risk[]}|null>(null);
   const [processing, setProcessing] = useState(false);
 
-  const parseCSV = (text: string): CSVRow[] => {
+  const parseCSV = (text: string): { rows: CSVRow[]; delimiter: telemetry.DelimiterType } => {
     // Strip UTF-8 BOM and check for empty file
     const normalized = text.replace(/^\uFEFF/, '').trim();
     if (!normalized) throw new Error('CSV file is empty');
@@ -22,15 +24,21 @@ export default function Import() {
 
     // T010: Delimiter detection - normalize header (BOM already stripped at line 17)
     const header = lines[0].trim();
+    let delimiter: telemetry.DelimiterType = 'comma';
+
     if (header !== 'provider,amount,currency,dueISO,autopay') {
       // Check for semicolon delimiter or wrong field count
-      if (header.includes(';') || header.split(',').length !== 5) {
+      if (header.includes(';')) {
+        delimiter = 'semicolon';
+        throw new Error('Parse failure: expected comma-delimited CSV');
+      }
+      if (header.split(',').length !== 5) {
         throw new Error('Parse failure: expected comma-delimited CSV');
       }
       throw new Error('Invalid CSV headers. Expected: provider,amount,currency,dueISO,autopay');
     }
 
-    return lines
+    const rows = lines
       .slice(1)
       .filter(line => line.trim().length > 0)
       .map(line => {
@@ -38,6 +46,8 @@ export default function Import() {
         if (v.length !== 5) throw new Error('Parse failure: expected comma-delimited CSV');
         return { provider: v[0], amount: v[1], currency: v[2], dueISO: v[3], autopay: v[4] };
       });
+
+    return { rows, delimiter };
   };
 
   const csvRowToItem = (row: CSVRow, rowNum: number): Item => {
@@ -67,27 +77,36 @@ export default function Import() {
     if (!file) return;
     setError(null);
     setProcessing(true);
+
+    const sizeBucket = telemetry.bucketSize(file.size);
+    let text = '';
+
     try {
       // T009: Pre-parse guards - file size
       if (file.size > 1_048_576) {
         setResults(null);
         setError('CSV too large (max 1MB)');
+        telemetry.error({ phase: 'size', size_bucket: sizeBucket });
         setProcessing(false);
         return;
       }
 
       // T009: Pre-parse guards - row count (non-empty rows)
-      const text = await file.text();
+      text = await file.text();
       const lines = text.trim().split(/\r?\n/);
       const nonEmptyLines = lines.filter(line => line.trim().length > 0);
+      const dataRowCount = nonEmptyLines.length - 1; // Exclude header
+      const rowBucket = telemetry.bucketRows(dataRowCount);
+
       if (nonEmptyLines.length > 1001) { // 1 header + 1000 data rows
         setResults(null);
         setError('Too many rows (max 1000)');
+        telemetry.error({ phase: 'rows', row_bucket: rowBucket, size_bucket: sizeBucket });
         setProcessing(false);
         return;
       }
 
-      const rows = parseCSV(text);
+      const { rows, delimiter } = parseCSV(text);
       const items: Item[] = rows.map((row, idx) => csvRowToItem(row, idx + 1));
       const risks: Risk[] = [];
       const dateGroups = new Map<string, Item[]>();
@@ -95,7 +114,43 @@ export default function Import() {
       dateGroups.forEach((g, d) => { if (g.length > 1) risks.push({ type: 'COLLISION', severity: 'high', message: `Multiple payments due on ${d}`, affectedItems: g.map(i => i.id) }); });
       items.forEach(i => { if (i.autopay) { const dt = DateTime.fromISO(i.due_date, { zone: 'America/New_York' }); if (dt.weekday === 6 || dt.weekday === 7) risks.push({ type: 'WEEKEND_AUTOPAY', severity: 'medium', message: `Autopay on weekend: ${i.provider} on ${i.due_date}`, affectedItems: [i.id] }); } });
       setResults({ items, risks });
-    } catch (err) { setError(err instanceof Error ? err.message : 'Failed to process CSV'); }
+
+      // Track successful usage (sampled at ≤10%)
+      telemetry.maybeUsage({
+        row_bucket: rowBucket,
+        size_bucket: sizeBucket,
+        delimiter,
+      });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to process CSV';
+      setError(errorMsg);
+
+      // Track error with appropriate phase (use text from outer scope)
+      const lines = text.trim().split(/\r?\n/);
+      const dataRowCount = Math.max(0, lines.filter(l => l.trim()).length - 1);
+      const rowBucket = telemetry.bucketRows(dataRowCount);
+
+      let phase: telemetry.CsvErrorInput['phase'] = 'parse';
+      let delimiter: telemetry.DelimiterType | undefined = 'comma';
+
+      if (errorMsg.includes('semicolon') || errorMsg.includes('delimiter')) {
+        phase = 'delimiter';
+        delimiter = 'semicolon';
+      } else if (errorMsg.includes('date format')) {
+        phase = 'date_format';
+      } else if (errorMsg.includes('Invalid date')) {
+        phase = 'date_real';
+      } else if (errorMsg.includes('currency')) {
+        phase = 'currency';
+      }
+
+      telemetry.error({
+        phase,
+        row_bucket: rowBucket,
+        size_bucket: sizeBucket,
+        delimiter,
+      });
+    }
     finally { setProcessing(false); }
   };
 
@@ -143,8 +198,10 @@ export default function Import() {
   const s = { box: { maxWidth: '1200px', margin: '0 auto', padding: '2rem' }, helper: { marginBottom: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }, drop: { border: '2px dashed #ccc', borderRadius: '4px', padding: '2rem', textAlign: 'center' as const, marginBottom: '1rem', background: '#fafafa' }, error: { padding: '1rem', background: '#fee', border: '1px solid #fcc', borderRadius: '4px', marginBottom: '1rem' }, table: { width: '100%', borderCollapse: 'collapse' as const, marginBottom: '1rem' }, td: { padding: '0.5rem', border: '1px solid #ddd' }, pill: { padding: '0.25rem 0.5rem', background: '#d4edda', color: '#155724', borderRadius: '4px', fontSize: '0.85rem' }, risk: (sev: 'high' | 'medium' | 'low') => ({ padding: '0.25rem 0.5rem', background: sev === 'high' ? '#f8d7da' : '#fff3cd', color: sev === 'high' ? '#721c24' : '#856404', borderRadius: '4px', fontSize: '0.85rem', marginRight: '0.25rem' }) };
 
   return (
-    <div style={s.box}>
-      <h1>Import CSV</h1>
+    <>
+      <TelemetryConsentBanner />
+      <div style={s.box}>
+        <h1>Import CSV</h1>
       <div style={s.helper}>
         <p style={{ margin: 0 }}><b>CSV Format:</b> <code>provider,amount,currency,dueISO,autopay</code></p>
         <p style={{ margin: '0.5rem 0 0', fontSize: '0.9rem', color: '#666' }}>Simple comma-delimited. No quotes or commas in values.</p>
@@ -201,6 +258,7 @@ export default function Import() {
           <button type="button" onClick={handleDownloadIcs}>Download .ics</button>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
