@@ -13,3 +13,11 @@ dist/
 build/
 coverage/
 .vercel
+# Manual test pages (temporary development files)
+frontend/test-*.html
+frontend/check-*.html
+*.htm
+
+# Build artifacts
+frontend_files/
+
