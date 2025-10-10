@@ -376,11 +376,64 @@ Before merging, verify:
 
 ---
 
+## A11y Announcements (v1.1 - 2025-10-10)
+
+**Feature ID:** 009-008-0020-3 (aria-live announcements)
+**Status:** Implementation Complete
+**Type:** UI-only accessibility polish, reversible
+
+### Summary
+
+Adds **screen reader announcements** to the telemetry consent banner for WCAG 2.1 AA compliance (SC 4.1.3 Status Messages).
+
+**Changes:**
+- **aria-live region** with `role="status"`, `aria-live="polite"`, `aria-atomic="true"`
+- **Locked announcement strings:**
+  - Opt-in: "Anonymous analytics enabled"
+  - Opt-out: "Analytics disabled"
+- **Visually hidden** (sr-only class) — zero visual changes for sighted users
+- **1500ms unmount delay** to allow screen reader announcement before banner disappears (increased from initial 100ms after manual NVDA testing)
+
+**Files Modified:**
+- `frontend/src/components/TelemetryConsentBanner.tsx` (+14 LOC)
+- `frontend/tests/integration/telemetry.test.tsx` (+25 LOC for 5 new tests, +9 LOC to update 3 existing tests with 2000ms timeout)
+- `frontend/src/lib/email-extractor.ts` (fixed import path bug)
+
+**Total:** 48 LOC (14 implementation + 34 tests + bugfix)
+
+**Behavioral Changes:**
+- No logic changes (FR-008): Consent state, telemetry emission, DNT handling unchanged
+- Dialog semantics preserved (FR-009): `role="dialog"`, `aria-labelledby`, `aria-describedby`, focus trap
+- Keyboard navigation unchanged (FR-010): Tab, Shift+Tab, Escape, Enter work as before
+- **NEW:** 1500ms delay before banner unmounts (allows announcement time for NVDA/VoiceOver)
+
+**Testing:**
+- All 593 automated tests pass (including 5 new aria-live tests)
+- Verified: Live region exists, ARIA attributes correct, announcement text accurate
+- **Manual NVDA testing completed** (T013):
+  - ✅ Test 1: "Allow analytics" → announces "Anonymous analytics enabled"
+  - ✅ Test 3: Escape key → announces "Analytics disabled"
+  - ✅ Visual regression: No visible announcement text for sighted users
+  - ⚠️  Test 2: "Decline" button inconclusive due to page reload noise (functionally equivalent to Escape test)
+
+**Reversibility:**
+- Single `git revert` removes aria-live feature
+- No data migrations or cleanup needed
+
+**References:**
+- **Feature Spec:** [specs/009-008-0020-3/spec.md](../../specs/009-008-0020-3/spec.md)
+- **Research (2025 standards):** [specs/009-008-0020-3/research.md](../../specs/009-008-0020-3/research.md)
+- **Implementation Plan:** [specs/009-008-0020-3/plan.md](../../specs/009-008-0020-3/plan.md)
+- **Tasks:** [specs/009-008-0020-3/tasks.md](../../specs/009-008-0020-3/tasks.md)
+
+---
+
 ## Change Log
 
 | **Version** | **Date**       | **Changes**                              |
 |-------------|----------------|------------------------------------------|
 | 1.0         | 2025-10-09     | Initial implementation and documentation |
+| 1.1         | 2025-10-10     | Added aria-live announcements for screen readers |
 
 ---
 

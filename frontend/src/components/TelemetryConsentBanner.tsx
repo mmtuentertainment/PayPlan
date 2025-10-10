@@ -18,17 +18,22 @@ export function TelemetryConsentBanner() {
   // Determine initial visibility immediately (not in useEffect)
   const shouldShow = !isDNT() && getConsent() === "unset";
   const [visible, setVisible] = useState(shouldShow);
+  const [announcementText, setAnnouncementText] = useState<string>("");
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleAllow = useCallback(() => {
+    setAnnouncementText("Anonymous analytics enabled");
     setConsent("opt_in");
-    setVisible(false);
+    // Delay hiding to allow screen reader announcement (1500ms for NVDA/VoiceOver)
+    setTimeout(() => setVisible(false), 1500);
   }, []);
 
   const handleDecline = useCallback(() => {
+    setAnnouncementText("Analytics disabled");
     setConsent("opt_out");
-    setVisible(false);
+    // Delay hiding to allow screen reader announcement (1500ms for NVDA/VoiceOver)
+    setTimeout(() => setVisible(false), 1500);
   }, []);
 
   useEffect(() => {
@@ -121,6 +126,14 @@ export function TelemetryConsentBanner() {
             Decline
           </button>
         </div>
+      </div>
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcementText}
       </div>
     </div>
   );
