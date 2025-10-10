@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getConsent, setConsent, isDNT } from "@/lib/telemetry";
 
 /**
@@ -20,6 +20,16 @@ export function TelemetryConsentBanner() {
   const [visible, setVisible] = useState(shouldShow);
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
+
+  const handleAllow = useCallback(() => {
+    setConsent("opt_in");
+    setVisible(false);
+  }, []);
+
+  const handleDecline = useCallback(() => {
+    setConsent("opt_out");
+    setVisible(false);
+  }, []);
 
   useEffect(() => {
     if (visible && firstButtonRef.current) {
@@ -69,17 +79,7 @@ export function TelemetryConsentBanner() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [visible]);
-
-  const handleAllow = () => {
-    setConsent("opt_in");
-    setVisible(false);
-  };
-
-  const handleDecline = () => {
-    setConsent("opt_out");
-    setVisible(false);
-  };
+  }, [visible, handleDecline]);
 
   if (!visible) return null;
 

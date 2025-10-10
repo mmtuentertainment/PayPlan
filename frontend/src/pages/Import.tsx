@@ -79,6 +79,7 @@ export default function Import() {
     setProcessing(true);
 
     const sizeBucket = telemetry.bucketSize(file.size);
+    let text = '';
 
     try {
       // T009: Pre-parse guards - file size
@@ -91,7 +92,7 @@ export default function Import() {
       }
 
       // T009: Pre-parse guards - row count (non-empty rows)
-      const text = await file.text();
+      text = await file.text();
       const lines = text.trim().split(/\r?\n/);
       const nonEmptyLines = lines.filter(line => line.trim().length > 0);
       const dataRowCount = nonEmptyLines.length - 1; // Exclude header
@@ -124,8 +125,7 @@ export default function Import() {
       const errorMsg = err instanceof Error ? err.message : 'Failed to process CSV';
       setError(errorMsg);
 
-      // Track error with appropriate phase
-      const text = await file.text().catch(() => '');
+      // Track error with appropriate phase (use text from outer scope)
       const lines = text.trim().split(/\r?\n/);
       const dataRowCount = Math.max(0, lines.filter(l => l.trim()).length - 1);
       const rowBucket = telemetry.bucketRows(dataRowCount);
