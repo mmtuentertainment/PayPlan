@@ -18,12 +18,17 @@ export function SuccessToast({ message, onDismiss, autoDismissMs = 3000 }: Succe
     // Auto-dismiss timer
     if (autoDismissMs && autoDismissMs > 0) {
       const timer = setTimeout(() => {
-        handleDismiss();
+        // Inline handleDismiss to avoid dependency issues
+        setIsExiting(true);
+        setTimeout(() => {
+          setIsVisible(false);
+          onDismiss?.();
+        }, 300); // Match animation duration
       }, autoDismissMs);
 
       return () => clearTimeout(timer);
     }
-  }, [autoDismissMs]);
+  }, [autoDismissMs, onDismiss]);
 
   const handleDismiss = () => {
     setIsExiting(true);

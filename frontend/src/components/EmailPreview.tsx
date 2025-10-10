@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { DateQuickFix } from './DateQuickFix';
 import type { Item } from '../lib/email-extractor';
-import type { DateLocale } from '../lib/date-parser';
+import type { DateLocale } from '../lib/extraction/extractors/date';
 import { formatCurrency } from '../lib/extraction/helpers/currency';
 
 interface EmailPreviewProps {

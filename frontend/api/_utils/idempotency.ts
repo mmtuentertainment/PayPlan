@@ -107,7 +107,7 @@ export async function cacheResponse(
   }
 }
 
-export function sendIdempotencyConflict(res: ServerResponse, host: string): void {
+export function sendIdempotencyConflict(res: ServerResponse, _host: string): void {
   const problem = buildProblem({
     type: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.type,
     title: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.title,

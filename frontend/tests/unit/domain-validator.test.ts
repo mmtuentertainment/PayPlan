@@ -275,7 +275,7 @@ describe('PROVIDER_DOMAINS', () => {
   });
 
   test('each provider has at least one domain', () => {
-    Object.entries(PROVIDER_DOMAINS).forEach(([provider, domains]) => {
+    Object.entries(PROVIDER_DOMAINS).forEach(([_provider, domains]) => {
       expect(domains.length).toBeGreaterThan(0);
       expect(Array.isArray(domains)).toBe(true);
     });

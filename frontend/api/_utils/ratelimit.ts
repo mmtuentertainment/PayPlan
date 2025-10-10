@@ -78,7 +78,7 @@ export function setRateLimitHeaders(res: ServerResponse, result: RateLimitResult
   }
 }
 
-export function sendRateLimitExceeded(res: ServerResponse, result: RateLimitResult, host: string): void {
+export function sendRateLimitExceeded(res: ServerResponse, result: RateLimitResult, _host: string): void {
   const problem = buildProblem({
     type: PROBLEM_TYPES.RATE_LIMIT_EXCEEDED.type,
     title: PROBLEM_TYPES.RATE_LIMIT_EXCEEDED.title,

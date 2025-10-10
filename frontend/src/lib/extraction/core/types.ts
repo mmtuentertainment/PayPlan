@@ -1,4 +1,4 @@
-import type { DateLocale } from '../../date-parser';
+import type { DateLocale } from '../extractors/date';
 import { z } from 'zod';
 
 /**

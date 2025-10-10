@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { DateTime } from 'luxon';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import type { DateLocale } from '../lib/date-parser';
+import type { DateLocale } from '../lib/extraction/extractors/date';
 import { reparseDate } from '../lib/extraction/helpers';
 
 /**

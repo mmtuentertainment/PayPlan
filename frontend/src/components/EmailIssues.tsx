@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Issue, Item } from '../lib/email-extractor';
-import { redactPII } from '../lib/redact';
+import { redactPII } from '../lib/extraction/helpers/redaction';
 import { ErrorList } from './ErrorAlert';
 
 interface EmailIssuesProps {

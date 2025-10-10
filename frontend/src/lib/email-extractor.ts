@@ -8,7 +8,7 @@ import {
   detectAutopay,
   extractLateFee
 } from './extraction/extractors';
-import { redactPII } from './redact';
+import { redactPII } from './extraction/helpers/redaction';
 import { getErrorMessage } from './extraction/helpers/error-messages';
 import { extractionCache } from './extraction/helpers/cache';
 import { safeExtract } from './extraction/helpers/field-extractor';

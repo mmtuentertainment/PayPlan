@@ -158,8 +158,10 @@ describe('Telemetry - Consent Flow', () => {
       expect(telemetry.getConsent()).toBe('opt_in');
     });
 
-    // Banner should disappear
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // Banner should disappear (after 1500ms announcement delay)
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    }, { timeout: 2000 });
   });
 
   it('should set consent to opt_out when Decline button clicked', async () => {
@@ -172,8 +174,10 @@ describe('Telemetry - Consent Flow', () => {
       expect(telemetry.getConsent()).toBe('opt_out');
     });
 
-    // Banner should disappear
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // Banner should disappear (after 1500ms announcement delay)
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    }, { timeout: 2000 });
   });
 
   it('should emit consent_change event exactly once when opting in', async () => {
@@ -219,8 +223,10 @@ describe('Telemetry - Consent Flow', () => {
       expect(telemetry.getConsent()).toBe('opt_out');
     });
 
-    // Banner should disappear
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // Banner should disappear (after 1500ms announcement delay)
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    }, { timeout: 2000 });
   });
 });
 
@@ -553,7 +559,99 @@ describe('Telemetry - Banner Accessibility', () => {
 });
 
 // ============================================================================
-// TEST SUITE 7: BUCKETING HELPERS
+// TEST SUITE 7: ARIA LIVE ANNOUNCEMENTS
+// ============================================================================
+
+describe('Telemetry - ARIA Live Announcements', () => {
+  beforeEach(() => {
+    localStorageMock.clear();
+    Object.defineProperty(navigator, 'doNotTrack', { value: '0', configurable: true, writable: true });
+    Object.defineProperty(navigator, 'msDoNotTrack', { value: undefined, configurable: true, writable: true });
+    Object.defineProperty(window, 'doNotTrack', { value: undefined, configurable: true, writable: true });
+  });
+
+  // T001: Live region exists with role="status"
+  it('should have live region with role="status"', () => {
+    render(<TelemetryConsentBanner />);
+
+    // Live region should exist when banner is visible
+    const liveRegion = screen.getByRole('status');
+    expect(liveRegion).toBeInTheDocument();
+
+    // Live region should be present on initial render (empty content is OK)
+    expect(liveRegion).toHaveTextContent('');
+  });
+
+  // T002: ARIA attributes are correct
+  it('should have correct ARIA attributes', () => {
+    render(<TelemetryConsentBanner />);
+
+    const liveRegion = screen.getByRole('status');
+
+    // Check aria-live="polite"
+    expect(liveRegion).toHaveAttribute('aria-live', 'polite');
+
+    // Check aria-atomic="true"
+    expect(liveRegion).toHaveAttribute('aria-atomic', 'true');
+
+    // Check sr-only class (Tailwind utility)
+    expect(liveRegion).toHaveClass('sr-only');
+  });
+
+  // T003: Opt-in announcement text
+  it('should announce "Anonymous analytics enabled" on opt-in', async () => {
+    render(<TelemetryConsentBanner />);
+
+    // Initially empty
+    const liveRegion = screen.getByRole('status');
+    expect(liveRegion).toHaveTextContent('');
+
+    const allowButton = screen.getByText('Allow analytics');
+    fireEvent.click(allowButton);
+
+    // Live region text should be set immediately
+    await waitFor(() => {
+      expect(liveRegion).toHaveTextContent('Anonymous analytics enabled');
+    });
+  });
+
+  // T004: Opt-out announcement text (Decline button)
+  it('should announce "Analytics disabled" on opt-out (Decline)', async () => {
+    render(<TelemetryConsentBanner />);
+
+    // Initially empty
+    const liveRegion = screen.getByRole('status');
+    expect(liveRegion).toHaveTextContent('');
+
+    const declineButton = screen.getByText('Decline');
+    fireEvent.click(declineButton);
+
+    // Live region text should be set immediately
+    await waitFor(() => {
+      expect(liveRegion).toHaveTextContent('Analytics disabled');
+    });
+  });
+
+  // T005: Opt-out announcement text (Escape key)
+  it('should announce "Analytics disabled" on Escape key', async () => {
+    render(<TelemetryConsentBanner />);
+
+    // Initially empty
+    const liveRegion = screen.getByRole('status');
+    expect(liveRegion).toHaveTextContent('');
+
+    const dialog = screen.getByRole('dialog');
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+
+    // Live region text should be set immediately
+    await waitFor(() => {
+      expect(liveRegion).toHaveTextContent('Analytics disabled');
+    });
+  });
+});
+
+// ============================================================================
+// TEST SUITE 8: BUCKETING HELPERS
 // ============================================================================
 
 describe('Telemetry - Bucketing Helpers', () => {
