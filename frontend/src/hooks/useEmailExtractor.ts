@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { extractItemsFromEmails } from '../lib/email-extractor';
 import type { ExtractionResult, Item, ExtractOptions } from '../lib/email-extractor';
-import type { DateLocale } from '../lib/date-parser';
+import type { DateLocale } from '../lib/extraction/extractors/date';
 import { sanitizeError } from '../lib/extraction/helpers/error-sanitizer';
 import { calculateItemConfidence } from '../lib/extraction/helpers/confidence-calculator';
 

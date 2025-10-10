@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { ExtractionCache } from '../../src/lib/extraction/helpers/cache';
 import type { ExtractionResult } from '../../src/lib/email-extractor';
-import { createMockResult, KLARNA_ITEM } from '../fixtures/mock-items';
+import { createMockResult } from '../fixtures/mock-items';
 import { KLARNA_SIMPLE } from '../fixtures/email-samples';
 
 describe('ExtractionCache', () => {

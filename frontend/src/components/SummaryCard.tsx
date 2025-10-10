@@ -4,10 +4,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 type Props = { summary: string };
 
 export default function SummaryCard({ summary }: Props) {
-  if (!summary) return null;
-
   // Memoize to avoid re-computing on every render
-  const summaryLines = useMemo(() => summary.split("\n").filter(Boolean), [summary]);
+  // Hook must be called before any conditional returns (React Rules of Hooks)
+  const summaryLines = useMemo(() =>
+    summary ? summary.split("\n").filter(Boolean) : [],
+    [summary]
+  );
+
+  if (!summary) return null;
 
   return (
     <Card>

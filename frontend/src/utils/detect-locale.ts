@@ -1,4 +1,4 @@
-import type { DateLocale } from '../lib/date-parser';
+import type { DateLocale } from '../lib/extraction/extractors/date';
 
 /**
  * Auto-detects the user's preferred date locale based on browser language and timezone.

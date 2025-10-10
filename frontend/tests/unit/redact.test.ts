@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { redactPII } from '../../src/lib/redact';
+import { redactPII } from '../../src/lib/extraction/helpers/redaction';
 
 describe('redactPII', () => {
   test('redacts email addresses', () => {

@@ -3,7 +3,7 @@ import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { SAMPLE_EMAILS } from '../lib/sample-emails';
 import { LocaleToggle } from './LocaleToggle';
-import type { DateLocale } from '../lib/date-parser';
+import type { DateLocale } from '../lib/extraction/extractors/date';
 import { detectUserLocale } from '../utils/detect-locale';
 
 interface EmailInputProps {

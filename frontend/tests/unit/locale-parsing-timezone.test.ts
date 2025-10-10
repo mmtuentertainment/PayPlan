@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { parseDate } from '../../src/lib/date-parser';
+import { parseDate } from '../../src/lib/extraction/extractors/date';
 
 describe('Locale parsing with timezone & DST boundaries', () => {
   const timezone = 'America/New_York';

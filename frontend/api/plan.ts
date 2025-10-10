@@ -265,7 +265,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     try {
       const rl = await checkLimit(clientIp);
       setRateHeaders(res, rl.headers);
-    } catch (e) {
+    } catch (_e) {
       // Ignore rate limit header errors in error path
     }
 

@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EmailIssues } from '../../src/components/EmailIssues';
 import type { Item, Issue } from '../../src/lib/email-extractor';
-import { createMockItem, LOW_CONFIDENCE_ITEM, HIGH_CONFIDENCE_ITEM, AFTERPAY_ITEM } from '../fixtures/mock-items';
+import { createMockItem, HIGH_CONFIDENCE_ITEM } from '../fixtures/mock-items';
 
 describe('EmailIssues - Low Confidence Detection', () => {
   test('shows low-confidence item in Issues when confidence < 0.6', () => {

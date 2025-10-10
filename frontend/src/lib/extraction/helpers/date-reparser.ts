@@ -1,5 +1,5 @@
-import { parseDate } from '../../date-parser';
-import type { DateLocale } from '../../date-parser';
+import { parseDate } from '../extractors/date';
+import type { DateLocale } from '../extractors/date';
 
 /**
  * Re-parses a raw date string using a different locale.
