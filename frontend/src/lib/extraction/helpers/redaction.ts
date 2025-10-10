@@ -147,12 +147,11 @@ export function redactPII(text: string): string {
   redacted = redacted.replace(/\bacct[:\s#]*(\d{4,})\b/gi, 'acct: [ACCOUNT]');
 
   // Redact names (capitalized first/last name pairs, 3+ chars each, with common word exclusions)
-  const commonWords = /\b(Pay Later|Auto Pay|Buy Now|Pay In|Due Date|Late Fee|Payment Plan|Order Number|Item Total)\b/g;
-  const matches = text.match(commonWords) || [];
-  redacted = redacted.replace(/\b[A-Z][a-z]{2,} [A-Z][a-z]{2,}\b/g, '[NAME]');
-  // Restore common false positives
-  matches.forEach((match) => {
-    redacted = redacted.replace('[NAME]', match);
+  const commonWords = /\b(Pay Later|Auto Pay|Buy Now|Pay In|Due Date|Late Fee|Payment Plan|Order Number|Item Total)\b/gi;
+  redacted = redacted.replace(/\b[A-Z][a-z]{2,} [A-Z][a-z]{2,}\b/g, (match) => {
+    // Preserve common phrases, redact everything else
+    commonWords.lastIndex = 0; // Reset regex for each test
+    return commonWords.test(match) ? match : '[NAME]';
   });
 
   return redacted;
