@@ -819,7 +819,7 @@ describe('Telemetry - Auto-Dismiss Countdown', () => {
 
     // Hide the tab
     act(() => {
-      Object.defineProperty(document, 'hidden', { value: true, writable: true, configurable: true });
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
       fireEvent(document, new Event('visibilitychange'));
     });
 
@@ -835,7 +835,7 @@ describe('Telemetry - Auto-Dismiss Countdown', () => {
     expect(screen.getByText(/Paused/)).toBeInTheDocument();
 
     // Clean up
-    Object.defineProperty(document, 'hidden', { value: false, writable: true, configurable: true });
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
   }, 7000); // Test timeout 7s
 
   // T009: Test pause indicator appears

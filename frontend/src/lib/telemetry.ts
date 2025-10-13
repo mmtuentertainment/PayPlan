@@ -66,7 +66,7 @@ type TelemetryEvent = CsvErrorEvent | CsvUsageEvent | ConsentChangeEvent;
 // STORAGE
 // ============================================================================
 
-const CONSENT_KEY = "pp.telemetryConsent";
+export const CONSENT_KEY = "pp.telemetryConsent";
 
 // ============================================================================
 // DNT DETECTION

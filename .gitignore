@@ -16,7 +16,7 @@ coverage/
 # Manual test pages (temporary development files)
 frontend/test-*.html
 frontend/check-*.html
-*.htm
+frontend/*.htm
 
 # Build artifacts
 frontend_files/

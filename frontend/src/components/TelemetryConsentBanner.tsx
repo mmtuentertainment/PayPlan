@@ -1,5 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { getConsent, setConsent, isDNT } from "@/lib/telemetry";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { getConsent, setConsent, isDNT, CONSENT_KEY } from "@/lib/telemetry";
+
+// Timing constants for auto-dismiss feature (FR-011 through FR-034)
+const COUNTDOWN_SECONDS = 10;      // Initial countdown duration
+const ANNOUNCE_DELAY_MS = 1500;    // Screen reader announcement delay (NVDA/VoiceOver)
+const ANIMATION_MS = 250;          // Exit animation duration (FR-014.4)
 
 /**
  * Accessible consent banner for telemetry opt-in/opt-out
@@ -24,7 +29,7 @@ export function TelemetryConsentBanner() {
   const firstButtonRef = useRef<HTMLButtonElement>(null);
 
   // Auto-dismiss state (Feature 011-009-008-0020)
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
   const [isHovered, setIsHovered] = useState(false);
   const [hasFocus, setHasFocus] = useState(false);
   const [isTabHidden, setTabHidden] = useState(false);
@@ -37,13 +42,13 @@ export function TelemetryConsentBanner() {
   const handleAutoDismiss = useCallback(() => {
     setAnnouncementText("Analytics banner auto-dismissed");
     setConsent("opt_out");
-    // Start exit animation (FR-014.4: 200-250ms)
+    // Start exit animation (FR-014.4)
     setIsExiting(true);
     setTimeout(() => {
       setVisible(false);
       // Restore focus to previous element
       previousFocusRef.current?.focus();
-    }, 1500); // Keep 1500ms for screen reader announcement time
+    }, ANNOUNCE_DELAY_MS);
   }, []);
 
   const handleAllow = useCallback(() => {
@@ -51,8 +56,8 @@ export function TelemetryConsentBanner() {
     setConsent("opt_in");
     // Start exit animation
     setIsExiting(true);
-    // Delay hiding to allow screen reader announcement (1500ms for NVDA/VoiceOver)
-    setTimeout(() => setVisible(false), 1500);
+    // Delay hiding to allow screen reader announcement
+    setTimeout(() => setVisible(false), ANNOUNCE_DELAY_MS);
   }, []);
 
   const handleDecline = useCallback(() => {
@@ -60,8 +65,8 @@ export function TelemetryConsentBanner() {
     setConsent("opt_out");
     // Start exit animation
     setIsExiting(true);
-    // Delay hiding to allow screen reader announcement (1500ms for NVDA/VoiceOver)
-    setTimeout(() => setVisible(false), 1500);
+    // Delay hiding to allow screen reader announcement
+    setTimeout(() => setVisible(false), ANNOUNCE_DELAY_MS);
   }, []);
 
   // Capture previous focus on mount for restoration
@@ -119,7 +124,9 @@ export function TelemetryConsentBanner() {
     };
 
     const handleFocusOut = (e: FocusEvent) => {
-      if (dialogRef.current && !dialogRef.current.contains(e.relatedTarget as Node)) {
+      if (!dialogRef.current) return;
+      const next = e.relatedTarget as Node | null;
+      if (!next || !dialogRef.current.contains(next)) {
         setHasFocus(false);
       }
     };
@@ -150,7 +157,7 @@ export function TelemetryConsentBanner() {
   // Cross-tab consent synchronization (FR-017.4)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'pp.telemetryConsent' && e.newValue) {
+      if (e.key === CONSENT_KEY && e.newValue) {
         // Another tab changed consent - hide banner immediately
         if (e.newValue === 'opt_in' || e.newValue === 'opt_out') {
           setVisible(false);
@@ -225,13 +232,13 @@ export function TelemetryConsentBanner() {
     }
   })();
 
-  const animationStyle: React.CSSProperties = {
+  const animationStyle: CSSProperties = {
     opacity: isExiting ? 0 : 1,
     // Only animate transform if user hasn't requested reduced motion
     transform: isExiting && !prefersReducedMotion ? 'translateY(-100%)' : 'translateY(0)',
     transition: prefersReducedMotion
-      ? 'opacity 0.25s ease-out' // Reduced motion: only fade
-      : 'opacity 0.25s ease-out, transform 0.25s ease-out', // Full animation
+      ? `opacity ${ANIMATION_MS}ms ease-out` // Reduced motion: only fade
+      : `opacity ${ANIMATION_MS}ms ease-out, transform ${ANIMATION_MS}ms ease-out`, // Full animation
   };
 
   return (
