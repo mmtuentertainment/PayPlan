@@ -79,7 +79,7 @@ export function TelemetryConsentBanner() {
 
   // Countdown timer (T014) - only runs when not paused
   useEffect(() => {
-    if (!visible || isPaused) return;
+    if (!visible || isPaused || isExiting || isDismissingRef.current) return;
 
     const intervalId = setInterval(() => {
       setCountdown((prev) => {
@@ -89,14 +89,14 @@ export function TelemetryConsentBanner() {
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [visible, isPaused]);
+  }, [visible, isPaused, isExiting]);
 
   // Auto-dismiss trigger (T015) - when countdown reaches 0
   useEffect(() => {
-    if (countdown === 0 && visible) {
+    if (countdown === 0 && visible && !isExiting && !isDismissingRef.current) {
       handleAutoDismiss();
     }
-  }, [countdown, visible, handleAutoDismiss]);
+  }, [countdown, visible, isExiting, handleAutoDismiss]);
 
   // Screen reader milestone announcements (T019) - 10s, 5s only (not 0, handled by auto-dismiss)
   useEffect(() => {
