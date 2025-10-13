@@ -36,11 +36,14 @@ export function TelemetryConsentBanner() {
   const [isExiting, setIsExiting] = useState(false); // Track dismissal animation
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const hasUserInteractedRef = useRef(false); // Track if user has manually interacted
+  const isDismissingRef = useRef(false); // Prevent race condition with concurrent dismissals
 
   const isPaused = isHovered || (hasFocus && hasUserInteractedRef.current) || isTabHidden;
 
   // Shared dismiss helper - ensures focus restoration for all dismissal paths (WCAG)
   const dismissBanner = useCallback(() => {
+    if (isDismissingRef.current) return; // Guard against concurrent dismissals
+    isDismissingRef.current = true;
     setIsExiting(true);
     setTimeout(() => {
       setVisible(false);
@@ -170,9 +173,10 @@ export function TelemetryConsentBanner() {
   useEffect(() => {
     if (visible && firstButtonRef.current) {
       // Focus first button when banner appears
-      setTimeout(() => {
+      const id = setTimeout(() => {
         firstButtonRef.current?.focus();
       }, 100);
+      return () => clearTimeout(id);
     }
   }, [visible]);
 
