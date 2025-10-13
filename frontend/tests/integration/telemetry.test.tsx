@@ -10,8 +10,8 @@
  * 6. Banner accessibility
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { TelemetryConsentBanner } from '@/components/TelemetryConsentBanner';
 import * as telemetry from '@/lib/telemetry';
 
@@ -578,8 +578,8 @@ describe('Telemetry - ARIA Live Announcements', () => {
     const liveRegion = screen.getByRole('status');
     expect(liveRegion).toBeInTheDocument();
 
-    // Live region should be present on initial render (empty content is OK)
-    expect(liveRegion).toHaveTextContent('');
+    // Live region should announce countdown at mount (10 seconds)
+    expect(liveRegion).toHaveTextContent(/10 seconds/);
   });
 
   // T002: ARIA attributes are correct
@@ -602,9 +602,9 @@ describe('Telemetry - ARIA Live Announcements', () => {
   it('should announce "Anonymous analytics enabled" on opt-in', async () => {
     render(<TelemetryConsentBanner />);
 
-    // Initially empty
+    // Initially shows countdown announcement
     const liveRegion = screen.getByRole('status');
-    expect(liveRegion).toHaveTextContent('');
+    expect(liveRegion).toHaveTextContent(/10 seconds/);
 
     const allowButton = screen.getByText('Allow analytics');
     fireEvent.click(allowButton);
@@ -619,9 +619,9 @@ describe('Telemetry - ARIA Live Announcements', () => {
   it('should announce "Analytics disabled" on opt-out (Decline)', async () => {
     render(<TelemetryConsentBanner />);
 
-    // Initially empty
+    // Initially shows countdown announcement
     const liveRegion = screen.getByRole('status');
-    expect(liveRegion).toHaveTextContent('');
+    expect(liveRegion).toHaveTextContent(/10 seconds/);
 
     const declineButton = screen.getByText('Decline');
     fireEvent.click(declineButton);
@@ -636,9 +636,9 @@ describe('Telemetry - ARIA Live Announcements', () => {
   it('should announce "Analytics disabled" on Escape key', async () => {
     render(<TelemetryConsentBanner />);
 
-    // Initially empty
+    // Initially shows countdown announcement
     const liveRegion = screen.getByRole('status');
-    expect(liveRegion).toHaveTextContent('');
+    expect(liveRegion).toHaveTextContent(/10 seconds/);
 
     const dialog = screen.getByRole('dialog');
     fireEvent.keyDown(dialog, { key: 'Escape' });
@@ -678,5 +678,294 @@ describe('Telemetry - Bucketing Helpers', () => {
     expect(telemetry.bucketSize(700 * 1024)).toBe('≤1MB');   // 700KB
     expect(telemetry.bucketSize(1024 * 1024)).toBe('≤1MB');  // 1MB
     expect(telemetry.bucketSize(2 * 1024 * 1024)).toBe('>1MB'); // 2MB
+  });
+});
+
+// ============================================================================
+// TEST SUITE 9: AUTO-DISMISS COUNTDOWN (Feature 011-009-008-0020)
+// ============================================================================
+
+describe('Telemetry - Auto-Dismiss Countdown', () => {
+  beforeEach(() => {
+    localStorageMock.clear();
+    Object.defineProperty(navigator, 'doNotTrack', { value: '0', configurable: true, writable: true });
+    Object.defineProperty(navigator, 'msDoNotTrack', { value: undefined, configurable: true, writable: true });
+    Object.defineProperty(window, 'doNotTrack', { value: undefined, configurable: true, writable: true });
+  });
+
+  // T002: Test countdown starts at 10 seconds
+  it('countdown starts at 10 seconds on banner mount', () => {
+    render(<TelemetryConsentBanner />);
+    expect(screen.getByText(/Auto-dismissing in 10s/)).toBeInTheDocument();
+  });
+
+  // T003: Test countdown decrements every second
+  it('countdown decrements by 1 every second', () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
+    render(<TelemetryConsentBanner />);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByText(/9s/)).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByText(/8s/)).toBeInTheDocument();
+
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+  });
+
+  // T004: Test auto-dismiss at countdown=0 (uses real timers)
+  it('banner dismisses and sets opt_out when countdown reaches 0', async () => {
+    render(<TelemetryConsentBanner />);
+
+    // Wait for full countdown (10s) + announcement delay (1.5s)
+    await new Promise(resolve => setTimeout(resolve, 11500));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    }, { timeout: 1000 });
+    expect(localStorage.getItem('pp.telemetryConsent')).toBe('opt_out');
+  }, 13000); // Test timeout 13s
+
+  // T005: Test countdown pauses on hover (uses real timers)
+  it('countdown pauses when user hovers over banner', async () => {
+    render(<TelemetryConsentBanner />);
+
+    // Wait 3.1 seconds (countdown should reach 7s or 6s, accounting for timing variance)
+    await new Promise(resolve => setTimeout(resolve, 3100));
+
+    const banner = screen.getByRole('dialog');
+    act(() => {
+      fireEvent.mouseEnter(banner);
+    });
+
+    // Verify pause indicator shows
+    await waitFor(() => {
+      expect(screen.getByText(/Paused/)).toBeInTheDocument();
+    }, { timeout: 500 });
+
+    // Wait 2 seconds while paused
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Should still show "Paused" (not changing)
+    expect(screen.getByText(/Paused/)).toBeInTheDocument();
+  }, 7000); // Test timeout 7s
+
+  // T006: Test countdown resumes after hover leaves
+  it('countdown resumes when hover ends', () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
+    render(<TelemetryConsentBanner />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000); // 5s elapsed, shows 5s
+    });
+    const banner = screen.getByRole('dialog');
+    fireEvent.mouseEnter(banner);
+    act(() => {
+      vi.advanceTimersByTime(2000); // Paused, still 5s
+    });
+
+    fireEvent.mouseLeave(banner);
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByText(/4s/)).toBeInTheDocument(); // Resumed
+
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+  });
+
+  // T007: Test countdown pauses on focus (uses real timers)
+  it('countdown pauses when element receives focus', async () => {
+    render(<TelemetryConsentBanner />);
+
+    // Wait 4.1 seconds (countdown should reach 6s or 5s)
+    await new Promise(resolve => setTimeout(resolve, 4100));
+
+    // Simulate real user interaction - Tab key press to move focus
+    const dialog = screen.getByRole('dialog');
+
+    // Fire keydown on document to trigger user interaction flag
+    fireEvent.keyDown(document, { key: 'Tab' });
+
+    // Wait a bit for state update
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // The button should be focused (auto-focused on mount)
+    const allowButton = screen.getByRole('button', { name: /Allow/ });
+
+    // Verify pause indicator shows (focus is within dialog + user interacted)
+    await waitFor(() => {
+      expect(screen.getByText(/Paused/)).toBeInTheDocument();
+    }, { timeout: 1000 });
+
+    // Wait 2 seconds while paused
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Should still show "Paused" (not changing)
+    expect(screen.getByText(/Paused/)).toBeInTheDocument();
+  }, 7500); // Test timeout 7.5s
+
+  // T008: Test pause on tab visibility change (uses real timers)
+  it('countdown pauses when tab becomes hidden', async () => {
+    render(<TelemetryConsentBanner />);
+
+    // Wait 2.1 seconds (countdown should reach 8s or 7s)
+    await new Promise(resolve => setTimeout(resolve, 2100));
+
+    // Hide the tab
+    act(() => {
+      Object.defineProperty(document, 'hidden', { value: true, writable: true, configurable: true });
+      fireEvent(document, new Event('visibilitychange'));
+    });
+
+    // Verify pause indicator shows
+    await waitFor(() => {
+      expect(screen.getByText(/Paused/)).toBeInTheDocument();
+    }, { timeout: 500 });
+
+    // Wait 3 seconds while paused
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Should still show "Paused" (not changing)
+    expect(screen.getByText(/Paused/)).toBeInTheDocument();
+
+    // Clean up
+    Object.defineProperty(document, 'hidden', { value: false, writable: true, configurable: true });
+  }, 7000); // Test timeout 7s
+
+  // T009: Test pause indicator appears
+  it('shows pause indicator when countdown is paused', () => {
+    render(<TelemetryConsentBanner />);
+    const banner = screen.getByRole('dialog');
+
+    fireEvent.mouseEnter(banner);
+    expect(screen.getByText(/Paused/)).toBeInTheDocument();
+  });
+
+  // T010: Test screen reader announcements at milestones
+  it('announces countdown at 10s, 5s, 0s only', () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
+    render(<TelemetryConsentBanner />);
+
+    const liveRegion = screen.getByRole('status');
+
+    // At 10s
+    expect(liveRegion).toHaveTextContent(/10 seconds/);
+
+    // At 9s - should NOT announce
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(liveRegion).toHaveTextContent(/10 seconds/); // Still old text
+
+    // At 5s - SHOULD announce
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
+    expect(liveRegion).toHaveTextContent(/5 seconds/);
+
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+  });
+
+  // T011: Test auto-dismiss announcement (uses real timers)
+  it('announces auto-dismissed on timeout', async () => {
+    render(<TelemetryConsentBanner />);
+
+    const liveRegion = screen.getByRole('status');
+
+    // Wait for countdown to complete (10s) + a bit more for auto-dismiss to trigger
+    await new Promise(resolve => setTimeout(resolve, 10100));
+
+    // The announcement should be set to "Analytics banner auto-dismissed"
+    await waitFor(() => {
+      expect(liveRegion).toHaveTextContent(/auto-dismissed/i);
+    }, { timeout: 500 });
+  }, 12000); // Test timeout 12s
+
+  // T012: Test focus restoration after auto-dismiss (uses real timers)
+  it('restores focus to previous element after auto-dismiss', async () => {
+    // First render just the input
+    const { rerender } = render(
+      <div>
+        <input data-testid="test-input" />
+      </div>
+    );
+
+    // Focus the input
+    const input = screen.getByTestId('test-input');
+    input.focus();
+    expect(document.activeElement).toBe(input);
+
+    // Now render with the banner (it will capture the focused input)
+    rerender(
+      <div>
+        <input data-testid="test-input" />
+        <TelemetryConsentBanner />
+      </div>
+    );
+
+    // Wait for banner auto-focus to complete
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Wait for auto-dismiss countdown + announcement delay
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    }, { timeout: 12000 });
+
+    // Focus should be restored to input
+    await waitFor(() => {
+      expect(document.activeElement).toBe(input);
+    }, { timeout: 500 });
+  }, 14000); // Test timeout 14s
+
+  // T013: Test user action cancels countdown
+  it('clicking Decline cancels countdown and dismisses banner', () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
+    render(<TelemetryConsentBanner />);
+
+    act(() => {
+      vi.advanceTimersByTime(3000); // At 7s
+    });
+
+    const declineButton = screen.getByRole('button', { name: /Decline/ });
+    fireEvent.click(declineButton);
+
+    act(() => {
+      vi.advanceTimersByTime(1500); // Wait for announcement delay
+    });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(localStorage.getItem('pp.telemetryConsent')).toBe('opt_out');
+
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+  });
+
+  // T014: Test cross-tab consent synchronization (FR-017.4)
+  it('dismisses banner when consent changes in another tab', () => {
+    render(<TelemetryConsentBanner />);
+
+    // Banner should be visible
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    // Simulate storage event from another tab setting consent to opt_in
+    const storageEvent = new StorageEvent('storage', {
+      key: 'pp.telemetryConsent',
+      newValue: 'opt_in',
+      oldValue: 'unset',
+    });
+
+    act(() => {
+      window.dispatchEvent(storageEvent);
+    });
+
+    // Banner should disappear immediately
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

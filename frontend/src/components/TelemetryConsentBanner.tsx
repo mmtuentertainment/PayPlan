@@ -13,6 +13,7 @@ import { getConsent, setConsent, isDNT } from "@/lib/telemetry";
  * - Focus trap (Tab/Shift+Tab stays inside)
  * - Escape key closes as "opt_out"
  * - Keyboard-accessible buttons
+ * - Auto-dismiss after 10 seconds (pauses on hover/focus/tab-switch)
  */
 export function TelemetryConsentBanner() {
   // Determine initial visibility immediately (not in useEffect)
@@ -22,9 +23,34 @@ export function TelemetryConsentBanner() {
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
 
+  // Auto-dismiss state (Feature 011-009-008-0020)
+  const [countdown, setCountdown] = useState(10);
+  const [isHovered, setIsHovered] = useState(false);
+  const [hasFocus, setHasFocus] = useState(false);
+  const [isTabHidden, setTabHidden] = useState(false);
+  const [isExiting, setIsExiting] = useState(false); // Track dismissal animation
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const hasUserInteractedRef = useRef(false); // Track if user has manually interacted
+
+  const isPaused = isHovered || (hasFocus && hasUserInteractedRef.current) || isTabHidden;
+
+  const handleAutoDismiss = useCallback(() => {
+    setAnnouncementText("Analytics banner auto-dismissed");
+    setConsent("opt_out");
+    // Start exit animation (FR-014.4: 200-250ms)
+    setIsExiting(true);
+    setTimeout(() => {
+      setVisible(false);
+      // Restore focus to previous element
+      previousFocusRef.current?.focus();
+    }, 1500); // Keep 1500ms for screen reader announcement time
+  }, []);
+
   const handleAllow = useCallback(() => {
     setAnnouncementText("Anonymous analytics enabled");
     setConsent("opt_in");
+    // Start exit animation
+    setIsExiting(true);
     // Delay hiding to allow screen reader announcement (1500ms for NVDA/VoiceOver)
     setTimeout(() => setVisible(false), 1500);
   }, []);
@@ -32,8 +58,108 @@ export function TelemetryConsentBanner() {
   const handleDecline = useCallback(() => {
     setAnnouncementText("Analytics disabled");
     setConsent("opt_out");
+    // Start exit animation
+    setIsExiting(true);
     // Delay hiding to allow screen reader announcement (1500ms for NVDA/VoiceOver)
     setTimeout(() => setVisible(false), 1500);
+  }, []);
+
+  // Capture previous focus on mount for restoration
+  useEffect(() => {
+    if (visible) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+    }
+  }, [visible]);
+
+  // Countdown timer (T014) - only runs when not paused
+  useEffect(() => {
+    if (!visible || isPaused) return;
+
+    const intervalId = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 0) return 0;
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [visible, isPaused]);
+
+  // Auto-dismiss trigger (T015) - when countdown reaches 0
+  useEffect(() => {
+    if (countdown === 0 && visible) {
+      handleAutoDismiss();
+    }
+  }, [countdown, visible, handleAutoDismiss]);
+
+  // Screen reader milestone announcements (T019) - 10s, 5s only (not 0, handled by auto-dismiss)
+  useEffect(() => {
+    if ([10, 5].includes(countdown) && visible) {
+      setAnnouncementText(`Auto-dismissing in ${countdown} seconds`);
+    }
+  }, [countdown, visible]);
+
+  // Page Visibility API (T016) - pause on tab hidden
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setTabHidden(document.hidden);
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  // Track focus within dialog (T016) - pause countdown when user interacts
+  useEffect(() => {
+    if (!visible) return;
+
+    const handleFocusIn = (e: FocusEvent) => {
+      if (dialogRef.current?.contains(e.target as Node)) {
+        setHasFocus(true);
+      }
+    };
+
+    const handleFocusOut = (e: FocusEvent) => {
+      if (dialogRef.current && !dialogRef.current.contains(e.relatedTarget as Node)) {
+        setHasFocus(false);
+      }
+    };
+
+    // Track user keyboard/mouse interaction (set flag once, then remove listener)
+    const handleUserInteraction = () => {
+      if (!hasUserInteractedRef.current) {
+        hasUserInteractedRef.current = true;
+        // Remove listeners after first interaction
+        document.removeEventListener('keydown', handleUserInteraction);
+        document.removeEventListener('mousedown', handleUserInteraction);
+      }
+    };
+
+    document.addEventListener('focusin', handleFocusIn);
+    document.addEventListener('focusout', handleFocusOut);
+    document.addEventListener('keydown', handleUserInteraction);
+    document.addEventListener('mousedown', handleUserInteraction);
+
+    return () => {
+      document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
+      document.removeEventListener('keydown', handleUserInteraction);
+      document.removeEventListener('mousedown', handleUserInteraction);
+    };
+  }, [visible]);
+
+  // Cross-tab consent synchronization (FR-017.4)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'pp.telemetryConsent' && e.newValue) {
+        // Another tab changed consent - hide banner immediately
+        if (e.newValue === 'opt_in' || e.newValue === 'opt_out') {
+          setVisible(false);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   useEffect(() => {
@@ -88,6 +214,26 @@ export function TelemetryConsentBanner() {
 
   if (!visible) return null;
 
+  // FR-014.4 & FR-014.5: Exit animation with prefers-reduced-motion support
+  const prefersReducedMotion = (() => {
+    try {
+      return typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return false; // Default to animations enabled
+    }
+  })();
+
+  const animationStyle: React.CSSProperties = {
+    opacity: isExiting ? 0 : 1,
+    // Only animate transform if user hasn't requested reduced motion
+    transform: isExiting && !prefersReducedMotion ? 'translateY(-100%)' : 'translateY(0)',
+    transition: prefersReducedMotion
+      ? 'opacity 0.25s ease-out' // Reduced motion: only fade
+      : 'opacity 0.25s ease-out, transform 0.25s ease-out', // Full animation
+  };
+
   return (
     <div
       ref={dialogRef}
@@ -96,6 +242,9 @@ export function TelemetryConsentBanner() {
       aria-labelledby="telemetry-title"
       aria-describedby="telemetry-desc"
       className="fixed top-0 left-0 right-0 z-50 bg-blue-50 border-b border-blue-200 shadow-md"
+      style={animationStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="max-w-4xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex-1">
@@ -105,6 +254,13 @@ export function TelemetryConsentBanner() {
           <p id="telemetry-desc" className="text-sm text-blue-800">
             Share anonymous usage data to help us fix bugs faster. We never collect CSV content,
             provider names, or amounts. Only error types and usage patterns.
+          </p>
+          <p className="text-xs text-blue-700 mt-2">
+            {isPaused ? (
+              <span>Paused</span>
+            ) : (
+              <span>Auto-dismissing in {countdown}s...</span>
+            )}
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
