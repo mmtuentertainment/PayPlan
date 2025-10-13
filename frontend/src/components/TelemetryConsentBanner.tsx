@@ -39,35 +39,33 @@ export function TelemetryConsentBanner() {
 
   const isPaused = isHovered || (hasFocus && hasUserInteractedRef.current) || isTabHidden;
 
-  const handleAutoDismiss = useCallback(() => {
-    setAnnouncementText("Analytics banner auto-dismissed");
-    setConsent("opt_out");
-    // Start exit animation (FR-014.4)
+  // Shared dismiss helper - ensures focus restoration for all dismissal paths (WCAG)
+  const dismissBanner = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
       setVisible(false);
-      // Restore focus to previous element
+      // Restore focus to previous element (FR-029 to FR-031)
       previousFocusRef.current?.focus();
     }, ANNOUNCE_DELAY_MS);
   }, []);
 
+  const handleAutoDismiss = useCallback(() => {
+    setAnnouncementText("Analytics banner auto-dismissed");
+    setConsent("opt_out");
+    dismissBanner();
+  }, [dismissBanner]);
+
   const handleAllow = useCallback(() => {
     setAnnouncementText("Anonymous analytics enabled");
     setConsent("opt_in");
-    // Start exit animation
-    setIsExiting(true);
-    // Delay hiding to allow screen reader announcement
-    setTimeout(() => setVisible(false), ANNOUNCE_DELAY_MS);
-  }, []);
+    dismissBanner();
+  }, [dismissBanner]);
 
   const handleDecline = useCallback(() => {
     setAnnouncementText("Analytics disabled");
     setConsent("opt_out");
-    // Start exit animation
-    setIsExiting(true);
-    // Delay hiding to allow screen reader announcement
-    setTimeout(() => setVisible(false), ANNOUNCE_DELAY_MS);
-  }, []);
+    dismissBanner();
+  }, [dismissBanner]);
 
   // Capture previous focus on mount for restoration
   useEffect(() => {
@@ -158,16 +156,16 @@ export function TelemetryConsentBanner() {
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === CONSENT_KEY && e.newValue) {
-        // Another tab changed consent - hide banner immediately
+        // Another tab changed consent - dismiss with focus restoration
         if (e.newValue === 'opt_in' || e.newValue === 'opt_out') {
-          setVisible(false);
+          dismissBanner();
         }
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [dismissBanner]);
 
   useEffect(() => {
     if (visible && firstButtonRef.current) {

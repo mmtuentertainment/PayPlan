@@ -948,7 +948,7 @@ describe('Telemetry - Auto-Dismiss Countdown', () => {
   });
 
   // T014: Test cross-tab consent synchronization (FR-017.4)
-  it('dismisses banner when consent changes in another tab', () => {
+  it('dismisses banner when consent changes in another tab', async () => {
     render(<TelemetryConsentBanner />);
 
     // Banner should be visible
@@ -965,7 +965,9 @@ describe('Telemetry - Auto-Dismiss Countdown', () => {
       window.dispatchEvent(storageEvent);
     });
 
-    // Banner should disappear immediately
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // Banner should disappear after animation delay (1500ms)
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    }, { timeout: 2000 });
   });
 });
