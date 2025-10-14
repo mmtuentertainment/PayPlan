@@ -21,3 +21,6 @@ frontend/*.htm
 # Build artifacts
 frontend_files/
 
+# Logs and audits (avoid committing machine-specific files/paths)
+logs/
+*.audit.json
