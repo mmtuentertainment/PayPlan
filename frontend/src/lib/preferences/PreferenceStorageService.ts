@@ -64,6 +64,20 @@ import {
  */
 export class PreferenceStorageService {
   /**
+   * Format error keywords for distinguishing format/type validation errors
+   * from size/quota validation errors during pre-save validation.
+   */
+  private static readonly FORMAT_ERROR_KEYWORDS = [
+    'IANA timezone',
+    'ISO date format',
+    'BCP 47',
+    'ISO 4217',
+    'valid date',
+    '0-6',
+    '1-31',
+  ] as const;
+
+  /**
    * Save a single preference to localStorage.
    *
    * If optInStatus is false, the preference is NOT persisted (privacy-first).
@@ -122,15 +136,11 @@ export class PreferenceStorageService {
         const errorMsg = validationResult.error.issues[0].message;
         // Only fail fast for format/type validation errors
         // Let size/quota errors be caught during actual save operation
-        if (
-          errorMsg.includes('IANA timezone') ||
-          errorMsg.includes('ISO date format') ||
-          errorMsg.includes('BCP 47') ||
-          errorMsg.includes('ISO 4217') ||
-          errorMsg.includes('valid date') ||
-          errorMsg.includes('0-6') ||
-          errorMsg.includes('1-31')
-        ) {
+        const isFormatError = PreferenceStorageService.FORMAT_ERROR_KEYWORDS.some((keyword) =>
+          errorMsg.includes(keyword)
+        );
+
+        if (isFormatError) {
           return {
             ok: false,
             error: {
@@ -292,15 +302,11 @@ export class PreferenceStorageService {
     if (!validationResult.success) {
       const errorMsg = validationResult.error.issues[0].message;
       // Only fail fast for format/type validation errors
-      if (
-        errorMsg.includes('IANA timezone') ||
-        errorMsg.includes('ISO date format') ||
-        errorMsg.includes('BCP 47') ||
-        errorMsg.includes('ISO 4217') ||
-        errorMsg.includes('valid date') ||
-        errorMsg.includes('0-6') ||
-        errorMsg.includes('1-31')
-      ) {
+      const isFormatError = PreferenceStorageService.FORMAT_ERROR_KEYWORDS.some((keyword) =>
+        errorMsg.includes(keyword)
+      );
+
+      if (isFormatError) {
         return {
           ok: false,
           error: {
