@@ -12,6 +12,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PreferenceCategory } from '../../../src/lib/preferences/types';
 import type { SerializedPreferenceCollection } from '../../../src/lib/preferences/types';
 import { PreferenceStorageService } from '../../../src/lib/preferences/PreferenceStorageService';
+import { SCHEMA_VERSION, DEFAULT_PREFERENCES } from '../../../src/lib/preferences/constants';
 
 describe('PreferenceStorageService.loadPreferences()', () => {
   let service: PreferenceStorageService;
@@ -50,8 +51,8 @@ describe('PreferenceStorageService.loadPreferences()', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.preferences.size).toBe(5); // 5 default categories
-      expect(result.value.version).toBe('1.0.0');
+      expect(result.value.preferences.size).toBe(Object.keys(DEFAULT_PREFERENCES).length);
+      expect(result.value.version).toBe(SCHEMA_VERSION);
       expect(result.value.totalSize).toBeGreaterThan(0);
 
       // Verify all defaults are opt-out
@@ -105,7 +106,7 @@ describe('PreferenceStorageService.loadPreferences()', () => {
     // Resilient fallback: return defaults instead of error
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.preferences.size).toBe(5); // 5 default categories
+      expect(result.value.preferences.size).toBe(Object.keys(DEFAULT_PREFERENCES).length);
       // Verify all defaults are opt-out
       result.value.preferences.forEach((pref) => {
         expect(pref.optInStatus).toBe(false);
@@ -132,7 +133,7 @@ describe('PreferenceStorageService.loadPreferences()', () => {
     // Should either migrate or return defaults
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.version).toBe('1.0.0'); // Current version
+      expect(result.value.version).toBe(SCHEMA_VERSION); // Current version
     }
   });
 
@@ -216,7 +217,7 @@ describe('PreferenceStorageService.loadPreferences()', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.preferences).toBeInstanceOf(Map);
-      expect(result.value.preferences.size).toBe(5); // All 5 categories (saved + defaults)
+      expect(result.value.preferences.size).toBe(Object.keys(DEFAULT_PREFERENCES).length); // All categories (saved + defaults)
 
       // Verify saved opt-in preferences are loaded
       const tzPref = result.value.preferences.get(PreferenceCategory.Timezone);
@@ -283,8 +284,8 @@ describe('PreferenceStorageService.loadPreferences()', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      // Should have all 5 categories
-      expect(result.value.preferences.size).toBe(5);
+      // Should have all categories
+      expect(result.value.preferences.size).toBe(Object.keys(DEFAULT_PREFERENCES).length);
 
       // Timezone should be opt-in with custom value
       const tzPref = result.value.preferences.get(PreferenceCategory.Timezone);
@@ -294,7 +295,7 @@ describe('PreferenceStorageService.loadPreferences()', () => {
       // Other categories should be opt-out with defaults
       const localePref = result.value.preferences.get(PreferenceCategory.Locale);
       expect(localePref?.optInStatus).toBe(false);
-      expect(localePref?.value).toBe('en-US'); // Default
+      expect(localePref?.value).toBe(DEFAULT_PREFERENCES[PreferenceCategory.Locale].value); // Default
     }
   });
 });

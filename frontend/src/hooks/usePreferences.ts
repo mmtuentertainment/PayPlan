@@ -251,15 +251,12 @@ export function usePreferences(): UsePreferencesReturn {
         clearTimeout(debounceTimerRef.current);
       }
 
-      // Optimistically update local state
-      const newPreferences = new Map(store.preferences.preferences);
+      // Optimistically update local state from latest storeState
+      const newPreferences = new Map(storeState.preferences.preferences);
       newPreferences.set(preference.category, preference);
 
       updateStore({
-        preferences: {
-          ...store.preferences,
-          preferences: newPreferences,
-        },
+        preferences: { ...storeState.preferences, preferences: newPreferences },
         error: null,
         statusMessage: null,
       });
@@ -293,7 +290,7 @@ export function usePreferences(): UsePreferencesReturn {
         }
       }, DEBOUNCE_DELAY_MS);
     },
-    [store.preferences, clearStatusMessage]
+    [clearStatusMessage]
   );
 
   /**

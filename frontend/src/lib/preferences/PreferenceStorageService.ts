@@ -87,17 +87,18 @@ export class PreferenceStorageService {
         const collection = loadResult.value;
         const existing = collection.preferences.get(preference.category);
 
-        // If there was an existing opt-in preference, reset it to default
+        // If there was an existing opt-in preference, delete it
         if (existing && existing.optInStatus) {
-          const defaultPref = DEFAULT_PREFERENCES[preference.category];
-          collection.preferences.set(preference.category, {
-            ...defaultPref,
-            timestamp: new Date().toISOString(),
-          });
-
+          collection.preferences.delete(preference.category);
+          const hasAnyOptIn = Array.from(collection.preferences.values()).some(
+            (p) => p.optInStatus
+          );
+          if (!hasAnyOptIn) {
+            localStorage.removeItem(STORAGE_KEY);
+            return { ok: true, value: false };
+          }
           collection.lastModified = new Date().toISOString();
           collection.totalSize = this.calculateStorageSize(collection);
-
           return this.saveCollection(collection);
         }
 
