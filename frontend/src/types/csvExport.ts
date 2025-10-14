@@ -44,7 +44,7 @@ export interface CSVRow {
  */
 export interface ExportMetadata {
   filename: string;          // Generated filename with timestamp
-  timestamp: string;         // ISO 8601 timestamp (YYYY-MM-DDTHH:mm:ss)
+  timestamp: string;         // ISO 8601 timestamp with timezone (e.g., "2025-10-14T15:30:45Z")
   recordCount: number;       // Total number of records in export
   shouldWarn: boolean;       // True if recordCount > 500 (performance warning)
   generatedAt: Date;         // JavaScript Date object for timestamp
@@ -69,7 +69,7 @@ export interface CSVExportData {
  */
 export const csvRowSchema = z.object({
   provider: z.string().min(1).max(255),
-  amount: z.string().regex(/^\d+\.\d{2}$/, "Amount must have exactly 2 decimal places"),
+  amount: z.string().regex(/^-?\d+\.\d{2}$/, "Amount must have exactly 2 decimal places (negative allowed for refunds)"),
   currency: z.string().length(3).regex(/^[A-Z]{3}$/, "Currency must be 3 uppercase letters"),
   dueISO: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
   autopay: z.enum(["true", "false"]),

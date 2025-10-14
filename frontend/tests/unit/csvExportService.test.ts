@@ -153,11 +153,124 @@ describe('csvExportService', () => {
       expect(result.dueISO).toBe('2025-12-25');
       expect(result.dueISO).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
+
+    // Edge case tests for financial accuracy
+    it('should format zero amount correctly', () => {
+      const payment: PaymentRecord = {
+        provider: 'Test',
+        amount: 0,
+        currency: 'USD',
+        dueISO: '2025-10-15',
+        autopay: true
+      };
+
+      const result = transformPaymentToCSVRow(payment);
+
+      expect(result.amount).toBe('0.00');
+    });
+
+    it('should handle negative amounts for refunds', () => {
+      const payment: PaymentRecord = {
+        provider: 'Test',
+        amount: -45.50,
+        currency: 'USD',
+        dueISO: '2025-10-15',
+        autopay: true
+      };
+
+      const result = transformPaymentToCSVRow(payment);
+
+      expect(result.amount).toBe('-45.50');
+    });
+
+    it('should handle large amounts without scientific notation', () => {
+      const payment: PaymentRecord = {
+        provider: 'Test',
+        amount: 999999.99,
+        currency: 'USD',
+        dueISO: '2025-10-15',
+        autopay: true
+      };
+
+      const result = transformPaymentToCSVRow(payment);
+
+      expect(result.amount).toBe('999999.99');
+      expect(result.amount).not.toContain('e');
+    });
+
+    it('should handle floating-point precision correctly', () => {
+      const payment: PaymentRecord = {
+        provider: 'Test',
+        amount: 0.1 + 0.2, // Common floating-point issue (0.30000000000000004)
+        currency: 'USD',
+        dueISO: '2025-10-15',
+        autopay: true
+      };
+
+      const result = transformPaymentToCSVRow(payment);
+
+      expect(result.amount).toBe('0.30');
+    });
   });
 
-  // Placeholder describe blocks for remaining functions
   describe('generateExportMetadata', () => {
-    it.todo('should be implemented in T005');
+    it('should generate filename with correct timestamp format', () => {
+      const result = generateExportMetadata(10);
+
+      expect(result.filename).toMatch(/^payplan-export-\d{4}-\d{2}-\d{2}-\d{6}\.csv$/);
+      expect(result.filename).toContain('payplan-export-');
+      expect(result.filename).toContain('.csv');
+    });
+
+    it('should set recordCount correctly', () => {
+      const result = generateExportMetadata(42);
+
+      expect(result.recordCount).toBe(42);
+    });
+
+    it('should set shouldWarn to false for 500 records (at threshold)', () => {
+      const result = generateExportMetadata(500);
+
+      expect(result.shouldWarn).toBe(false);
+    });
+
+    it('should set shouldWarn to false for records below threshold', () => {
+      const result = generateExportMetadata(50);
+
+      expect(result.shouldWarn).toBe(false);
+    });
+
+    it('should set shouldWarn to true for 501 records (above threshold)', () => {
+      const result = generateExportMetadata(501);
+
+      expect(result.shouldWarn).toBe(true);
+    });
+
+    it('should set shouldWarn to true for 1000 records', () => {
+      const result = generateExportMetadata(1000);
+
+      expect(result.shouldWarn).toBe(true);
+    });
+
+    it('should generate valid ISO 8601 timestamp', () => {
+      const result = generateExportMetadata(10);
+
+      expect(result.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    });
+
+    it('should generate Date object for generatedAt', () => {
+      const result = generateExportMetadata(10);
+
+      expect(result.generatedAt).toBeInstanceOf(Date);
+    });
+
+    it('should generate consistent timestamp across fields', () => {
+      const result = generateExportMetadata(10);
+      const parsedTimestamp = new Date(result.timestamp);
+
+      // Timestamps should match within 1 second
+      expect(Math.abs(result.generatedAt.getTime() - parsedTimestamp.getTime())).toBeLessThan(1000);
+    });
   });
 
   describe('generateCSV', () => {

@@ -24,9 +24,12 @@ import { csvRowSchema, exportMetadataSchema } from '@/types/csvExport';
  * @throws {Error} If validation fails
  */
 export function transformPaymentToCSVRow(payment: PaymentRecord): CSVRow {
+  // Use Math.round for consistent financial rounding (avoids toFixed floating-point issues)
+  const roundedAmount = (Math.round(payment.amount * 100) / 100).toFixed(2);
+
   const row: CSVRow = {
     provider: payment.provider,
-    amount: payment.amount.toFixed(2),  // Format to exactly 2 decimal places
+    amount: roundedAmount,
     currency: payment.currency,
     dueISO: payment.dueISO,
     autopay: payment.autopay.toString(), // Convert boolean to string
