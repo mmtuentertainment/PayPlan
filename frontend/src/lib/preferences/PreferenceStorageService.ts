@@ -201,13 +201,9 @@ export class PreferenceStorageService {
       const validationResult = serializedPreferenceCollectionSchema.safeParse(parsed);
 
       if (!validationResult.success) {
-        return {
-          ok: false,
-          error: {
-            type: 'Deserialization',
-            message: ERROR_MESSAGES.DESERIALIZATION_ERROR,
-          },
-        };
+        // Corrupted data: clear storage and fallback to defaults
+        localStorage.removeItem(STORAGE_KEY);
+        return { ok: true, value: this.createDefaultCollection() };
       }
 
       const serializedCollection = validationResult.data;
@@ -261,18 +257,12 @@ export class PreferenceStorageService {
 
       return { ok: true, value: collection };
     } catch (error) {
-      // On error, return defaults
-      if (error instanceof SyntaxError) {
-        return {
-          ok: false,
-          error: {
-            type: 'Deserialization',
-            message: ERROR_MESSAGES.DESERIALIZATION_ERROR,
-          },
-        };
+      // Security errors should be surfaced to user
+      if (error instanceof Error && error.name === 'SecurityError') {
+        return this.handleStorageError(error);
       }
-
-      return this.handleStorageError(error);
+      // Parse errors and other issues: fallback to defaults for resilient UX
+      return { ok: true, value: this.createDefaultCollection() };
     }
   }
 
@@ -388,17 +378,22 @@ export class PreferenceStorageService {
    */
   calculateStorageSize(collection: PreferenceCollection): number {
     try {
-      // Convert Map to Record for serialization
-      const serialized: SerializedPreferenceCollection = {
+      // Use fixed-point iteration to handle self-referential totalSize
+      // Start without totalSize to get base payload
+      const base = {
         version: collection.version,
         preferences: Object.fromEntries(collection.preferences),
-        totalSize: collection.totalSize,
         lastModified: collection.lastModified,
       };
 
-      const jsonString = JSON.stringify(serialized);
-      const blob = new Blob([jsonString]);
-      return blob.size; // Accurate UTF-8 byte length
+      // Iterate until size stabilizes (digit count converges)
+      let estimate = 0;
+      for (let i = 0; i < 3; i++) {
+        const json = JSON.stringify({ ...base, totalSize: estimate });
+        estimate = new Blob([json]).size;
+      }
+
+      return estimate;
     } catch {
       // If serialization fails, return 0
       return 0;

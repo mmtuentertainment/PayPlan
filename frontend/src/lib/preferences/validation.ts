@@ -259,21 +259,40 @@ export const currencyFormatSchema = z.object({
 // ============================================================================
 
 /**
- * Validates BCP 47 language tags.
+ * Validates BCP 47 language tags using Intl.getCanonicalLocales.
+ *
+ * Supports full BCP 47 spec including:
+ * - Language codes: en, es, zh
+ * - Region subtags: en-US, es-MX, fr-FR
+ * - Script subtags: zh-Hant, sr-Latn, uz-Cyrl
+ * - Variants: en-GB-oed, de-DE-1996
  *
  * @see data-model.md LocaleValue
  *
  * @example
  * localeSchema.parse("en-US") // ✓
- * localeSchema.parse("es-MX") // ✓
+ * localeSchema.parse("zh-Hant") // ✓ Traditional Chinese
+ * localeSchema.parse("sr-Latn-RS") // ✓ Serbian Latin (Serbia)
  * localeSchema.parse("invalid") // ✗ throws ZodError
  */
 export const localeSchema = z
   .string()
   .min(2, 'Locale must be at least 2 characters')
-  .regex(
-    /^[a-z]{2,3}(-[A-Z]{2})?$/,
-    'Must be valid BCP 47 language tag (e.g., "en-US", "es-MX", "fr")'
+  .refine(
+    (locale) => {
+      try {
+        // Use Intl.getCanonicalLocales for standards-compliant BCP 47 validation
+        const canonical = Intl.getCanonicalLocales(locale)[0];
+        // Enforce that the input matches canonical form (proper casing)
+        // BCP 47 requires: lowercase language, Titlecase script, UPPERCASE region
+        return canonical === locale;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: 'Must be valid BCP 47 language tag with proper casing (e.g., "en-US", "es-MX", "zh-Hant")',
+    }
   );
 
 // ============================================================================

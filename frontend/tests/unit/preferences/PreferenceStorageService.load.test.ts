@@ -94,18 +94,22 @@ describe('PreferenceStorageService.loadPreferences()', () => {
   });
 
   // ============================================================================
-  // Contract 3: Deserialization error (corrupted data)
+  // Contract 3: Corrupted data fallback (resilient UX)
   // ============================================================================
 
-  it('should return Deserialization error for corrupted localStorage data', () => {
+  it('should fallback to defaults for corrupted localStorage data', () => {
     mockStorage.getItem = vi.fn().mockReturnValue('{ invalid json }');
 
     const result = service.loadPreferences();
 
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.type).toBe('Deserialization');
-      expect(result.error.message).toContain('corrupted');
+    // Resilient fallback: return defaults instead of error
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.preferences.size).toBe(5); // 5 default categories
+      // Verify all defaults are opt-out
+      result.value.preferences.forEach((pref) => {
+        expect(pref.optInStatus).toBe(false);
+      });
     }
   });
 

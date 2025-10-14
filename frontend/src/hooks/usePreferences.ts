@@ -26,7 +26,7 @@ import type {
   StorageError,
 } from '../lib/preferences/types';
 import { PreferenceStorageService } from '../lib/preferences/PreferenceStorageService';
-import { DEBOUNCE_DELAY_MS, SUCCESS_MESSAGES } from '../lib/preferences/constants';
+import { DEBOUNCE_DELAY_MS, SUCCESS_MESSAGES, STORAGE_KEY } from '../lib/preferences/constants';
 
 // Singleton storage service instance
 const storageService = new PreferenceStorageService();
@@ -46,18 +46,43 @@ interface PreferenceStore {
 }
 
 // Global store state
-let storeState: PreferenceStore = {
-  preferences: storageService.loadPreferences().ok
-    ? (storageService.loadPreferences() as { ok: true; value: PreferenceCollection }).value
-    : {
+let storeState: PreferenceStore = (() => {
+  // SSR-safe: only access storage if window is defined
+  if (typeof window === 'undefined') {
+    return {
+      preferences: {
         version: '1.0.0',
         preferences: new Map(),
         totalSize: 0,
         lastModified: new Date().toISOString(),
       },
-  error: null,
-  statusMessage: null,
-};
+      error: null,
+      statusMessage: null,
+    };
+  }
+
+  // Single load call to avoid redundancy
+  const initialLoad = storageService.loadPreferences();
+  if (initialLoad.ok) {
+    return {
+      preferences: initialLoad.value,
+      error: null,
+      statusMessage: null,
+    };
+  }
+
+  // Return defaults on error
+  return {
+    preferences: {
+      version: '1.0.0',
+      preferences: new Map(),
+      totalSize: 0,
+      lastModified: new Date().toISOString(),
+    },
+    error: initialLoad.error,
+    statusMessage: null,
+  };
+})();
 
 // Subscribers for store changes
 const subscribers = new Set<() => void>();
@@ -108,29 +133,7 @@ function updateStore(newState: Partial<PreferenceStore>): void {
   notifySubscribers();
 }
 
-// ============================================================================
-// Cross-Tab Synchronization
-// ============================================================================
-
-/**
- * Handle storage events from other tabs.
- * Reloads preferences when another tab makes changes.
- *
- * @see research.md Section 1 - localStorage cross-tab sync
- */
-if (typeof window !== 'undefined') {
-  window.addEventListener('storage', (event) => {
-    if (event.key === 'payplan_preferences_v1' && event.storageArea === localStorage) {
-      const loadResult = storageService.loadPreferences();
-      if (loadResult.ok) {
-        updateStore({
-          preferences: loadResult.value,
-          statusMessage: 'Preferences synced from another tab',
-        });
-      }
-    }
-  });
-}
+// Note: Cross-tab sync listener is moved into the hook's useEffect for proper cleanup
 
 // ============================================================================
 // usePreferences Hook
@@ -220,10 +223,10 @@ export function usePreferences(): UsePreferencesReturn {
   const store = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   // Debounce timer ref
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Status message timer ref (for auto-clear)
-  const statusTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Clear status message after 3 seconds.
@@ -352,6 +355,26 @@ export function usePreferences(): UsePreferencesReturn {
     },
     [clearStatusMessage]
   );
+
+  // Cross-tab synchronization
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY && event.storageArea === localStorage) {
+        const loadResult = storageService.loadPreferences();
+        if (loadResult.ok) {
+          updateStore({
+            preferences: loadResult.value,
+            statusMessage: 'Preferences synced from another tab',
+          });
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Cleanup timers on unmount
   useEffect(() => {
