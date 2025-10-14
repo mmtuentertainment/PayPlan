@@ -437,11 +437,11 @@ T023 Manual testing
 ### Phase 2: Core Implementation
 - [X] T009: Download test written
 - [X] T010: Download implemented
-- [ ] T011: Integration test written
-- [ ] T012: Button added
-- [ ] T013: Export handler implemented
+- [X] T011: Integration test written
+- [X] T012: Button added
+- [X] T013: Export handler implemented
 - [ ] T014: Component test written
-- [ ] T015: Parent updated
+- [X] T015: Parent updated
 - [ ] T016: Warning test written
 
 ### Phase 3: Polish & Edge Cases
