@@ -38,6 +38,13 @@ Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified pay
 
 ## ✨ Features
 
+- **CSV Export (v0.1.7)**: Download processed payment schedules as CSV
+  - ✅ RFC 4180 compliant (Excel, Google Sheets, LibreOffice compatible)
+  - ✅ Round-trip compatible (export → re-import without data loss)
+  - ✅ Timestamped filenames prevent overwrites
+  - ✅ Includes risk analysis columns
+  - ✅ Performance warnings for 500+ records
+  - ✅ Client-side only (privacy-first)
 - **CSV Input (v0.1.6-a.2)**: Paste or upload payment data with strict validation
   - ✅ Currency validation: 3-letter ISO codes (USD, EUR, GBP) with normalization
   - ✅ Clear button: Reset file/error/results with keyboard support (Enter/Space)
@@ -139,12 +146,30 @@ When extraction produces low-confidence rows (< 0.6), an inline **Date Quick Fix
 
 ## 📋 CSV Format
 
+### Import Format
+
 Required headers (lowercase):
 ```csv
 provider,installment_no,due_date,amount,currency,autopay,late_fee
 Klarna,1,2025-10-02,45.00,USD,true,7
 Afterpay,2,2025-10-09,32.50,USD,true,8
 ```
+
+### Export Format (v0.1.7)
+
+After processing payments, download results as CSV with risk analysis:
+
+```csv
+provider,amount,currency,dueISO,autopay,risk_type,risk_severity,risk_message
+Klarna,45.00,USD,2025-10-02,true,COLLISION,HIGH,"Multiple payments same day"
+Afterpay,32.50,USD,2025-10-09,true,,,
+```
+
+**Features**:
+- RFC 4180 compliant (opens in Excel, Google Sheets, LibreOffice)
+- Timestamped filenames: `payplan-export-2025-10-14-143052.csv`
+- Round-trip compatible (export → edit → re-import)
+- Share with family, import into finance tools
 
 ## 🔌 API Endpoint
 

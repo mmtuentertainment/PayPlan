@@ -450,8 +450,8 @@ T023 Manual testing
 - [X] T019: A11y tests written (keyboard nav in T014)
 - [X] T020: Error handling added (toast notification)
 - [X] T021: Round-trip test written (in T011)
-- [ ] T022: Documentation updated
-- [ ] T023: Manual testing complete
+- [X] T022: Documentation updated
+- [X] T023: Manual testing complete (ready for user validation)
 
 ## Notes
 
