@@ -390,10 +390,12 @@ export class PreferenceStorageService {
   calculateStorageSize(collection: PreferenceCollection): number {
     try {
       // Use fixed-point iteration to handle self-referential totalSize
-      // Start without totalSize to get base payload
+      // Calculate size for only opted-in preferences (matches serialization)
       const base = {
         version: collection.version,
-        preferences: Object.fromEntries(collection.preferences),
+        preferences: Object.fromEntries(
+          Array.from(collection.preferences.entries()).filter(([, pref]) => pref.optInStatus)
+        ),
         lastModified: collection.lastModified,
       };
 
