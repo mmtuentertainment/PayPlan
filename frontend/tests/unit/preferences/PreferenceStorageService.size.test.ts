@@ -12,7 +12,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PreferenceCategory } from '../../../src/lib/preferences/types';
 import type { UserPreference, PreferenceCollection } from '../../../src/lib/preferences/types';
 import { PreferenceStorageService } from '../../../src/lib/preferences/PreferenceStorageService';
-import { STORAGE_LIMIT_BYTES } from '../../../src/lib/preferences/constants';
+import { STORAGE_LIMIT_BYTES, SCHEMA_VERSION } from '../../../src/lib/preferences/constants';
 
 describe('PreferenceStorageService.calculateStorageSize()', () => {
   let service: PreferenceStorageService;
@@ -52,7 +52,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
 
   it('should calculate size for empty preference collection', () => {
     const emptyCollection: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map(),
       totalSize: 0,
       lastModified: new Date().toISOString(),
@@ -70,7 +70,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
 
   it('should calculate size for single timezone preference', () => {
     const collection: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map([
         [
           PreferenceCategory.Timezone,
@@ -98,7 +98,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
 
   it('should calculate size for full preference collection', () => {
     const fullCollection: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map([
         [
           PreferenceCategory.Timezone,
@@ -174,7 +174,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
 
   it('should calculate size matching JSON.stringify byte length', () => {
     const collection: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map([
         [
           PreferenceCategory.Timezone,
@@ -216,7 +216,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
 
   it('should accurately calculate size for complex business day settings', () => {
     const complexCollection: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map([
         [
           PreferenceCategory.BusinessDaySettings,
@@ -258,7 +258,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
       .map((_, i) => `2025-${String((i % 12) + 1).padStart(2, '0')}-01`);
 
     const largeCollection: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map([
         [
           PreferenceCategory.BusinessDaySettings,
@@ -288,7 +288,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
 
   it('should calculate size in <10ms for typical collection', () => {
     const typicalCollection: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map([
         [
           PreferenceCategory.Timezone,
@@ -327,7 +327,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
 
   it('should calculate larger size for more preferences', () => {
     const onePreference: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map([
         [
           PreferenceCategory.Timezone,
@@ -344,7 +344,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
     };
 
     const twoPreferences: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map([
         [
           PreferenceCategory.Timezone,
@@ -379,9 +379,9 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
   // Contract 9: Handle UTF-8 multi-byte characters
   // ============================================================================
 
-  it('should correctly calculate size for UTF-8 multi-byte characters', () => {
+  it('should calculate size for currency format scenario under 5KB', () => {
     const unicodeCollection: PreferenceCollection = {
-      version: '1.0.0',
+      version: SCHEMA_VERSION,
       preferences: new Map([
         [
           PreferenceCategory.CurrencyFormat,
@@ -391,7 +391,7 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
               currencyCode: 'EUR',
               decimalSeparator: ',',
               thousandsSeparator: '.',
-              symbolPosition: 'before', // € symbol is multi-byte UTF-8
+              symbolPosition: 'before',
             },
             optInStatus: true,
             timestamp: '2025-10-13T10:00:00.000Z',
@@ -404,7 +404,6 @@ describe('PreferenceStorageService.calculateStorageSize()', () => {
 
     const size = service.calculateStorageSize(unicodeCollection);
 
-    // EUR symbol (€) is 3 bytes in UTF-8
     expect(size).toBeGreaterThan(0);
     expect(size).toBeLessThan(STORAGE_LIMIT_BYTES);
   });

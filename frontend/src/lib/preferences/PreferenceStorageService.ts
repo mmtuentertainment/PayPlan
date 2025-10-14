@@ -210,9 +210,9 @@ export class PreferenceStorageService {
       const serializedCollection = validationResult.data;
 
       // Handle version mismatch - migrate or use current version
-      if (serializedCollection.version !== SCHEMA_VERSION) {
-        // For now, just update to current version (simple migration)
-        // Future: Implement more sophisticated migration logic
+      const versionMismatch = serializedCollection.version !== SCHEMA_VERSION;
+      if (versionMismatch) {
+        // Simple migration: bump version now; recompute size after building collection
         serializedCollection.version = SCHEMA_VERSION;
       }
 
@@ -255,6 +255,11 @@ export class PreferenceStorageService {
         totalSize: serializedCollection.totalSize,
         lastModified: serializedCollection.lastModified,
       };
+
+      // Ensure size metadata is accurate post-migration
+      if (versionMismatch) {
+        collection.totalSize = this.calculateStorageSize(collection);
+      }
 
       return { ok: true, value: collection };
     } catch (error) {
@@ -347,10 +352,14 @@ export class PreferenceStorageService {
         const collection = loadResult.value;
         const defaultPref = DEFAULT_PREFERENCES[category];
 
-        collection.preferences.set(category, {
-          ...defaultPref,
-          timestamp: new Date().toISOString(),
-        });
+        if (!defaultPref.optInStatus) {
+          collection.preferences.delete(category);
+        } else {
+          collection.preferences.set(category, {
+            ...defaultPref,
+            timestamp: new Date().toISOString(),
+          });
+        }
 
         collection.lastModified = new Date().toISOString();
         collection.totalSize = this.calculateStorageSize(collection);
