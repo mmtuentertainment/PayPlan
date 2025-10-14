@@ -425,10 +425,10 @@ T023 Manual testing
 ## Completion Checklist
 
 ### Phase 1: Setup & Foundation
-- [ ] T001: Types created
-- [ ] T002: Service stub created
-- [ ] T003: Transform test written
-- [ ] T004: Transform implemented
+- [X] T001: Types created
+- [X] T002: Service stub created
+- [X] T003: Transform test written
+- [X] T004: Transform implemented
 - [ ] T005: Metadata test written
 - [ ] T006: Metadata implemented
 - [ ] T007: CSV generation test written
