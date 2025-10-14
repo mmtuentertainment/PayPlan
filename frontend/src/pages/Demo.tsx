@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FIXTURES } from './demo/fixtures';
 import { extractItemsFromEmails, type Item } from '@/lib/email-extractor';
 import { DateTime } from 'luxon';
 import { createEvents, type EventAttributes } from 'ics';
+import { usePreferences } from '@/hooks/usePreferences';
+import { PreferenceCategory } from '@/lib/preferences/types';
+import { timezoneValueSchema } from '@/lib/preferences/schemas';
 
 interface Risk { type: 'COLLISION'|'WEEKEND_AUTOPAY'; severity: 'high'|'medium'|'low'; message: string; affectedItems?: string[]; }
 
@@ -10,19 +13,54 @@ export default function Demo() {
   const [results, setResults] = useState<{ items: Item[]; risks: Risk[] } | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Get timezone from preferences (defaults to 'America/New_York')
+  const { preferences } = usePreferences();
+  const [timezone, setTimezone] = useState<string>('America/New_York');
+
+  useEffect(() => {
+    const tzPreference = preferences.get(PreferenceCategory.Timezone);
+    if (tzPreference && tzPreference.optInStatus && tzPreference.value) {
+      // Validate timezone value with Zod
+      const validation = timezoneValueSchema.safeParse(tzPreference.value);
+      if (validation.success) {
+        // Additional runtime check: verify timezone is valid for Luxon
+        const testDt = DateTime.now().setZone(validation.data);
+        if (testDt.isValid) {
+          setTimezone(validation.data);
+        } else {
+          console.warn('Invalid IANA timezone in preference:', validation.data);
+          // Keep default timezone
+        }
+      } else {
+        console.warn('Timezone preference validation failed:', validation.error);
+      }
+    }
+  }, [preferences]);
+
   const handleRunDemo = () => {
     setLoading(true);
     try {
       const allItems: Item[] = [];
       FIXTURES.forEach(f => {
-        try { allItems.push(...extractItemsFromEmails(f.emailText, 'America/New_York').items); }
+        try { allItems.push(...extractItemsFromEmails(f.emailText, timezone).items); }
         catch { console.warn(`Failed extraction: ${f.id}`); }
       });
       const risks: Risk[] = [];
       const dateGroups = new Map<string, Item[]>();
       allItems.forEach(i => { const g = dateGroups.get(i.due_date) || []; g.push(i); dateGroups.set(i.due_date, g); });
       dateGroups.forEach((g, d) => { if (g.length > 1) risks.push({ type: 'COLLISION', severity: 'high', message: `Multiple payments due on ${d}`, affectedItems: g.map(i => i.id) }); });
-      allItems.forEach(i => { if (i.autopay) { const dt = DateTime.fromISO(i.due_date, { zone: 'America/New_York' }); if (dt.weekday === 6 || dt.weekday === 7) risks.push({ type: 'WEEKEND_AUTOPAY', severity: 'medium', message: `Autopay on weekend: ${i.provider} on ${i.due_date}`, affectedItems: [i.id] }); } });
+      allItems.forEach(i => {
+        if (i.autopay) {
+          const dt = DateTime.fromISO(i.due_date, { zone: timezone });
+          if (!dt.isValid) {
+            console.warn('Invalid date/timezone for autopay check:', i.due_date, timezone);
+            return;
+          }
+          if (dt.weekday === 6 || dt.weekday === 7) {
+            risks.push({ type: 'WEEKEND_AUTOPAY', severity: 'medium', message: `Autopay on weekend: ${i.provider} on ${i.due_date}`, affectedItems: [i.id] });
+          }
+        }
+      });
       setResults({ items: allItems, risks });
     } finally { setLoading(false); }
   };
@@ -30,13 +68,20 @@ export default function Demo() {
   const handleDownloadIcs = () => {
     if (!results) return;
     try {
-      const now = DateTime.now().setZone('America/New_York');
+      const now = DateTime.now().setZone(timezone);
       const mon = now.minus({ days: now.weekday - 1 }).startOf('day');
       const sun = mon.plus({ days: 6 }).endOf('day');
-      const inWeek = (d: string) => { const dt = DateTime.fromISO(d, { zone: 'America/New_York' }); return dt >= mon && dt <= sun; };
+      const inWeek = (d: string) => {
+        const dt = DateTime.fromISO(d, { zone: timezone });
+        return dt.isValid && dt >= mon && dt <= sun;
+      };
       const thisWeek = results.items.filter(i => inWeek(i.due_date));
       const events: EventAttributes[] = thisWeek.map(i => {
-        const dt = DateTime.fromISO(i.due_date, { zone: 'America/New_York' });
+        const dt = DateTime.fromISO(i.due_date, { zone: timezone });
+        if (!dt.isValid) {
+          console.warn('Invalid date for ICS event:', i.due_date);
+          throw new Error(`Invalid date for ICS event: ${i.due_date}`);
+        }
         const rA = results.risks.filter(r => r.affectedItems?.includes(i.id)).map(r => `⚠️ ${r.message}`).join('\n');
         return { title: `${i.provider} Payment - ${i.amount} ${i.currency ?? ''}`, start: [dt.year, dt.month, dt.day], duration: { hours: 1 }, description: `Installment ${i.installment_no}${rA ? '\n' + rA : ''}` };
       });

@@ -395,3 +395,23 @@ export function usePreferences(): UsePreferencesReturn {
     resetPreferences,
   };
 }
+
+/**
+ * FOR TESTING ONLY: Expose internal store access
+ * This allows the test-utils module to reset state without polluting production builds.
+ *
+ * @internal
+ */
+export const __testOnly = {
+  get storageService() {
+    return storageService;
+  },
+  get subscribers() {
+    return subscribers;
+  },
+  getStoreState: () => storeState,
+  setStoreState: (state: PreferenceStore) => {
+    storeState = state;
+  },
+  notifySubscribers,
+};

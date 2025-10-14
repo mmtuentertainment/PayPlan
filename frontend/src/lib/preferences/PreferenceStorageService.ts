@@ -195,16 +195,33 @@ export class PreferenceStorageService {
    * If no saved preferences exist, returns defaults.
    * Merges saved opt-in preferences with default opt-out preferences.
    *
+   * Performance: Instrumented with performance.mark/measure for monitoring (NFR-001).
+   *
    * @returns Result<PreferenceCollection, StorageError>
    *
    * @see spec.md FR-007 (merge with defaults)
+   * @see spec.md NFR-001 (<100ms restoration target)
    */
   loadPreferences(): Result<PreferenceCollection, StorageError> {
+    // Performance monitoring start (T034: NFR-001)
+    if (typeof performance !== 'undefined') {
+      performance.mark('preferences-restore-start');
+    }
+
     try {
       const serialized = localStorage.getItem(STORAGE_KEY);
 
       // No saved preferences: return defaults
       if (serialized === null || serialized === undefined) {
+        // Performance monitoring end (T034: NFR-001)
+        if (typeof performance !== 'undefined') {
+          performance.mark('preferences-restore-end');
+          performance.measure(
+            'preferences-restore-complete',
+            'preferences-restore-start',
+            'preferences-restore-end'
+          );
+        }
         return { ok: true, value: this.createDefaultCollection() };
       }
 
@@ -272,6 +289,16 @@ export class PreferenceStorageService {
         collection.totalSize = this.calculateStorageSize(collection);
       }
 
+      // Performance monitoring end (T034: NFR-001)
+      if (typeof performance !== 'undefined') {
+        performance.mark('preferences-restore-end');
+        performance.measure(
+          'preferences-restore-complete',
+          'preferences-restore-start',
+          'preferences-restore-end'
+        );
+      }
+
       return { ok: true, value: collection };
     } catch (error) {
       // Security errors should be surfaced to user
@@ -279,6 +306,15 @@ export class PreferenceStorageService {
         return this.handleStorageError(error);
       }
       // Parse errors and other issues: fallback to defaults for resilient UX
+      // Performance monitoring end (T034: NFR-001)
+      if (typeof performance !== 'undefined') {
+        performance.mark('preferences-restore-end');
+        performance.measure(
+          'preferences-restore-complete',
+          'preferences-restore-start',
+          'preferences-restore-end'
+        );
+      }
       return { ok: true, value: this.createDefaultCollection() };
     }
   }

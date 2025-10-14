@@ -12,20 +12,32 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { PreferenceCategory } from '../../../src/lib/preferences/types';
+import { dispatchStorageEvent } from '../../helpers/storageEvent';
 
 // Hook to be implemented in T024
-import { usePreferences } from '../../../src/hooks/usePreferences';
+import { usePreferences, __testOnly } from '../../../src/hooks/usePreferences';
+import { resetStoreForTesting } from '../../../src/hooks/usePreferences.test-utils';
 
 describe('usePreferences Hook Integration', () => {
   let mockStorage: Storage;
+  let mockStorageData: { [key: string]: string | null } = {};
 
   beforeEach(() => {
-    // Mock localStorage
+    // Clear mock storage data
+    mockStorageData = {};
+
+    // Mock localStorage with automatic data tracking
     mockStorage = {
-      getItem: vi.fn(),
-      setItem: vi.fn(),
-      removeItem: vi.fn(),
-      clear: vi.fn(),
+      getItem: vi.fn((key: string) => mockStorageData[key] ?? null),
+      setItem: vi.fn((key: string, value: string) => {
+        mockStorageData[key] = value;
+      }),
+      removeItem: vi.fn((key: string) => {
+        delete mockStorageData[key];
+      }),
+      clear: vi.fn(() => {
+        mockStorageData = {};
+      }),
       length: 0,
       key: vi.fn(),
     };
@@ -34,10 +46,15 @@ describe('usePreferences Hook Integration', () => {
       value: mockStorage,
       writable: true,
     });
+
+    // CRITICAL: Reset global store state after localStorage mock is set up
+    // This ensures each test starts with a clean slate
+    resetStoreForTesting(__testOnly);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.clearAllTimers();
   });
 
   // ============================================================================
@@ -98,7 +115,8 @@ describe('usePreferences Hook Integration', () => {
         lastModified: '2025-10-13T10:00:00.000Z',
       });
 
-      mockStorage.getItem = vi.fn().mockReturnValue(savedData);
+      mockStorageData['payplan_preferences_v1'] = savedData;
+      resetStoreForTesting(__testOnly); // Reload with new mock data
 
       const { result } = renderHook(() => usePreferences());
 
@@ -123,7 +141,8 @@ describe('usePreferences Hook Integration', () => {
         lastModified: '2025-10-13T10:00:00.000Z',
       });
 
-      mockStorage.getItem = vi.fn().mockReturnValue(savedData);
+      mockStorageData['payplan_preferences_v1'] = savedData;
+      resetStoreForTesting(__testOnly); // Reload with new mock data
 
       const { result } = renderHook(() => usePreferences());
 
@@ -149,6 +168,7 @@ describe('usePreferences Hook Integration', () => {
   describe('Save Preference', () => {
     it('should save preference with opt-in', async () => {
       mockStorage.getItem = vi.fn().mockReturnValue(null);
+      vi.useFakeTimers();
 
       const { result } = renderHook(() => usePreferences());
 
@@ -161,13 +181,20 @@ describe('usePreferences Hook Integration', () => {
         });
       });
 
-      await waitFor(() => {
-        const tzPref = result.current.preferences.get(PreferenceCategory.Timezone);
-        expect(tzPref?.value).toBe('America/Los_Angeles');
-        expect(tzPref?.optInStatus).toBe(true);
+      // Fast-forward past debounce delay (300ms) AND status message timer (3000ms)
+      await act(async () => {
+        vi.advanceTimersByTime(300);
+        await Promise.resolve(); // Let microtasks run
+        vi.advanceTimersByTime(3000); // Clear status message timer
       });
 
+      // Verify the preference was saved
+      const tzPref = result.current.preferences.get(PreferenceCategory.Timezone);
+      expect(tzPref?.value).toBe('America/Los_Angeles');
+      expect(tzPref?.optInStatus).toBe(true);
       expect(mockStorage.setItem).toHaveBeenCalled();
+
+      vi.useRealTimers();
     });
 
     it('should not save preference without opt-in', async () => {
@@ -219,15 +246,15 @@ describe('usePreferences Hook Integration', () => {
       // Should not have called setItem yet
       expect(mockStorage.setItem).not.toHaveBeenCalled();
 
-      // Fast-forward 300ms
-      act(() => {
+      // Fast-forward past debounce and status timer
+      await act(async () => {
         vi.advanceTimersByTime(300);
+        await Promise.resolve();
+        vi.advanceTimersByTime(3000);
       });
 
-      await waitFor(() => {
-        // Should only save once (debounced)
-        expect(mockStorage.setItem).toHaveBeenCalledTimes(1);
-      });
+      // Should only save once (debounced)
+      expect(mockStorage.setItem).toHaveBeenCalledTimes(1);
 
       vi.useRealTimers();
     });
@@ -238,9 +265,7 @@ describe('usePreferences Hook Integration', () => {
   // ============================================================================
 
   describe('Update Preference', () => {
-    it('should update preference value', async () => {
-      mockStorage.getItem = vi.fn().mockReturnValue(null);
-
+    it('should update preference value', () => {
       const { result } = renderHook(() => usePreferences());
 
       act(() => {
@@ -251,16 +276,13 @@ describe('usePreferences Hook Integration', () => {
         );
       });
 
-      await waitFor(() => {
-        const localePref = result.current.preferences.get(PreferenceCategory.Locale);
-        expect(localePref?.value).toBe('es-MX');
-        expect(localePref?.optInStatus).toBe(true);
-      });
+      // updatePreference is synchronous - check immediately
+      const localePref = result.current.preferences.get(PreferenceCategory.Locale);
+      expect(localePref?.value).toBe('es-MX');
+      expect(localePref?.optInStatus).toBe(true);
     });
 
-    it('should update opt-in status', async () => {
-      mockStorage.getItem = vi.fn().mockReturnValue(null);
-
+    it('should update opt-in status', () => {
       const { result } = renderHook(() => usePreferences());
 
       act(() => {
@@ -271,13 +293,12 @@ describe('usePreferences Hook Integration', () => {
         );
       });
 
-      await waitFor(() => {
-        const tzPref = result.current.preferences.get(PreferenceCategory.Timezone);
-        expect(tzPref?.optInStatus).toBe(true);
-      });
+      // updatePreference is synchronous - check immediately
+      const tzPref = result.current.preferences.get(PreferenceCategory.Timezone);
+      expect(tzPref?.optInStatus).toBe(true);
     });
 
-    it('should handle validation errors gracefully', async () => {
+    it('should handle validation errors gracefully', () => {
       mockStorage.getItem = vi.fn().mockReturnValue(null);
 
       const { result } = renderHook(() => usePreferences());
@@ -290,10 +311,9 @@ describe('usePreferences Hook Integration', () => {
         );
       });
 
-      await waitFor(() => {
-        expect(result.current.error).toBeDefined();
-        expect(result.current.error?.type).toBe('Validation');
-      });
+      // Error handling is synchronous
+      expect(result.current.error).toBeDefined();
+      expect(result.current.error?.type).toBe('Validation');
     });
   });
 
@@ -302,7 +322,7 @@ describe('usePreferences Hook Integration', () => {
   // ============================================================================
 
   describe('Reset Preferences', () => {
-    it('should reset all preferences to defaults', async () => {
+    it('should reset all preferences to defaults', () => {
       const savedData = JSON.stringify({
         version: '1.0.0',
         preferences: {
@@ -317,24 +337,27 @@ describe('usePreferences Hook Integration', () => {
         lastModified: '2025-10-13T10:00:00.000Z',
       });
 
-      mockStorage.getItem = vi.fn().mockReturnValue(savedData);
+      mockStorageData['payplan_preferences_v1'] = savedData;
+      resetStoreForTesting(__testOnly); // Load saved data
 
       const { result } = renderHook(() => usePreferences());
 
+      // Verify it loaded the saved preference
+      expect(result.current.preferences.get(PreferenceCategory.Timezone)?.value).toBe('America/New_York');
+
+      // Reset will clear storage (mock handles this automatically)
       act(() => {
         result.current.resetPreferences();
       });
 
-      await waitFor(() => {
-        const tzPref = result.current.preferences.get(PreferenceCategory.Timezone);
-        expect(tzPref?.value).toBe('UTC'); // Default
-        expect(tzPref?.optInStatus).toBe(false);
-      });
-
+      // Reset is synchronous - check immediately
+      const tzPref = result.current.preferences.get(PreferenceCategory.Timezone);
+      expect(tzPref?.value).toBe('UTC'); // Default
+      expect(tzPref?.optInStatus).toBe(false);
       expect(mockStorage.removeItem).toHaveBeenCalledWith('payplan_preferences_v1');
     });
 
-    it('should reset specific category', async () => {
+    it('should reset specific category', () => {
       const savedData = JSON.stringify({
         version: '1.0.0',
         preferences: {
@@ -355,23 +378,24 @@ describe('usePreferences Hook Integration', () => {
         lastModified: '2025-10-13T10:00:00.000Z',
       });
 
-      mockStorage.getItem = vi.fn().mockReturnValue(savedData);
+      mockStorageData['payplan_preferences_v1'] = savedData;
+      resetStoreForTesting(__testOnly);
 
       const { result } = renderHook(() => usePreferences());
 
+      // Reset will automatically update mockStorageData through setItem
       act(() => {
         result.current.resetPreferences(PreferenceCategory.Timezone);
       });
 
-      await waitFor(() => {
-        const tzPref = result.current.preferences.get(PreferenceCategory.Timezone);
-        expect(tzPref?.value).toBe('UTC'); // Reset to default
-        expect(tzPref?.optInStatus).toBe(false);
+      // Reset is synchronous - check immediately
+      const tzPref = result.current.preferences.get(PreferenceCategory.Timezone);
+      expect(tzPref?.value).toBe('UTC'); // Reset to default
+      expect(tzPref?.optInStatus).toBe(false);
 
-        const localePref = result.current.preferences.get(PreferenceCategory.Locale);
-        expect(localePref?.value).toBe('es-MX'); // Unchanged
-        expect(localePref?.optInStatus).toBe(true);
-      });
+      const localePref = result.current.preferences.get(PreferenceCategory.Locale);
+      expect(localePref?.value).toBe('es-MX'); // Unchanged
+      expect(localePref?.optInStatus).toBe(true);
     });
   });
 
@@ -387,6 +411,7 @@ describe('usePreferences Hook Integration', () => {
         error.name = 'QuotaExceededError';
         throw error;
       });
+      vi.useFakeTimers();
 
       const { result } = renderHook(() => usePreferences());
 
@@ -402,39 +427,55 @@ describe('usePreferences Hook Integration', () => {
         });
       });
 
-      await waitFor(() => {
-        expect(result.current.error).toBeDefined();
-        expect(result.current.error?.type).toBe('QuotaExceeded');
+      // Fast-forward past debounce and status timer
+      await act(async () => {
+        vi.advanceTimersByTime(300);
+        await Promise.resolve();
+        vi.advanceTimersByTime(3000);
       });
+
+      expect(result.current.error).toBeDefined();
+      expect(result.current.error?.type).toBe('QuotaExceeded');
+
+      vi.useRealTimers();
     });
 
-    it('should handle SecurityError gracefully', async () => {
+    it('should handle SecurityError gracefully', () => {
       mockStorage.getItem = vi.fn().mockImplementation(() => {
         const error = new Error('SecurityError');
         error.name = 'SecurityError';
         throw error;
       });
 
+      // Reset store AFTER setting up the throwing mock
+      resetStoreForTesting(__testOnly);
+
       const { result } = renderHook(() => usePreferences());
 
-      await waitFor(() => {
-        expect(result.current.error).toBeDefined();
-        expect(result.current.error?.type).toBe('Security');
-      });
+      // Error on initial load should be captured
+      expect(result.current.error).toBeDefined();
+      expect(result.current.error?.type).toBe('Security');
     });
 
-    it('should handle corrupted localStorage data', async () => {
-      mockStorage.getItem = vi.fn().mockReturnValue('{ invalid json }');
+    it('should handle corrupted localStorage data', () => {
+      mockStorageData['payplan_preferences_v1'] = '{ invalid json }';
+
+      // Reset store AFTER setting up the mock data to trigger fallback
+      resetStoreForTesting(__testOnly);
 
       const { result } = renderHook(() => usePreferences());
 
-      await waitFor(() => {
-        expect(result.current.error).toBeDefined();
-        expect(result.current.error?.type).toBe('Deserialization');
-      });
+      // FR-009: Deserialization errors fall back to defaults silently (resilient UX)
+      // No error should be exposed - user sees defaults instead
+      expect(result.current.error).toBeNull();
 
-      // Should fall back to defaults despite error
+      // Should fall back to defaults
       expect(result.current.preferences.size).toBe(5);
+
+      // All preferences should be defaults with opt-out status
+      result.current.preferences.forEach((pref) => {
+        expect(pref.optInStatus).toBe(false);
+      });
     });
   });
 
@@ -470,13 +511,11 @@ describe('usePreferences Hook Integration', () => {
       mockStorage.getItem = vi.fn().mockReturnValue(newData);
 
       act(() => {
-        window.dispatchEvent(
-          new StorageEvent('storage', {
-            key: 'payplan_preferences_v1',
-            newValue: newData,
-            storageArea: mockStorage,
-          })
-        );
+        dispatchStorageEvent({
+          key: 'payplan_preferences_v1',
+          newValue: newData,
+          storageArea: mockStorage as unknown as Storage,
+        });
       });
 
       await waitFor(() => {
@@ -495,13 +534,11 @@ describe('usePreferences Hook Integration', () => {
       const initialValue = initialTz?.value;
 
       act(() => {
-        window.dispatchEvent(
-          new StorageEvent('storage', {
-            key: 'other_key',
-            newValue: 'some data',
-            storageArea: mockStorage,
-          })
-        );
+        dispatchStorageEvent({
+          key: 'other_key',
+          newValue: 'some data',
+          storageArea: mockStorage as unknown as Storage,
+        });
       });
 
       // Should not have changed
@@ -552,13 +589,11 @@ describe('usePreferences Hook Integration', () => {
       mockStorage.getItem = vi.fn().mockReturnValue(newData);
 
       act(() => {
-        window.dispatchEvent(
-          new StorageEvent('storage', {
-            key: 'payplan_preferences_v1',
-            newValue: newData,
-            storageArea: mockStorage,
-          })
-        );
+        dispatchStorageEvent({
+          key: 'payplan_preferences_v1',
+          newValue: newData,
+          storageArea: mockStorage as unknown as Storage,
+        });
       });
 
       rerender();
@@ -595,9 +630,11 @@ describe('usePreferences Hook Integration', () => {
 
       const startTime = performance.now();
       const { result } = renderHook(() => usePreferences());
-      await waitFor(() => expect(result.current.isLoading).toBe(false));
       const endTime = performance.now();
 
+      // Check that preferences are loaded immediately (sync operation)
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.preferences.size).toBe(5);
       expect(endTime - startTime).toBeLessThan(100); // <100ms (NFR-001)
     });
 
@@ -632,6 +669,7 @@ describe('usePreferences Hook Integration', () => {
   describe('Accessibility', () => {
     it('should provide status messages for screen readers', async () => {
       mockStorage.getItem = vi.fn().mockReturnValue(null);
+      vi.useFakeTimers();
 
       const { result } = renderHook(() => usePreferences());
 
@@ -644,14 +682,20 @@ describe('usePreferences Hook Integration', () => {
         });
       });
 
-      await waitFor(() => {
-        // Hook should expose status message for ARIA live region
-        expect(result.current.statusMessage).toBeDefined();
-        expect(result.current.statusMessage).toContain('saved');
+      // Fast-forward past debounce delay (300ms)
+      await act(async () => {
+        vi.advanceTimersByTime(300);
+        await Promise.resolve();
       });
+
+      // Hook should expose status message for ARIA live region
+      expect(result.current.statusMessage).toBeDefined();
+      expect(result.current.statusMessage).toContain('saved');
+
+      vi.useRealTimers();
     });
 
-    it('should provide error messages for screen readers', async () => {
+    it('should provide error messages for screen readers', () => {
       mockStorage.getItem = vi.fn().mockReturnValue(null);
 
       const { result } = renderHook(() => usePreferences());
@@ -664,10 +708,10 @@ describe('usePreferences Hook Integration', () => {
         );
       });
 
-      await waitFor(() => {
-        expect(result.current.error).toBeDefined();
-        expect(result.current.statusMessage).toContain('error');
-      });
+      // Error handling is synchronous
+      expect(result.current.error).toBeDefined();
+      // Status message contains "Error: " prefix
+      expect(result.current.statusMessage).toContain('Error');
     });
   });
 });

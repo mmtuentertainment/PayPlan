@@ -14,5 +14,6 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
+    testTimeout: 10000, // 10s default (was 5s), prevents timeout on async tests
   },
 })

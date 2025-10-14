@@ -955,10 +955,12 @@ describe('Telemetry - Auto-Dismiss Countdown', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     // Simulate storage event from another tab setting consent to opt_in
-    const storageEvent = new StorageEvent('storage', {
-      key: 'pp.telemetryConsent',
-      newValue: 'opt_in',
-      oldValue: 'unset',
+    // Note: Not using storageArea since this is simulating cross-tab sync (no specific storage mock needed)
+    const storageEvent = new Event('storage') as StorageEvent;
+    Object.defineProperties(storageEvent, {
+      key: { value: 'pp.telemetryConsent', enumerable: true },
+      newValue: { value: 'opt_in', enumerable: true },
+      oldValue: { value: 'unset', enumerable: true },
     });
 
     act(() => {

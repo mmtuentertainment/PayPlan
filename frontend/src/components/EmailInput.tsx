@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { SAMPLE_EMAILS } from '../lib/sample-emails';
 import { LocaleToggle } from './LocaleToggle';
 import type { DateLocale } from '../lib/extraction/extractors/date';
 import { detectUserLocale } from '../utils/detect-locale';
+import { PreferenceToggle } from './preferences/PreferenceToggle';
+import { InlineStatusIndicator } from './preferences/InlineStatusIndicator';
+import { PreferenceCategory } from '../lib/preferences/types';
+import { usePreferences } from '../hooks/usePreferences';
+import { z } from 'zod';
+
+// Zod schema for DateLocale validation
+const dateLocaleSchema = z.enum(['US', 'EU']);
 
 interface EmailInputProps {
   onExtract: (text: string, locale: DateLocale) => void;
@@ -16,6 +24,28 @@ export function EmailInput({ onExtract, isExtracting, hasExtractedData }: EmailI
   const [text, setText] = useState('');
   const [dateLocale, setDateLocale] = useState<DateLocale>(() => detectUserLocale());
   const maxChars = 16000;
+
+  // Integrate preferences
+  const { preferences, updatePreference } = usePreferences();
+  const localePreference = preferences.get(PreferenceCategory.Locale);
+  const [localeRestored, setLocaleRestored] = useState(false);
+
+  // Restore locale preference on mount (if opted-in)
+  useEffect(() => {
+    if (!localeRestored && localePreference && localePreference.optInStatus && localePreference.value) {
+      // Validate the saved locale value with Zod
+      const validation = dateLocaleSchema.safeParse(localePreference.value);
+      if (validation.success) {
+        setDateLocale(validation.data);
+        setLocaleRestored(true);
+      } else {
+        // Invalid locale value in storage - log and fall back to defaults
+        console.warn('Invalid locale preference value:', localePreference.value, validation.error);
+        // Optionally clear the corrupted preference
+        updatePreference(PreferenceCategory.Locale, detectUserLocale(), false);
+      }
+    }
+  }, [localePreference, localeRestored, updatePreference]);
 
   const handleUseSample = () => {
     setText(SAMPLE_EMAILS);
@@ -55,13 +85,39 @@ export function EmailInput({ onExtract, isExtracting, hasExtractedData }: EmailI
         </Button>
       </div>
 
-      <LocaleToggle
-        locale={dateLocale}
-        onLocaleChange={setDateLocale}
-        onReExtract={handleReExtract}
-        hasExtractedData={hasExtractedData}
-        isExtracting={isExtracting}
-      />
+      <div className="space-y-3">
+        <LocaleToggle
+          locale={dateLocale}
+          onLocaleChange={(newLocale) => {
+            setDateLocale(newLocale);
+            setLocaleRestored(false); // Clear restored state when user manually changes
+            // Update preference if opted-in
+            if (localePreference?.optInStatus) {
+              updatePreference(PreferenceCategory.Locale, newLocale, true);
+            }
+          }}
+          onReExtract={handleReExtract}
+          hasExtractedData={hasExtractedData}
+          isExtracting={isExtracting}
+        />
+
+        <div className="flex items-center gap-3 px-3">
+          <PreferenceToggle
+            category={PreferenceCategory.Locale}
+            optInStatus={localePreference?.optInStatus ?? false}
+            onChange={(optIn) => {
+              updatePreference(PreferenceCategory.Locale, dateLocale, optIn);
+            }}
+            disabled={isExtracting}
+          />
+          {localeRestored && (
+            <InlineStatusIndicator
+              category={PreferenceCategory.Locale}
+              restored={true}
+            />
+          )}
+        </div>
+      </div>
 
       <Textarea
         id="email-input"
