@@ -80,7 +80,8 @@ export class PreferenceStorageService {
       try {
         const loadResult = this.loadPreferences();
         if (!loadResult.ok) {
-          // If can't load, just return success with false (nothing to do)
+          // Storage invalid: clear to ensure opt-out is honored (privacy-first)
+          localStorage.removeItem(STORAGE_KEY);
           return { ok: true, value: false };
         }
 
