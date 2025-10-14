@@ -75,7 +75,9 @@ export function PreferenceToggle({
       />
       <Label
         htmlFor={`preference-toggle-${category}`}
-        className="text-sm text-gray-700 cursor-pointer select-none"
+        className={`text-sm text-gray-700 select-none ${
+          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+        }`}
       >
         Remember this {categoryDisplay.toLowerCase()} setting
       </Label>

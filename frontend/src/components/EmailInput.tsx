@@ -101,7 +101,11 @@ export function EmailInput({ onExtract, isExtracting, hasExtractedData }: EmailI
           isExtracting={isExtracting}
         />
 
-        <div className="flex items-center gap-3 px-3">
+        <div
+          role="group"
+          aria-label="Locale preference settings"
+          className="flex items-center gap-3 px-3"
+        >
           <PreferenceToggle
             category={PreferenceCategory.Locale}
             optInStatus={localePreference?.optInStatus ?? false}

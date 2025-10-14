@@ -481,13 +481,18 @@ describe('Business Day Settings Validation', () => {
   // ============================================================================
 
   describe('Performance', () => {
-    it('should validate business day settings in <5ms (avg of 10 runs)', () => {
+    it('should validate business day settings in <2ms (median of 10 runs)', () => {
       const settings = {
         workingDays: [1, 2, 3, 4, 5],
         holidays: ['2025-12-25', '2025-01-01'],
       };
 
-      // Run 10 times and take average to reduce flakiness
+      // Warmup runs to eliminate JIT compilation overhead
+      for (let i = 0; i < 3; i++) {
+        businessDaySettingsSchema.safeParse(settings);
+      }
+
+      // Measured runs
       const times: number[] = [];
       for (let i = 0; i < 10; i++) {
         const startTime = performance.now();
@@ -496,12 +501,16 @@ describe('Business Day Settings Validation', () => {
         times.push(endTime - startTime);
       }
 
-      const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
-      // More realistic threshold: <5ms average (was <1ms which is too strict)
-      expect(avgTime).toBeLessThan(5);
+      // Calculate median (more robust than average against outliers)
+      times.sort((a, b) => a - b);
+      const median = times.length % 2 === 0
+        ? (times[times.length / 2 - 1] + times[times.length / 2]) / 2
+        : times[Math.floor(times.length / 2)];
+
+      expect(median).toBeLessThan(2);
     });
 
-    it('should validate large holiday list in <10ms (avg of 10 runs)', () => {
+    it('should validate large holiday list in <5ms (median of 10 runs)', () => {
       const largeHolidayList = Array.from(
         { length: 50 },
         (_, i) => `2025-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`
@@ -512,7 +521,12 @@ describe('Business Day Settings Validation', () => {
         holidays: largeHolidayList,
       };
 
-      // Run 10 times and take average to reduce flakiness
+      // Warmup runs to eliminate JIT compilation overhead
+      for (let i = 0; i < 3; i++) {
+        businessDaySettingsSchema.safeParse(settings);
+      }
+
+      // Measured runs
       const times: number[] = [];
       for (let i = 0; i < 10; i++) {
         const startTime = performance.now();
@@ -521,9 +535,13 @@ describe('Business Day Settings Validation', () => {
         times.push(endTime - startTime);
       }
 
-      const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
-      // More realistic threshold for 50 holidays with luxon validation: <10ms
-      expect(avgTime).toBeLessThan(10);
+      // Calculate median (more robust than average against outliers)
+      times.sort((a, b) => a - b);
+      const median = times.length % 2 === 0
+        ? (times[times.length / 2 - 1] + times[times.length / 2]) / 2
+        : times[Math.floor(times.length / 2)];
+
+      expect(median).toBeLessThan(5);
     });
   });
 

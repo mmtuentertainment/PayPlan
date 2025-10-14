@@ -572,7 +572,7 @@ describe('Currency Format Validation', () => {
   // ============================================================================
 
   describe('Performance', () => {
-    it('should validate currency format in <5ms (avg of 10 runs)', () => {
+    it('should validate currency format in <2ms (median of 10 runs)', () => {
       const format = {
         currencyCode: 'USD',
         decimalSeparator: '.',
@@ -580,7 +580,12 @@ describe('Currency Format Validation', () => {
         symbolPosition: 'before',
       };
 
-      // Run 10 times and take average to reduce flakiness
+      // Warmup runs to eliminate JIT compilation overhead
+      for (let i = 0; i < 3; i++) {
+        currencyFormatSchema.safeParse(format);
+      }
+
+      // Measured runs
       const times: number[] = [];
       for (let i = 0; i < 10; i++) {
         const startTime = performance.now();
@@ -589,9 +594,13 @@ describe('Currency Format Validation', () => {
         times.push(endTime - startTime);
       }
 
-      const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
-      // More realistic threshold: <5ms average (was <1ms which is too strict)
-      expect(avgTime).toBeLessThan(5);
+      // Calculate median (more robust than average against outliers)
+      times.sort((a, b) => a - b);
+      const median = times.length % 2 === 0
+        ? (times[times.length / 2 - 1] + times[times.length / 2]) / 2
+        : times[Math.floor(times.length / 2)];
+
+      expect(median).toBeLessThan(2);
     });
   });
 

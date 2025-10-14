@@ -29,6 +29,16 @@ module.exports = {
     '/.vercel/'
   ],
 
+  // Coverage thresholds to ensure minimum test coverage for critical financial logic
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+
   // Exclude build artifacts from module map
   modulePathIgnorePatterns: [
     '/.vercel/',

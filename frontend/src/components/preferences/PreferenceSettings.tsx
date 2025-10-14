@@ -20,7 +20,6 @@
 
 import { useState } from 'react';
 import { Button } from '../ui/button';
-import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import {
   AlertDialog,
@@ -36,6 +35,11 @@ import {
 import { PreferenceToggle } from './PreferenceToggle';
 import { PreferenceCategory, type PreferenceCategoryType, type PreferenceCollection } from '../../lib/preferences/types';
 import { RotateCcw } from 'lucide-react';
+import {
+  paydayDatesValueSchema,
+  businessDaySettingsValueSchema,
+  currencyFormatValueSchema,
+} from '../../lib/preferences/schemas';
 
 export interface PreferenceSettingsProps {
   /** Current preference collection (null if not loaded) */
@@ -79,7 +83,13 @@ export function PreferenceSettings({
         return String(value);
 
       case PreferenceCategory.PaydayDates: {
-        const pattern = value as { type: string; [key: string]: unknown };
+        // Validate payday pattern structure
+        const validation = paydayDatesValueSchema.safeParse(value);
+        if (!validation.success) {
+          console.warn('Invalid payday pattern value:', value, validation.error);
+          return 'Invalid format';
+        }
+        const pattern = validation.data;
         if (pattern.type === 'biweekly') {
           return `Biweekly (every 2 weeks)`;
         }
@@ -96,15 +106,38 @@ export function PreferenceSettings({
       }
 
       case PreferenceCategory.BusinessDaySettings: {
-        const settings = value as { workingDays: number[]; holidays: string[] };
-        const dayCount = settings.workingDays?.length || 0;
-        const holidayCount = settings.holidays?.length || 0;
+        // Validate business day settings structure
+        const validation = businessDaySettingsValueSchema.safeParse(value);
+        if (!validation.success) {
+          console.warn('Invalid business day settings value:', value, validation.error);
+          return 'Invalid format';
+        }
+        const settings = validation.data;
+        const dayCount = Array.isArray(settings.workingDays) ? settings.workingDays.length : 0;
+        const holidayCount = Array.isArray(settings.holidays) ? settings.holidays.length : 0;
         return `${dayCount} working days, ${holidayCount} holidays`;
       }
 
       case PreferenceCategory.CurrencyFormat: {
-        const format = value as { currencyCode: string; symbolPosition: string };
-        return `${format.currencyCode} (${format.symbolPosition} symbol)`;
+        // Validate currency format structure
+        const validation = currencyFormatValueSchema.safeParse(value);
+        if (!validation.success) {
+          console.warn('Invalid currency format value:', value, validation.error);
+          return 'Invalid format';
+        }
+        const format = validation.data;
+        // Use Intl.NumberFormat for proper currency display if possible
+        try {
+          const formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: format.currencyCode,
+          });
+          const sample = formatter.format(100);
+          return `${format.currencyCode} (${format.symbolPosition} symbol, e.g., ${sample})`;
+        } catch {
+          // Fallback if Intl doesn't support the currency code
+          return `${format.currencyCode} (${format.symbolPosition} symbol)`;
+        }
       }
 
       case PreferenceCategory.Locale:
@@ -115,9 +148,15 @@ export function PreferenceSettings({
     }
   };
 
-  const handleResetAll = () => {
-    onResetAll();
-    setResetDialogOpen(false);
+  const handleResetAll = async () => {
+    try {
+      await onResetAll();
+      setResetDialogOpen(false);
+    } catch (err) {
+      console.error('Failed to reset preferences:', err);
+      // Keep dialog open on error so user can retry
+      // TODO: Show error toast/notification
+    }
   };
 
   return (
@@ -135,7 +174,7 @@ export function PreferenceSettings({
         <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
           <AlertDialogTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4" aria-hidden="true" />
               Reset All
             </Button>
           </AlertDialogTrigger>
@@ -165,7 +204,7 @@ export function PreferenceSettings({
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <Label className="text-sm text-gray-600">Current Value</Label>
+              <div className="text-sm text-gray-600 font-medium">Current Value</div>
               <p className="text-sm font-medium text-gray-900 mt-1">
                 {formatValue(PreferenceCategory.Timezone, getPreference(PreferenceCategory.Timezone)?.value)}
               </p>
@@ -173,13 +212,10 @@ export function PreferenceSettings({
             <PreferenceToggle
               category={PreferenceCategory.Timezone}
               optInStatus={getPreference(PreferenceCategory.Timezone)?.optInStatus || false}
-              onChange={(optIn) =>
-                onSave(
-                  PreferenceCategory.Timezone,
-                  getPreference(PreferenceCategory.Timezone)?.value,
-                  optIn
-                )
-              }
+              onChange={(optIn) => {
+                const value = getPreference(PreferenceCategory.Timezone)?.value ?? 'America/New_York';
+                onSave(PreferenceCategory.Timezone, value, optIn);
+              }}
             />
           </CardContent>
         </Card>
@@ -192,7 +228,7 @@ export function PreferenceSettings({
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <Label className="text-sm text-gray-600">Current Value</Label>
+              <div className="text-sm text-gray-600 font-medium">Current Value</div>
               <p className="text-sm font-medium text-gray-900 mt-1">
                 {formatValue(PreferenceCategory.PaydayDates, getPreference(PreferenceCategory.PaydayDates)?.value)}
               </p>
@@ -200,13 +236,10 @@ export function PreferenceSettings({
             <PreferenceToggle
               category={PreferenceCategory.PaydayDates}
               optInStatus={getPreference(PreferenceCategory.PaydayDates)?.optInStatus || false}
-              onChange={(optIn) =>
-                onSave(
-                  PreferenceCategory.PaydayDates,
-                  getPreference(PreferenceCategory.PaydayDates)?.value,
-                  optIn
-                )
-              }
+              onChange={(optIn) => {
+                const value = getPreference(PreferenceCategory.PaydayDates)?.value ?? { type: 'biweekly', startDate: new Date().toISOString().split('T')[0], dayOfWeek: 5 };
+                onSave(PreferenceCategory.PaydayDates, value, optIn);
+              }}
             />
           </CardContent>
         </Card>
@@ -219,7 +252,7 @@ export function PreferenceSettings({
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <Label className="text-sm text-gray-600">Current Value</Label>
+              <div className="text-sm text-gray-600 font-medium">Current Value</div>
               <p className="text-sm font-medium text-gray-900 mt-1">
                 {formatValue(PreferenceCategory.BusinessDaySettings, getPreference(PreferenceCategory.BusinessDaySettings)?.value)}
               </p>
@@ -227,13 +260,10 @@ export function PreferenceSettings({
             <PreferenceToggle
               category={PreferenceCategory.BusinessDaySettings}
               optInStatus={getPreference(PreferenceCategory.BusinessDaySettings)?.optInStatus || false}
-              onChange={(optIn) =>
-                onSave(
-                  PreferenceCategory.BusinessDaySettings,
-                  getPreference(PreferenceCategory.BusinessDaySettings)?.value,
-                  optIn
-                )
-              }
+              onChange={(optIn) => {
+                const value = getPreference(PreferenceCategory.BusinessDaySettings)?.value ?? { workingDays: [1, 2, 3, 4, 5], holidays: [] };
+                onSave(PreferenceCategory.BusinessDaySettings, value, optIn);
+              }}
             />
           </CardContent>
         </Card>
@@ -246,7 +276,7 @@ export function PreferenceSettings({
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <Label className="text-sm text-gray-600">Current Value</Label>
+              <div className="text-sm text-gray-600 font-medium">Current Value</div>
               <p className="text-sm font-medium text-gray-900 mt-1">
                 {formatValue(PreferenceCategory.CurrencyFormat, getPreference(PreferenceCategory.CurrencyFormat)?.value)}
               </p>
@@ -254,13 +284,10 @@ export function PreferenceSettings({
             <PreferenceToggle
               category={PreferenceCategory.CurrencyFormat}
               optInStatus={getPreference(PreferenceCategory.CurrencyFormat)?.optInStatus || false}
-              onChange={(optIn) =>
-                onSave(
-                  PreferenceCategory.CurrencyFormat,
-                  getPreference(PreferenceCategory.CurrencyFormat)?.value,
-                  optIn
-                )
-              }
+              onChange={(optIn) => {
+                const value = getPreference(PreferenceCategory.CurrencyFormat)?.value ?? { currencyCode: 'USD', decimalSeparator: '.', thousandsSeparator: ',', symbolPosition: 'before' };
+                onSave(PreferenceCategory.CurrencyFormat, value, optIn);
+              }}
             />
           </CardContent>
         </Card>
@@ -273,7 +300,7 @@ export function PreferenceSettings({
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <Label className="text-sm text-gray-600">Current Value</Label>
+              <div className="text-sm text-gray-600 font-medium">Current Value</div>
               <p className="text-sm font-medium text-gray-900 mt-1">
                 {formatValue(PreferenceCategory.Locale, getPreference(PreferenceCategory.Locale)?.value)}
               </p>
@@ -281,13 +308,10 @@ export function PreferenceSettings({
             <PreferenceToggle
               category={PreferenceCategory.Locale}
               optInStatus={getPreference(PreferenceCategory.Locale)?.optInStatus || false}
-              onChange={(optIn) =>
-                onSave(
-                  PreferenceCategory.Locale,
-                  getPreference(PreferenceCategory.Locale)?.value,
-                  optIn
-                )
-              }
+              onChange={(optIn) => {
+                const value = getPreference(PreferenceCategory.Locale)?.value ?? 'en-US';
+                onSave(PreferenceCategory.Locale, value, optIn);
+              }}
             />
           </CardContent>
         </Card>
