@@ -16,7 +16,7 @@
  */
 
 import type {
-  PreferenceCategory,
+  PreferenceCategoryType,
   UserPreference,
   PreferenceCollection,
   SerializedPreferenceCollection,
@@ -220,11 +220,11 @@ export class PreferenceStorageService {
       }
 
       // Convert Record to Map
-      const preferences = new Map<PreferenceCategory, UserPreference>();
+      const preferences = new Map<PreferenceCategoryType, UserPreference>();
 
       // Start with defaults (all opt-out)
       Object.entries(DEFAULT_PREFERENCES).forEach(([category, pref]) => {
-        preferences.set(category as PreferenceCategory, pref);
+        preferences.set(category as PreferenceCategoryType, pref);
       });
 
       // Override with saved opt-in preferences
@@ -232,7 +232,7 @@ export class PreferenceStorageService {
         if (pref.optInStatus) {
           // Validate saved preference value
           const validationResult = validatePreferenceValue(
-            category as PreferenceCategory,
+            category as PreferenceCategoryType,
             pref.value
           );
 
@@ -243,12 +243,12 @@ export class PreferenceStorageService {
               error: {
                 type: 'Validation',
                 message: validationResult.error.issues[0].message,
-                category: category as PreferenceCategory,
+                category: category as PreferenceCategoryType,
               },
             };
           }
 
-          preferences.set(category as PreferenceCategory, pref);
+          preferences.set(category as PreferenceCategoryType, pref);
         }
       }
 
@@ -285,7 +285,7 @@ export class PreferenceStorageService {
    * @returns Result<boolean, StorageError>
    */
   updatePreference(
-    category: PreferenceCategory,
+    category: PreferenceCategoryType,
     value: unknown,
     optInStatus?: boolean
   ): Result<boolean, StorageError> {
@@ -344,7 +344,7 @@ export class PreferenceStorageService {
    *
    * @see spec.md FR-008 (reset all preferences)
    */
-  resetPreferences(category?: PreferenceCategory): Result<boolean, StorageError> {
+  resetPreferences(category?: PreferenceCategoryType): Result<boolean, StorageError> {
     try {
       if (category) {
         // Reset specific category
@@ -452,10 +452,10 @@ export class PreferenceStorageService {
    * @returns Default preference collection
    */
   private createDefaultCollection(): PreferenceCollection {
-    const preferences = new Map<PreferenceCategory, UserPreference>();
+    const preferences = new Map<PreferenceCategoryType, UserPreference>();
 
     Object.entries(DEFAULT_PREFERENCES).forEach(([category, pref]) => {
-      preferences.set(category as PreferenceCategory, {
+      preferences.set(category as PreferenceCategoryType, {
         ...pref,
         timestamp: new Date().toISOString(),
       });
@@ -482,7 +482,7 @@ export class PreferenceStorageService {
    */
   private handleStorageError(
     error: unknown,
-    category?: PreferenceCategory
+    category?: PreferenceCategoryType
   ): Result<never, StorageError> {
     if (error instanceof Error) {
       if (error.name === 'QuotaExceededError') {

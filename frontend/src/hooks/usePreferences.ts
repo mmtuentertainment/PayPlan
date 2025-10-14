@@ -20,7 +20,7 @@
 
 import { useSyncExternalStore, useCallback, useRef, useEffect } from 'react';
 import type {
-  PreferenceCategory,
+  PreferenceCategoryType,
   UserPreference,
   PreferenceCollection,
   StorageError,
@@ -138,7 +138,7 @@ if (typeof window !== 'undefined') {
 
 export interface UsePreferencesReturn {
   /** Current preference collection (Map of category → preference) */
-  preferences: Map<PreferenceCategory, UserPreference>;
+  preferences: Map<PreferenceCategoryType, UserPreference>;
 
   /** Current error, if any */
   error: StorageError | null;
@@ -164,7 +164,7 @@ export interface UsePreferencesReturn {
    * @param optInStatus - Optional: new opt-in status
    */
   updatePreference: (
-    category: PreferenceCategory,
+    category: PreferenceCategoryType,
     value: unknown,
     optInStatus?: boolean
   ) => void;
@@ -174,7 +174,7 @@ export interface UsePreferencesReturn {
    *
    * @param category - Optional: specific category to reset
    */
-  resetPreferences: (category?: PreferenceCategory) => void;
+  resetPreferences: (category?: PreferenceCategoryType) => void;
 }
 
 /**
@@ -297,7 +297,7 @@ export function usePreferences(): UsePreferencesReturn {
    * Update preference value and/or opt-in status.
    */
   const updatePreference = useCallback(
-    (category: PreferenceCategory, value: unknown, optInStatus?: boolean) => {
+    (category: PreferenceCategoryType, value: unknown, optInStatus?: boolean) => {
       const result = storageService.updatePreference(category, value, optInStatus);
 
       if (result.ok) {
@@ -327,7 +327,7 @@ export function usePreferences(): UsePreferencesReturn {
    * Reset preferences to defaults.
    */
   const resetPreferences = useCallback(
-    (category?: PreferenceCategory) => {
+    (category?: PreferenceCategoryType) => {
       const result = storageService.resetPreferences(category);
 
       if (result.ok) {

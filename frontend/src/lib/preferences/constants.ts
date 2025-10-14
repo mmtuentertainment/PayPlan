@@ -12,6 +12,7 @@
 
 import {
   PreferenceCategory,
+  type PreferenceCategoryType,
   type UserPreference,
   type BiweeklyPattern,
 } from './types';
@@ -153,7 +154,7 @@ export const DEFAULT_LOCALE = 'en-US';
  * @see spec.md FR-002 (explicit opt-in required)
  */
 export const DEFAULT_PREFERENCES: Record<
-  PreferenceCategory,
+  PreferenceCategoryType,
   UserPreference
 > = {
   [PreferenceCategory.Timezone]: {

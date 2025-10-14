@@ -18,13 +18,15 @@
  *
  * @see data-model.md Section "PreferenceCategory (Enum)"
  */
-export enum PreferenceCategory {
-  Timezone = 'timezone',
-  PaydayDates = 'payday_dates',
-  BusinessDaySettings = 'business_day_settings',
-  CurrencyFormat = 'currency_format',
-  Locale = 'locale',
-}
+export const PreferenceCategory = {
+  Timezone: 'timezone',
+  PaydayDates: 'payday_dates',
+  BusinessDaySettings: 'business_day_settings',
+  CurrencyFormat: 'currency_format',
+  Locale: 'locale',
+} as const;
+
+export type PreferenceCategoryType = typeof PreferenceCategory[keyof typeof PreferenceCategory];
 
 // ============================================================================
 // Payday Pattern Types (Discriminated Union)
@@ -87,7 +89,7 @@ export type PaydayPattern =
  * Timezone value: IANA timezone identifier.
  */
 export interface TimezoneValue {
-  category: PreferenceCategory.Timezone;
+  category: typeof PreferenceCategory.Timezone;
   value: string; // e.g., "America/New_York", "Europe/London", "UTC"
 }
 
@@ -95,7 +97,7 @@ export interface TimezoneValue {
  * Payday dates value: Flexible pattern supporting specific dates and recurring schedules.
  */
 export interface PaydayDatesValue {
-  category: PreferenceCategory.PaydayDates;
+  category: typeof PreferenceCategory.PaydayDates;
   value: PaydayPattern;
 }
 
@@ -103,7 +105,7 @@ export interface PaydayDatesValue {
  * Business day settings value: Rules for working days vs. weekends/holidays.
  */
 export interface BusinessDaySettingsValue {
-  category: PreferenceCategory.BusinessDaySettings;
+  category: typeof PreferenceCategory.BusinessDaySettings;
   value: {
     workingDays: number[]; // 0=Sunday, 1=Monday, ..., 6=Saturday
     holidays: string[]; // Array of ISO date strings (e.g., ["2025-12-25"])
@@ -114,7 +116,7 @@ export interface BusinessDaySettingsValue {
  * Currency format value: Display formatting for monetary amounts.
  */
 export interface CurrencyFormatValue {
-  category: PreferenceCategory.CurrencyFormat;
+  category: typeof PreferenceCategory.CurrencyFormat;
   value: {
     currencyCode: string; // ISO 4217 code (e.g., "USD", "EUR", "GBP")
     decimalSeparator: '.' | ',';
@@ -127,7 +129,7 @@ export interface CurrencyFormatValue {
  * Locale value: Language/region setting (BCP 47 format).
  */
 export interface LocaleValue {
-  category: PreferenceCategory.Locale;
+  category: typeof PreferenceCategory.Locale;
   value: string; // BCP 47 language tag (e.g., "en-US", "en-GB", "es-MX")
 }
 
@@ -155,7 +157,7 @@ export type CategoryValue =
  */
 export interface UserPreference<T = unknown> {
   /** Which preference category this belongs to */
-  category: PreferenceCategory;
+  category: PreferenceCategoryType;
 
   /** The user's configured value (type varies by category) */
   value: T;
@@ -181,7 +183,7 @@ export interface PreferenceCollection {
   version: string;
 
   /** All saved preferences keyed by category (max 5 entries) */
-  preferences: Map<PreferenceCategory, UserPreference>;
+  preferences: Map<PreferenceCategoryType, UserPreference>;
 
   /** Total storage size in bytes (must be <5120 bytes / 5KB) */
   totalSize: number;
@@ -223,6 +225,7 @@ export type StorageErrorType =
 export interface StorageError {
   type: StorageErrorType;
   message: string;
+  category?: PreferenceCategoryType;
   originalError?: Error;
 }
 
@@ -271,14 +274,14 @@ export type Result<T, E> = Ok<T> | Err<E>;
 /**
  * Extract the value type for a specific preference category.
  */
-export type PreferenceValueType<C extends PreferenceCategory> = C extends PreferenceCategory.Timezone
+export type PreferenceValueType<C extends PreferenceCategoryType> = C extends typeof PreferenceCategory.Timezone
   ? string
-  : C extends PreferenceCategory.PaydayDates
+  : C extends typeof PreferenceCategory.PaydayDates
   ? PaydayPattern
-  : C extends PreferenceCategory.BusinessDaySettings
+  : C extends typeof PreferenceCategory.BusinessDaySettings
   ? BusinessDaySettingsValue['value']
-  : C extends PreferenceCategory.CurrencyFormat
+  : C extends typeof PreferenceCategory.CurrencyFormat
   ? CurrencyFormatValue['value']
-  : C extends PreferenceCategory.Locale
+  : C extends typeof PreferenceCategory.Locale
   ? string
   : never;

@@ -14,10 +14,10 @@ import { z } from 'zod';
 import { DateTime } from 'luxon';
 import {
   PreferenceCategory,
+  type PreferenceCategoryType,
   type PaydayPattern,
   type UserPreference,
   type PreferenceCollection,
-  type SerializedPreferenceCollection,
 } from './types';
 import {
   STORAGE_LIMIT_BYTES,
@@ -351,7 +351,7 @@ export const categoryValueSchema = z.discriminatedUnion('category', [
  * })
  */
 export const userPreferenceSchema: z.ZodType<UserPreference> = z.object({
-  category: z.nativeEnum(PreferenceCategory),
+  category: z.string() as z.ZodType<PreferenceCategoryType>,
   value: z.unknown(), // Type depends on category, validated separately
   optInStatus: z.boolean(),
   timestamp: z
@@ -411,7 +411,7 @@ export const serializedPreferenceCollectionSchema = z.object({
  *
  * @see data-model.md PreferenceCollection
  */
-export const preferenceCollectionSchema: z.ZodType<PreferenceCollection> = z.object({
+export const preferenceCollectionSchema = z.object({
   version: z
     .string()
     .regex(/^\d+\.\d+\.\d+$/, 'Version must be MAJOR.MINOR.PATCH format')
@@ -425,7 +425,7 @@ export const preferenceCollectionSchema: z.ZodType<PreferenceCollection> = z.obj
     {
       message: `Cannot exceed ${MAX_PREFERENCE_CATEGORIES} preference categories`,
     }
-  ),
+  ) as z.ZodType<Map<PreferenceCategoryType, UserPreference>>,
   totalSize: z
     .number()
     .int()
@@ -440,7 +440,7 @@ export const preferenceCollectionSchema: z.ZodType<PreferenceCollection> = z.obj
       message: 'Last modified must be valid ISO 8601 datetime',
       }
     ),
-});
+}) as z.ZodType<PreferenceCollection>;
 
 // ============================================================================
 // Category-Specific Validation Helper
@@ -464,9 +464,11 @@ export const preferenceCollectionSchema: z.ZodType<PreferenceCollection> = z.obj
  * }
  */
 export function validatePreferenceValue(
-  category: PreferenceCategory,
+  category: PreferenceCategoryType,
   value: unknown
-): z.SafeParseReturnType<unknown, unknown> {
+):
+  | { success: true; data: unknown }
+  | { success: false; error: z.ZodError<unknown> } {
   switch (category) {
     case PreferenceCategory.Timezone:
       return timezoneSchema.safeParse(value);
