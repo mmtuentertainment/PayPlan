@@ -423,10 +423,12 @@ export class PreferenceStorageService {
    */
   private saveCollection(collection: PreferenceCollection): Result<boolean, StorageError> {
     try {
-      // Convert Map to Record for JSON serialization
+      // Persist only opted-in preferences (privacy-first)
       const serialized: SerializedPreferenceCollection = {
         version: collection.version,
-        preferences: Object.fromEntries(collection.preferences),
+        preferences: Object.fromEntries(
+          Array.from(collection.preferences.entries()).filter(([, pref]) => pref.optInStatus)
+        ),
         totalSize: collection.totalSize,
         lastModified: collection.lastModified,
       };
