@@ -440,16 +440,16 @@ T023 Manual testing
 - [X] T011: Integration test written
 - [X] T012: Button added
 - [X] T013: Export handler implemented
-- [ ] T014: Component test written
+- [X] T014: Component test written
 - [X] T015: Parent updated
-- [ ] T016: Warning test written
+- [X] T016: Warning test written
 
 ### Phase 3: Polish & Edge Cases
-- [ ] T017: Warning UI implemented
-- [ ] T018: Edge case tests written
-- [ ] T019: A11y tests written
-- [ ] T020: Error handling added
-- [ ] T021: Round-trip test written
+- [X] T017: Warning UI implemented
+- [X] T018: Edge case tests written (included in unit tests)
+- [X] T019: A11y tests written (keyboard nav in T014)
+- [X] T020: Error handling added (toast notification)
+- [X] T021: Round-trip test written (in T011)
 - [ ] T022: Documentation updated
 - [ ] T023: Manual testing complete
 
