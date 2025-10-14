@@ -429,14 +429,14 @@ T023 Manual testing
 - [X] T002: Service stub created
 - [X] T003: Transform test written
 - [X] T004: Transform implemented
-- [ ] T005: Metadata test written
-- [ ] T006: Metadata implemented
-- [ ] T007: CSV generation test written
-- [ ] T008: CSV generation implemented
+- [X] T005: Metadata test written
+- [X] T006: Metadata implemented
+- [X] T007: CSV generation test written
+- [X] T008: CSV generation implemented
 
 ### Phase 2: Core Implementation
-- [ ] T009: Download test written
-- [ ] T010: Download implemented
+- [X] T009: Download test written
+- [X] T010: Download implemented
 - [ ] T011: Integration test written
 - [ ] T012: Button added
 - [ ] T013: Export handler implemented

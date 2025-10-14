@@ -54,8 +54,30 @@ export function transformPaymentToCSVRow(payment: PaymentRecord): CSVRow {
  * @throws {Error} If validation fails
  */
 export function generateExportMetadata(recordCount: number): ExportMetadata {
-  // TODO: Implement in T006
-  throw new Error('Not implemented: generateExportMetadata');
+  const now = new Date();
+
+  // Generate ISO 8601 basic format timestamp for filename (no colons, cross-platform safe)
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+  const filenameTimestamp = `${year}-${month}-${day}-${hours}${minutes}${seconds}`;
+  const filename = `payplan-export-${filenameTimestamp}.csv`;
+
+  const metadata: ExportMetadata = {
+    filename,
+    timestamp: now.toISOString(), // ISO 8601 with timezone
+    recordCount,
+    shouldWarn: recordCount > 500, // Performance warning threshold
+    generatedAt: now
+  };
+
+  // Validate output with Zod schema
+  const validated = exportMetadataSchema.parse(metadata);
+  return validated;
 }
 
 /**
@@ -70,8 +92,15 @@ export function generateExportMetadata(recordCount: number): ExportMetadata {
  * @returns CSV string content
  */
 export function generateCSV(rows: CSVRow[]): string {
-  // TODO: Implement in T008
-  throw new Error('Not implemented: generateCSV');
+  // Use PapaParse to generate RFC 4180-compliant CSV
+  const csvContent = Papa.unparse(rows, {
+    quotes: true,        // Force quotes around all fields (handles special chars)
+    delimiter: ',',      // Standard comma delimiter
+    newline: '\r\n',    // Windows-style line endings (widest compatibility)
+    header: true         // Include header row
+  });
+
+  return csvContent;
 }
 
 /**
@@ -87,8 +116,22 @@ export function generateCSV(rows: CSVRow[]): string {
  * @param filename - Filename for the downloaded file
  */
 export function downloadCSV(csvContent: string, filename: string): void {
-  // TODO: Implement in T010
-  throw new Error('Not implemented: downloadCSV');
+  // Create Blob with UTF-8 encoding
+  const blob = new Blob([csvContent], {
+    type: 'text/csv;charset=utf-8;'
+  });
+
+  // Generate object URL for download
+  const url = URL.createObjectURL(blob);
+
+  // Create anchor element and trigger download
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  // Clean up object URL to prevent memory leak
+  URL.revokeObjectURL(url);
 }
 
 /**
