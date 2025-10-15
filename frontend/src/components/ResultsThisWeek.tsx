@@ -1,15 +1,22 @@
 // Minimal results card to satisfy MVP view + Copy + ICS download (T011 hook).
 
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { exportPaymentsToCSV, downloadCSV } from "@/services/csvExportService";
+import type { PaymentRecord } from "@/types/csvExport";
+import { ToastNotification } from "@/components/preferences/ToastNotification";
 
 type Props = {
   actions: string[];
   icsBase64: string | null;
   onCopy: () => void;
+  normalizedPayments?: PaymentRecord[]; // NEW: Payment data for CSV export
 };
 
-export default function ResultsThisWeek({ actions, icsBase64, onCopy }: Props) {
+export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalizedPayments = [] }: Props) {
+  const [warningToast, setWarningToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
   function downloadIcs() {
     if (!icsBase64) return;
     const blob = b64ToBlob(icsBase64, "text/calendar");
@@ -28,6 +35,35 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy }: Props) {
     return new Blob([bytes], { type });
   }
 
+  function handleDownloadCSV() {
+    try {
+      const { csvContent, metadata } = exportPaymentsToCSV(normalizedPayments);
+
+      // T016-T017: Show warning for large datasets
+      if (metadata.shouldWarn) {
+        setWarningToast({
+          message: `Generating large export (${metadata.recordCount} records). This may take a moment...`,
+          type: 'success'
+        });
+      }
+
+      downloadCSV(csvContent, metadata.filename);
+
+      // Dismiss warning after download starts
+      if (metadata.shouldWarn) {
+        setTimeout(() => setWarningToast(null), 2000);
+      }
+    } catch (error) {
+      console.error('CSV export failed:', error);
+      setWarningToast({
+        message: 'CSV export failed. Please try again.',
+        type: 'error'
+      });
+    }
+  }
+
+  const hasPayments = normalizedPayments.length > 0;
+
   return (
     <Card>
       <CardHeader>
@@ -44,6 +80,9 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy }: Props) {
           <Button variant="secondary" onClick={downloadIcs} disabled={!icsBase64}>
             Download .ics
           </Button>
+          <Button variant="secondary" onClick={handleDownloadCSV} disabled={!hasPayments}>
+            Download CSV
+          </Button>
         </div>
         {icsBase64 && (
           <p className="text-xs text-muted-foreground">
@@ -51,6 +90,13 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy }: Props) {
           </p>
         )}
       </CardContent>
+      {warningToast && (
+        <ToastNotification
+          message={warningToast.message}
+          type={warningToast.type}
+          onDismiss={() => setWarningToast(null)}
+        />
+      )}
     </Card>
   );
 }
