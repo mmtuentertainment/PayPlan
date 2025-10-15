@@ -1,0 +1,15 @@
+provider,installment_no,due_date,amount,currency,autopay,late_fee
+Klarna,1,2025-10-14,45.00,USD,true,7
+Klarna,2,2025-10-28,45.00,USD,true,7
+Klarna,3,2025-11-11,45.00,USD,true,7
+Affirm,1,2025-10-15,120.00,USD,true,15
+Affirm,2,2025-11-15,120.00,USD,true,15
+Afterpay,1,2025-10-16,25.00,USD,false,8
+Afterpay,2,2025-10-23,25.00,USD,false,8
+Afterpay,3,2025-10-30,25.00,USD,false,8
+Afterpay,4,2025-11-06,25.00,USD,false,8
+PayPal Pay in 4,1,2025-10-17,75.00,USD,true,0
+PayPal Pay in 4,2,2025-10-31,75.00,USD,true,0
+PayPal Pay in 4,3,2025-11-14,75.00,USD,true,0
+Zip,1,2025-10-18,50.00,USD,true,10
+Sezzle,1,2025-10-19,35.00,USD,false,5

@@ -1,0 +1,2 @@
+provider,installment_no,due_date,amount,currency,autopay,late_fee
+Klarna,1,2025-12-01,25.00,USD,false,5

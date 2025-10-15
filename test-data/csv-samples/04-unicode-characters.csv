@@ -1,0 +1,4 @@
+provider,installment_no,due_date,amount,currency,autopay,late_fee
+Café Münchën,1,2025-10-14,45.00,EUR,true,7
+東京ストア,1,2025-10-15,5000,JPY,false,500
+Tienda España,1,2025-10-16,30.50,EUR,true,3

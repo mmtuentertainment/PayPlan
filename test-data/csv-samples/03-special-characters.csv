@@ -1,0 +1,6 @@
+provider,installment_no,due_date,amount,currency,autopay,late_fee
+"Klarna, Inc.",1,2025-10-14,45.00,USD,true,7
+"Bob's ""Best"" Buy",1,2025-10-15,30.00,USD,false,5
+"Multi
+Line
+Provider",1,2025-10-16,20.00,USD,true,0

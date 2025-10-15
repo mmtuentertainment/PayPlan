@@ -1,0 +1,5 @@
+provider,installment_no,due_date,amount,currency,autopay,late_fee
+Zero Amount,1,2025-10-14,0.00,USD,false,0
+Negative Refund,1,2025-10-15,-25.50,USD,false,0
+Large Amount,1,2025-10-16,999999.99,USD,true,50
+Decimal Edge,1,2025-10-17,0.30,USD,false,0
