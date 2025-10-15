@@ -63,8 +63,7 @@ export function StatusIndicator({
     : null;
 
   return (
-    <div
-      role="status"
+    <output
       aria-live="polite"
       className={`inline-flex items-center gap-2 ${className}`}
     >
@@ -90,7 +89,7 @@ export function StatusIndicator({
       </Badge>
 
       {formattedTimestamp && (
-        <span className="text-xs text-gray-500" aria-label={formattedTimestamp}>
+        <span className="text-xs text-gray-500">
           {formattedTimestamp}
         </span>
       )}
@@ -100,7 +99,7 @@ export function StatusIndicator({
         Payment status: {status}
         {formattedTimestamp && `. ${formattedTimestamp}`}
       </span>
-    </div>
+    </output>
   );
 }
 

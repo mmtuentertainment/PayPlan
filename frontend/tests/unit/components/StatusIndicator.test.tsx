@@ -61,11 +61,11 @@ describe('StatusIndicator', () => {
     expect(timestampText).not.toBeInTheDocument();
   });
 
-  it('should have role="status" for accessibility', () => {
+  it('should use semantic output element for status', () => {
     const { container } = render(<StatusIndicator status="paid" />);
 
-    const statusElement = container.querySelector('[role="status"]');
-    expect(statusElement).toBeInTheDocument();
+    const outputElement = container.querySelector('output');
+    expect(outputElement).toBeInTheDocument();
   });
 
   it('should have aria-live="polite" for screen readers', () => {
