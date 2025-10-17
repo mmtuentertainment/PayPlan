@@ -60,12 +60,17 @@ export class ArchiveErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log error details for debugging
-    console.error('ArchiveErrorBoundary caught an error:', {
-      error,
-      errorInfo,
-      archiveName: this.props.archiveName,
-    });
+    // Log minimal non-PII information for debugging
+    // Avoid logging full error details or archiveName which may contain sensitive data
+    console.error('Archive error boundary triggered');
+
+    // In production, this could be sent to a secure logging service:
+    // secureLogger.logError({
+    //   message: 'Archive rendering error',
+    //   errorType: error.name,
+    //   component: 'ArchiveErrorBoundary',
+    //   timestamp: new Date().toISOString(),
+    // });
 
     this.setState({
       error,
@@ -86,6 +91,11 @@ export class ArchiveErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       const { archiveName } = this.props;
       const { error } = this.state;
+
+      // Redact archive name to prevent PII exposure (may contain sensitive data)
+      const safeArchiveName = archiveName
+        ? archiveName.substring(0, 20) + (archiveName.length > 20 ? '...' : '')
+        : 'Unknown archive';
 
       // Determine error type for better messaging
       const isCorruptedData = error?.message?.includes('JSON') ||
@@ -129,7 +139,7 @@ export class ArchiveErrorBoundary extends Component<Props, State> {
                 </h2>
                 {archiveName && (
                   <p className="text-sm text-red-700 mb-2">
-                    Archive: <strong>{archiveName}</strong>
+                    Archive: <strong>{safeArchiveName}</strong>
                   </p>
                 )}
                 <p className="text-red-700">{errorMessage}</p>

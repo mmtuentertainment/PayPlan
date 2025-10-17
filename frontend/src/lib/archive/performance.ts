@@ -36,10 +36,36 @@ export interface PerformanceLog {
 }
 
 /**
+ * Sanitize metadata to remove sensitive information before logging
+ *
+ * Redacts values for keys that may contain PII or sensitive data
+ * such as names, emails, payment information, account details, etc.
+ *
+ * @param metadata - Metadata object to sanitize
+ * @returns Sanitized metadata object with sensitive values redacted
+ */
+function sanitizeMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
+  const sensitiveKeys = /name|email|address|card|account|ssn|token|payment|amount|provider/i;
+  const sanitized: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(metadata)) {
+    if (sensitiveKeys.test(key)) {
+      sanitized[key] = '[REDACTED]';
+    } else {
+      sanitized[key] = value;
+    }
+  }
+
+  return sanitized;
+}
+
+/**
  * Log performance metric with comparison to target
  *
  * Logs to console in development, could be extended to send to
  * analytics service in production.
+ *
+ * Metadata is sanitized to remove sensitive information before logging.
  *
  * @param operation - Name of the operation
  * @param duration - Duration in milliseconds
@@ -76,9 +102,11 @@ export function logPerformance(
   if (process.env.NODE_ENV === 'development') {
     const status = withinTarget ? '✅' : '⚠️';
     const percentage = ((duration / target) * 100).toFixed(1);
+    // Sanitize metadata before logging to prevent PII exposure
+    const safeMetadata = metadata ? sanitizeMetadata(metadata) : '';
     console.log(
       `${status} [Performance] ${operation}: ${duration.toFixed(2)}ms (${percentage}% of ${target}ms target)`,
-      metadata || ''
+      safeMetadata
     );
   }
 
