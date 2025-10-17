@@ -36,6 +36,7 @@ import {
   getCurrentTimestamp,
   calculateByteSize,
   calculatePercentage,
+  generateArchiveFilename,
 } from './utils';
 import {
   MAX_ARCHIVES,
@@ -43,6 +44,7 @@ import {
   ERROR_MESSAGES,
   SCHEMA_VERSION,
 } from './constants';
+import Papa from 'papaparse';
 
 /**
  * Service for managing payment archive business logic.
@@ -513,6 +515,99 @@ export class ArchiveService {
       dateRange,
       averageAmount,
       currency,
+    };
+  }
+
+  /**
+   * T073-T082: Export archive to CSV with metadata columns
+   *
+   * Transforms PaymentArchiveRecord[] to CSV format with:
+   * - 10 standard payment columns (provider, amount, currency, dueISO, autopay, risk_*, paid_*)
+   * - 2 archive metadata columns (archive_name, archive_date)
+   * - Total: 12 columns
+   *
+   * Uses PapaParse for RFC 4180-compliant CSV generation.
+   * Preserves Unicode characters with UTF-8 encoding.
+   *
+   * PERFORMANCE: Target <3s for 50 payments (T083)
+   *
+   * @param archive - Archive to export
+   * @returns CSV string content
+   *
+   * @example
+   * ```typescript
+   * const csv = service.exportArchiveToCSV(archive);
+   * downloadCSV(csv, generateArchiveFilename(archive.name, archive.createdAt));
+   * ```
+   */
+  exportArchiveToCSV(archive: Archive): string {
+    // T075: Transform each PaymentArchiveRecord to CSV row with archive metadata
+    const csvRows = archive.payments.map(payment =>
+      this.transformArchiveToCSVRow(payment, archive.name, archive.createdAt)
+    );
+
+    // T077: Generate CSV with column order: 10 payment + 2 archive columns
+    const csvContent = Papa.unparse(csvRows, {
+      quotes: true,        // Force quotes around all fields (handles special chars)
+      delimiter: ',',      // Standard comma delimiter
+      newline: '\r\n',     // Windows-style line endings (widest compatibility)
+      header: true,        // Include header row
+    });
+
+    return csvContent;
+  }
+
+  /**
+   * T075: Transform PaymentArchiveRecord to CSV row with archive metadata
+   *
+   * Maps archive payment record to CSV format with:
+   * - Standard payment columns (provider, amount, currency, etc.)
+   * - Archive metadata columns (archive_name, archive_date)
+   *
+   * Column Order (12 total):
+   * 1. provider
+   * 2. amount
+   * 3. currency
+   * 4. dueISO
+   * 5. autopay
+   * 6. risk_type
+   * 7. risk_severity
+   * 8. risk_message
+   * 9. paid_status
+   * 10. paid_timestamp
+   * 11. archive_name (NEW)
+   * 12. archive_date (NEW)
+   *
+   * @param payment - Payment archive record
+   * @param archiveName - Archive name (supports Unicode)
+   * @param archiveDate - Archive creation timestamp
+   * @returns CSV row object
+   * @private
+   */
+  private transformArchiveToCSVRow(
+    payment: PaymentArchiveRecord,
+    archiveName: string,
+    archiveDate: string
+  ): Record<string, string> {
+    // Format amount to exactly 2 decimal places
+    const roundedAmount = (Math.round(payment.amount * 100) / 100).toFixed(2);
+
+    return {
+      // Standard payment columns (10)
+      provider: payment.provider,
+      amount: roundedAmount,
+      currency: payment.currency,
+      dueISO: payment.dueISO,
+      autopay: payment.autopay.toString(),
+      risk_type: payment.risk_type || '',
+      risk_severity: payment.risk_severity || '',
+      risk_message: payment.risk_message || '',
+      paid_status: payment.status,
+      paid_timestamp: payment.timestamp,
+
+      // Archive metadata columns (2)
+      archive_name: archiveName,
+      archive_date: archiveDate,
     };
   }
 }

@@ -20,6 +20,7 @@ import { ArchiveService } from '@/lib/archive/ArchiveService';
 import { ArchiveStorage } from '@/lib/archive/ArchiveStorage';
 import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
 import { ArchiveStatistics } from '@/components/archive/ArchiveStatistics';
+import { ExportArchiveButton } from '@/components/archive/ExportArchiveButton';
 
 /**
  * Format ISO date to readable format
@@ -162,10 +163,17 @@ export function ArchiveDetailView() {
       </Link>
 
       <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-        <h1 className="text-3xl font-bold mb-2">{name}</h1>
-        <p className="text-gray-600 mb-4">
-          Created {formatDate(createdAt)}
-        </p>
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">{name}</h1>
+            <p className="text-gray-600">
+              Created {formatDate(createdAt)}
+            </p>
+          </div>
+
+          {/* T087: Export Archive Button */}
+          <ExportArchiveButton archive={archive} />
+        </div>
 
         <div className="mt-4 text-xs text-gray-500 italic">
           This archive is read-only. Payment statuses cannot be modified.

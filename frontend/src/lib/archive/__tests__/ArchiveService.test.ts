@@ -9,12 +9,13 @@
  * Follows patterns from Feature 015 (PaymentStatusService.test.ts).
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ArchiveService } from '../ArchiveService';
 import { ArchiveStorage } from '../ArchiveStorage';
 import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
 import type { PaymentRecord } from '@/types/csvExport';
-import { MAX_ARCHIVES, MAX_STORAGE_SIZE } from '../constants';
+import { MAX_ARCHIVES } from '../constants';
+import { generateArchiveFilename } from '../utils';
 
 describe('ArchiveService - Create Archive MVP', () => {
   let service: ArchiveService;
@@ -829,6 +830,284 @@ describe('ArchiveService - Create Archive MVP', () => {
       expect(stats.pendingPercentage).toBe(0.0);
       expect(stats.averageAmount).toBeUndefined();
       expect(stats.currency).toBeUndefined();
+    });
+  });
+
+  describe('T073-T083: exportArchiveToCSV()', () => {
+    it('T073: should generate CSV with 12 columns (10 payment + 2 archive)', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test Provider',
+          amount: 100.50,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+          risk_type: 'collision',
+          risk_severity: 'high',
+          risk_message: 'Test risk',
+        },
+      ];
+
+      // Mark as paid
+      paymentStatusStorage.saveStatus({
+        paymentId: payments[0].id!,
+        status: 'paid',
+        timestamp: '2025-10-14T14:30:00.000Z',
+      });
+
+      const createResult = await service.createArchive('Test Archive', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const csv = service.exportArchiveToCSV(archive);
+
+        // Parse CSV to check columns
+        const lines = csv.split('\r\n');
+        const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
+
+        expect(headers).toHaveLength(12);
+        expect(headers).toEqual([
+          'provider',
+          'amount',
+          'currency',
+          'dueISO',
+          'autopay',
+          'risk_type',
+          'risk_severity',
+          'risk_message',
+          'paid_status',
+          'paid_timestamp',
+          'archive_name',
+          'archive_date',
+        ]);
+      }
+    });
+
+    it('T075: should transform PaymentArchiveRecord to CSV row correctly', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Klarna',
+          amount: 45.99,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: true,
+          risk_type: 'collision',
+          risk_severity: 'high',
+          risk_message: 'Multiple payments due',
+        },
+      ];
+
+      paymentStatusStorage.saveStatus({
+        paymentId: payments[0].id!,
+        status: 'paid',
+        timestamp: '2025-10-14T14:30:00.000Z',
+      });
+
+      const createResult = await service.createArchive('October 2025', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const csv = service.exportArchiveToCSV(archive);
+
+        // Parse data row (skip header)
+        const lines = csv.split('\r\n');
+        const dataRow = lines[1];
+
+        // Should contain all payment data + archive metadata
+        expect(dataRow).toContain('Klarna');
+        expect(dataRow).toContain('45.99');
+        expect(dataRow).toContain('USD');
+        expect(dataRow).toContain('2025-10-15');
+        expect(dataRow).toContain('true');
+        expect(dataRow).toContain('collision');
+        expect(dataRow).toContain('high');
+        expect(dataRow).toContain('Multiple payments due');
+        expect(dataRow).toContain('paid');
+        expect(dataRow).toContain('2025-10-14T14:30:00.000Z');
+        expect(dataRow).toContain('October 2025');
+        expect(dataRow).toContain(archive.createdAt);
+      }
+    });
+
+    it('T077: should maintain correct CSV column order', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test',
+          amount: 100,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+        },
+      ];
+
+      const createResult = await service.createArchive('Test', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const csv = service.exportArchiveToCSV(archive);
+
+        const lines = csv.split('\r\n');
+        const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
+
+        // Verify exact column order
+        expect(headers[0]).toBe('provider');
+        expect(headers[1]).toBe('amount');
+        expect(headers[2]).toBe('currency');
+        expect(headers[3]).toBe('dueISO');
+        expect(headers[4]).toBe('autopay');
+        expect(headers[5]).toBe('risk_type');
+        expect(headers[6]).toBe('risk_severity');
+        expect(headers[7]).toBe('risk_message');
+        expect(headers[8]).toBe('paid_status');
+        expect(headers[9]).toBe('paid_timestamp');
+        expect(headers[10]).toBe('archive_name');
+        expect(headers[11]).toBe('archive_date');
+      }
+    });
+
+    it('T079: should generate correct filename with slugified archive name', () => {
+      // This test is for utils.ts generateArchiveFilename()
+      // Already implemented in utils.ts
+      const filename = generateArchiveFilename('October 2025', '2025-10-17T14:30:22.000Z');
+      expect(filename).toBe('payplan-archive-october-2025-2025-10-17-143022.csv');
+
+      // Test Unicode handling
+      const unicodeFilename = generateArchiveFilename('October 2025 💰', '2025-10-17T14:30:22.000Z');
+      expect(unicodeFilename).toBe('payplan-archive-october-2025-2025-10-17-143022.csv');
+    });
+
+    it('T081: should preserve Unicode characters in CSV data', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Paiements Français 💰',
+          amount: 100.00,
+          currency: 'EUR',
+          dueISO: '2025-10-15',
+          autopay: false,
+          risk_message: 'Risque élevé 🔴',
+        },
+      ];
+
+      const createResult = await service.createArchive('Octobre 2025 💰', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const csv = service.exportArchiveToCSV(archive);
+
+        // Unicode should be preserved in CSV content
+        expect(csv).toContain('Paiements Français 💰');
+        expect(csv).toContain('Risque élevé 🔴');
+        expect(csv).toContain('Octobre 2025 💰');
+      }
+    });
+
+    it('T083: should export 50 payments in <3 seconds', async () => {
+      // Create 50 payments
+      const payments: PaymentRecord[] = [];
+      for (let i = 0; i < 50; i++) {
+        payments.push({
+          id: `550e8400-e29b-41d4-a716-44665544${String(i).padStart(4, '0')}`,
+          provider: `Provider ${i}`,
+          amount: 100.00 + i,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: i % 2 === 0,
+          risk_type: 'collision',
+          risk_severity: 'high',
+          risk_message: `Risk message for payment ${i}`,
+        });
+      }
+
+      const createResult = await service.createArchive('Large Archive', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+
+        const startTime = performance.now();
+        const csv = service.exportArchiveToCSV(archive);
+        const endTime = performance.now();
+
+        const exportTime = endTime - startTime;
+
+        // Should complete in <3 seconds (3000ms)
+        expect(exportTime).toBeLessThan(3000);
+
+        // Verify CSV has 50 data rows + 1 header
+        const lines = csv.split('\r\n').filter(line => line.trim());
+        expect(lines.length).toBe(51); // 1 header + 50 data rows
+      }
+    });
+
+    it('should handle empty risk fields correctly', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test Provider',
+          amount: 100.00,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+          // No risk fields
+        },
+      ];
+
+      const createResult = await service.createArchive('Test', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const csv = service.exportArchiveToCSV(archive);
+
+        // Parse data row
+        const lines = csv.split('\r\n');
+        const dataRow = lines[1].split(',').map(cell => cell.replace(/"/g, ''));
+
+        // Risk fields should be empty strings
+        expect(dataRow[5]).toBe(''); // risk_type
+        expect(dataRow[6]).toBe(''); // risk_severity
+        expect(dataRow[7]).toBe(''); // risk_message
+      }
+    });
+
+    it('should format amounts to exactly 2 decimal places', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test',
+          amount: 100.5, // Should become 100.50
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          provider: 'Test 2',
+          amount: 45, // Should become 45.00
+          currency: 'USD',
+          dueISO: '2025-10-16',
+          autopay: true,
+        },
+      ];
+
+      const createResult = await service.createArchive('Test', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const csv = service.exportArchiveToCSV(archive);
+
+        expect(csv).toContain('100.50');
+        expect(csv).toContain('45.00');
+      }
     });
   });
 });

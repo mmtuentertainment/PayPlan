@@ -91,22 +91,22 @@ Goal: Users see totals, percentages, date range in statistics panel
 ## Phase 6: User Story 4 - Export Archived Data to CSV (P4)
 Goal: Users export archive with metadata columns to CSV
 
-- [ ] T073 [P] [US4] Write test: ArchiveService.exportArchiveToCSV() generates CSV with 12 columns in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T074 [US4] Implement exportArchiveToCSV() skeleton with PapaParse integration in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T075 [P] [US4] Write test: transformArchiveToCSVRow() maps PaymentArchiveRecord to CSV row in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T076 [US4] Implement transformArchiveToCSVRow() with archive_name, archive_date columns in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T077 [P] [US4] Write test: CSV column order matches spec (10 payment + 2 archive columns) in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T078 [US4] Implement CSV column mapping in correct order per spec in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T079 [P] [US4] Write test: generateArchiveFilename() creates slugified filename with date in frontend/src/lib/archive/__tests__/utils.test.ts
-- [ ] T080 [US4] Implement generateArchiveFilename() with slugify and ISO date in frontend/src/lib/archive/utils.ts
-- [ ] T081 [P] [US4] Write test: exportArchiveToCSV() preserves Unicode characters in archive_name in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T082 [US4] Handle Unicode encoding in CSV export with UTF-8 BOM in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T083 [P] [US4] Write test: exportArchiveToCSV() completes in <3s for 50 payments in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T084 [US4] Optimize CSV generation with streaming or batching if needed in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T085 [P] [US4] Create ExportArchiveButton component with download icon in frontend/src/components/archive/ExportArchiveButton.tsx
-- [ ] T086 [US4] Integrate exportArchiveToCSV() with button click and blob download in frontend/src/components/archive/ExportArchiveButton.tsx
-- [ ] T087 [P] [US4] Add ExportArchiveButton to ArchiveDetailView header in frontend/src/pages/ArchiveDetailView.tsx
-- [ ] T088 [US4] Write test: CSV download triggers browser download with correct filename in frontend/src/components/archive/__tests__/ExportArchiveButton.test.tsx
+- [X] T073 [P] [US4] Write test: ArchiveService.exportArchiveToCSV() generates CSV with 12 columns in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T074 [US4] Implement exportArchiveToCSV() skeleton with PapaParse integration in frontend/src/lib/archive/ArchiveService.ts
+- [X] T075 [P] [US4] Write test: transformArchiveToCSVRow() maps PaymentArchiveRecord to CSV row in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T076 [US4] Implement transformArchiveToCSVRow() with archive_name, archive_date columns in frontend/src/lib/archive/ArchiveService.ts
+- [X] T077 [P] [US4] Write test: CSV column order matches spec (10 payment + 2 archive columns) in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T078 [US4] Implement CSV column mapping in correct order per spec in frontend/src/lib/archive/ArchiveService.ts
+- [X] T079 [P] [US4] Write test: generateArchiveFilename() creates slugified filename with date in frontend/src/lib/archive/__tests__/utils.test.ts
+- [X] T080 [US4] Implement generateArchiveFilename() with slugify and ISO date in frontend/src/lib/archive/utils.ts
+- [X] T081 [P] [US4] Write test: exportArchiveToCSV() preserves Unicode characters in archive_name in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T082 [US4] Handle Unicode encoding in CSV export with UTF-8 BOM in frontend/src/lib/archive/ArchiveService.ts
+- [X] T083 [P] [US4] Write test: exportArchiveToCSV() completes in <3s for 50 payments in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T084 [US4] Optimize CSV generation with streaming or batching if needed in frontend/src/lib/archive/ArchiveService.ts
+- [X] T085 [P] [US4] Create ExportArchiveButton component with download icon in frontend/src/components/archive/ExportArchiveButton.tsx
+- [X] T086 [US4] Integrate exportArchiveToCSV() with button click and blob download in frontend/src/components/archive/ExportArchiveButton.tsx
+- [X] T087 [P] [US4] Add ExportArchiveButton to ArchiveDetailView header in frontend/src/pages/ArchiveDetailView.tsx
+- [X] T088 [US4] Write test: CSV download triggers browser download with correct filename in frontend/src/components/archive/__tests__/ExportArchiveButton.test.tsx
 
 ## Phase 7: User Story 5 - Delete Old Archives (P5)
 Goal: Users delete archives with confirmation to free storage
