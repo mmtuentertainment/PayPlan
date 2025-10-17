@@ -19,6 +19,7 @@ interface ArchiveListItemProps {
   archive: ArchiveIndexEntry;
   isCorrupted?: boolean;
   onDelete?: (archiveId: string) => void;
+  isDeleting?: boolean; // CodeRabbit: Loading state from parent
 }
 
 /**
@@ -42,7 +43,7 @@ function formatDate(isoDate: string): string {
  * Displays archive metadata with click to view details.
  * Includes delete button with confirmation dialog.
  */
-export function ArchiveListItem({ archive, isCorrupted = false, onDelete }: ArchiveListItemProps) {
+export function ArchiveListItem({ archive, isCorrupted = false, onDelete, isDeleting = false }: ArchiveListItemProps) {
   const { id, name, createdAt, paymentCount, paidCount, pendingCount } = archive;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -131,6 +132,7 @@ export function ArchiveListItem({ archive, isCorrupted = false, onDelete }: Arch
           archiveName={name}
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}
+          isDeleting={isDeleting}
         />
       )}
     </>

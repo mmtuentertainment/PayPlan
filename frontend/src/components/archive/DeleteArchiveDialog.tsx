@@ -13,6 +13,7 @@ interface DeleteArchiveDialogProps {
   archiveName: string;
   onConfirm: () => void;
   onCancel: () => void;
+  isDeleting?: boolean; // CodeRabbit: Loading state to prevent double-submission
 }
 
 /**
@@ -28,6 +29,7 @@ export function DeleteArchiveDialog({
   archiveName,
   onConfirm,
   onCancel,
+  isDeleting = false, // CodeRabbit: Default to false
 }: DeleteArchiveDialogProps) {
   return (
     <div
@@ -68,10 +70,16 @@ export function DeleteArchiveDialog({
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            disabled={isDeleting}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              isDeleting
+                ? 'bg-red-400 text-white opacity-50 cursor-not-allowed'
+                : 'bg-red-600 text-white hover:bg-red-700'
+            }`}
             aria-label="Confirm deletion"
+            aria-busy={isDeleting}
           >
-            Delete
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </button>
         </div>
       </div>

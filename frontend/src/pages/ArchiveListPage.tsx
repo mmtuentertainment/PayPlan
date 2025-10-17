@@ -11,6 +11,7 @@
  * Performance target: <100ms load time
  */
 
+import { useState } from 'react';
 import { usePaymentArchives } from '@/hooks/usePaymentArchives';
 import { ArchiveListItem } from '@/components/archive/ArchiveListItem';
 import { Link } from 'react-router-dom';
@@ -27,9 +28,22 @@ import { Link } from 'react-router-dom';
  */
 export function ArchiveListPage() {
   const { archives, deleteArchive, isLoading, error } = usePaymentArchives();
+  // CodeRabbit Fix: Track which archive is being deleted to prevent double-clicks
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDeleteArchive = async (archiveId: string) => {
-    await deleteArchive(archiveId);
+    try {
+      setDeletingId(archiveId);
+      const success = await deleteArchive(archiveId);
+      if (success) {
+        console.info('Archive deleted successfully');
+      }
+    } catch (err) {
+      console.error('Failed to delete archive:', err instanceof Error ? err.message : 'Unknown error');
+      // Error state already managed by usePaymentArchives hook
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   if (isLoading) {
@@ -133,6 +147,7 @@ export function ArchiveListPage() {
             key={archive.id}
             archive={archive}
             onDelete={handleDeleteArchive}
+            isDeleting={deletingId === archive.id}
           />
         ))}
       </div>

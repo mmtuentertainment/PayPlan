@@ -89,10 +89,13 @@ describe('DeleteArchiveDialog', () => {
 
     // Click the backdrop (parent div)
     const backdrop = container.querySelector('[role="dialog"]');
-    if (backdrop) {
-      await user.click(backdrop);
-      expect(onCancel).toHaveBeenCalledTimes(1);
-    }
+
+    // CodeRabbit Fix: Assert backdrop exists before clicking (test fails if missing)
+    expect(backdrop).not.toBeNull();
+    expect(backdrop).toBeInTheDocument();
+
+    await user.click(backdrop!);
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it('should have proper ARIA attributes', () => {
