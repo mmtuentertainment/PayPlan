@@ -6,6 +6,7 @@
  * Tasks: T112-T113
  */
 
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   logPerformance,
   measureSync,
