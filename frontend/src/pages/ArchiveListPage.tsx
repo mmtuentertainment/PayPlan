@@ -29,7 +29,13 @@ export function ArchiveListPage() {
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <div className="animate-pulse">
+        <div
+          className="animate-pulse"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <span className="sr-only">Loading...</span>
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -44,11 +50,15 @@ export function ArchiveListPage() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div
+          className="bg-red-50 border border-red-200 rounded-lg p-4"
+          role="alert"
+          aria-live="polite"
+        >
           <h2 className="text-lg font-semibold text-red-800 mb-2">
             Error Loading Archives
           </h2>
-          <p className="text-red-700">{error.message}</p>
+          <p className="text-red-700">Unable to load archives. Please try again later.</p>
         </div>
       </div>
     );
@@ -66,6 +76,7 @@ export function ArchiveListPage() {
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"

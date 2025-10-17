@@ -67,6 +67,8 @@ export function ArchiveListItem({ archive, isCorrupted = false }: ArchiveListIte
           onClick={(e) => {
             if (isCorrupted) e.preventDefault();
           }}
+          aria-disabled={isCorrupted}
+          tabIndex={isCorrupted ? -1 : undefined}
         >
           View
         </Link>

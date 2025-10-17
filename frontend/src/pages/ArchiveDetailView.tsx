@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePaymentArchives } from '@/hooks/usePaymentArchives';
 import type { Archive } from '@/lib/archive/types';
+import { archiveSchema } from '@/lib/archive/validation';
 
 /**
  * Format ISO date to readable format
@@ -75,7 +76,20 @@ export function ArchiveDetailView() {
     // Log performance for debugging
     console.log(`Archive load time: ${(endTime - startTime).toFixed(2)}ms`);
 
-    setArchive(loadedArchive);
+    // Validate fetched archive
+    if (loadedArchive) {
+      const validationResult = archiveSchema.safeParse(loadedArchive);
+      if (!validationResult.success) {
+        console.error('Archive validation failed:', validationResult.error);
+        setArchive(null);
+        setIsLoading(false);
+        return;
+      }
+      setArchive(validationResult.data);
+    } else {
+      setArchive(loadedArchive);
+    }
+
     setIsLoading(false);
   }, [id, getArchiveById]);
 

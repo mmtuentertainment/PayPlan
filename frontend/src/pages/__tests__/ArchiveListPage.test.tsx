@@ -132,6 +132,7 @@ describe('ArchiveListPage', () => {
     );
 
     expect(screen.getByText('Error Loading Archives')).toBeInTheDocument();
-    expect(screen.getByText('localStorage is disabled')).toBeInTheDocument();
+    // Fix #1: User-friendly error message (no raw error.message exposure)
+    expect(screen.getByText('Unable to load archives. Please try again later.')).toBeInTheDocument();
   });
 });
