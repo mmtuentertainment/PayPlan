@@ -21,34 +21,34 @@
 ## Phase 3: User Story 1 - Create Payment Archive (P1 MVP)
 Goal: Users can create named archive, snapshot statuses, reset to pending
 
-- [ ] T015 [P] [US1] Write test: ArchiveService.createArchive() with valid name creates archive in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T016 [US1] Implement ArchiveService.createArchive() skeleton in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T017 [P] [US1] Write test: joinPaymentsWithStatuses() combines payment data + status in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T018 [US1] Implement joinPaymentsWithStatuses() to create PaymentArchiveRecord[] in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T019 [P] [US1] Write test: calculateArchiveMetadata() returns total/paid/pending/failed counts in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T020 [US1] Implement calculateArchiveMetadata() with date range extraction in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T021 [P] [US1] Write test: ensureUniqueName() auto-appends " (2)" for duplicate names in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T022 [US1] Implement ensureUniqueName() with recursive increment logic in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T023 [P] [US1] Write test: ArchiveStorage.saveArchive() persists to localStorage with payplan_archive_{id} key in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T024 [US1] Implement ArchiveStorage.saveArchive() with JSON serialization in frontend/src/lib/archive/ArchiveStorage.ts
-- [ ] T025 [P] [US1] Write test: ArchiveStorage.updateIndex() adds new entry to archive index in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T026 [US1] Implement ArchiveStorage.updateIndex() with payplan_archive_index key in frontend/src/lib/archive/ArchiveStorage.ts
-- [ ] T027 [P] [US1] Write test: createArchive() calls PaymentStatusStorage.clearAll() to reset statuses in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T028 [US1] Integrate PaymentStatusStorage.clearAll() call after successful archive save in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T029 [P] [US1] Write test: validateArchiveName() rejects empty/whitespace-only names in frontend/src/lib/archive/__tests__/validation.test.ts
-- [ ] T030 [US1] Implement validateArchiveName() with trimming and Zod schema in frontend/src/lib/archive/validation.ts
-- [ ] T031 [P] [US1] Write test: createArchive() throws error when payment list is empty in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T032 [US1] Implement empty payment check with descriptive error message in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T033 [P] [US1] Write test: createArchive() throws error when 50 archives exist in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T034 [US1] Implement archive count limit check (MAX_ARCHIVES = 50) in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T035 [P] [US1] Write test: createArchive() throws error when storage exceeds 5MB in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T036 [US1] Implement storage size limit check (MAX_STORAGE_SIZE = 5MB) in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T037 [P] [US1] Create CreateArchiveDialog component with form and warning text in frontend/src/components/archive/CreateArchiveDialog.tsx
-- [ ] T038 [US1] Implement dialog form with name input, validation, and reset warning in frontend/src/components/archive/CreateArchiveDialog.tsx
-- [ ] T039 [P] [US1] Create usePaymentArchives hook with createArchive, loading, error state in frontend/src/hooks/usePaymentArchives.ts
-- [ ] T040 [US1] Integrate usePaymentArchives hook with CreateArchiveDialog for form submission in frontend/src/components/archive/CreateArchiveDialog.tsx
-- [ ] T041 [P] [US1] Write test: CreateArchiveDialog shows success message after archive creation in frontend/src/components/archive/__tests__/CreateArchiveDialog.test.tsx
-- [ ] T042 [US1] Implement success feedback and dialog close on successful archive in frontend/src/components/archive/CreateArchiveDialog.tsx
+- [X] T015 [P] [US1] Write test: ArchiveService.createArchive() with valid name creates archive in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T016 [US1] Implement ArchiveService.createArchive() skeleton in frontend/src/lib/archive/ArchiveService.ts
+- [X] T017 [P] [US1] Write test: joinPaymentsWithStatuses() combines payment data + status in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T018 [US1] Implement joinPaymentsWithStatuses() to create PaymentArchiveRecord[] in frontend/src/lib/archive/ArchiveService.ts
+- [X] T019 [P] [US1] Write test: calculateArchiveMetadata() returns total/paid/pending/failed counts in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T020 [US1] Implement calculateArchiveMetadata() with date range extraction in frontend/src/lib/archive/ArchiveService.ts
+- [X] T021 [P] [US1] Write test: ensureUniqueName() auto-appends " (2)" for duplicate names in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T022 [US1] Implement ensureUniqueName() with recursive increment logic in frontend/src/lib/archive/ArchiveService.ts
+- [X] T023 [P] [US1] Write test: ArchiveStorage.saveArchive() persists to localStorage with payplan_archive_{id} key in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
+- [X] T024 [US1] Implement ArchiveStorage.saveArchive() with JSON serialization in frontend/src/lib/archive/ArchiveStorage.ts
+- [X] T025 [P] [US1] Write test: ArchiveStorage.updateIndex() adds new entry to archive index in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
+- [X] T026 [US1] Implement ArchiveStorage.updateIndex() with payplan_archive_index key in frontend/src/lib/archive/ArchiveStorage.ts
+- [X] T027 [P] [US1] Write test: createArchive() calls PaymentStatusStorage.clearAll() to reset statuses in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T028 [US1] Integrate PaymentStatusStorage.clearAll() call after successful archive save in frontend/src/lib/archive/ArchiveService.ts
+- [X] T029 [P] [US1] Write test: validateArchiveName() rejects empty/whitespace-only names in frontend/src/lib/archive/__tests__/validation.test.ts
+- [X] T030 [US1] Implement validateArchiveName() with trimming and Zod schema in frontend/src/lib/archive/validation.ts
+- [X] T031 [P] [US1] Write test: createArchive() throws error when payment list is empty in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T032 [US1] Implement empty payment check with descriptive error message in frontend/src/lib/archive/ArchiveService.ts
+- [X] T033 [P] [US1] Write test: createArchive() throws error when 50 archives exist in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T034 [US1] Implement archive count limit check (MAX_ARCHIVES = 50) in frontend/src/lib/archive/ArchiveService.ts
+- [X] T035 [P] [US1] Write test: createArchive() throws error when storage exceeds 5MB in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T036 [US1] Implement storage size limit check (MAX_STORAGE_SIZE = 5MB) in frontend/src/lib/archive/ArchiveService.ts
+- [X] T037 [P] [US1] Create CreateArchiveDialog component with form and warning text in frontend/src/components/archive/CreateArchiveDialog.tsx
+- [X] T038 [US1] Implement dialog form with name input, validation, and reset warning in frontend/src/components/archive/CreateArchiveDialog.tsx
+- [X] T039 [P] [US1] Create usePaymentArchives hook with createArchive, loading, error state in frontend/src/hooks/usePaymentArchives.ts
+- [X] T040 [US1] Integrate usePaymentArchives hook with CreateArchiveDialog for form submission in frontend/src/components/archive/CreateArchiveDialog.tsx
+- [X] T041 [P] [US1] Write test: CreateArchiveDialog shows success message after archive creation in frontend/src/components/archive/__tests__/CreateArchiveDialog.test.tsx
+- [X] T042 [US1] Implement success feedback and dialog close on successful archive in frontend/src/components/archive/CreateArchiveDialog.tsx
 
 ## Phase 4: User Story 2 - View Archived Payment History (P2)
 Goal: Users can view archive list and detail pages (read-only)

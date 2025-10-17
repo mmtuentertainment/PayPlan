@@ -34,6 +34,7 @@ import {
   INDEX_SCHEMA_VERSION,
   ERROR_MESSAGES,
   MAX_STORAGE_SIZE,
+  MAX_ARCHIVES,
 } from './constants';
 import { getCurrentTimestamp, calculateByteSize } from './utils';
 
@@ -200,6 +201,95 @@ export class ArchiveStorage {
         archiveId,
       },
     };
+  }
+
+  /**
+   * T024: Save archive to localStorage
+   *
+   * Persists archive with key: payplan_archive_{id}
+   * Validates archive structure before saving.
+   *
+   * @param archive - Archive to persist
+   * @returns Result<void, ArchiveError>
+   */
+  saveArchive(archive: Archive): Result<void, ArchiveError> {
+    // Validate archive ID
+    if (!isValidArchiveId(archive.id)) {
+      return {
+        ok: false,
+        error: {
+          type: 'Validation',
+          message: ERROR_MESSAGES.INVALID_ARCHIVE_ID,
+          archiveId: archive.id,
+        },
+      };
+    }
+
+    try {
+      const key = `${ARCHIVE_KEY_PREFIX}${archive.id}`;
+      const jsonString = JSON.stringify(archive);
+
+      // Check size before saving
+      const size = new Blob([jsonString]).size;
+      const currentSize = this.calculateTotalSize();
+
+      if (currentSize + size > MAX_STORAGE_SIZE) {
+        return {
+          ok: false,
+          error: {
+            type: 'QuotaExceeded',
+            message: ERROR_MESSAGES.QUOTA_EXCEEDED,
+            archiveId: archive.id,
+          },
+        };
+      }
+
+      localStorage.setItem(key, jsonString);
+      return { ok: true, value: undefined };
+    } catch (error) {
+      return this.handleStorageError(error, archive.id);
+    }
+  }
+
+  /**
+   * T026: Update archive index with new entry
+   *
+   * Adds new archive entry to index and persists.
+   * Maintains sorted order (newest first).
+   *
+   * @param entry - Archive metadata entry to add
+   * @returns Result<void, ArchiveError>
+   */
+  updateIndex(entry: ArchiveIndexEntry): Result<void, ArchiveError> {
+    try {
+      // Load current index
+      const indexResult = this.loadArchiveIndex();
+      if (!indexResult.ok) {
+        return indexResult as Result<never, ArchiveError>;
+      }
+
+      const index = indexResult.value;
+
+      // Check archive limit
+      if (index.archives.length >= MAX_ARCHIVES) {
+        return {
+          ok: false,
+          error: {
+            type: 'LimitReached',
+            message: ERROR_MESSAGES.ARCHIVE_LIMIT_REACHED,
+          },
+        };
+      }
+
+      // Add new entry to beginning (newest first)
+      index.archives.unshift(entry);
+      index.lastModified = getCurrentTimestamp();
+
+      // Save updated index
+      return this.saveIndex(index);
+    } catch (error) {
+      return this.handleStorageError(error, entry.id);
+    }
   }
 
   /**

@@ -222,4 +222,118 @@ describe('ArchiveStorage - Foundational Layer', () => {
       }
     });
   });
+
+  describe('T023: saveArchive()', () => {
+    it('should save archive to localStorage with correct key', () => {
+      const testArchive = {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'October 2025',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      const result = storage.saveArchive(testArchive);
+
+      expect(result.ok).toBe(true);
+
+      // Verify saved to correct key
+      const key = getArchiveKey(testArchive.id);
+      const saved = localStorage.getItem(key);
+      expect(saved).toBeTruthy();
+
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        expect(parsed.name).toBe('October 2025');
+        expect(parsed.id).toBe(testArchive.id);
+      }
+    });
+
+    it('should reject invalid archive ID', () => {
+      const invalidArchive = {
+        id: 'not-a-uuid',
+        name: 'Test',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      const result = storage.saveArchive(invalidArchive);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Validation');
+      }
+    });
+  });
+
+  describe('T025: updateIndex()', () => {
+    it('should add new entry to archive index', () => {
+      const entry = {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'October 2025',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        paymentCount: 10,
+        paidCount: 5,
+        pendingCount: 5,
+      };
+
+      const result = storage.updateIndex(entry);
+
+      expect(result.ok).toBe(true);
+
+      // Verify index was updated
+      const indexResult = storage.loadArchiveIndex();
+      expect(indexResult.ok).toBe(true);
+      if (indexResult.ok) {
+        expect(indexResult.value.archives).toHaveLength(1);
+        expect(indexResult.value.archives[0].name).toBe('October 2025');
+      }
+    });
+
+    it('should add entries at beginning (newest first)', () => {
+      // Add first entry
+      storage.updateIndex({
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'Archive 1',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        paymentCount: 10,
+        paidCount: 5,
+        pendingCount: 5,
+      });
+
+      // Add second entry
+      storage.updateIndex({
+        id: '550e8400-e29b-41d4-a716-446655440001',
+        name: 'Archive 2',
+        createdAt: '2025-10-18T14:30:00.000Z',
+        paymentCount: 8,
+        paidCount: 4,
+        pendingCount: 4,
+      });
+
+      const indexResult = storage.loadArchiveIndex();
+      expect(indexResult.ok).toBe(true);
+      if (indexResult.ok) {
+        expect(indexResult.value.archives).toHaveLength(2);
+        // Newest should be first
+        expect(indexResult.value.archives[0].name).toBe('Archive 2');
+        expect(indexResult.value.archives[1].name).toBe('Archive 1');
+      }
+    });
+  });
 });
