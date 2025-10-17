@@ -52,20 +52,25 @@ describe('Archive Validation', () => {
     });
 
     it('should reject string shorter than MIN_NAME_LENGTH after trimming', () => {
-      const result = validateArchiveName('ab'); // Length 2, MIN is 3
+      // CodeRabbit Fix: Use constant instead of hardcoded value for maintainability
+      const tooShort = 'a'.repeat(MIN_NAME_LENGTH - 1); // Dynamic: MIN_NAME_LENGTH - 1
+      const result = validateArchiveName(tooShort);
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.message).toContain('at least');
+        expect(result.error.message).toContain(String(MIN_NAME_LENGTH));
       }
     });
 
     it('should accept string at exactly MIN_NAME_LENGTH', () => {
-      const result = validateArchiveName('abc'); // Length 3
+      // CodeRabbit Fix: Use constant instead of hardcoded value for maintainability
+      const exactLength = 'a'.repeat(MIN_NAME_LENGTH); // Dynamic: MIN_NAME_LENGTH
+      const result = validateArchiveName(exactLength);
 
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.value).toBe('abc');
+        expect(result.value).toBe(exactLength);
       }
     });
 

@@ -12,6 +12,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ArchiveStorage } from '../ArchiveStorage';
 import { INDEX_SCHEMA_VERSION, ARCHIVE_INDEX_KEY, getArchiveKey } from '../constants';
+import type { ArchiveIndex, ArchiveIndexEntry, Archive } from '../types';
 
 describe('ArchiveStorage - Foundational Layer', () => {
   let storage: ArchiveStorage;
@@ -73,19 +74,19 @@ describe('ArchiveStorage - Foundational Layer', () => {
     });
 
     it('should load valid index from localStorage', () => {
-      // Setup: Save valid index
-      const testIndex = {
+      // CodeRabbit Fix: Add explicit type annotations for type safety
+      const testIndexEntry: ArchiveIndexEntry = {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'Test Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        paymentCount: 10,
+        paidCount: 5,
+        pendingCount: 5,
+      };
+
+      const testIndex: ArchiveIndex = {
         version: INDEX_SCHEMA_VERSION,
-        archives: [
-          {
-            id: '550e8400-e29b-41d4-a716-446655440000',
-            name: 'Test Archive',
-            createdAt: '2025-10-17T14:30:00.000Z',
-            paymentCount: 10,
-            paidCount: 5,
-            pendingCount: 5,
-          },
-        ],
+        archives: [testIndexEntry],
         lastModified: '2025-10-17T14:30:00.000Z',
       };
       localStorage.setItem(ARCHIVE_INDEX_KEY, JSON.stringify(testIndex));
@@ -225,7 +226,8 @@ describe('ArchiveStorage - Foundational Layer', () => {
 
   describe('T023: saveArchive()', () => {
     it('should save archive to localStorage with correct key', () => {
-      const testArchive = {
+      // CodeRabbit Fix: Add explicit type annotation for type safety
+      const testArchive: Archive = {
         id: '550e8400-e29b-41d4-a716-446655440000',
         name: 'October 2025',
         createdAt: '2025-10-17T14:30:00.000Z',
@@ -283,7 +285,8 @@ describe('ArchiveStorage - Foundational Layer', () => {
 
   describe('T025: updateIndex()', () => {
     it('should add new entry to archive index', () => {
-      const entry = {
+      // CodeRabbit Fix: Add explicit type annotation for type safety
+      const entry: ArchiveIndexEntry = {
         id: '550e8400-e29b-41d4-a716-446655440000',
         name: 'October 2025',
         createdAt: '2025-10-17T14:30:00.000Z',

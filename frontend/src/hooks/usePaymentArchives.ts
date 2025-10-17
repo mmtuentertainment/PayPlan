@@ -136,9 +136,26 @@ export function usePaymentArchives(): UsePaymentArchivesReturn {
   }, [archiveService]);
 
   /**
-   * List all archives
+   * List all archives with metadata
    *
-   * @returns Array of archive metadata entries or null if error
+   * CodeRabbit: Dual Error-Signaling Pattern
+   * - Returns: ArchiveIndexEntry[] | null (null indicates error)
+   * - Side Effect: Sets error state on failure
+   *
+   * Callers must check BOTH the return value AND the hook's error property.
+   *
+   * @example
+   * ```typescript
+   * const { listArchives, error } = usePaymentArchives();
+   * const archives = listArchives();
+   * if (!archives) {
+   *   console.error('List failed:', error?.message);
+   *   return;
+   * }
+   * // Use archives safely
+   * ```
+   *
+   * @returns Array of archive metadata entries, or null if error occurred
    */
   const listArchives = useCallback((): ArchiveIndexEntry[] | null => {
     const result = archiveService.listArchives();
@@ -156,8 +173,25 @@ export function usePaymentArchives(): UsePaymentArchivesReturn {
    *
    * CodeRabbit Fix: Validate input before calling service (defense in depth)
    *
+   * CodeRabbit: Dual Error-Signaling Pattern
+   * - Returns: Archive | null (null indicates error)
+   * - Side Effect: Sets error state on failure
+   *
+   * Callers must check BOTH the return value AND the hook's error property.
+   *
+   * @example
+   * ```typescript
+   * const { getArchiveById, error } = usePaymentArchives();
+   * const archive = getArchiveById('550e8400-...');
+   * if (!archive) {
+   *   console.error('Load failed:', error?.message);
+   *   return;
+   * }
+   * // Use archive safely
+   * ```
+   *
    * @param id - Archive UUID
-   * @returns Full archive or null if error
+   * @returns Full archive data, or null if error occurred
    */
   const getArchiveById = useCallback((id: string): Archive | null => {
     // Validate archiveId is non-empty UUID
