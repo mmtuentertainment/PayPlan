@@ -72,8 +72,8 @@ export class ArchiveStorage {
     try {
       const serialized = localStorage.getItem(ARCHIVE_INDEX_KEY);
 
-      // No saved index: return empty default
-      if (serialized === null || serialized === undefined) {
+      // CodeRabbit Fix: Remove redundant undefined check (localStorage.getItem returns string | null)
+      if (serialized === null) {
         return { ok: true, value: this.createDefaultIndex() };
       }
 
@@ -82,8 +82,8 @@ export class ArchiveStorage {
       try {
         parsed = JSON.parse(serialized);
       } catch (parseError) {
-        // JSON parse error: corrupted data, clear and return defaults
-        console.warn('Corrupted archive index (invalid JSON), resetting to defaults');
+        // CodeRabbit Fix: Privacy-safe logging (no sensitive data)
+        console.warn('Archive index reset due to corruption');
         localStorage.removeItem(ARCHIVE_INDEX_KEY);
         return { ok: true, value: this.createDefaultIndex() };
       }
@@ -92,8 +92,8 @@ export class ArchiveStorage {
       const validationResult = validateArchiveIndex(parsed);
 
       if (!validationResult.success) {
-        // Corrupted data: clear storage and return defaults
-        console.warn('Corrupted archive index (invalid schema), resetting to defaults');
+        // CodeRabbit Fix: Privacy-safe logging (no sensitive data)
+        console.warn('Archive index reset due to invalid schema');
         localStorage.removeItem(ARCHIVE_INDEX_KEY);
         return { ok: true, value: this.createDefaultIndex() };
       }
@@ -107,8 +107,8 @@ export class ArchiveStorage {
         return this.handleStorageError(error);
       }
 
-      // Other errors: fallback to defaults for resilient UX
-      console.warn('Failed to load archive index, using defaults', error);
+      // CodeRabbit Fix: Privacy-safe logging (no error details)
+      console.warn('Archive index reset to defaults');
       localStorage.removeItem(ARCHIVE_INDEX_KEY);
       return { ok: true, value: this.createDefaultIndex() };
     }

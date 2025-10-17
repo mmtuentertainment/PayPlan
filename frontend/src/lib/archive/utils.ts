@@ -44,24 +44,30 @@ export function getCurrentTimestamp(): string {
 /**
  * Calculate byte size of data for storage quota management
  *
+ * CodeRabbit Fix: Return null on error to detect quota calculation failures
  * Uses Blob API for accurate byte size calculation (handles Unicode correctly).
  *
  * @param data - Data to calculate size for (will be JSON.stringify'd)
- * @returns Size in bytes
+ * @returns Size in bytes, or null if calculation failed
  *
  * @example
  * ```typescript
  * const archive = { id: '...', name: 'October 2025', ... };
  * const size = calculateByteSize(archive);
- * console.log(`Archive size: ${size} bytes`);
+ * if (size === null) {
+ *   console.error('Failed to calculate size');
+ * } else {
+ *   console.log(`Archive size: ${size} bytes`);
+ * }
  * ```
  */
-export function calculateByteSize(data: unknown): number {
+export function calculateByteSize(data: unknown): number | null {
   try {
     const jsonString = JSON.stringify(data);
     return new Blob([jsonString]).size;
-  } catch {
-    return 0;
+  } catch (error) {
+    console.error('Failed to calculate byte size:', error);
+    return null;
   }
 }
 
@@ -164,7 +170,7 @@ export function formatDateRange(earliest: string | null, latest: string | null, 
 export function slugifyArchiveName(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '')  // Remove special chars (keeps alphanumeric, spaces, hyphens)
+    .replace(/[^\w\s-]/g, '')  // Remove special chars (keeps alphanumeric, underscores, spaces, hyphens)
     .replace(/\s+/g, '-')       // Spaces to hyphens
     .replace(/-+/g, '-')        // Collapse multiple hyphens
     .replace(/^-+|-+$/g, '');   // Trim leading/trailing hyphens
@@ -213,10 +219,12 @@ export function generateArchiveFilename(archiveName: string, createdAt: string):
  * Calculate percentage with safe rounding
  *
  * Handles division by zero and rounds to 1 decimal place.
+ * Validates inputs to ensure they are finite, non-negative, and part <= total.
  *
  * @param part - Part count
  * @param total - Total count
  * @returns Percentage (0-100) rounded to 1 decimal
+ * @throws RangeError if inputs are invalid (non-finite, negative, or part > total)
  *
  * @example
  * ```typescript
@@ -225,6 +233,17 @@ export function generateArchiveFilename(archiveName: string, createdAt: string):
  * ```
  */
 export function calculatePercentage(part: number, total: number): number {
+  // Validate inputs are finite and non-negative
+  if (!Number.isFinite(part) || !Number.isFinite(total)) {
+    throw new RangeError('Part and total must be finite numbers');
+  }
+  if (part < 0 || total < 0) {
+    throw new RangeError('Part and total must be non-negative');
+  }
+  if (part > total) {
+    throw new RangeError('Part cannot be greater than total');
+  }
+
   if (total === 0) return 0;
   return Math.round((part / total) * 1000) / 10; // Round to 1 decimal
 }
@@ -233,12 +252,21 @@ export function calculatePercentage(part: number, total: number): number {
  * Sort archives by creation date (newest first)
  *
  * Used for archive list display ordering.
+ * Handles NaN dates by replacing them with Number.NEGATIVE_INFINITY
+ * to ensure deterministic ordering.
  *
  * @param archives - Array of archives or index entries
  * @returns Sorted array (newest first)
  */
 export function sortByCreatedAtDesc<T extends { createdAt: string }>(archives: T[]): T[] {
   return [...archives].sort((a, b) => {
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    const timeA = new Date(a.createdAt).getTime();
+    const timeB = new Date(b.createdAt).getTime();
+
+    // Replace NaN with NEGATIVE_INFINITY to ensure deterministic ordering
+    const safeTimeA = isNaN(timeA) ? Number.NEGATIVE_INFINITY : timeA;
+    const safeTimeB = isNaN(timeB) ? Number.NEGATIVE_INFINITY : timeB;
+
+    return safeTimeB - safeTimeA;
   });
 }

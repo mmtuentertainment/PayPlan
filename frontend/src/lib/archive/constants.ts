@@ -30,8 +30,14 @@ export const ARCHIVE_KEY_PREFIX = 'payplan_archive_';
  *
  * @param archiveId - Archive UUID
  * @returns Storage key (e.g., "payplan_archive_550e8400-...")
+ * @throws Error if archiveId is not a valid UUID v4
  */
 export function getArchiveKey(archiveId: string): string {
+  // Validate UUID v4 format before concatenating
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(archiveId)) {
+    throw new Error('Invalid archive ID');
+  }
   return `${ARCHIVE_KEY_PREFIX}${archiveId}`;
 }
 
@@ -74,7 +80,7 @@ export const MAX_NAME_LENGTH = 100;
 
 export const ERROR_MESSAGES = {
   // Validation errors
-  INVALID_ARCHIVE_ID: 'Invalid archive ID format (must be UUID v4)',
+  INVALID_ARCHIVE_ID: 'Invalid archive ID',
   EMPTY_NAME: 'Archive name cannot be empty',
   NAME_TOO_LONG: `Archive name must be under ${MAX_NAME_LENGTH} characters`,
   NO_PAYMENTS: 'No payments to archive. Import or process payments first.',

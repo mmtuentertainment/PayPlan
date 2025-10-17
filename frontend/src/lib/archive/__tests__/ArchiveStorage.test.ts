@@ -9,9 +9,9 @@
  * Follows patterns from Feature 015 (PaymentStatusStorage.test.ts).
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ArchiveStorage } from '../ArchiveStorage';
-import { INDEX_SCHEMA_VERSION } from '../constants';
+import { INDEX_SCHEMA_VERSION, ARCHIVE_INDEX_KEY, getArchiveKey } from '../constants';
 
 describe('ArchiveStorage - Foundational Layer', () => {
   let storage: ArchiveStorage;
@@ -37,19 +37,26 @@ describe('ArchiveStorage - Foundational Layer', () => {
       });
 
       // Validate lastModified is ISO 8601
-      expect(() => new Date(index.lastModified)).not.toThrow();
-      expect(new Date(index.lastModified).toISOString()).toBe(index.lastModified);
+      const parsedDate = new Date(index.lastModified);
+      expect(isNaN(parsedDate.getTime())).toBe(false);
+      expect(parsedDate.toISOString()).toBe(index.lastModified);
     });
 
-    it('should return fresh index on each call with updated timestamp', async () => {
+    it('should return fresh index on each call with updated timestamp', () => {
+      vi.useFakeTimers();
+
       const index1 = storage.createDefaultIndex();
-      // Small delay to ensure different timestamps
-      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // Advance time by 10ms
+      vi.advanceTimersByTime(10);
+
       const index2 = storage.createDefaultIndex();
 
       expect(index1.archives).toEqual([]);
       expect(index2.archives).toEqual([]);
       expect(index1.lastModified).not.toBe(index2.lastModified); // Different timestamps
+
+      vi.useRealTimers();
     });
   });
 
@@ -81,7 +88,7 @@ describe('ArchiveStorage - Foundational Layer', () => {
         ],
         lastModified: '2025-10-17T14:30:00.000Z',
       };
-      localStorage.setItem('payplan_archive_index', JSON.stringify(testIndex));
+      localStorage.setItem(ARCHIVE_INDEX_KEY, JSON.stringify(testIndex));
 
       const result = storage.loadArchiveIndex();
 
@@ -93,7 +100,7 @@ describe('ArchiveStorage - Foundational Layer', () => {
     });
 
     it('should return default index when localStorage has corrupted JSON', () => {
-      localStorage.setItem('payplan_archive_index', '{invalid json');
+      localStorage.setItem(ARCHIVE_INDEX_KEY, '{invalid json');
 
       const result = storage.loadArchiveIndex();
 
@@ -104,7 +111,7 @@ describe('ArchiveStorage - Foundational Layer', () => {
     });
 
     it('should return default index when localStorage has invalid schema', () => {
-      localStorage.setItem('payplan_archive_index', JSON.stringify({ foo: 'bar' }));
+      localStorage.setItem(ARCHIVE_INDEX_KEY, JSON.stringify({ foo: 'bar' }));
 
       const result = storage.loadArchiveIndex();
 
@@ -127,7 +134,7 @@ describe('ArchiveStorage - Foundational Layer', () => {
         archives: [],
         lastModified: '2025-10-17T14:30:00.000Z',
       };
-      localStorage.setItem('payplan_archive_index', JSON.stringify(testIndex));
+      localStorage.setItem(ARCHIVE_INDEX_KEY, JSON.stringify(testIndex));
 
       const size = storage.calculateTotalSize();
       expect(size).toBeGreaterThan(0);
@@ -135,16 +142,18 @@ describe('ArchiveStorage - Foundational Layer', () => {
     });
 
     it('should sum index + all archive data', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+
       // Create index
-      localStorage.setItem('payplan_archive_index', JSON.stringify({
+      localStorage.setItem(ARCHIVE_INDEX_KEY, JSON.stringify({
         version: INDEX_SCHEMA_VERSION,
-        archives: [{ id: 'test-id', name: 'Test', createdAt: '2025-10-17T14:30:00.000Z', paymentCount: 0, paidCount: 0, pendingCount: 0 }],
+        archives: [{ id: testArchiveId, name: 'Test', createdAt: '2025-10-17T14:30:00.000Z', paymentCount: 0, paidCount: 0, pendingCount: 0 }],
         lastModified: '2025-10-17T14:30:00.000Z',
       }));
 
       // Create archive
-      localStorage.setItem('payplan_archive_test-id', JSON.stringify({
-        id: 'test-id',
+      localStorage.setItem(getArchiveKey(testArchiveId), JSON.stringify({
+        id: testArchiveId,
         name: 'Test Archive',
         createdAt: '2025-10-17T14:30:00.000Z',
         sourceVersion: '1.0.0',

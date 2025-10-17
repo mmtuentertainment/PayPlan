@@ -31,17 +31,8 @@ export interface PaymentContextType {
 }
 
 /**
- * Default context value (no payments)
- */
-const defaultContext: PaymentContextType = {
-  payments: [],
-  setPayments: () => {
-    console.warn('PaymentContext.setPayments called outside of provider');
-  },
-};
-
-/**
  * Payment Context for sharing payment data
+ * CodeRabbit Fix: Removed unused defaultContext (dead code)
  * Using undefined default to enable proper hook validation
  */
 export const PaymentContext = createContext<PaymentContextType | undefined>(undefined);

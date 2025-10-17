@@ -15,7 +15,6 @@ import { z } from 'zod';
 import {
   MIN_NAME_LENGTH,
   MAX_NAME_LENGTH,
-  SCHEMA_VERSION,
   INDEX_SCHEMA_VERSION,
   MAX_ARCHIVES,
 } from './constants';
@@ -38,14 +37,14 @@ export const dateRangeSchema = z.object({
 }).refine(
   (data) => {
     if (!data.earliest || !data.latest) return true; // Null/empty allowed
-    // Validate actual dates exist (not 2024-02-31)
-    const earliestDate = new Date(data.earliest + 'T00:00:00Z');
-    const latestDate = new Date(data.latest + 'T00:00:00Z');
+    // Validate actual dates exist (not 2024-02-31) - parse as local dates
+    const earliestDate = new Date(data.earliest);
+    const latestDate = new Date(data.latest);
     if (isNaN(earliestDate.getTime()) || isNaN(latestDate.getTime())) {
       return false; // Invalid dates
     }
-    // Ensure chronological order
-    return data.earliest <= data.latest;
+    // Ensure chronological order - use getTime() for comparison
+    return earliestDate.getTime() <= latestDate.getTime();
   },
   { message: 'earliest date must be before or equal to latest date and both must be valid dates' }
 );
@@ -61,7 +60,7 @@ export const archiveMetadataSchema = z.object({
   paidCount: z.number().int().nonnegative('Paid count must be non-negative'),
   pendingCount: z.number().int().nonnegative('Pending count must be non-negative'),
   dateRange: dateRangeSchema,
-  storageSize: z.number().int().positive('Storage size must be positive'),
+  storageSize: z.number().int().nonnegative('Storage size must be non-negative'),
 }).refine(
   (data) => data.paidCount + data.pendingCount === data.totalCount,
   { message: 'paidCount + pendingCount must equal totalCount' }
@@ -98,7 +97,6 @@ export const paymentArchiveRecordSchema = z.object({
     .regex(/^[^<>]*$/, 'Risk type cannot contain HTML tags')
     .optional(),
   risk_severity: z.enum(['low', 'medium', 'high', 'critical', ''])
-    .or(z.string().length(0))
     .optional(),
   risk_message: z.string()
     .max(500, 'Risk message must be under 500 characters')
@@ -136,7 +134,10 @@ export const archiveSchema = z.object({
  */
 export const archiveIndexEntrySchema = z.object({
   id: z.string().uuid('Archive ID must be UUID v4'),
-  name: z.string().min(1).max(MAX_NAME_LENGTH),
+  name: z.preprocess(
+    (val) => typeof val === 'string' ? val.trim() : val,
+    z.string().min(1).max(MAX_NAME_LENGTH)
+  ),
   createdAt: z.string().datetime('Created timestamp must be ISO 8601'),
   paymentCount: z.number().int().nonnegative(),
   paidCount: z.number().int().nonnegative(),
@@ -178,7 +179,7 @@ export function validateArchiveName(name: string): Result<string, { message: str
   if (trimmed.length < MIN_NAME_LENGTH) {
     return {
       ok: false,
-      error: { message: 'Archive name cannot be empty' },
+      error: { message: `Archive name must be at least ${MIN_NAME_LENGTH} characters` },
     };
   }
 
