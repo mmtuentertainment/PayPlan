@@ -3,18 +3,23 @@
  *
  * Feature: 016-build-a-payment-archive
  * Phase: 4 (User Story 2 - View Archived Payment History)
- * Tasks: T053-T054, T055-T056
+ * Phase: 5 (User Story 3 - View Archive Statistics)
+ * Tasks: T053-T054, T055-T056, T071
  *
- * Archive detail page showing full payment history.
+ * Archive detail page showing full payment history and statistics.
  * Read-only view with no edit controls.
  * Performance target: <100ms load time
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePaymentArchives } from '@/hooks/usePaymentArchives';
-import type { Archive } from '@/lib/archive/types';
-import { archiveSchema, archiveMetadataSchema } from '@/lib/archive/validation';
+import type { Archive, ArchiveSummary } from '@/lib/archive/types';
+import { archiveSchema } from '@/lib/archive/validation';
+import { ArchiveService } from '@/lib/archive/ArchiveService';
+import { ArchiveStorage } from '@/lib/archive/ArchiveStorage';
+import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
+import { ArchiveStatistics } from '@/components/archive/ArchiveStatistics';
 
 /**
  * Format ISO date to readable format
@@ -65,6 +70,13 @@ export function ArchiveDetailView() {
   const [archive, setArchive] = useState<Archive | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize ArchiveService for statistics calculation
+  const archiveService = useMemo(() => {
+    const archiveStorage = new ArchiveStorage();
+    const paymentStatusStorage = new PaymentStatusStorage();
+    return new ArchiveService(archiveStorage, paymentStatusStorage);
+  }, []);
+
   useEffect(() => {
     if (!id) return;
 
@@ -92,6 +104,12 @@ export function ArchiveDetailView() {
 
     setIsLoading(false);
   }, [id, getArchiveById]);
+
+  // T071: Calculate statistics from archive
+  const archiveStatistics: ArchiveSummary | null = useMemo(() => {
+    if (!archive) return null;
+    return archiveService.calculateStatistics(archive);
+  }, [archive, archiveService]);
 
   if (isLoading) {
     return (
@@ -133,25 +151,6 @@ export function ArchiveDetailView() {
 
   const { name, createdAt, payments } = archive;
 
-  // CodeRabbit Fix: Validate metadata before rendering to prevent NaN
-  const validatedMetadata = archiveMetadataSchema.safeParse(archive.metadata);
-
-  // Use validated values or safe defaults
-  const metadata = validatedMetadata.success
-    ? validatedMetadata.data
-    : {
-        totalCount: 0,
-        paidCount: 0,
-        pendingCount: 0,
-        dateRange: { earliest: null, latest: null },
-        storageSize: 0,
-      };
-
-  // Log validation errors for debugging
-  if (!validatedMetadata.success) {
-    console.warn('Archive metadata validation failed:', validatedMetadata.error.format());
-  }
-
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
@@ -168,34 +167,15 @@ export function ArchiveDetailView() {
           Created {formatDate(createdAt)}
         </p>
 
-        {/* Metadata Summary - CodeRabbit Fix: Safe defaults prevent NaN */}
-        <div className="flex gap-6 text-sm">
-          <div>
-            <span className="text-gray-600">Total Payments:</span>{' '}
-            <span className="font-medium">{metadata.totalCount}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Paid:</span>{' '}
-            <span className="font-medium text-green-600">{metadata.paidCount}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Pending:</span>{' '}
-            <span className="font-medium text-yellow-600">{metadata.pendingCount}</span>
-          </div>
-          {metadata.dateRange.earliest && metadata.dateRange.latest && (
-            <div>
-              <span className="text-gray-600">Date Range:</span>{' '}
-              <span className="font-medium">
-                {formatDate(metadata.dateRange.earliest)} - {formatDate(metadata.dateRange.latest)}
-              </span>
-            </div>
-          )}
-        </div>
-
         <div className="mt-4 text-xs text-gray-500 italic">
           This archive is read-only. Payment statuses cannot be modified.
         </div>
       </div>
+
+      {/* T071: Archive Statistics Panel */}
+      {archiveStatistics && (
+        <ArchiveStatistics summary={archiveStatistics} />
+      )}
 
       {/* Payment Records Table - T055-T056: Read-only, no edit controls */}
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">

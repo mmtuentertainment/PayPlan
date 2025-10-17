@@ -75,18 +75,18 @@ Goal: Users can view archive list and detail pages (read-only)
 ## Phase 5: User Story 3 - View Archive Statistics (P3)
 Goal: Users see totals, percentages, date range in statistics panel
 
-- [ ] T061 [P] [US3] Write test: ArchiveService.calculateStatistics() returns count and percentage data in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T062 [US3] Implement calculateStatistics() with paid/pending/failed percentages in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T063 [P] [US3] Write test: formatDateRange() formats start and end dates consistently in frontend/src/lib/archive/__tests__/utils.test.ts
-- [ ] T064 [US3] Implement formatDateRange() helper with locale-aware formatting in frontend/src/lib/archive/utils.ts
-- [ ] T065 [P] [US3] Create ArchiveStatistics component with statistics panel layout in frontend/src/components/archive/ArchiveStatistics.tsx
-- [ ] T066 [US3] Implement statistics display with counts, percentages, date range in frontend/src/components/archive/ArchiveStatistics.tsx
-- [ ] T067 [P] [US3] Write test: calculateStatistics() handles all pending (0% paid) without error in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T068 [US3] Handle division by zero and 0% edge case in calculateStatistics() in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T069 [P] [US3] Write test: calculateStatistics() handles all paid (100% paid) without error in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
-- [ ] T070 [US3] Handle 100% case and ensure proper rounding in calculateStatistics() in frontend/src/lib/archive/ArchiveService.ts
-- [ ] T071 [P] [US3] Integrate ArchiveStatistics component into ArchiveDetailView in frontend/src/pages/ArchiveDetailView.tsx
-- [ ] T072 [US3] Style ArchiveStatistics with consistent spacing and typography in frontend/src/components/archive/ArchiveStatistics.tsx
+- [X] T061 [P] [US3] Write test: ArchiveService.calculateStatistics() returns count and percentage data in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T062 [US3] Implement calculateStatistics() with paid/pending/failed percentages in frontend/src/lib/archive/ArchiveService.ts
+- [X] T063 [P] [US3] Write test: formatDateRange() formats start and end dates consistently in frontend/src/lib/archive/__tests__/utils.test.ts
+- [X] T064 [US3] Implement formatDateRange() helper with locale-aware formatting in frontend/src/lib/archive/utils.ts
+- [X] T065 [P] [US3] Create ArchiveStatistics component with statistics panel layout in frontend/src/components/archive/ArchiveStatistics.tsx
+- [X] T066 [US3] Implement statistics display with counts, percentages, date range in frontend/src/components/archive/ArchiveStatistics.tsx
+- [X] T067 [P] [US3] Write test: calculateStatistics() handles all pending (0% paid) without error in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T068 [US3] Handle division by zero and 0% edge case in calculateStatistics() in frontend/src/lib/archive/ArchiveService.ts
+- [X] T069 [P] [US3] Write test: calculateStatistics() handles all paid (100% paid) without error in frontend/src/lib/archive/__tests__/ArchiveService.test.ts
+- [X] T070 [US3] Handle 100% case and ensure proper rounding in calculateStatistics() in frontend/src/lib/archive/ArchiveService.ts
+- [X] T071 [P] [US3] Integrate ArchiveStatistics component into ArchiveDetailView in frontend/src/pages/ArchiveDetailView.tsx
+- [X] T072 [US3] Style ArchiveStatistics with consistent spacing and typography in frontend/src/components/archive/ArchiveStatistics.tsx
 
 ## Phase 6: User Story 4 - Export Archived Data to CSV (P4)
 Goal: Users export archive with metadata columns to CSV

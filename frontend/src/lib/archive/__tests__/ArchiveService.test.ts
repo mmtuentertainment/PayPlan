@@ -591,4 +591,244 @@ describe('ArchiveService - Create Archive MVP', () => {
       }
     });
   });
+
+  describe('T061-T070: calculateStatistics()', () => {
+    it('T061: should calculate counts and percentages correctly', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test 1',
+          amount: 100.00,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          provider: 'Test 2',
+          amount: 50.00,
+          currency: 'USD',
+          dueISO: '2025-10-20',
+          autopay: true,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440002',
+          provider: 'Test 3',
+          amount: 75.00,
+          currency: 'USD',
+          dueISO: '2025-10-25',
+          autopay: false,
+        },
+      ];
+
+      // Mark first two as paid
+      paymentStatusStorage.saveStatus({
+        paymentId: payments[0].id!,
+        status: 'paid',
+        timestamp: '2025-10-14T14:30:00.000Z',
+      });
+      paymentStatusStorage.saveStatus({
+        paymentId: payments[1].id!,
+        status: 'paid',
+        timestamp: '2025-10-19T10:00:00.000Z',
+      });
+
+      const createResult = await service.createArchive('Stats Test', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const stats = service.calculateStatistics(archive);
+
+        expect(stats.totalCount).toBe(3);
+        expect(stats.paidCount).toBe(2);
+        expect(stats.pendingCount).toBe(1);
+        expect(stats.paidPercentage).toBe(66.7); // 2/3 = 66.7%
+        expect(stats.pendingPercentage).toBe(33.3); // 1/3 = 33.3%
+        expect(stats.dateRange.earliest).toBe('2025-10-15');
+        expect(stats.dateRange.latest).toBe('2025-10-25');
+      }
+    });
+
+    it('T067: should handle all pending (0% paid) without error', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test 1',
+          amount: 100.00,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          provider: 'Test 2',
+          amount: 50.00,
+          currency: 'USD',
+          dueISO: '2025-10-20',
+          autopay: true,
+        },
+      ];
+
+      const createResult = await service.createArchive('All Pending', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const stats = service.calculateStatistics(archive);
+
+        expect(stats.totalCount).toBe(2);
+        expect(stats.paidCount).toBe(0);
+        expect(stats.pendingCount).toBe(2);
+        expect(stats.paidPercentage).toBe(0.0); // 0/2 = 0%
+        expect(stats.pendingPercentage).toBe(100.0); // 2/2 = 100%
+      }
+    });
+
+    it('T069: should handle all paid (100% paid) without error', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test 1',
+          amount: 100.00,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          provider: 'Test 2',
+          amount: 50.00,
+          currency: 'USD',
+          dueISO: '2025-10-20',
+          autopay: true,
+        },
+      ];
+
+      // Mark all as paid
+      paymentStatusStorage.saveStatus({
+        paymentId: payments[0].id!,
+        status: 'paid',
+        timestamp: '2025-10-14T14:30:00.000Z',
+      });
+      paymentStatusStorage.saveStatus({
+        paymentId: payments[1].id!,
+        status: 'paid',
+        timestamp: '2025-10-19T10:00:00.000Z',
+      });
+
+      const createResult = await service.createArchive('All Paid', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const stats = service.calculateStatistics(archive);
+
+        expect(stats.totalCount).toBe(2);
+        expect(stats.paidCount).toBe(2);
+        expect(stats.pendingCount).toBe(0);
+        expect(stats.paidPercentage).toBe(100.0); // 2/2 = 100%
+        expect(stats.pendingPercentage).toBe(0.0); // 0/2 = 0%
+      }
+    });
+
+    it('should calculate average amount for single currency', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test 1',
+          amount: 100.00,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          provider: 'Test 2',
+          amount: 50.00,
+          currency: 'USD',
+          dueISO: '2025-10-20',
+          autopay: true,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440002',
+          provider: 'Test 3',
+          amount: 75.00,
+          currency: 'USD',
+          dueISO: '2025-10-25',
+          autopay: false,
+        },
+      ];
+
+      const createResult = await service.createArchive('Average Test', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const stats = service.calculateStatistics(archive);
+
+        expect(stats.averageAmount).toBe(75.0); // (100 + 50 + 75) / 3 = 75
+        expect(stats.currency).toBe('USD');
+      }
+    });
+
+    it('should skip average for multiple currencies', async () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test 1',
+          amount: 100.00,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          provider: 'Test 2',
+          amount: 50.00,
+          currency: 'EUR',
+          dueISO: '2025-10-20',
+          autopay: true,
+        },
+      ];
+
+      const createResult = await service.createArchive('Multi-Currency Test', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archive = createResult.value;
+        const stats = service.calculateStatistics(archive);
+
+        expect(stats.averageAmount).toBeUndefined();
+        expect(stats.currency).toBeUndefined();
+      }
+    });
+
+    it('should handle 0 payments edge case', async () => {
+      // This is a theoretical test - in practice createArchive validates against empty payments
+      // But we can test with a manually constructed archive
+      const mockArchive = {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'Empty Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      const stats = service.calculateStatistics(mockArchive);
+
+      expect(stats.totalCount).toBe(0);
+      expect(stats.paidPercentage).toBe(0.0);
+      expect(stats.pendingPercentage).toBe(0.0);
+      expect(stats.averageAmount).toBeUndefined();
+      expect(stats.currency).toBeUndefined();
+    });
+  });
 });

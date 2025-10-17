@@ -25,6 +25,7 @@ import type {
   ArchiveError,
   Result,
   DateRange,
+  ArchiveSummary,
 } from './types';
 import type { PaymentRecord } from '@/types/csvExport';
 import { ArchiveStorage } from './ArchiveStorage';
@@ -34,13 +35,13 @@ import {
   generateArchiveId,
   getCurrentTimestamp,
   calculateByteSize,
+  calculatePercentage,
 } from './utils';
 import {
   MAX_ARCHIVES,
   MAX_STORAGE_SIZE,
   ERROR_MESSAGES,
   SCHEMA_VERSION,
-  DEFAULT_DATE_RANGE,
 } from './constants';
 
 /**
@@ -459,5 +460,59 @@ export class ArchiveService {
     }
 
     return this.archiveStorage.loadArchive(archiveId);
+  }
+
+  /**
+   * T061-T062: Calculate archive statistics for statistics panel
+   *
+   * Calculates comprehensive statistics including:
+   * - Count data (total, paid, pending)
+   * - Percentages (paid %, pending %)
+   * - Average payment amount (if single currency)
+   * - Date range
+   *
+   * Business Rules:
+   * - Percentages calculated using calculatePercentage() (handles division by zero)
+   * - Average only calculated if all payments use same currency
+   * - Edge cases: 0 payments → 0%, all paid → 100%, all pending → 0%
+   *
+   * @param archive - Archive to calculate statistics for
+   * @returns ArchiveSummary with calculated statistics
+   */
+  calculateStatistics(archive: Archive): ArchiveSummary {
+    const { metadata, payments } = archive;
+    const { totalCount, paidCount, pendingCount, dateRange } = metadata;
+
+    // Calculate percentages using safe utility (handles division by zero)
+    const paidPercentage = calculatePercentage(paidCount, totalCount);
+    const pendingPercentage = calculatePercentage(pendingCount, totalCount);
+
+    // Calculate average amount if single currency
+    let averageAmount: number | undefined = undefined;
+    let currency: string | undefined = undefined;
+
+    if (payments.length > 0) {
+      // Check if all payments use same currency
+      const firstCurrency = payments[0].currency;
+      const allSameCurrency = payments.every(p => p.currency === firstCurrency);
+
+      if (allSameCurrency) {
+        // Calculate average
+        const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+        averageAmount = totalAmount / payments.length;
+        currency = firstCurrency;
+      }
+    }
+
+    return {
+      totalCount,
+      paidCount,
+      pendingCount,
+      paidPercentage,
+      pendingPercentage,
+      dateRange,
+      averageAmount,
+      currency,
+    };
   }
 }
