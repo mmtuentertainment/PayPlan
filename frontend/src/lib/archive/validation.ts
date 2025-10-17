@@ -77,7 +77,10 @@ export const paymentArchiveRecordSchema = z.object({
   // Status fields (from Feature 015)
   paymentId: z.string().uuid('Payment ID must be UUID v4'),
   status: z.enum(['paid', 'pending']),
-  timestamp: z.string().datetime('Timestamp must be ISO 8601'),
+  timestamp: z.string().refine(
+    (val) => val === '' || z.string().datetime().safeParse(val).success,
+    { message: 'Timestamp must be ISO 8601 datetime or empty string' }
+  ),
 
   // Payment fields (from Feature 014 PaymentRecord)
   provider: z.string().min(1, 'Provider name required').max(255),

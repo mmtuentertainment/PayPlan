@@ -478,4 +478,117 @@ describe('ArchiveService - Create Archive MVP', () => {
       }
     });
   });
+
+  describe('T050: listArchives()', () => {
+    it('should return empty array when no archives exist', () => {
+      const result = service.listArchives();
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value).toEqual([]);
+      }
+    });
+
+    it('should return all archive metadata from index', () => {
+      // Create two archives
+      const payments: PaymentRecord[] = [{
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        provider: 'Test',
+        amount: 100,
+        currency: 'USD',
+        dueISO: '2025-10-15',
+        autopay: false,
+      }];
+
+      service.createArchive('Archive 1', payments);
+      service.createArchive('Archive 2', payments);
+
+      const result = service.listArchives();
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value).toHaveLength(2);
+        expect(result.value[0].name).toBe('Archive 2'); // Newest first
+        expect(result.value[1].name).toBe('Archive 1');
+      }
+    });
+
+    it('should include paymentCount in metadata', () => {
+      const payments: PaymentRecord[] = [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'Test 1',
+          amount: 100,
+          currency: 'USD',
+          dueISO: '2025-10-15',
+          autopay: false,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          provider: 'Test 2',
+          amount: 50,
+          currency: 'USD',
+          dueISO: '2025-10-20',
+          autopay: true,
+        },
+      ];
+
+      service.createArchive('Test Archive', payments);
+
+      const result = service.listArchives();
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value[0].paymentCount).toBe(2);
+      }
+    });
+  });
+
+  describe('T054: getArchiveById()', () => {
+    it('should load full archive by ID', () => {
+      const payments: PaymentRecord[] = [{
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        provider: 'Test Provider',
+        amount: 100.00,
+        currency: 'USD',
+        dueISO: '2025-10-15',
+        autopay: false,
+      }];
+
+      const createResult = service.createArchive('Test Archive', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archiveId = createResult.value.id;
+
+        const result = service.getArchiveById(archiveId);
+
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+          expect(result.value.id).toBe(archiveId);
+          expect(result.value.name).toBe('Test Archive');
+          expect(result.value.payments).toHaveLength(1);
+          expect(result.value.payments[0].provider).toBe('Test Provider');
+        }
+      }
+    });
+
+    it('should return NotFound error for non-existent archive', () => {
+      const result = service.getArchiveById('550e8400-e29b-41d4-a716-446655440000');
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('NotFound');
+      }
+    });
+
+    it('should return Validation error for invalid ID format', () => {
+      const result = service.getArchiveById('invalid-id');
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Validation');
+      }
+    });
+  });
 });

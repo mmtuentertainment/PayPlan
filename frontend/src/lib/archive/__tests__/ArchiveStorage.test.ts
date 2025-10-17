@@ -336,4 +336,148 @@ describe('ArchiveStorage - Foundational Layer', () => {
       }
     });
   });
+
+  describe('T043: loadArchive()', () => {
+    it('should load archive by ID from localStorage', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const testArchive = {
+        id: testArchiveId,
+        name: 'October 2025',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [
+          {
+            paymentId: '650e8400-e29b-41d4-a716-446655440000',
+            status: 'paid',
+            timestamp: '2025-10-15T10:00:00.000Z',
+            provider: 'Klarna',
+            amount: 45.00,
+            currency: 'USD',
+            dueISO: '2025-10-20',
+            autopay: true,
+          },
+        ],
+        metadata: {
+          totalCount: 1,
+          paidCount: 1,
+          pendingCount: 0,
+          dateRange: { earliest: '2025-10-20', latest: '2025-10-20' },
+          storageSize: 500,
+        },
+      };
+
+      // Save archive to localStorage
+      const key = getArchiveKey(testArchiveId);
+      localStorage.setItem(key, JSON.stringify(testArchive));
+
+      // Load archive
+      const result = storage.loadArchive(testArchiveId);
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value.id).toBe(testArchiveId);
+        expect(result.value.name).toBe('October 2025');
+        expect(result.value.payments).toHaveLength(1);
+        expect(result.value.payments[0].provider).toBe('Klarna');
+      }
+    });
+
+    it('should return NotFound error when archive does not exist', () => {
+      const archiveId = '550e8400-e29b-41d4-a716-446655440000';
+
+      const result = storage.loadArchive(archiveId);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('NotFound');
+        expect(result.error.archiveId).toBe(archiveId);
+      }
+    });
+
+    it('should return Validation error for invalid archive ID', () => {
+      const result = storage.loadArchive('invalid-id');
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Validation');
+      }
+    });
+  });
+
+  describe('T045: loadArchive() validates archive schema', () => {
+    it('should validate archive structure with Zod', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const validArchive = {
+        id: testArchiveId,
+        name: 'Valid Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      const key = getArchiveKey(testArchiveId);
+      localStorage.setItem(key, JSON.stringify(validArchive));
+
+      const result = storage.loadArchive(testArchiveId);
+
+      expect(result.ok).toBe(true);
+    });
+
+    it('should return Corrupted error for invalid schema', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const invalidArchive = {
+        id: testArchiveId,
+        name: 'Invalid',
+        // Missing required fields
+      };
+
+      const key = getArchiveKey(testArchiveId);
+      localStorage.setItem(key, JSON.stringify(invalidArchive));
+
+      const result = storage.loadArchive(testArchiveId);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Corrupted');
+        expect(result.error.archiveId).toBe(testArchiveId);
+      }
+    });
+  });
+
+  describe('T047: loadArchive() handles corrupted JSON', () => {
+    it('should return Corrupted error for malformed JSON', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const key = getArchiveKey(testArchiveId);
+      localStorage.setItem(key, '{invalid json');
+
+      const result = storage.loadArchive(testArchiveId);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Corrupted');
+        expect(result.error.message).toContain('corrupted');
+        expect(result.error.archiveId).toBe(testArchiveId);
+      }
+    });
+
+    it('should handle JSON with special characters gracefully', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const key = getArchiveKey(testArchiveId);
+      localStorage.setItem(key, '{"id": null, "name": "\u0000"}');
+
+      const result = storage.loadArchive(testArchiveId);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Corrupted');
+      }
+    });
+  });
 });

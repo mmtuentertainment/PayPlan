@@ -27,6 +27,7 @@ import type {
 import {
   validateArchiveIndex,
   isValidArchiveId,
+  validateArchive,
 } from './validation';
 import {
   ARCHIVE_INDEX_KEY,
@@ -305,6 +306,96 @@ export class ArchiveStorage {
       return { ok: true, value: undefined };
     } catch (error) {
       return this.handleStorageError(error);
+    }
+  }
+
+  /**
+   * T044: Load archive from localStorage by ID
+   *
+   * Retrieves full archive data including all payment records.
+   * Used by detail view to display complete archive.
+   *
+   * @param archiveId - Archive UUID to load
+   * @returns Result<Archive, ArchiveError> - Archive or error
+   */
+  loadArchive(archiveId: string): Result<Archive, ArchiveError> {
+    // Validate archive ID format
+    if (!isValidArchiveId(archiveId)) {
+      return {
+        ok: false,
+        error: {
+          type: 'Validation',
+          message: ERROR_MESSAGES.INVALID_ARCHIVE_ID,
+          archiveId,
+        },
+      };
+    }
+
+    try {
+      const key = `${ARCHIVE_KEY_PREFIX}${archiveId}`;
+      const serialized = localStorage.getItem(key);
+
+      // Check if archive exists
+      if (serialized === null) {
+        return {
+          ok: false,
+          error: {
+            type: 'NotFound',
+            message: ERROR_MESSAGES.ARCHIVE_NOT_FOUND,
+            archiveId,
+          },
+        };
+      }
+
+      // Parse JSON - T047: catch corrupted JSON
+      let parsed;
+      try {
+        parsed = JSON.parse(serialized);
+      } catch (parseError) {
+        console.warn('Archive corrupted:', archiveId);
+        return {
+          ok: false,
+          error: {
+            type: 'Corrupted',
+            message: ERROR_MESSAGES.CORRUPTED_ARCHIVE,
+            archiveId,
+          },
+        };
+      }
+
+      // T045: Validate archive schema with Zod
+      const validationResult = validateArchive(parsed);
+
+      if (!validationResult.success) {
+        console.warn('Archive schema invalid:', archiveId);
+        return {
+          ok: false,
+          error: {
+            type: 'Corrupted',
+            message: ERROR_MESSAGES.CORRUPTED_ARCHIVE,
+            archiveId,
+          },
+        };
+      }
+
+      const archive = validationResult.data;
+      return { ok: true, value: archive };
+    } catch (error) {
+      // Security errors should be surfaced
+      if (error instanceof Error && error.name === 'SecurityError') {
+        return this.handleStorageError(error, archiveId);
+      }
+
+      // Unexpected errors treated as corrupted
+      console.warn('Failed to load archive:', archiveId);
+      return {
+        ok: false,
+        error: {
+          type: 'Corrupted',
+          message: ERROR_MESSAGES.CORRUPTED_ARCHIVE,
+          archiveId,
+        },
+      };
     }
   }
 }

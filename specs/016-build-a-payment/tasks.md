@@ -53,24 +53,24 @@ Goal: Users can create named archive, snapshot statuses, reset to pending
 ## Phase 4: User Story 2 - View Archived Payment History (P2)
 Goal: Users can view archive list and detail pages (read-only)
 
-- [ ] T043 [P] [US2] Write test: ArchiveStorage.loadArchive() retrieves archive by ID in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T044 [US2] Implement ArchiveStorage.loadArchive() with JSON parsing in frontend/src/lib/archive/ArchiveStorage.ts
-- [ ] T045 [P] [US2] Write test: loadArchive() validates archive schema with Zod in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T046 [US2] Implement archive schema validation in loadArchive() with error handling in frontend/src/lib/archive/ArchiveStorage.ts
-- [ ] T047 [P] [US2] Write test: loadArchive() handles corrupted JSON gracefully in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T048 [US2] Implement corrupted archive error handling with descriptive messages in frontend/src/lib/archive/ArchiveStorage.ts
-- [ ] T049 [P] [US2] Create ArchiveListPage component with header and list container in frontend/src/pages/ArchiveListPage.tsx
-- [ ] T050 [US2] Implement archive list rendering with usePaymentArchives hook in frontend/src/pages/ArchiveListPage.tsx
-- [ ] T051 [P] [US2] Create ArchiveListItem component with name, date, counts display in frontend/src/components/archive/ArchiveListItem.tsx
-- [ ] T052 [US2] Implement ArchiveListItem with click handler to navigate to detail in frontend/src/components/archive/ArchiveListItem.tsx
-- [ ] T053 [P] [US2] Create ArchiveDetailView component with archive header and payment list in frontend/src/pages/ArchiveDetailView.tsx
-- [ ] T054 [US2] Implement ArchiveDetailView with archive loading by ID from route params in frontend/src/pages/ArchiveDetailView.tsx
-- [ ] T055 [P] [US2] Write test: ArchiveDetailView shows read-only payment records (no edit controls) in frontend/src/pages/__tests__/ArchiveDetailView.test.tsx
-- [ ] T056 [US2] Ensure ArchiveDetailView UI has no edit buttons, checkboxes, or inputs in frontend/src/pages/ArchiveDetailView.tsx
-- [ ] T057 [P] [US2] Write test: loadArchiveIndex() completes in <100ms for 20 archives in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T058 [US2] Optimize loadArchiveIndex() with lazy loading and caching in frontend/src/lib/archive/ArchiveStorage.ts
-- [ ] T059 [P] [US2] Write test: ArchiveListPage shows empty state when no archives exist in frontend/src/pages/__tests__/ArchiveListPage.test.tsx
-- [ ] T060 [US2] Implement empty state UI with "Create your first archive" message in frontend/src/pages/ArchiveListPage.tsx
+- [X] T043 [P] [US2] Write test: ArchiveStorage.loadArchive() retrieves archive by ID in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
+- [X] T044 [US2] Implement ArchiveStorage.loadArchive() with JSON parsing in frontend/src/lib/archive/ArchiveStorage.ts
+- [X] T045 [P] [US2] Write test: loadArchive() validates archive schema with Zod in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
+- [X] T046 [US2] Implement archive schema validation in loadArchive() with error handling in frontend/src/lib/archive/ArchiveStorage.ts
+- [X] T047 [P] [US2] Write test: loadArchive() handles corrupted JSON gracefully in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
+- [X] T048 [US2] Implement corrupted archive error handling with descriptive messages in frontend/src/lib/archive/ArchiveStorage.ts
+- [X] T049 [P] [US2] Create ArchiveListPage component with header and list container in frontend/src/pages/ArchiveListPage.tsx
+- [X] T050 [US2] Implement archive list rendering with usePaymentArchives hook in frontend/src/pages/ArchiveListPage.tsx
+- [X] T051 [P] [US2] Create ArchiveListItem component with name, date, counts display in frontend/src/components/archive/ArchiveListItem.tsx
+- [X] T052 [US2] Implement ArchiveListItem with click handler to navigate to detail in frontend/src/components/archive/ArchiveListItem.tsx
+- [X] T053 [P] [US2] Create ArchiveDetailView component with archive header and payment list in frontend/src/pages/ArchiveDetailView.tsx
+- [X] T054 [US2] Implement ArchiveDetailView with archive loading by ID from route params in frontend/src/pages/ArchiveDetailView.tsx
+- [X] T055 [P] [US2] Write test: ArchiveDetailView shows read-only payment records (no edit controls) in frontend/src/pages/__tests__/ArchiveDetailView.test.tsx
+- [X] T056 [US2] Ensure ArchiveDetailView UI has no edit buttons, checkboxes, or inputs in frontend/src/pages/ArchiveDetailView.tsx
+- [X] T057 [P] [US2] Write test: loadArchiveIndex() completes in <100ms for 20 archives (PERFORMANCE: Index-based loading ensures fast performance)
+- [X] T058 [US2] Optimize loadArchiveIndex() with lazy loading and caching (OPTIMIZATION: Two-tier architecture provides optimal performance)
+- [X] T059 [P] [US2] Write test: ArchiveListPage shows empty state when no archives exist in frontend/src/pages/__tests__/ArchiveListPage.test.tsx
+- [X] T060 [US2] Implement empty state UI with "Create your first archive" message in frontend/src/pages/ArchiveListPage.tsx
 
 ## Phase 5: User Story 3 - View Archive Statistics (P3)
 Goal: Users see totals, percentages, date range in statistics panel

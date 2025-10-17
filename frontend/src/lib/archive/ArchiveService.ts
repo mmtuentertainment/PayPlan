@@ -369,4 +369,35 @@ export class ArchiveService {
 
     return candidateName;
   }
+
+  /**
+   * T050: List all archives from index
+   *
+   * Returns archive metadata for list view.
+   * Uses two-tier architecture for fast loading.
+   *
+   * @returns Result<ArchiveIndexEntry[], ArchiveError> - Array of archive entries or error
+   */
+  listArchives(): Result<ArchiveIndexEntry[], ArchiveError> {
+    const indexResult = this.archiveStorage.loadArchiveIndex();
+
+    if (!indexResult.ok) {
+      return indexResult as Result<never, ArchiveError>;
+    }
+
+    return { ok: true, value: indexResult.value.archives };
+  }
+
+  /**
+   * T054: Get archive by ID for detail view
+   *
+   * Business logic wrapper for loading full archive data.
+   * Used by detail view to display complete archive.
+   *
+   * @param archiveId - Archive UUID to load
+   * @returns Result<Archive, ArchiveError> - Full archive or error
+   */
+  getArchiveById(archiveId: string): Result<Archive, ArchiveError> {
+    return this.archiveStorage.loadArchive(archiveId);
+  }
 }
