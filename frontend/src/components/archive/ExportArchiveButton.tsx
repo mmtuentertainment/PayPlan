@@ -77,6 +77,7 @@ export function ExportArchiveButton({ archive }: ExportArchiveButtonProps) {
           }
         `}
         aria-label="Export archive to CSV"
+        aria-busy={isExporting}
       >
         {/* Download icon */}
         <svg

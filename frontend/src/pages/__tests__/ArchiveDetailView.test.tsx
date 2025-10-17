@@ -97,9 +97,9 @@ describe('ArchiveDetailView', () => {
     expect(screen.getByText('Klarna')).toBeInTheDocument();
     expect(screen.getByText('Affirm')).toBeInTheDocument();
 
-    // Check amounts are displayed
-    expect(screen.getByText('45.00 USD')).toBeInTheDocument();
-    expect(screen.getByText('100.00 USD')).toBeInTheDocument();
+    // Check amounts are displayed (CodeRabbit: Now uses Intl.NumberFormat)
+    expect(screen.getByText(/\$45\.00/)).toBeInTheDocument();  // USD format: $45.00
+    expect(screen.getByText(/\$100\.00/)).toBeInTheDocument(); // USD format: $100.00
 
     // T055: Verify NO edit controls exist (read-only)
     // No checkboxes

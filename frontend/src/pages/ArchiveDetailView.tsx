@@ -56,6 +56,32 @@ function formatTimestamp(timestamp: string): string {
 }
 
 /**
+ * Format currency amount with proper locale and currency-specific decimals
+ *
+ * CodeRabbit Fix: Use Intl.NumberFormat for currency-aware formatting
+ * Matches ArchiveStatistics formatCurrency() for consistency
+ *
+ * @param amount - Payment amount
+ * @param currency - ISO 4217 currency code
+ * @returns Formatted currency string (e.g., "$75.00", "¥7,500", "BD 75.000")
+ */
+function formatCurrency(amount: number, currency: string): string {
+  if (typeof amount !== 'number' || Number.isNaN(amount) || !Number.isFinite(amount)) {
+    return '--';
+  }
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  } catch {
+    // Fallback if currency code invalid
+    return `${amount.toFixed(2)} ${currency}`;
+  }
+}
+
+/**
  * Archive detail view component
  *
  * Features:
@@ -216,7 +242,7 @@ export function ArchiveDetailView() {
                 <tr key={payment.paymentId} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm">{payment.provider}</td>
                   <td className="px-4 py-3 text-sm font-medium">
-                    {payment.amount.toFixed(2)} {payment.currency}
+                    {formatCurrency(payment.amount, payment.currency)}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {formatDate(payment.dueISO)}

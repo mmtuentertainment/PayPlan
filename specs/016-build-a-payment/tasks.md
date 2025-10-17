@@ -128,7 +128,10 @@ Goal: Users delete archives with confirmation to free storage
 - [ ] T103 [P] [US5] Add delete button to ArchiveListItem with confirmation trigger in frontend/src/components/archive/ArchiveListItem.tsx
 - [ ] T104 [US5] Add delete button to ArchiveDetailView with confirmation trigger in frontend/src/pages/ArchiveDetailView.tsx
 
-## Phase 8: Polish & Cross-Cutting
+## Phase 8: Polish & Cross-Cutting (14 original + 7 deferred CodeRabbit improvements)
+Goal: Loading states, error boundaries, accessibility, performance logging, deferred enhancements
+
+Original Tasks:
 - [ ] T105 [P] Write test: Cross-tab storage event updates archive list on create in frontend/src/hooks/__tests__/usePaymentArchives.test.ts
 - [ ] T106 Implement storage event listener for cross-tab create sync in frontend/src/hooks/usePaymentArchives.ts
 - [ ] T107 [P] Add loading states to ArchiveListPage with skeleton loaders in frontend/src/pages/ArchiveListPage.tsx
@@ -143,6 +146,19 @@ Goal: Users delete archives with confirmation to free storage
 - [ ] T116 [P] Add ARIA labels to DeleteArchiveDialog buttons in frontend/src/components/archive/DeleteArchiveDialog.tsx
 - [ ] T117 [P] Update CLAUDE.md with Feature 016 technologies and commands in /home/matt/PROJECTS/PayPlan/CLAUDE.md
 - [ ] T118 [P] Create archive feature documentation with API examples in /home/matt/PROJECTS/PayPlan/specs/016-build-a-payment/IMPLEMENTATION.md
+
+Deferred from Phase 6 CodeRabbit Analysis:
+- [ ] T119 [P] Add export confirmation dialog before CSV download in ExportArchiveButton.tsx (30 min)
+- [ ] T120 [P] Add audit logging for archive exports (user id, archive id, timestamp) in ExportArchiveButton.tsx (15 min)
+- [ ] T121 [P] Add CSV structure validation tests (parse and validate header/rows) in ExportArchiveButton.test.tsx (20 min)
+- [ ] T122 [P] Add decimal precision preservation test for CSV export in ExportArchiveButton.test.tsx (10 min)
+- [ ] T123 [P] Clean up test dynamic imports and add type annotations in ExportArchiveButton.test.tsx (10 min)
+
+Deferred from Phase 5 CodeRabbit Analysis:
+- [ ] T124 [P] Add locale-aware percentage separators using Intl.NumberFormat in ArchiveStatistics.tsx (15 min)
+- [ ] T125 [P] Add accessibility test assertions for ArchiveStatistics (ARIA roles, keyboard nav) in ArchiveStatistics.test.tsx (20 min)
+
+Total Phase 8: 21 tasks (~5 hours)
 
 ## Dependencies
 
