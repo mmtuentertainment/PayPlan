@@ -256,4 +256,31 @@ describe('ArchiveDetailView', () => {
       // This validates graceful handling of older archive versions
     });
   });
+
+  describe('Loading State Test', () => {
+    it('should show loading indicator while fetching archive', () => {
+      // Mock hook to return loading state
+      vi.spyOn(usePaymentArchivesModule, 'usePaymentArchives').mockReturnValue({
+        archives: [],
+        isLoading: true, // Loading state
+        error: null,
+        createArchive: vi.fn(),
+        listArchives: vi.fn(),
+        getArchiveById: vi.fn().mockReturnValue(null),
+        clearError: vi.fn(),
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/archives/550e8400-e29b-41d4-a716-446655440000']}>
+          <Routes>
+            <Route path="/archives/:id" element={<ArchiveDetailView />} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      // Assert loading state is visible
+      // Component should show "Loading..." text or loading spinner
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    });
+  });
 });

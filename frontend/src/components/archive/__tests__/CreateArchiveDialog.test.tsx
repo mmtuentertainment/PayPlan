@@ -237,4 +237,32 @@ describe('CreateArchiveDialog', () => {
       expect(errorMessage).not.toContain('amount');
     }, 10000);
   });
+
+  describe('Loading State Tests', () => {
+    it('should show loading state during archive creation', async () => {
+      const user = userEvent.setup();
+
+      render(<CreateArchiveDialog payments={mockPayments} />);
+
+      const nameInput = screen.getByLabelText(/archive name/i);
+      await user.type(nameInput, 'Test Archive');
+
+      const createButton = screen.getByRole('button', { name: /create archive/i });
+
+      // Click and immediately check for loading state
+      const clickPromise = user.click(createButton);
+
+      // Button should become disabled during loading
+      await waitFor(() => {
+        expect(createButton).toBeDisabled();
+      }, { timeout: 100 });
+
+      await clickPromise;
+
+      // Wait for completion
+      await waitFor(() => {
+        expect(screen.getByText('Success!')).toBeInTheDocument();
+      }, { timeout: 5000 });
+    }, 10000);
+  });
 });
