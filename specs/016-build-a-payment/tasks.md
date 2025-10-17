@@ -9,14 +9,14 @@
 - [X] T006 [P] Create archive utils for UUID generation, timestamp formatting in frontend/src/lib/archive/utils.ts
 
 ## Phase 2: Foundational Layer
-- [ ] T007 [P] Write test: ArchiveStorage.createDefaultIndex() returns empty ArchiveIndex in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T008 Implement ArchiveStorage.createDefaultIndex() in frontend/src/lib/archive/ArchiveStorage.ts
-- [ ] T009 [P] Write test: ArchiveStorage.loadArchiveIndex() handles missing key in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T010 Implement ArchiveStorage.loadArchiveIndex() with default fallback in frontend/src/lib/archive/ArchiveStorage.ts
-- [ ] T011 [P] Write test: ArchiveStorage.calculateTotalSize() sums all archive data in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T012 Implement ArchiveStorage.calculateTotalSize() in frontend/src/lib/archive/ArchiveStorage.ts
-- [ ] T013 [P] Write test: ArchiveStorage.handleStorageError() catches QuotaExceededError in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
-- [ ] T014 Implement ArchiveStorage.handleStorageError() with error mapping in frontend/src/lib/archive/ArchiveStorage.ts
+- [X] T007 [P] Write test: ArchiveStorage.createDefaultIndex() returns empty ArchiveIndex in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
+- [X] T008 Implement ArchiveStorage.createDefaultIndex() in frontend/src/lib/archive/ArchiveStorage.ts
+- [X] T009 [P] Write test: ArchiveStorage.loadArchiveIndex() handles missing key in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
+- [X] T010 Implement ArchiveStorage.loadArchiveIndex() with default fallback in frontend/src/lib/archive/ArchiveStorage.ts
+- [X] T011 [P] Write test: ArchiveStorage.calculateTotalSize() sums all archive data in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
+- [X] T012 Implement ArchiveStorage.calculateTotalSize() in frontend/src/lib/archive/ArchiveStorage.ts
+- [X] T013 [P] Write test: ArchiveStorage.handleStorageError() catches QuotaExceededError in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
+- [X] T014 Implement ArchiveStorage.handleStorageError() with error mapping in frontend/src/lib/archive/ArchiveStorage.ts
 
 ## Phase 3: User Story 1 - Create Payment Archive (P1 MVP)
 Goal: Users can create named archive, snapshot statuses, reset to pending
