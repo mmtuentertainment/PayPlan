@@ -81,11 +81,15 @@ export function ArchiveListItem({ archive, isCorrupted = false }: ArchiveListIte
         </div>
         <div>
           <span className="text-gray-600">Paid:</span>{' '}
-          <span className="font-medium text-green-600">{paidCount}</span>
+          <span className="font-medium text-green-600">
+            <span className="sr-only">Paid: </span>{paidCount}<span className="sr-only"> payments</span>
+          </span>
         </div>
         <div>
           <span className="text-gray-600">Pending:</span>{' '}
-          <span className="font-medium text-yellow-600">{pendingCount}</span>
+          <span className="font-medium text-yellow-600">
+            <span className="sr-only">Pending: </span>{pendingCount}<span className="sr-only"> payments</span>
+          </span>
         </div>
       </div>
     </div>

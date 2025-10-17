@@ -103,17 +103,19 @@ export function ArchiveListPage() {
   }
 
   // T050: Render archive list with metadata
+  // CodeRabbit Fix: Use semantic HTML for better screen reader landmarks
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+    <main className="max-w-4xl mx-auto p-6">
+      <header className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Payment Archives</h1>
         <Link
           to="/"
           className="px-4 py-2 text-blue-500 hover:text-blue-600 transition-colors"
+          aria-label="Back to Payments"
         >
           Back to Payments
         </Link>
-      </div>
+      </header>
 
       <p className="text-gray-600 mb-6">
         View your archived payment history. Archives are read-only snapshots of your payment status tracking.
@@ -128,6 +130,6 @@ export function ArchiveListPage() {
       <div className="mt-6 text-sm text-gray-500 text-center">
         {archives.length} {archives.length === 1 ? 'archive' : 'archives'} saved
       </div>
-    </div>
+    </main>
   );
 }

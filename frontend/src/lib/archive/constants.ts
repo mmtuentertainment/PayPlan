@@ -53,7 +53,8 @@ export const MAX_ARCHIVES = 50;
 export const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 /** Storage warning threshold (80% of max, recommend cleanup) */
-export const STORAGE_WARNING_THRESHOLD = 0.8 * MAX_STORAGE_SIZE; // 4MB
+// CodeRabbit Fix: Use Math.floor for integer threshold (avoid floating-point precision)
+export const STORAGE_WARNING_THRESHOLD = Math.floor(0.8 * MAX_STORAGE_SIZE); // 4MB
 
 /**
  * Schema Versioning

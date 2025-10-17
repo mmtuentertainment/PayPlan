@@ -108,7 +108,8 @@ export function usePaymentArchives(): UsePaymentArchivesReturn {
     setError(null);
 
     try {
-      const result = archiveService.createArchive(name, payments);
+      // CodeRabbit Fix: Add await for async createArchive call
+      const result = await archiveService.createArchive(name, payments);
 
       if (result.ok) {
         // Update local archives state

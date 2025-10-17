@@ -440,10 +440,24 @@ export class ArchiveService {
    * Business logic wrapper for loading full archive data.
    * Used by detail view to display complete archive.
    *
+   * CodeRabbit Fix: Validate UUID format before calling storage
+   *
    * @param archiveId - Archive UUID to load
    * @returns Result<Archive, ArchiveError> - Full archive or error
    */
   getArchiveById(archiveId: string): Result<Archive, ArchiveError> {
+    // Validate UUID format before calling storage
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(archiveId)) {
+      return {
+        ok: false,
+        error: {
+          type: 'Validation',
+          message: ERROR_MESSAGES.INVALID_ARCHIVE_ID,
+        },
+      };
+    }
+
     return this.archiveStorage.loadArchive(archiveId);
   }
 }
