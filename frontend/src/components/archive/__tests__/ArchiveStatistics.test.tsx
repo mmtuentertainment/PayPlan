@@ -45,9 +45,9 @@ describe('ArchiveStatistics Component', () => {
     expect(screen.getByText('4')).toBeInTheDocument();
     expect(screen.getByText('(40.0%)')).toBeInTheDocument();
 
-    // Check average amount
+    // Check average amount (CodeRabbit: Now uses Intl.NumberFormat with currency symbol)
     expect(screen.getByText('Average Amount')).toBeInTheDocument();
-    expect(screen.getByText('125.50 USD')).toBeInTheDocument();
+    expect(screen.getByText(/\$125\.50/)).toBeInTheDocument(); // USD format: $125.50
 
     // Check date range
     expect(screen.getByText(/Date Range:/)).toBeInTheDocument();
@@ -169,7 +169,7 @@ describe('ArchiveStatistics Component', () => {
     expect(screen.queryByText(/Date Range:/)).not.toBeInTheDocument();
   });
 
-  it('should format average amount with 2 decimal places', () => {
+  it('should format average amount with currency symbol using Intl.NumberFormat', () => {
     const summary: ArchiveSummary = {
       totalCount: 3,
       paidCount: 2,
@@ -186,7 +186,9 @@ describe('ArchiveStatistics Component', () => {
 
     render(<ArchiveStatistics summary={summary} />);
 
-    expect(screen.getByText('75.00 USD')).toBeInTheDocument();
+    // CodeRabbit Fix: Now uses Intl.NumberFormat for proper currency formatting
+    // USD format: $75.00 (with currency symbol, not "75.00 USD")
+    expect(screen.getByText(/\$75\.00/)).toBeInTheDocument();
   });
 
   it('should render with proper styling classes', () => {

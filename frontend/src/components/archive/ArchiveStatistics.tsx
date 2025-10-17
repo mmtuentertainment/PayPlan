@@ -42,6 +42,31 @@ export function ArchiveStatistics({ summary }: ArchiveStatisticsProps) {
     currency,
   } = summary;
 
+  // CodeRabbit Fix: Validate numeric values before formatting
+  const isValidNumber = (val: unknown): val is number => {
+    return typeof val === 'number' && !Number.isNaN(val) && Number.isFinite(val);
+  };
+
+  // Safe percentage formatter
+  const formatPercentage = (val: number): string => {
+    if (!isValidNumber(val)) return '--';
+    return val.toFixed(1);
+  };
+
+  // CodeRabbit Fix: Currency-aware amount formatter
+  const formatCurrency = (amount: number, currencyCode: string): string => {
+    if (!isValidNumber(amount)) return '--';
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: currencyCode,
+      }).format(amount);
+    } catch {
+      // Fallback if currency code invalid
+      return `${amount.toFixed(2)} ${currencyCode}`;
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
       <h2 className="text-xl font-semibold mb-4">Statistics</h2>
@@ -59,7 +84,7 @@ export function ArchiveStatistics({ summary }: ArchiveStatisticsProps) {
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-green-600">{paidCount}</span>
             <span className="text-sm text-gray-500">
-              ({paidPercentage.toFixed(1)}%)
+              ({formatPercentage(paidPercentage)}%)
             </span>
           </div>
         </div>
@@ -70,7 +95,7 @@ export function ArchiveStatistics({ summary }: ArchiveStatisticsProps) {
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-yellow-600">{pendingCount}</span>
             <span className="text-sm text-gray-500">
-              ({pendingPercentage.toFixed(1)}%)
+              ({formatPercentage(pendingPercentage)}%)
             </span>
           </div>
         </div>
@@ -80,7 +105,7 @@ export function ArchiveStatistics({ summary }: ArchiveStatisticsProps) {
           <span className="text-sm text-gray-600 mb-1">Average Amount</span>
           {averageAmount !== undefined && currency ? (
             <span className="text-2xl font-bold text-gray-900">
-              {averageAmount.toFixed(2)} {currency}
+              {formatCurrency(averageAmount, currency)}
             </span>
           ) : (
             <span className="text-sm text-gray-400 italic">Multiple currencies</span>

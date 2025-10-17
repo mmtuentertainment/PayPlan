@@ -89,7 +89,8 @@ export const ERROR_MESSAGES = {
 
   // Limit errors
   ARCHIVE_LIMIT_REACHED: `Archive limit reached (${MAX_ARCHIVES}/${MAX_ARCHIVES}). Delete old archives to create new ones.`,
-  QUOTA_EXCEEDED: 'Storage limit exceeded (5MB). Delete old archives to free space.',
+  // CodeRabbit Fix: Use MAX_STORAGE_SIZE constant instead of hardcoded "5MB"
+  QUOTA_EXCEEDED: `Storage limit exceeded (${Math.floor(MAX_STORAGE_SIZE / 1024 / 1024)}MB). Delete old archives to free space.`,
 
   // Storage errors
   SECURITY_ERROR: 'localStorage is disabled or blocked. Enable browser storage to use archives.',
