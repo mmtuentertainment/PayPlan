@@ -217,11 +217,22 @@ export class ArchiveService {
    * @returns Array of PaymentArchiveRecord with joined data
    */
   joinPaymentsWithStatuses(payments: PaymentRecord[]): PaymentArchiveRecord[] {
-    // Load current statuses
+    // Load current statuses with error checking
     const statusResult = this.paymentStatusStorage.loadStatuses();
+
+    // If status loading fails, log warning but continue with defaults
+    if (!statusResult.ok) {
+      console.warn('Failed to load payment statuses:', statusResult.error);
+    }
+
     const statuses = statusResult.ok ? statusResult.value.statuses : new Map();
 
     return payments.map((payment) => {
+      // Validate payment.id exists before using
+      if (!payment.id) {
+        console.warn('Payment missing ID, cannot join with status:', payment);
+      }
+
       const paymentId = payment.id || '';
       const statusRecord = statuses.get(paymentId);
 
@@ -276,14 +287,33 @@ export class ArchiveService {
         pendingCount++;
       }
 
-      // Track date range
+      // Track date range with validation
       const dueDate = record.dueISO;
       if (dueDate) {
-        if (earliest === null || dueDate < earliest) {
-          earliest = dueDate;
+        // Validate date string before comparison
+        const dueDateObj = new Date(dueDate);
+        if (isNaN(dueDateObj.getTime())) {
+          console.warn('Invalid date format in dueISO:', dueDate);
+          continue;
         }
-        if (latest === null || dueDate > latest) {
+
+        // Use Date objects for comparison
+        if (earliest === null) {
+          earliest = dueDate;
+        } else {
+          const earliestDate = new Date(earliest);
+          if (dueDateObj < earliestDate) {
+            earliest = dueDate;
+          }
+        }
+
+        if (latest === null) {
           latest = dueDate;
+        } else {
+          const latestDate = new Date(latest);
+          if (dueDateObj > latestDate) {
+            latest = dueDate;
+          }
         }
       }
     }

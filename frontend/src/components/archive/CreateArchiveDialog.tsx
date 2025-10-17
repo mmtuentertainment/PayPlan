@@ -9,7 +9,7 @@
  * Follows SOLUTIONS.md UX flow with two-step confirmation.
  */
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { PaymentRecord } from '@/types/csvExport';
 import { usePaymentArchives } from '@/hooks/usePaymentArchives';
 import { Button } from '@/components/ui/button';
@@ -42,11 +42,21 @@ export function CreateArchiveDialog({
   const [archiveName, setArchiveName] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { createArchive, isLoading, error, clearError } = usePaymentArchives();
+  const successTimeoutRef = useRef<number | null>(null);
 
-  // Calculate current tracking summary
+  // Calculate current tracking summary from actual payment data
   const totalPayments = payments.length;
-  const paidCount = 0; // TODO: Get from payment status when integrated
+  const paidCount = payments.filter(p => p.paid_status === 'paid').length;
   const pendingCount = totalPayments - paidCount;
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current !== null) {
+        window.clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
 
   /**
    * Handle form submission
@@ -65,10 +75,11 @@ export function CreateArchiveDialog({
       setSuccessMessage(`Archive "${archive.name}" created successfully!`);
       setArchiveName('');
 
-      // Call success callback after short delay
-      setTimeout(() => {
+      // Call success callback after short delay (store ref to cleanup)
+      successTimeoutRef.current = window.setTimeout(() => {
         onSuccess?.(archive.name);
         setSuccessMessage(null);
+        successTimeoutRef.current = null;
       }, 2000);
     }
   };
@@ -119,6 +130,8 @@ export function CreateArchiveDialog({
               disabled={isLoading}
               maxLength={100}
               required
+              aria-invalid={!!error}
+              aria-describedby={error ? 'archive-error' : undefined}
             />
           </div>
 
@@ -133,7 +146,12 @@ export function CreateArchiveDialog({
           </div>
 
           {/* Warning about reset */}
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+          <div
+            className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+          >
             <p className="font-medium text-yellow-800 text-sm mb-1">⚠️ Warning:</p>
             <p className="text-sm text-yellow-700">
               Creating this archive will reset all current payment statuses to pending.
@@ -143,7 +161,12 @@ export function CreateArchiveDialog({
 
           {/* Error display */}
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-400 p-3 rounded">
+            <div
+              id="archive-error"
+              className="bg-red-50 border-l-4 border-red-400 p-3 rounded"
+              role="alert"
+              aria-live="assertive"
+            >
               <p className="font-medium text-red-800 text-sm mb-1">Error:</p>
               <p className="text-sm text-red-700">{error.message}</p>
             </div>

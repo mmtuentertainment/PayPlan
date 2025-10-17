@@ -9,7 +9,7 @@
  * Provides createArchive wrapper with state management.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { Archive, ArchiveError } from '@/lib/archive/types';
 import type { PaymentRecord } from '@/types/csvExport';
 import { ArchiveService } from '@/lib/archive/ArchiveService';
@@ -52,10 +52,12 @@ export function usePaymentArchives(): UsePaymentArchivesReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ArchiveError | null>(null);
 
-  // Initialize services (could be refactored to use dependency injection)
-  const archiveStorage = new ArchiveStorage();
-  const paymentStatusStorage = new PaymentStatusStorage();
-  const archiveService = new ArchiveService(archiveStorage, paymentStatusStorage);
+  // Initialize services once with useMemo to avoid recreation on each render
+  const archiveService = useMemo(() => {
+    const archiveStorage = new ArchiveStorage();
+    const paymentStatusStorage = new PaymentStatusStorage();
+    return new ArchiveService(archiveStorage, paymentStatusStorage);
+  }, []);
 
   /**
    * Create new payment archive
@@ -72,7 +74,7 @@ export function usePaymentArchives(): UsePaymentArchivesReturn {
     setError(null);
 
     try {
-      const result = archiveService.createArchive(name, payments);
+      const result = await archiveService.createArchive(name, payments);
 
       if (result.ok) {
         return result.value;
