@@ -13,17 +13,38 @@
  * - Average payment amount (if single currency)
  */
 
+import { z } from 'zod';
 import type { ArchiveSummary } from '@/lib/archive/types';
 import { formatDateRange } from '@/lib/archive/utils';
+import { dateRangeSchema } from '@/lib/archive/validation';
 
 interface ArchiveStatisticsProps {
   summary: ArchiveSummary;
 }
 
 /**
+ * Zod schema for validating ArchiveSummary at component boundary
+ * Ensures data integrity before rendering
+ */
+const archiveSummarySchema = z.object({
+  totalCount: z.number().int().nonnegative(),
+  paidCount: z.number().int().nonnegative(),
+  pendingCount: z.number().int().nonnegative(),
+  paidPercentage: z.number().min(0).max(100),
+  pendingPercentage: z.number().min(0).max(100),
+  dateRange: dateRangeSchema,
+  averageAmount: z.number().positive().optional(),
+  currency: z.string().length(3).optional(),
+}).refine(
+  data => data.paidCount + data.pendingCount === data.totalCount,
+  { message: 'Paid and pending counts must sum to total count' }
+);
+
+/**
  * Statistics panel component for archive detail view
  *
  * Features:
+ * - Validates summary data at component boundary (defense in depth)
  * - Displays counts and percentages for paid/pending
  * - Shows date range using formatDateRange()
  * - Shows average amount if available
@@ -31,6 +52,21 @@ interface ArchiveStatisticsProps {
  * - Clean card layout with consistent styling
  */
 export function ArchiveStatistics({ summary }: ArchiveStatisticsProps) {
+  // Validate summary data at component boundary
+  const validationResult = archiveSummarySchema.safeParse(summary);
+  if (!validationResult.success) {
+    console.error('Invalid archive summary data:', validationResult.error);
+    return (
+      <div className="bg-red-50 rounded-lg border border-red-200 p-6 mb-6">
+        <h2 className="text-xl font-semibold text-red-800 mb-2">Statistics Error</h2>
+        <p className="text-sm text-red-700">
+          Invalid statistics data. This archive may be corrupted.
+        </p>
+      </div>
+    );
+  }
+
+  // Use validated data
   const {
     totalCount,
     paidCount,
@@ -40,7 +76,7 @@ export function ArchiveStatistics({ summary }: ArchiveStatisticsProps) {
     dateRange,
     averageAmount,
     currency,
-  } = summary;
+  } = validationResult.data;
 
   // CodeRabbit Fix: Validate numeric values before formatting
   const isValidNumber = (val: unknown): val is number => {

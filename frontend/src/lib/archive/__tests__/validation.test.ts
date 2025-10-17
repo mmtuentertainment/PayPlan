@@ -192,14 +192,16 @@ describe('Archive Validation', () => {
         }
       });
 
-      it('should accept zero-width characters', () => {
+      it('should strip zero-width characters (security fix)', () => {
+        // CodeRabbit Phase C Fix: Strip zero-width characters to prevent homograph attacks
         const zeroWidth = 'Oct\u200Bober\u200C2025\uFEFF'; // U+200B, U+200C, U+FEFF
+        const expected = 'October2025'; // Zero-width chars stripped
 
         const result = validateArchiveName(zeroWidth);
 
         expect(result.ok).toBe(true);
         if (result.ok) {
-          expect(result.value).toBe(zeroWidth.trim());
+          expect(result.value).toBe(expected);
         }
       });
 

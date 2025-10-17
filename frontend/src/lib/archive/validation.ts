@@ -173,27 +173,36 @@ export const archiveIndexSchema = z.object({
  *
  * Used by createArchive() to validate user input before processing.
  *
+ * CodeRabbit Fix: Strip zero-width characters to prevent homograph attacks
+ * Removes: U+200B (zero-width space), U+200C (zero-width non-joiner),
+ *          U+FEFF (zero-width no-break space/BOM)
+ *
  * @param name - User-provided archive name
- * @returns Validation result with trimmed name or error
+ * @returns Validation result with stripped and trimmed name or error
  */
 export function validateArchiveName(name: string): Result<string, { message: string }> {
-  const trimmed = name.trim();
+  // Strip zero-width characters before trim and validation
+  const stripped = name
+    .replace(/\u200B/g, '') // Zero-width space
+    .replace(/\u200C/g, '') // Zero-width non-joiner
+    .replace(/\uFEFF/g, '') // Zero-width no-break space (BOM)
+    .trim();
 
-  if (trimmed.length < MIN_NAME_LENGTH) {
+  if (stripped.length < MIN_NAME_LENGTH) {
     return {
       ok: false,
       error: { message: `Archive name must be at least ${MIN_NAME_LENGTH} characters` },
     };
   }
 
-  if (trimmed.length > MAX_NAME_LENGTH) {
+  if (stripped.length > MAX_NAME_LENGTH) {
     return {
       ok: false,
       error: { message: `Archive name must be under ${MAX_NAME_LENGTH} characters` },
     };
   }
 
-  return { ok: true, value: trimmed };
+  return { ok: true, value: stripped };
 }
 
 /**

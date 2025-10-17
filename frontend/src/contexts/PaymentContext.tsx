@@ -28,7 +28,12 @@ import type { PaymentRecord } from '@/types/csvExport';
 const paymentRecordSchema = z.object({
   id: z.string().uuid('Payment ID must be UUID v4').optional(),
   provider: z.string().min(1, 'Provider required').max(255),
-  amount: z.number().positive('Amount must be positive'),
+  amount: z.number()
+    .positive('Amount must be positive')
+    .refine(
+      (val) => Number.isInteger(val * 100),
+      { message: 'Amount must have at most 2 decimal places' }
+    ),
   currency: z.string().length(3, 'Currency must be ISO 4217 code').regex(/^[A-Z]{3}$/),
   dueISO: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Due date must be YYYY-MM-DD'),
   autopay: z.boolean(),

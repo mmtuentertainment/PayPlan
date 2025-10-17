@@ -145,7 +145,7 @@ describe('ExportArchiveButton', () => {
       ...mockArchive,
       payments: [
         {
-          paymentId: '1',
+          paymentId: '550e8400-e29b-41d4-a716-446655440002',  // Valid UUID
           status: 'paid',
           timestamp: '2025-10-16T10:00:00.000Z',
           provider: 'Provider 1',
@@ -155,7 +155,7 @@ describe('ExportArchiveButton', () => {
           autopay: false,
         },
         {
-          paymentId: '2',
+          paymentId: '550e8400-e29b-41d4-a716-446655440003',  // Valid UUID
           status: 'pending',
           timestamp: '',
           provider: 'Provider 2',
@@ -168,6 +168,7 @@ describe('ExportArchiveButton', () => {
       metadata: {
         ...mockArchive.metadata,
         totalCount: 2,
+        paidCount: 1,  // Added missing field
         pendingCount: 1,
       },
     };

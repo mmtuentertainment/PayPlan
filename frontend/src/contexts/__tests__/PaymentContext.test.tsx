@@ -122,6 +122,52 @@ describe('PaymentContext Validation', () => {
         );
       }).not.toThrow();
     });
+
+    it('should reject amounts with more than 2 decimal places', () => {
+      // CodeRabbit Phase C Fix: Decimal precision validation
+      const invalidPayments: PaymentRecord[] = [{
+        ...validPayment,
+        amount: 45.001,  // 3 decimals - invalid
+      }];
+
+      expect(() => {
+        const TestComponent = () => {
+          const { setPayments } = usePaymentContext();
+          setPayments(invalidPayments);
+          return null;
+        };
+
+        const mockSetPayments = vi.fn();
+        render(
+          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+            <TestComponent />
+          </PaymentContextProvider>
+        );
+      }).toThrow(/decimal|precision|2 decimal/i);
+    });
+
+    it('should accept amounts with exactly 2 decimal places', () => {
+      // CodeRabbit Phase C Fix: Decimal precision validation
+      const validPayments: PaymentRecord[] = [{
+        ...validPayment,
+        amount: 45.99,  // Exactly 2 decimals - valid
+      }];
+
+      expect(() => {
+        const TestComponent = () => {
+          const { setPayments } = usePaymentContext();
+          setPayments(validPayments);
+          return null;
+        };
+
+        const mockSetPayments = vi.fn();
+        render(
+          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+            <TestComponent />
+          </PaymentContextProvider>
+        );
+      }).not.toThrow();
+    });
   });
 
   describe('Currency Validation', () => {

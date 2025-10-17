@@ -16,6 +16,7 @@ import { ArchiveStorage } from '@/lib/archive/ArchiveStorage';
 import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
 import { generateArchiveFilename } from '@/lib/archive/utils';
 import { downloadCSV } from '@/services/csvExportService';
+import { archiveSchema } from '@/lib/archive/validation';
 
 interface ExportArchiveButtonProps {
   archive: Archive;
@@ -41,13 +42,20 @@ export function ExportArchiveButton({ archive }: ExportArchiveButtonProps) {
       setIsExporting(true);
       setError(null);
 
+      // Validate archive data before export (defense in depth)
+      const validationResult = archiveSchema.safeParse(archive);
+      if (!validationResult.success) {
+        setError('Invalid archive data. Cannot export.');
+        return;
+      }
+
       // Initialize service
       const archiveStorage = new ArchiveStorage();
       const paymentStatusStorage = new PaymentStatusStorage();
       const archiveService = new ArchiveService(archiveStorage, paymentStatusStorage);
 
-      // Generate CSV content
-      const csvContent = archiveService.exportArchiveToCSV(archive);
+      // Generate CSV content with validated archive
+      const csvContent = archiveService.exportArchiveToCSV(validationResult.data);
 
       // Generate filename
       const filename = generateArchiveFilename(archive.name, archive.createdAt);
