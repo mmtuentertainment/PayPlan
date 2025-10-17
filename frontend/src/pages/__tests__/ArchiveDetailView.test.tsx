@@ -211,4 +211,49 @@ describe('ArchiveDetailView', () => {
     expect(screen.getByText('Error Loading Archive')).toBeInTheDocument();
     expect(screen.getByText(/corrupted/i)).toBeInTheDocument();
   });
+
+  describe('Backward Compatibility Test', () => {
+    it('should render legacy archive with sourceVersion 0.9.0', async () => {
+      // Create legacy archive with older version
+      const legacyArchive: Archive = {
+        ...mockArchive,
+        sourceVersion: '0.9.0', // Old version (current is 1.0.0)
+      };
+
+      const mockGetArchiveById = vi.fn().mockReturnValue(legacyArchive);
+
+      vi.spyOn(usePaymentArchivesModule, 'usePaymentArchives').mockReturnValue({
+        archives: [],
+        isLoading: false,
+        error: null,
+        createArchive: vi.fn(),
+        listArchives: vi.fn(),
+        getArchiveById: mockGetArchiveById,
+        clearError: vi.fn(),
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/archives/550e8400-e29b-41d4-a716-446655440000']}>
+          <Routes>
+            <Route path="/archives/:id" element={<ArchiveDetailView />} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      // Wait for async loading
+      await waitFor(() => {
+        expect(screen.getByText('October 2025')).toBeInTheDocument();
+      });
+
+      // Verify legacy archive renders without error
+      expect(screen.getByText('October 2025')).toBeInTheDocument();
+      expect(screen.queryByText(/error/i)).not.toBeInTheDocument();
+
+      // Verify content displays correctly
+      expect(screen.getByText('Klarna')).toBeInTheDocument();
+      expect(screen.getByText('Affirm')).toBeInTheDocument();
+
+      // This validates graceful handling of older archive versions
+    });
+  });
 });

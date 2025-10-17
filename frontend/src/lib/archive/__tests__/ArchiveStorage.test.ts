@@ -480,4 +480,169 @@ describe('ArchiveStorage - Foundational Layer', () => {
       }
     });
   });
+
+  describe('Financial Integrity Tests', () => {
+    it('should reject archive with negative payment counts on load', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const invalidArchive = {
+        id: testArchiveId,
+        name: 'Invalid Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: -1, // Invalid: negative count
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      // Manually save invalid archive (bypassing validation)
+      const key = getArchiveKey(testArchiveId);
+      localStorage.setItem(key, JSON.stringify(invalidArchive));
+
+      // Attempt to load - should fail validation
+      const result = storage.loadArchive(testArchiveId);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Corrupted');
+      }
+    });
+
+    it('should reject archive with inconsistent payment counts on load', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const invalidArchive = {
+        id: testArchiveId,
+        name: 'Invalid Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 20, // 20 total
+          paidCount: 10,  // 10 paid
+          pendingCount: 5, // 5 pending -> 10 + 5 = 15 != 20 (inconsistent!)
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      // Manually save invalid archive (bypassing validation)
+      const key = getArchiveKey(testArchiveId);
+      localStorage.setItem(key, JSON.stringify(invalidArchive));
+
+      // Attempt to load - should fail validation
+      const result = storage.loadArchive(testArchiveId);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Corrupted');
+      }
+    });
+
+    it('should allow saving duplicate archive ID (overwrite behavior)', () => {
+      const archiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const archive = {
+        id: archiveId,
+        name: 'First Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      // Save archive first time (should succeed)
+      const firstSave = storage.saveArchive(archive);
+      expect(firstSave.ok).toBe(true);
+
+      // Save another archive with same ID (overwrites, should succeed)
+      const duplicateArchive = {
+        ...archive,
+        name: 'Duplicate Archive',
+      };
+      const secondSave = storage.saveArchive(duplicateArchive);
+
+      // localStorage.setItem overwrites, so this should succeed
+      expect(secondSave.ok).toBe(true);
+
+      // Verify the archive was overwritten
+      const loadResult = storage.loadArchive(archiveId);
+      expect(loadResult.ok).toBe(true);
+      if (loadResult.ok) {
+        expect(loadResult.value.name).toBe('Duplicate Archive');
+      }
+    });
+  });
+
+  describe('Timezone Normalization Test', () => {
+    it('should enforce UTC timestamps (reject non-UTC timezone offsets)', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const archiveWithNonUtc = {
+        id: testArchiveId,
+        name: 'Non-UTC Archive',
+        createdAt: '2025-10-17T14:30:00+05:00', // Non-UTC (UTC+5) - NOT accepted by Zod
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      // Manually save archive with non-UTC timestamp (bypassing validation)
+      const key = getArchiveKey(testArchiveId);
+      localStorage.setItem(key, JSON.stringify(archiveWithNonUtc));
+
+      // Attempt to load - should fail validation (Zod requires UTC 'Z' format)
+      const loadResult = storage.loadArchive(testArchiveId);
+      expect(loadResult.ok).toBe(false);
+
+      if (!loadResult.ok) {
+        expect(loadResult.error.type).toBe('Corrupted');
+        expect(loadResult.error.message).toContain('corrupted');
+      }
+    });
+
+    it('should accept UTC timestamps ending with Z', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const archiveWithUtc = {
+        id: testArchiveId,
+        name: 'UTC Archive',
+        createdAt: '2025-10-17T09:30:00.000Z', // UTC timestamp (correct format)
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      // Save and load UTC timestamp (should succeed)
+      const saveResult = storage.saveArchive(archiveWithUtc);
+      expect(saveResult.ok).toBe(true);
+
+      const loadResult = storage.loadArchive(testArchiveId);
+      expect(loadResult.ok).toBe(true);
+
+      if (loadResult.ok) {
+        // Verify UTC timestamp is preserved
+        expect(loadResult.value.createdAt).toBe('2025-10-17T09:30:00.000Z');
+        expect(loadResult.value.createdAt).toMatch(/Z$/);
+      }
+    });
+  });
 });
