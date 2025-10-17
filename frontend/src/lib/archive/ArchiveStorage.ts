@@ -310,6 +310,50 @@ export class ArchiveStorage {
   }
 
   /**
+   * Delete archive from localStorage by ID
+   *
+   * Removes archive data and updates index.
+   * Used for rollback operations when archive creation partially fails.
+   *
+   * @param archiveId - Archive UUID to delete
+   * @returns Result<void, ArchiveError> - Success or error
+   */
+  deleteArchive(archiveId: string): Result<void, ArchiveError> {
+    // Validate archive ID format
+    if (!isValidArchiveId(archiveId)) {
+      return {
+        ok: false,
+        error: {
+          type: 'Validation',
+          message: ERROR_MESSAGES.INVALID_ARCHIVE_ID,
+          archiveId,
+        },
+      };
+    }
+
+    try {
+      // Remove archive data
+      const key = `${ARCHIVE_KEY_PREFIX}${archiveId}`;
+      localStorage.removeItem(key);
+
+      // Remove from index
+      const indexResult = this.loadArchiveIndex();
+      if (!indexResult.ok) {
+        return indexResult as Result<never, ArchiveError>;
+      }
+
+      const index = indexResult.value;
+      index.archives = index.archives.filter(entry => entry.id !== archiveId);
+      index.lastModified = getCurrentTimestamp();
+
+      // Save updated index
+      return this.saveIndex(index);
+    } catch (error) {
+      return this.handleStorageError(error, archiveId);
+    }
+  }
+
+  /**
    * T044: Load archive from localStorage by ID
    *
    * Retrieves full archive data including all payment records.

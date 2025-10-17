@@ -103,6 +103,11 @@ export function formatDateRange(earliest: string | null, latest: string | null, 
       return 'Invalid date range';
     }
 
+    // CodeRabbit Fix: Check earliest <= latest to prevent inverted ranges
+    if (startDate.getTime() > endDate.getTime()) {
+      return 'Invalid date range';
+    }
+
     // Same day
     if (earliest === latest) {
       return startDate.toLocaleDateString(locale, {

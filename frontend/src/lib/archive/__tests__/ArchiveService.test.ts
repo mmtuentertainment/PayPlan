@@ -33,7 +33,7 @@ describe('ArchiveService - Create Archive MVP', () => {
   });
 
   describe('T015: createArchive() with valid name', () => {
-    it('should create archive successfully with valid payments and name', () => {
+    it('should create archive successfully with valid payments and name', async () => {
       // Setup: Create test payments
       const payments: PaymentRecord[] = [
         {
@@ -61,7 +61,7 @@ describe('ArchiveService - Create Archive MVP', () => {
         timestamp: '2025-10-14T14:30:00.000Z',
       });
 
-      const result = service.createArchive('October 2025', payments);
+      const result = await service.createArchive('October 2025', payments);
 
       expect(result.ok).toBe(true);
       if (result.ok) {
@@ -74,7 +74,7 @@ describe('ArchiveService - Create Archive MVP', () => {
       }
     });
 
-    it('should generate unique archive ID', () => {
+    it('should generate unique archive ID', async () => {
       const payments: PaymentRecord[] = [{
         id: '550e8400-e29b-41d4-a716-446655440000',
         provider: 'Test',
@@ -84,8 +84,8 @@ describe('ArchiveService - Create Archive MVP', () => {
         autopay: false,
       }];
 
-      const result1 = service.createArchive('Archive 1', payments);
-      const result2 = service.createArchive('Archive 2', payments);
+      const result1 = await service.createArchive('Archive 1', payments);
+      const result2 = await service.createArchive('Archive 2', payments);
 
       expect(result1.ok && result2.ok).toBe(true);
       if (result1.ok && result2.ok) {
@@ -312,7 +312,7 @@ describe('ArchiveService - Create Archive MVP', () => {
   });
 
   describe('T027: Reset statuses integration', () => {
-    it('should call PaymentStatusStorage.clearAll() after successful archive', () => {
+    it('should call PaymentStatusStorage.clearAll() after successful archive', async () => {
       const payments: PaymentRecord[] = [{
         id: '550e8400-e29b-41d4-a716-446655440000',
         provider: 'Test',
@@ -334,7 +334,7 @@ describe('ArchiveService - Create Archive MVP', () => {
       expect(beforeResult.ok && beforeResult.value?.status).toBe('paid');
 
       // Create archive (should reset statuses)
-      const result = service.createArchive('Test Archive', payments);
+      const result = await service.createArchive('Test Archive', payments);
       expect(result.ok).toBe(true);
 
       // Verify status was cleared
@@ -344,7 +344,7 @@ describe('ArchiveService - Create Archive MVP', () => {
   });
 
   describe('T029: Empty name validation', () => {
-    it('should reject empty archive name', () => {
+    it('should reject empty archive name', async () => {
       const payments: PaymentRecord[] = [{
         id: '550e8400-e29b-41d4-a716-446655440000',
         provider: 'Test',
@@ -354,7 +354,7 @@ describe('ArchiveService - Create Archive MVP', () => {
         autopay: false,
       }];
 
-      const result = service.createArchive('', payments);
+      const result = await service.createArchive('', payments);
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -363,7 +363,7 @@ describe('ArchiveService - Create Archive MVP', () => {
       }
     });
 
-    it('should reject whitespace-only archive name', () => {
+    it('should reject whitespace-only archive name', async () => {
       const payments: PaymentRecord[] = [{
         id: '550e8400-e29b-41d4-a716-446655440000',
         provider: 'Test',
@@ -373,7 +373,7 @@ describe('ArchiveService - Create Archive MVP', () => {
         autopay: false,
       }];
 
-      const result = service.createArchive('   ', payments);
+      const result = await service.createArchive('   ', payments);
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -381,7 +381,7 @@ describe('ArchiveService - Create Archive MVP', () => {
       }
     });
 
-    it('should trim and accept name with leading/trailing spaces', () => {
+    it('should trim and accept name with leading/trailing spaces', async () => {
       const payments: PaymentRecord[] = [{
         id: '550e8400-e29b-41d4-a716-446655440000',
         provider: 'Test',
@@ -391,7 +391,7 @@ describe('ArchiveService - Create Archive MVP', () => {
         autopay: false,
       }];
 
-      const result = service.createArchive('  October 2025  ', payments);
+      const result = await service.createArchive('  October 2025  ', payments);
 
       expect(result.ok).toBe(true);
       if (result.ok) {
@@ -401,8 +401,8 @@ describe('ArchiveService - Create Archive MVP', () => {
   });
 
   describe('T031: No payments error', () => {
-    it('should throw error when payment list is empty', () => {
-      const result = service.createArchive('Test Archive', []);
+    it('should throw error when payment list is empty', async () => {
+      const result = await service.createArchive('Test Archive', []);
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -413,7 +413,7 @@ describe('ArchiveService - Create Archive MVP', () => {
   });
 
   describe('T033: 50-archive limit', () => {
-    it('should throw error when 50 archives exist', () => {
+    it('should throw error when 50 archives exist', async () => {
       // Create 50 archives
       const payments: PaymentRecord[] = [{
         id: '550e8400-e29b-41d4-a716-446655440000',
@@ -425,7 +425,7 @@ describe('ArchiveService - Create Archive MVP', () => {
       }];
 
       for (let i = 0; i < MAX_ARCHIVES; i++) {
-        const result = service.createArchive(`Archive ${i}`, payments);
+        const result = await service.createArchive(`Archive ${i}`, payments);
         if (!result.ok) {
           // If we hit storage limit before 50, that's OK for this test
           break;
@@ -433,7 +433,7 @@ describe('ArchiveService - Create Archive MVP', () => {
       }
 
       // Try to create 51st archive
-      const result = service.createArchive('Archive 51', payments);
+      const result = await service.createArchive('Archive 51', payments);
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -444,7 +444,7 @@ describe('ArchiveService - Create Archive MVP', () => {
   });
 
   describe('T035: 5MB storage limit', () => {
-    it('should throw error when storage exceeds 5MB', () => {
+    it('should throw error when storage exceeds 5MB', async () => {
       // Create large payment array to exceed storage
       const largePayments: PaymentRecord[] = [];
 
@@ -464,7 +464,7 @@ describe('ArchiveService - Create Archive MVP', () => {
       // Try to create multiple large archives to exceed 5MB
       let lastResult;
       for (let i = 0; i < 20; i++) {
-        lastResult = service.createArchive(`Large Archive ${i}`, largePayments);
+        lastResult = await service.createArchive(`Large Archive ${i}`, largePayments);
         if (!lastResult.ok && lastResult.error.type === 'QuotaExceeded') {
           break;
         }
@@ -489,7 +489,7 @@ describe('ArchiveService - Create Archive MVP', () => {
       }
     });
 
-    it('should return all archive metadata from index', () => {
+    it('should return all archive metadata from index', async () => {
       // Create two archives
       const payments: PaymentRecord[] = [{
         id: '550e8400-e29b-41d4-a716-446655440000',
@@ -500,8 +500,8 @@ describe('ArchiveService - Create Archive MVP', () => {
         autopay: false,
       }];
 
-      service.createArchive('Archive 1', payments);
-      service.createArchive('Archive 2', payments);
+      await service.createArchive('Archive 1', payments);
+      await service.createArchive('Archive 2', payments);
 
       const result = service.listArchives();
 
@@ -513,7 +513,7 @@ describe('ArchiveService - Create Archive MVP', () => {
       }
     });
 
-    it('should include paymentCount in metadata', () => {
+    it('should include paymentCount in metadata', async () => {
       const payments: PaymentRecord[] = [
         {
           id: '550e8400-e29b-41d4-a716-446655440000',
@@ -533,7 +533,7 @@ describe('ArchiveService - Create Archive MVP', () => {
         },
       ];
 
-      service.createArchive('Test Archive', payments);
+      await service.createArchive('Test Archive', payments);
 
       const result = service.listArchives();
 
@@ -545,7 +545,7 @@ describe('ArchiveService - Create Archive MVP', () => {
   });
 
   describe('T054: getArchiveById()', () => {
-    it('should load full archive by ID', () => {
+    it('should load full archive by ID', async () => {
       const payments: PaymentRecord[] = [{
         id: '550e8400-e29b-41d4-a716-446655440000',
         provider: 'Test Provider',
@@ -555,7 +555,7 @@ describe('ArchiveService - Create Archive MVP', () => {
         autopay: false,
       }];
 
-      const createResult = service.createArchive('Test Archive', payments);
+      const createResult = await service.createArchive('Test Archive', payments);
       expect(createResult.ok).toBe(true);
 
       if (createResult.ok) {

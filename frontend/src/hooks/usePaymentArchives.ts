@@ -11,6 +11,7 @@
  */
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { z } from 'zod';
 import type { Archive, ArchiveIndexEntry, ArchiveError } from '@/lib/archive/types';
 import type { PaymentRecord } from '@/types/csvExport';
 import { ArchiveService } from '@/lib/archive/ArchiveService';
@@ -152,10 +153,26 @@ export function usePaymentArchives(): UsePaymentArchivesReturn {
   /**
    * Get archive by ID for detail view
    *
+   * CodeRabbit Fix: Validate input before calling service (defense in depth)
+   *
    * @param id - Archive UUID
    * @returns Full archive or null if error
    */
   const getArchiveById = useCallback((id: string): Archive | null => {
+    // Validate archiveId is non-empty UUID
+    const uuidSchema = z.string().uuid();
+    const validationResult = uuidSchema.safeParse(id);
+
+    if (!validationResult.success) {
+      const validationError: ArchiveError = {
+        type: 'Validation',
+        message: 'Invalid archive ID format. Must be a valid UUID.',
+        archiveId: id,
+      };
+      setError(validationError);
+      return null;
+    }
+
     const result = archiveService.getArchiveById(id);
 
     if (result.ok) {

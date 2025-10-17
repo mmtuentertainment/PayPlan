@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePaymentArchives } from '@/hooks/usePaymentArchives';
 import type { Archive } from '@/lib/archive/types';
-import { archiveSchema } from '@/lib/archive/validation';
+import { archiveSchema, archiveMetadataSchema } from '@/lib/archive/validation';
 
 /**
  * Format ISO date to readable format
@@ -131,7 +131,26 @@ export function ArchiveDetailView() {
     );
   }
 
-  const { name, createdAt, payments, metadata } = archive;
+  const { name, createdAt, payments } = archive;
+
+  // CodeRabbit Fix: Validate metadata before rendering to prevent NaN
+  const validatedMetadata = archiveMetadataSchema.safeParse(archive.metadata);
+
+  // Use validated values or safe defaults
+  const metadata = validatedMetadata.success
+    ? validatedMetadata.data
+    : {
+        totalCount: 0,
+        paidCount: 0,
+        pendingCount: 0,
+        dateRange: { earliest: null, latest: null },
+        storageSize: 0,
+      };
+
+  // Log validation errors for debugging
+  if (!validatedMetadata.success) {
+    console.warn('Archive metadata validation failed:', validatedMetadata.error.format());
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -149,7 +168,7 @@ export function ArchiveDetailView() {
           Created {formatDate(createdAt)}
         </p>
 
-        {/* Metadata Summary */}
+        {/* Metadata Summary - CodeRabbit Fix: Safe defaults prevent NaN */}
         <div className="flex gap-6 text-sm">
           <div>
             <span className="text-gray-600">Total Payments:</span>{' '}

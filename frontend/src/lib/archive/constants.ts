@@ -36,7 +36,8 @@ export function getArchiveKey(archiveId: string): string {
   // Validate UUID v4 format before concatenating
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(archiveId)) {
-    throw new Error('Invalid archive ID');
+    // CodeRabbit Fix: Use ERROR_MESSAGES constant instead of hardcoded string
+    throw new Error(ERROR_MESSAGES.INVALID_ARCHIVE_ID);
   }
   return `${ARCHIVE_KEY_PREFIX}${archiveId}`;
 }

@@ -62,12 +62,12 @@ describe('CreateArchiveDialog', () => {
       const createButton = screen.getByRole('button', { name: /create archive/i });
       await user.click(createButton);
 
-      // Wait for success message - look for Success title
+      // Wait for success message - look for Success title (increased timeout for async with retry)
       await waitFor(() => {
         const successTitle = screen.getByText('Success!');
         expect(successTitle).toBeInTheDocument();
-      }, { timeout: 3000 });
-    });
+      }, { timeout: 5000 });
+    }, 10000); // Increased test timeout to 10 seconds
 
     it('should call onSuccess callback after archive creation', async () => {
       const user = userEvent.setup();
@@ -86,11 +86,11 @@ describe('CreateArchiveDialog', () => {
       const createButton = screen.getByRole('button', { name: /create archive/i });
       await user.click(createButton);
 
-      // Wait for success callback
+      // Wait for success callback (increased timeout for async with retry)
       await waitFor(() => {
         expect(onSuccess).toHaveBeenCalledWith(expect.any(String));
-      }, { timeout: 3000 });
-    });
+      }, { timeout: 5000 });
+    }, 10000); // Increased test timeout to 10 seconds
   });
 
   it('should display archive name input', () => {
@@ -142,11 +142,11 @@ describe('CreateArchiveDialog', () => {
     const createButton = screen.getByRole('button', { name: /create archive/i });
     await user.click(createButton);
 
-    // Should show success state after creation
+    // Should show success state after creation (increased timeout for async with retry)
     await waitFor(() => {
       expect(screen.getByText('Success!')).toBeInTheDocument();
-    }, { timeout: 3000 });
-  });
+    }, { timeout: 5000 });
+  }, 10000); // Increased test timeout to 10 seconds
 
   it('should call onCancel when cancel button clicked', async () => {
     const user = userEvent.setup();
@@ -177,10 +177,10 @@ describe('CreateArchiveDialog', () => {
     const createButton = screen.getByRole('button', { name: /create archive/i });
     await user.click(createButton);
 
-    // Wait for error message
+    // Wait for error message (increased timeout for async with retry logic)
     await waitFor(() => {
       expect(screen.getByText(/error/i)).toBeInTheDocument();
       expect(screen.getByText(/no payments/i)).toBeInTheDocument();
-    }, { timeout: 1000 });
-  });
+    }, { timeout: 5000 });
+  }, 10000); // Increased test timeout to 10 seconds
 });

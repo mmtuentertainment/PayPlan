@@ -69,16 +69,16 @@ export class ArchiveService {
    * 3. Calculate metadata (counts, date range, size)
    * 4. Ensure unique name (auto-append " (2)" if needed)
    * 5. Save archive to storage
-   * 6. Reset payment statuses to pending
+   * 6. Reset payment statuses to pending (with retry logic)
    *
    * @param name - User-provided archive name
    * @param payments - Current payment records from app state
-   * @returns Result<Archive, ArchiveError> - Created archive or error
+   * @returns Promise<Result<Archive, ArchiveError>> - Created archive or error
    */
-  createArchive(
+  async createArchive(
     name: string,
     payments: PaymentRecord[]
-  ): Result<Archive, ArchiveError> {
+  ): Promise<Result<Archive, ArchiveError>> {
     // Validate name (T030)
     const nameValidation = validateArchiveName(name);
     if (!nameValidation.ok) {
@@ -191,20 +191,65 @@ export class ArchiveService {
     });
 
     if (!updateIndexResult.ok) {
-      // Rollback: delete archive if index update fails
-      // Note: We don't have deleteArchive yet, but this is the intent
-      return updateIndexResult;
+      // CRITICAL: Rollback - delete orphaned archive if index update fails
+      console.warn(`Index update failed for archive ${archive.id}, performing rollback`);
+      const deleteResult = this.archiveStorage.deleteArchive(archive.id);
+
+      if (!deleteResult.ok) {
+        console.error(`Rollback failed: Could not delete orphaned archive ${archive.id}`);
+      } else {
+        console.info(`Rollback successful: Deleted orphaned archive ${archive.id}`);
+      }
+
+      // Return the original index update error with rollback context
+      return {
+        ok: false,
+        error: {
+          ...updateIndexResult.error,
+          message: `${updateIndexResult.error.message} (Archive was rolled back)`,
+        },
+      };
     }
 
-    // Reset payment statuses (T028)
-    const clearResult = this.paymentStatusStorage.clearAll();
-    if (!clearResult.ok) {
-      // Archive was saved but status reset failed
-      // Log warning but return success (archive creation succeeded)
-      console.warn('Archive created but failed to reset payment statuses:', clearResult.error);
-    }
+    // Reset payment statuses (T028) with retry logic for better UX
+    // Note: Archive was successfully created, so we always return success
+    // even if status reset fails after retries
+    await this.resetPaymentStatusesWithRetry();
 
     return { ok: true, value: archive };
+  }
+
+  /**
+   * Reset payment statuses with retry logic
+   *
+   * Attempts to clear payment statuses up to 3 times with delays.
+   * Always resolves (doesn't throw) since archive creation already succeeded.
+   * Logs warning only if all retries fail.
+   *
+   * @private
+   */
+  private async resetPaymentStatusesWithRetry(): Promise<void> {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 100;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      const clearResult = this.paymentStatusStorage.clearAll();
+
+      if (clearResult.ok) {
+        if (attempt > 1) {
+          console.info(`Payment statuses reset succeeded on attempt ${attempt}`);
+        }
+        return; // Success
+      }
+
+      // If not the last attempt, wait before retrying
+      if (attempt < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+      }
+    }
+
+    // All retries failed - log warning but don't throw (archive creation succeeded)
+    console.warn(`Failed to reset payment statuses after ${MAX_RETRIES} attempts. Archive was created successfully.`);
   }
 
   /**
@@ -381,8 +426,9 @@ export class ArchiveService {
   listArchives(): Result<ArchiveIndexEntry[], ArchiveError> {
     const indexResult = this.archiveStorage.loadArchiveIndex();
 
+    // CodeRabbit Fix: Proper error propagation without unsafe type assertion
     if (!indexResult.ok) {
-      return indexResult as Result<never, ArchiveError>;
+      return { ok: false, error: indexResult.error };
     }
 
     return { ok: true, value: indexResult.value.archives };
