@@ -16,12 +16,14 @@ import { Link } from 'react-router-dom';
 interface Props {
   children: ReactNode;
   archiveName?: string;
+  resetKeys?: unknown[]; // Optional: Keys to watch for reset
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
+  prevResetKeys?: unknown[];
 }
 
 /**
@@ -51,12 +53,33 @@ export class ArchiveErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
+      prevResetKeys: props.resetKeys,
     };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     // Update state so the next render will show the fallback UI
     return { hasError: true, error };
+  }
+
+  static getDerivedStateFromProps(props: Props, state: State): Partial<State> | null {
+    // Reset error boundary when resetKeys change (allows external reset)
+    if (props.resetKeys && state.prevResetKeys) {
+      const hasResetKeysChanged = props.resetKeys.some(
+        (key, index) => key !== state.prevResetKeys?.[index]
+      );
+
+      if (hasResetKeysChanged) {
+        return {
+          hasError: false,
+          error: null,
+          errorInfo: null,
+          prevResetKeys: props.resetKeys,
+        };
+      }
+    }
+
+    return null;
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {

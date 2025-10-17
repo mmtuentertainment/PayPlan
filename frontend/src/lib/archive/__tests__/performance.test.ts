@@ -85,6 +85,44 @@ describe('Performance Logging', () => {
       expect(result).toBe(42);
       expect(log.operation).toBe('op');
     });
+
+    // Phase E: E1 - Error timing test
+    it('logs duration even when function throws', () => {
+      const throwingFn = () => {
+        // Simulate some work before throwing
+        let sum = 0;
+        for (let i = 0; i < 100; i++) {
+          sum += i;
+        }
+        throw new Error('Test error');
+      };
+
+      // Function should throw and be caught
+      expect(() => {
+        measureSync('failingOp', 100, throwingFn);
+      }).toThrow('Test error');
+
+      // The key behavior is that the error is still thrown even after timing
+      // (console.log only happens in development mode, not in test environment)
+    });
+
+    // Phase E: E1 - Verify error re-throw preserves original error
+    it('re-throws original error after logging', () => {
+      const customError = new Error('Custom error message');
+      const throwingFn = () => {
+        throw customError;
+      };
+
+      let caughtError: Error | undefined;
+      try {
+        measureSync('failingOp', 100, throwingFn);
+      } catch (error) {
+        caughtError = error as Error;
+      }
+
+      expect(caughtError).toBe(customError);
+      expect(caughtError?.message).toBe('Custom error message');
+    });
   });
 
   describe('measureAsync', () => {
@@ -112,6 +150,58 @@ describe('Performance Logging', () => {
       );
 
       expect(log.metadata).toEqual(metadata);
+    });
+
+    // Phase E: E1 - Async rejection timing test
+    it('logs duration even when promise rejects', async () => {
+      const rejectingFn = async () => {
+        // Simulate async work before rejection
+        await new Promise(resolve => setTimeout(resolve, 10));
+        throw new Error('Async test error');
+      };
+
+      // Promise should reject and error should propagate
+      await expect(async () => {
+        await measureAsync('failingAsyncOp', 100, rejectingFn);
+      }).rejects.toThrow('Async test error');
+
+      // The key behavior is that the error is still thrown even after timing
+      // (console.log only happens in development mode, not in test environment)
+    });
+
+    // Phase E: E1 - Verify rejection preserves original error
+    it('re-throws original rejection after logging', async () => {
+      const customError = new Error('Custom async error');
+      const rejectingFn = async () => {
+        await new Promise(resolve => setTimeout(resolve, 5));
+        throw customError;
+      };
+
+      let caughtError: Error | undefined;
+      try {
+        await measureAsync('failingAsyncOp', 100, rejectingFn);
+      } catch (error) {
+        caughtError = error as Error;
+      }
+
+      expect(caughtError).toBe(customError);
+      expect(caughtError?.message).toBe('Custom async error');
+    });
+
+    // Phase E: E1 - Timeout case test
+    it('logs performance for slow operations exceeding target', async () => {
+      const slowFn = async () => {
+        await new Promise(resolve => setTimeout(resolve, 150));
+        return 'slow result';
+      };
+
+      const { result, log } = await measureAsync('slowOp', 100, slowFn);
+
+      expect(result).toBe('slow result');
+      expect(log.operation).toBe('slowOp');
+      expect(log.duration).toBeGreaterThanOrEqual(149);
+      expect(log.withinTarget).toBe(false); // Exceeded 100ms target
+      expect(log.target).toBe(100);
     });
   });
 

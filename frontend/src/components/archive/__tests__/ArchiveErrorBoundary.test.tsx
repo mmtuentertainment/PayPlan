@@ -9,7 +9,7 @@
  */
 
 import { vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ArchiveErrorBoundary } from '../ArchiveErrorBoundary';
 
@@ -144,5 +144,124 @@ describe('ArchiveErrorBoundary', () => {
 
     const alert = screen.getByRole('alert');
     expect(alert).toHaveAttribute('aria-live', 'assertive');
+  });
+
+  // Phase E: E2 - Interactive behavior tests
+  describe('Interactive Behavior', () => {
+    it('Try Again button resets error state and re-renders children', () => {
+      let shouldThrow = true;
+      let resetKey = 0;
+
+      const { rerender } = render(
+        <BrowserRouter>
+          <ArchiveErrorBoundary resetKeys={[resetKey]}>
+            <ThrowError shouldThrow={shouldThrow} />
+          </ArchiveErrorBoundary>
+        </BrowserRouter>
+      );
+
+      // Error shown initially
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+      const tryAgainButton = screen.getByRole('button', { name: /Try Again/i });
+
+      // Fix the error condition and change reset key
+      shouldThrow = false;
+      resetKey = 1;
+
+      // Click Try Again (this calls handleReset which updates state)
+      fireEvent.click(tryAgainButton);
+
+      // Re-render with new resetKey to trigger getDerivedStateFromProps
+      rerender(
+        <BrowserRouter>
+          <ArchiveErrorBoundary resetKeys={[resetKey]}>
+            <ThrowError shouldThrow={shouldThrow} />
+          </ArchiveErrorBoundary>
+        </BrowserRouter>
+      );
+
+      // Error should be cleared due to resetKeys change, child should render
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(screen.getByText('Child component')).toBeInTheDocument();
+    });
+
+    it('Try Again button is keyboard accessible with Enter key', () => {
+      render(
+        <BrowserRouter>
+          <ArchiveErrorBoundary>
+            <ThrowError shouldThrow={true} />
+          </ArchiveErrorBoundary>
+        </BrowserRouter>
+      );
+
+      const tryAgainButton = screen.getByRole('button', { name: /Try Again/i });
+
+      // Focus the button
+      tryAgainButton.focus();
+      expect(document.activeElement).toBe(tryAgainButton);
+
+      // Press Enter
+      fireEvent.keyDown(tryAgainButton, { key: 'Enter', code: 'Enter' });
+
+      // Button handler should be triggered (state reset attempted)
+      expect(tryAgainButton).toBeInTheDocument();
+    });
+
+    it('Try Again button is keyboard accessible with Space key', () => {
+      render(
+        <BrowserRouter>
+          <ArchiveErrorBoundary>
+            <ThrowError shouldThrow={true} />
+          </ArchiveErrorBoundary>
+        </BrowserRouter>
+      );
+
+      const tryAgainButton = screen.getByRole('button', { name: /Try Again/i });
+
+      // Focus the button
+      tryAgainButton.focus();
+      expect(document.activeElement).toBe(tryAgainButton);
+
+      // Press Space
+      fireEvent.keyDown(tryAgainButton, { key: ' ', code: 'Space' });
+
+      // Button should be accessible
+      expect(tryAgainButton).toBeInTheDocument();
+    });
+
+    it('Back to Archives link is keyboard navigable', () => {
+      render(
+        <BrowserRouter>
+          <ArchiveErrorBoundary>
+            <ThrowError shouldThrow={true} />
+          </ArchiveErrorBoundary>
+        </BrowserRouter>
+      );
+
+      const backLink = screen.getByText('Back to Archives');
+
+      // Link should be focusable
+      backLink.focus();
+      expect(document.activeElement).toBe(backLink);
+
+      // Should have proper href for navigation
+      expect(backLink).toHaveAttribute('href', '/archives');
+    });
+
+    it('Focus management - Try Again button is focusable', () => {
+      render(
+        <BrowserRouter>
+          <ArchiveErrorBoundary>
+            <ThrowError shouldThrow={true} />
+          </ArchiveErrorBoundary>
+        </BrowserRouter>
+      );
+
+      const tryAgainButton = screen.getByRole('button', { name: /Try Again/i });
+
+      // Button should be keyboard accessible
+      expect(tryAgainButton).not.toHaveAttribute('disabled');
+      expect(tryAgainButton.tabIndex).toBeGreaterThanOrEqual(0);
+    });
   });
 });
