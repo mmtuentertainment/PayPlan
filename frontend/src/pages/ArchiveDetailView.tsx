@@ -24,6 +24,7 @@ import { ArchiveStatistics } from '@/components/archive/ArchiveStatistics';
 import { ExportArchiveButton } from '@/components/archive/ExportArchiveButton';
 import { DeleteArchiveDialog } from '@/components/archive/DeleteArchiveDialog';
 import { ArchiveErrorBoundary } from '@/components/archive/ArchiveErrorBoundary';
+import { ROUTES } from '@/routes';
 
 /**
  * Format ISO date to readable format
@@ -156,7 +157,7 @@ function ArchiveDetailViewContent() {
 
     if (success) {
       // Redirect to archive list after successful deletion
-      navigate('/archives');
+      navigate(ROUTES.ARCHIVES);
     }
   };
 
@@ -184,7 +185,7 @@ function ArchiveDetailViewContent() {
     return (
       <div className="max-w-6xl mx-auto p-6">
         <Link
-          to="/archives"
+          to={ROUTES.ARCHIVES}
           className="inline-block mb-4 text-blue-500 hover:text-blue-600"
         >
           ← Back to Archives
@@ -208,7 +209,7 @@ function ArchiveDetailViewContent() {
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
       <Link
-        to="/archives"
+        to={ROUTES.ARCHIVES}
         className="inline-block mb-4 text-blue-500 hover:text-blue-600"
       >
         ← Back to Archives

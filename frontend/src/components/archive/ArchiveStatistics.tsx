@@ -110,60 +110,70 @@ export function ArchiveStatistics({ summary }: ArchiveStatisticsProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-      <h2 className="text-xl font-semibold mb-4">Statistics</h2>
+    <section
+      className="bg-white rounded-lg shadow-sm border p-6 mb-6"
+      aria-labelledby="archive-statistics-heading"
+    >
+      <h2 id="archive-statistics-heading" className="text-xl font-semibold mb-4">
+        Statistics
+      </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Phase F: F1 - Semantic HTML with description list */}
+      <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Payments */}
         <div className="flex flex-col">
-          <span className="text-sm text-gray-600 mb-1">Total Payments</span>
-          <span className="text-2xl font-bold text-gray-900">{totalCount}</span>
+          <dt className="text-sm text-gray-600 mb-1">Total Payments</dt>
+          <dd className="text-2xl font-bold text-gray-900">{totalCount}</dd>
         </div>
 
         {/* Paid Count with Percentage */}
         <div className="flex flex-col">
-          <span className="text-sm text-gray-600 mb-1">Paid</span>
-          <div className="flex items-baseline gap-2">
+          <dt className="text-sm text-gray-600 mb-1">Paid</dt>
+          <dd className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-green-600">{paidCount}</span>
             <span className="text-sm text-gray-500">
               ({formatPercentage(paidPercentage)}%)
             </span>
-          </div>
+          </dd>
         </div>
 
         {/* Pending Count with Percentage */}
         <div className="flex flex-col">
-          <span className="text-sm text-gray-600 mb-1">Pending</span>
-          <div className="flex items-baseline gap-2">
+          <dt className="text-sm text-gray-600 mb-1">Pending</dt>
+          <dd className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-yellow-600">{pendingCount}</span>
             <span className="text-sm text-gray-500">
               ({formatPercentage(pendingPercentage)}%)
             </span>
-          </div>
+          </dd>
         </div>
 
         {/* Average Amount */}
         <div className="flex flex-col">
-          <span className="text-sm text-gray-600 mb-1">Average Amount</span>
-          {averageAmount !== undefined && currency ? (
-            <span className="text-2xl font-bold text-gray-900">
-              {formatCurrency(averageAmount, currency)}
-            </span>
-          ) : (
-            <span className="text-sm text-gray-400 italic">Multiple currencies</span>
-          )}
+          <dt className="text-sm text-gray-600 mb-1">Average Amount</dt>
+          <dd>
+            {averageAmount !== undefined && currency ? (
+              <span className="text-2xl font-bold text-gray-900">
+                {formatCurrency(averageAmount, currency)}
+              </span>
+            ) : (
+              <span className="text-sm text-gray-400 italic">Multiple currencies</span>
+            )}
+          </dd>
         </div>
-      </div>
+      </dl>
 
       {/* Date Range */}
       {(dateRange.earliest || dateRange.latest) && (
-        <div className="mt-6 pt-6 border-t">
-          <span className="text-sm text-gray-600">Date Range: </span>
-          <span className="text-sm font-medium text-gray-900">
-            {formatDateRange(dateRange.earliest, dateRange.latest)}
-          </span>
-        </div>
+        <dl className="mt-6 pt-6 border-t">
+          <div className="flex gap-2">
+            <dt className="text-sm text-gray-600">Date Range:</dt>
+            <dd className="text-sm font-medium text-gray-900">
+              {formatDateRange(dateRange.earliest, dateRange.latest)}
+            </dd>
+          </div>
+        </dl>
       )}
-    </div>
+    </section>
   );
 }

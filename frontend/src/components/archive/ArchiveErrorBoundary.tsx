@@ -12,6 +12,8 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { ROUTES } from '@/routes';
+import { isCorruptedDataError } from '@/lib/archive/errors';
 
 interface Props {
   children: ReactNode;
@@ -120,16 +122,23 @@ export class ArchiveErrorBoundary extends Component<Props, State> {
         ? archiveName.substring(0, 20) + (archiveName.length > 20 ? '...' : '')
         : 'Unknown archive';
 
-      // Determine error type for better messaging
-      const isCorruptedData = error?.message?.includes('JSON') ||
-                              error?.message?.includes('parse') ||
-                              error?.message?.includes('validation');
+      // Determine error type using instanceof instead of string matching
+      const isCorruptedData = error ? isCorruptedDataError(error) : false;
 
-      const errorTitle = isCorruptedData
+      // Fallback to string matching for backward compatibility with non-typed errors
+      const isCorruptedDataFallback = !isCorruptedData && error?.message && (
+        error.message.includes('JSON') ||
+        error.message.includes('parse') ||
+        error.message.includes('validation')
+      );
+
+      const showCorruptedDataError = isCorruptedData || isCorruptedDataFallback;
+
+      const errorTitle = showCorruptedDataError
         ? 'Archive Data Error'
         : 'Archive Loading Error';
 
-      const errorMessage = isCorruptedData
+      const errorMessage = showCorruptedDataError
         ? 'This archive appears to be corrupted or contains invalid data. The archive may need to be deleted and recreated.'
         : 'An unexpected error occurred while loading this archive.';
 
@@ -185,7 +194,7 @@ export class ArchiveErrorBoundary extends Component<Props, State> {
             {/* Action buttons */}
             <div className="flex gap-3 mt-4">
               <Link
-                to="/archives"
+                to={ROUTES.ARCHIVES}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
               >
                 Back to Archives

@@ -214,4 +214,117 @@ describe('ArchiveStatistics Component', () => {
     const grid = container.querySelector('.grid');
     expect(grid).toBeInTheDocument();
   });
+
+  // Phase F: F3 - Financial edge case tests
+  describe('Financial Edge Cases', () => {
+    it('should handle repeating decimals (1/3 = 33.33%)', () => {
+      const summary: ArchiveSummary = {
+        totalCount: 3,
+        paidCount: 1,
+        pendingCount: 2,
+        paidPercentage: 33.333333333,  // Repeating decimal
+        pendingPercentage: 66.666666667,  // Repeating decimal
+        dateRange: {
+          earliest: '2025-10-01',
+          latest: '2025-10-31',
+        },
+      };
+
+      render(<ArchiveStatistics summary={summary} />);
+
+      // Should round to 1 decimal place
+      expect(screen.getByText('(33.3%)')).toBeInTheDocument();
+      expect(screen.getByText('(66.7%)')).toBeInTheDocument();
+    });
+
+    it('should handle large amounts (999,999,999.99)', () => {
+      const summary: ArchiveSummary = {
+        totalCount: 1,
+        paidCount: 1,
+        pendingCount: 0,
+        paidPercentage: 100.0,
+        pendingPercentage: 0.0,
+        dateRange: {
+          earliest: '2025-10-01',
+          latest: '2025-10-31',
+        },
+        averageAmount: 999999999.99,  // Maximum realistic amount
+        currency: 'USD',
+      };
+
+      render(<ArchiveStatistics summary={summary} />);
+
+      // Intl.NumberFormat should handle large numbers with proper formatting
+      // USD format with commas: $999,999,999.99
+      expect(screen.getByText(/\$999,999,999\.99/)).toBeInTheDocument();
+    });
+
+    it('should handle 3-decimal currencies (BHD - Bahraini Dinar)', () => {
+      const summary: ArchiveSummary = {
+        totalCount: 1,
+        paidCount: 1,
+        pendingCount: 0,
+        paidPercentage: 100.0,
+        pendingPercentage: 0.0,
+        dateRange: {
+          earliest: '2025-10-01',
+          latest: '2025-10-31',
+        },
+        averageAmount: 45.500,  // BHD uses 3 decimal places
+        currency: 'BHD',
+      };
+
+      render(<ArchiveStatistics summary={summary} />);
+
+      // Intl.NumberFormat should handle BHD with 3 decimals
+      // BHD format: "BHD 45.500" or "45.500 د.ب" (depends on locale)
+      expect(screen.getByText(/45\.5/)).toBeInTheDocument();
+    });
+
+    it('should handle zero average amount by omitting it', () => {
+      const summary: ArchiveSummary = {
+        totalCount: 1,
+        paidCount: 1,
+        pendingCount: 0,
+        paidPercentage: 100.0,
+        pendingPercentage: 0.0,
+        dateRange: {
+          earliest: '2025-10-01',
+          latest: '2025-10-31',
+        },
+        // averageAmount: 0.00 would fail validation (must be positive)
+        // Instead, omit it (treated as undefined/no data)
+        averageAmount: undefined,
+        currency: undefined,
+      };
+
+      render(<ArchiveStatistics summary={summary} />);
+
+      // Should show "Multiple currencies" when no average available
+      expect(screen.getByText('Multiple currencies')).toBeInTheDocument();
+    });
+
+    it('should handle non-standard currency code (XXX) with Intl fallback', () => {
+      const summary: ArchiveSummary = {
+        totalCount: 1,
+        paidCount: 1,
+        pendingCount: 0,
+        paidPercentage: 100.0,
+        pendingPercentage: 0.0,
+        dateRange: {
+          earliest: '2025-10-01',
+          latest: '2025-10-31',
+        },
+        averageAmount: 100.00,
+        currency: 'XXX',  // Valid 3-letter code, Intl may use generic symbol
+      };
+
+      const { container } = render(<ArchiveStatistics summary={summary} />);
+
+      // Intl.NumberFormat handles XXX with generic currency symbol (¤)
+      // Verify the amount is displayed (may show as "¤100.00" or "XXX 100.00")
+      expect(container.textContent).toMatch(/100/);
+      // The formatting is handled by Intl.NumberFormat, actual output varies by environment
+    });
+  });
 });
