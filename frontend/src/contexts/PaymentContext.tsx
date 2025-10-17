@@ -42,8 +42,9 @@ const defaultContext: PaymentContextType = {
 
 /**
  * Payment Context for sharing payment data
+ * Using undefined default to enable proper hook validation
  */
-export const PaymentContext = createContext<PaymentContextType>(defaultContext);
+export const PaymentContext = createContext<PaymentContextType | undefined>(undefined);
 
 /**
  * Hook to access payment context
@@ -62,7 +63,8 @@ export const PaymentContext = createContext<PaymentContextType>(defaultContext);
 export function usePaymentContext(): PaymentContextType {
   const context = useContext(PaymentContext);
 
-  if (!context) {
+  // CodeRabbit Fix: Proper undefined check (not !context which never triggers with defaultContext)
+  if (context === undefined) {
     throw new Error('usePaymentContext must be used within PaymentContextProvider');
   }
 

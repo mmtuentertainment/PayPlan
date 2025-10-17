@@ -20,6 +20,7 @@ npm test [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNO
 TypeScript 5.8 (frontend), Node.js 20.x (backend): Follow standard conventions
 
 ## Recent Changes
+- 016-build-a-payment: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 - 015-build-a-payment: Added TypeScript 5.8.3 (frontend), Node.js 20.x (backend) + React 19.1.1, Zod 4.1.11 (validation), uuid 13.0.0 (unique IDs), Vitest 3.2.4 (testing)
 - 014-build-a-csv: Added TypeScript 5.8 (frontend), Node.js 20.x (backend) + React 19, PapaParse 5.5.3 (CSV generation), Zod 4.1.11 (validation)
 

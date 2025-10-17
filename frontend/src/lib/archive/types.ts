@@ -63,14 +63,16 @@ export interface PaymentArchiveRecord {
  * Represents the span of payment dates within an archive.
  * Used for displaying "Date Range: Oct 1-31, 2025" in statistics.
  *
- * @property earliest - Earliest payment due date (YYYY-MM-DD)
- * @property latest - Latest payment due date (YYYY-MM-DD)
+ * CodeRabbit Fix: Made nullable to handle empty archives safely
+ *
+ * @property earliest - Earliest payment due date (YYYY-MM-DD) or null if no payments
+ * @property latest - Latest payment due date (YYYY-MM-DD) or null if no payments
  *
  * @see data-model.md Section: DateRange
  */
 export interface DateRange {
-  earliest: string;
-  latest: string;
+  earliest: string | null;
+  latest: string | null;
 }
 
 /**

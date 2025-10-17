@@ -17,28 +17,43 @@ import {
   MAX_NAME_LENGTH,
   SCHEMA_VERSION,
   INDEX_SCHEMA_VERSION,
+  MAX_ARCHIVES,
 } from './constants';
+
+/**
+ * CodeRabbit Fix: Result type moved to top for proper usage order
+ */
+export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 
 /**
  * DateRange validation schema
  *
+ * CodeRabbit Fix: Made fields nullable and added actual date validation
  * Validates ISO 8601 date strings (YYYY-MM-DD format).
  * Ensures earliest <= latest for chronological ordering.
  */
 export const dateRangeSchema = z.object({
-  earliest: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD format'),
-  latest: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD format'),
+  earliest: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD format').nullable(),
+  latest: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD format').nullable(),
 }).refine(
   (data) => {
-    if (!data.earliest || !data.latest) return true; // Empty allowed
+    if (!data.earliest || !data.latest) return true; // Null/empty allowed
+    // Validate actual dates exist (not 2024-02-31)
+    const earliestDate = new Date(data.earliest + 'T00:00:00Z');
+    const latestDate = new Date(data.latest + 'T00:00:00Z');
+    if (isNaN(earliestDate.getTime()) || isNaN(latestDate.getTime())) {
+      return false; // Invalid dates
+    }
+    // Ensure chronological order
     return data.earliest <= data.latest;
   },
-  { message: 'earliest date must be before or equal to latest date' }
+  { message: 'earliest date must be before or equal to latest date and both must be valid dates' }
 );
 
 /**
  * ArchiveMetadata validation schema
  *
+ * CodeRabbit Fix: Removed redundant refine checks (sum check covers <= checks)
  * Ensures metadata consistency: paidCount + pendingCount === totalCount.
  */
 export const archiveMetadataSchema = z.object({
@@ -50,17 +65,12 @@ export const archiveMetadataSchema = z.object({
 }).refine(
   (data) => data.paidCount + data.pendingCount === data.totalCount,
   { message: 'paidCount + pendingCount must equal totalCount' }
-).refine(
-  (data) => data.paidCount <= data.totalCount,
-  { message: 'paidCount cannot exceed totalCount' }
-).refine(
-  (data) => data.pendingCount <= data.totalCount,
-  { message: 'pendingCount cannot exceed totalCount' }
 );
 
 /**
  * PaymentArchiveRecord validation schema
  *
+ * CodeRabbit Fixes: Added decimal precision, risk field constraints
  * Validates combined payment status + payment details snapshot.
  * Follows PaymentRecord structure from Feature 014.
  */
@@ -72,28 +82,44 @@ export const paymentArchiveRecordSchema = z.object({
 
   // Payment fields (from Feature 014 PaymentRecord)
   provider: z.string().min(1, 'Provider name required').max(255),
-  amount: z.number().positive('Amount must be positive'),
+  amount: z.number()
+    .positive('Amount must be positive')
+    .refine(
+      (val) => Number.isInteger(val * 100),
+      { message: 'Amount must have at most 2 decimal places' }
+    ),
   currency: z.string().length(3, 'Currency must be 3-letter ISO 4217 code').regex(/^[A-Z]{3}$/),
   dueISO: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Due date must be YYYY-MM-DD'),
   autopay: z.boolean(),
 
-  // Optional risk fields
-  risk_type: z.string().optional(),
-  risk_severity: z.string().optional(),
-  risk_message: z.string().optional(),
+  // Optional risk fields - CodeRabbit: Added constraints for security
+  risk_type: z.string()
+    .max(200, 'Risk type must be under 200 characters')
+    .regex(/^[^<>]*$/, 'Risk type cannot contain HTML tags')
+    .optional(),
+  risk_severity: z.enum(['low', 'medium', 'high', 'critical', ''])
+    .or(z.string().length(0))
+    .optional(),
+  risk_message: z.string()
+    .max(500, 'Risk message must be under 500 characters')
+    .regex(/^[^<>]*$/, 'Risk message cannot contain HTML tags')
+    .optional(),
 });
 
 /**
  * Archive validation schema
  *
+ * CodeRabbit Fix: Use preprocess for trim (before min/max checks)
  * Validates complete archive structure with immutable snapshot.
  */
 export const archiveSchema = z.object({
   id: z.string().uuid('Archive ID must be UUID v4'),
-  name: z.string()
-    .min(MIN_NAME_LENGTH, `Archive name must be at least ${MIN_NAME_LENGTH} character`)
-    .max(MAX_NAME_LENGTH, `Archive name must be under ${MAX_NAME_LENGTH} characters`)
-    .transform((name) => name.trim()), // Auto-trim whitespace
+  name: z.preprocess(
+    (val) => typeof val === 'string' ? val.trim() : val,
+    z.string()
+      .min(MIN_NAME_LENGTH, `Archive name must be at least ${MIN_NAME_LENGTH} characters`)
+      .max(MAX_NAME_LENGTH, `Archive name must be under ${MAX_NAME_LENGTH} characters`)
+  ),
   createdAt: z.string().datetime('Created timestamp must be ISO 8601'),
   sourceVersion: z.string().regex(/^\d+\.\d+\.\d+$/, 'Must be semantic version (e.g., "1.0.0")'),
   payments: z.array(paymentArchiveRecordSchema),
@@ -123,15 +149,19 @@ export const archiveIndexEntrySchema = z.object({
 /**
  * ArchiveIndex validation schema
  *
+ * CodeRabbit Fixes: Use MAX_ARCHIVES constant, validate version literal
  * Validates archive index structure stored in localStorage.
  */
 export const archiveIndexSchema = z.object({
-  version: z.string().regex(/^\d+\.\d+\.\d+$/, 'Must be semantic version'),
+  version: z.string().refine(
+    (v) => v === INDEX_SCHEMA_VERSION,
+    { message: `Version must match INDEX_SCHEMA_VERSION (${INDEX_SCHEMA_VERSION})` }
+  ),
   archives: z.array(archiveIndexEntrySchema),
   lastModified: z.string().datetime('Last modified must be ISO 8601'),
 }).refine(
-  (data) => data.archives.length <= 50, // MAX_ARCHIVES
-  { message: 'Archive index cannot contain more than 50 archives' }
+  (data) => data.archives.length <= MAX_ARCHIVES,
+  { message: `Archive index cannot contain more than ${MAX_ARCHIVES} archives` }
 );
 
 /**
@@ -165,35 +195,37 @@ export function validateArchiveName(name: string): Result<string, { message: str
 /**
  * UUID v4 validation helper
  *
+ * CodeRabbit Fix: Use Zod for consistent validation
+ *
  * @param id - String to validate
  * @returns true if valid UUID v4
  */
-export function isValidArchiveId(id: string): boolean {
-  const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidV4Regex.test(id);
-}
+const uuidSchema = z.string().uuid();
 
-/**
- * Result type for validation
- */
-type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
+export function isValidArchiveId(id: string): boolean {
+  return uuidSchema.safeParse(id).success;
+}
 
 /**
  * Validate and parse archive from unknown data
  *
+ * CodeRabbit Fix: Proper Zod return type (not any)
+ *
  * @param data - Data to validate
  * @returns Validated archive or error
  */
-export function validateArchive(data: unknown): { success: boolean; data?: any; error?: any } {
+export function validateArchive(data: unknown): z.SafeParseReturnType<unknown, z.infer<typeof archiveSchema>> {
   return archiveSchema.safeParse(data);
 }
 
 /**
  * Validate and parse archive index from unknown data
  *
+ * CodeRabbit Fix: Proper Zod return type (not any)
+ *
  * @param data - Data to validate
  * @returns Validated index or error
  */
-export function validateArchiveIndex(data: unknown): { success: boolean; data?: any; error?: any } {
+export function validateArchiveIndex(data: unknown): z.SafeParseReturnType<unknown, z.infer<typeof archiveIndexSchema>> {
   return archiveIndexSchema.safeParse(data);
 }

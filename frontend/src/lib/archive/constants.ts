@@ -13,6 +13,8 @@
  * - Feature 016: 'payplan_archive_index', 'payplan_archive_{id}'
  */
 
+import type { DateRange } from './types';
+
 /**
  * localStorage Keys
  */
@@ -60,8 +62,8 @@ export const INDEX_SCHEMA_VERSION = '1.0.0';
  * Archive Name Constraints
  */
 
-/** Minimum archive name length (after trimming) */
-export const MIN_NAME_LENGTH = 1;
+/** Minimum archive name length (after trimming) - CodeRabbit: Changed from 1 to 3 for financial records */
+export const MIN_NAME_LENGTH = 3;
 
 /** Maximum archive name length (supports long Unicode names) */
 export const MAX_NAME_LENGTH = 100;
@@ -120,7 +122,8 @@ export const PERFORMANCE_TARGETS = {
 export const DEFAULT_ARCHIVE_VERSION = '1.0.0';
 
 /** Default empty date range (for archives with no payments - edge case) */
+/** CodeRabbit Fix: Use null instead of empty strings to prevent date parsing errors */
 export const DEFAULT_DATE_RANGE: DateRange = {
-  earliest: '',
-  latest: '',
+  earliest: null,
+  latest: null,
 };

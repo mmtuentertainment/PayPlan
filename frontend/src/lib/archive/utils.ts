@@ -68,11 +68,13 @@ export function calculateByteSize(data: unknown): number {
 /**
  * Format date range for display
  *
+ * CodeRabbit Fix: Use UTC methods, validate dates, support locale parameter
  * Converts ISO date strings to human-readable format.
  * Used in archive statistics panel (User Story 3).
  *
- * @param earliest - ISO date string (YYYY-MM-DD)
- * @param latest - ISO date string (YYYY-MM-DD)
+ * @param earliest - ISO date string (YYYY-MM-DD) or null
+ * @param latest - ISO date string (YYYY-MM-DD) or null
+ * @param locale - Optional locale for formatting (defaults to browser locale)
  * @returns Formatted date range (e.g., "Oct 1-31, 2025")
  *
  * @example
@@ -81,34 +83,54 @@ export function calculateByteSize(data: unknown): number {
  * console.log(range); // "Oct 1-31, 2025"
  * ```
  */
-export function formatDateRange(earliest: string, latest: string): string {
+export function formatDateRange(earliest: string | null, latest: string | null, locale?: string): string {
   if (!earliest || !latest) {
     return 'No date range';
   }
 
   try {
-    const startDate = new Date(earliest);
-    const endDate = new Date(latest);
+    const startDate = new Date(earliest + 'T00:00:00Z');
+    const endDate = new Date(latest + 'T00:00:00Z');
+
+    // CodeRabbit Fix: Validate dates before using
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return 'Invalid date range';
+    }
 
     // Same day
     if (earliest === latest) {
-      return startDate.toLocaleDateString('en-US', {
+      return startDate.toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
+        timeZone: 'UTC',
       });
     }
 
+    // CodeRabbit Fix: Use UTC methods for consistent cross-timezone comparison
+    const sameMonth = startDate.getUTCMonth() === endDate.getUTCMonth();
+    const sameYear = startDate.getUTCFullYear() === endDate.getUTCFullYear();
+
     // Same month and year
-    if (startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear()) {
-      const month = startDate.toLocaleDateString('en-US', { month: 'short' });
-      const year = startDate.getFullYear();
-      return `${month} ${startDate.getDate()}-${endDate.getDate()}, ${year}`;
+    if (sameMonth && sameYear) {
+      const month = startDate.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' });
+      const year = startDate.getUTCFullYear();
+      return `${month} ${startDate.getUTCDate()}-${endDate.getUTCDate()}, ${year}`;
     }
 
     // Different months or years
-    const start = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const end = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const start = startDate.toLocaleDateString(locale, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+    const end = endDate.toLocaleDateString(locale, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
     return `${start} - ${end}`;
   } catch {
     return 'Invalid date range';
@@ -151,6 +173,7 @@ export function slugifyArchiveName(name: string): string {
 /**
  * Generate archive CSV filename
  *
+ * CodeRabbit Fix: Use UTC getters for consistent cross-timezone filenames
  * Creates safe filename from archive name and creation timestamp.
  * Format: payplan-archive-{slugified-name}-{YYYY-MM-DD-HHMMSS}.csv
  *
@@ -169,12 +192,14 @@ export function generateArchiveFilename(archiveName: string, createdAt: string):
 
   try {
     const date = new Date(createdAt);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    // CodeRabbit Fix: Use UTC getters for timezone-independent filenames
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
 
     const timestamp = `${year}-${month}-${day}-${hours}${minutes}${seconds}`;
     return `payplan-archive-${slugified}-${timestamp}.csv`;
