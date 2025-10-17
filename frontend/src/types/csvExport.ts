@@ -7,8 +7,11 @@ import { z } from 'zod';
 /**
  * Represents a single payment in the PayPlan system.
  * This is the input data for CSV export.
+ *
+ * T007: Extended with payment status tracking fields (Feature 015)
  */
 export interface PaymentRecord {
+  id?: string;               // UUID v4 assigned at payment creation (Feature 015)
   provider: string;           // Provider name (e.g., "Klarna", "Affirm")
   amount: number;             // Payment amount (e.g., 45.00)
   currency: string;           // ISO 4217 currency code (e.g., "USD", "EUR")
@@ -17,6 +20,8 @@ export interface PaymentRecord {
   risk_type?: string;        // Risk category (optional, may be undefined)
   risk_severity?: string;    // Risk severity level (optional, may be undefined)
   risk_message?: string;     // Risk description (optional, may be undefined)
+  paid_status?: 'paid' | 'pending';  // Payment status (Feature 015 - runtime only for CSV export)
+  paid_timestamp?: string;   // ISO 8601 timestamp when marked as paid (Feature 015 - runtime only)
 }
 
 // ============================================================================
@@ -26,6 +31,8 @@ export interface PaymentRecord {
 /**
  * Represents a single row in the exported CSV file.
  * Transforms PaymentRecord to ensure RFC 4180 compliance.
+ *
+ * T007: Extended with payment status fields (Feature 015)
  */
 export interface CSVRow {
   provider: string;           // Provider name (escaped per RFC 4180)
@@ -36,6 +43,8 @@ export interface CSVRow {
   risk_type: string;         // Risk type or empty string ""
   risk_severity: string;     // Risk severity or empty string ""
   risk_message: string;      // Risk message or empty string ""
+  paid_status: string;       // "paid", "pending", or "" if not tracked (Feature 015)
+  paid_timestamp: string;    // ISO 8601 timestamp or "" (Feature 015)
 }
 
 /**

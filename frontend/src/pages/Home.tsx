@@ -1,5 +1,5 @@
 // Wire InputCard -> Full Results display
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import InputCard from "@/components/InputCard";
 import ResultsThisWeek from "@/components/ResultsThisWeek";
 import RiskFlags from "@/components/RiskFlags";
@@ -7,6 +7,7 @@ import SummaryCard from "@/components/SummaryCard";
 import ScheduleTable from "@/components/ScheduleTable";
 import type { PlanResponse } from "@/lib/api";
 import type { PaymentRecord } from "@/types/csvExport";
+import { generatePaymentId } from "@/lib/payment-status/utils";
 
 export default function Home() {
   const [res, setRes] = useState<PlanResponse | null>(null);
@@ -18,11 +19,14 @@ export default function Home() {
     navigator.clipboard.writeText(text).catch(() => {});
   }
 
-  // Transform PlanResponse.normalized to PaymentRecord format for CSV export
-  function getNormalizedPayments(): PaymentRecord[] {
+  // Transform PlanResponse.normalized to PaymentRecord format with stable IDs
+  // T038: Assign unique IDs to each payment for status tracking (Feature 015)
+  // Memoized to ensure stable IDs across renders
+  const normalizedPayments = useMemo<PaymentRecord[]>(() => {
     if (!res) return [];
 
     return res.normalized.map(item => ({
+      id: generatePaymentId(), // Feature 015: UUID v4 for payment status tracking
       provider: item.provider,
       amount: item.amount,
       currency: 'USD', // Default currency (not included in API response)
@@ -33,7 +37,7 @@ export default function Home() {
       risk_severity: undefined,
       risk_message: undefined
     }));
-  }
+  }, [res]); // Re-generate IDs only when res changes (new plan loaded)
 
   return (
     <div className="container mx-auto p-4 space-y-4 max-w-4xl">
@@ -46,7 +50,7 @@ export default function Home() {
             actions={res.actionsThisWeek}
             icsBase64={ics}
             onCopy={handleCopy}
-            normalizedPayments={getNormalizedPayments()}
+            normalizedPayments={normalizedPayments}
           />
           <RiskFlags flags={res.riskFlags} />
           <SummaryCard summary={res.summary} />
