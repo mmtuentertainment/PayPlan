@@ -287,11 +287,16 @@ export class PaymentStatusStorage {
   }
 
   /**
-   * Clear all payment status records (US5)
-   * Implementation in T075
+   * Clear all payment status records
+   * Used by Feature 016 (Archive System) to reset statuses after archiving
    */
   clearAll(): Result<boolean, StorageError> {
-    throw new Error('Not implemented - T075 (US5)');
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      return { ok: true, value: true };
+    } catch (error) {
+      return this.handleStorageError(error);
+    }
   }
 
   /**

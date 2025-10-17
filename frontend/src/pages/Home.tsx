@@ -8,6 +8,7 @@ import ScheduleTable from "@/components/ScheduleTable";
 import type { PlanResponse } from "@/lib/api";
 import type { PaymentRecord } from "@/types/csvExport";
 import { generatePaymentId } from "@/lib/payment-status/utils";
+import { PaymentContextProvider } from "@/contexts/PaymentContext";
 
 export default function Home() {
   const [res, setRes] = useState<PlanResponse | null>(null);
@@ -39,24 +40,33 @@ export default function Home() {
     }));
   }, [res]); // Re-generate IDs only when res changes (new plan loaded)
 
+  // T002: Provide PaymentContext for archive feature (Feature 016)
+  // Archive components need access to normalizedPayments for snapshotting
+  const paymentContextValue = useMemo(() => ({
+    payments: normalizedPayments,
+    setPayments: () => {}, // Read-only for now (payments come from API)
+  }), [normalizedPayments]);
+
   return (
-    <div className="container mx-auto p-4 space-y-4 max-w-4xl">
-      <h1 className="text-3xl font-bold">PayPlan</h1>
-      <p className="text-muted-foreground">All your BNPL due dates, one plan.</p>
-      <InputCard onResult={setRes} onIcsReady={setIcs} />
-      {res && (
-        <>
-          <ResultsThisWeek
-            actions={res.actionsThisWeek}
-            icsBase64={ics}
-            onCopy={handleCopy}
-            normalizedPayments={normalizedPayments}
-          />
-          <RiskFlags flags={res.riskFlags} />
-          <SummaryCard summary={res.summary} />
-          <ScheduleTable rows={res.normalized} />
-        </>
-      )}
-    </div>
+    <PaymentContextProvider value={paymentContextValue}>
+      <div className="container mx-auto p-4 space-y-4 max-w-4xl">
+        <h1 className="text-3xl font-bold">PayPlan</h1>
+        <p className="text-muted-foreground">All your BNPL due dates, one plan.</p>
+        <InputCard onResult={setRes} onIcsReady={setIcs} />
+        {res && (
+          <>
+            <ResultsThisWeek
+              actions={res.actionsThisWeek}
+              icsBase64={ics}
+              onCopy={handleCopy}
+              normalizedPayments={normalizedPayments}
+            />
+            <RiskFlags flags={res.riskFlags} />
+            <SummaryCard summary={res.summary} />
+            <ScheduleTable rows={res.normalized} />
+          </>
+        )}
+      </div>
+    </PaymentContextProvider>
   );
 }
