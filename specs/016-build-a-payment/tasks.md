@@ -1,12 +1,12 @@
 # Tasks: Payment History Archive System
 
 ## Phase 1: Setup & Dependencies
-- [ ] T001 [P] Create React PaymentContext for sharing payment data in frontend/src/contexts/PaymentContext.tsx
-- [ ] T002 [P] Update Home.tsx to provide PaymentContext wrapper in frontend/src/pages/Home.tsx
-- [ ] T003 [P] Create archive types file with Archive, ArchiveMetadata, PaymentArchiveRecord in frontend/src/lib/archive/types.ts
-- [ ] T004 [P] Create archive constants file with storage keys, limits (50 archives, 5MB) in frontend/src/lib/archive/constants.ts
-- [ ] T005 [P] Create archive validation schemas using Zod in frontend/src/lib/archive/validation.ts
-- [ ] T006 [P] Create archive utils for UUID generation, timestamp formatting in frontend/src/lib/archive/utils.ts
+- [X] T001 [P] Create React PaymentContext for sharing payment data in frontend/src/contexts/PaymentContext.tsx
+- [X] T002 [P] Update Home.tsx to provide PaymentContext wrapper in frontend/src/pages/Home.tsx
+- [X] T003 [P] Create archive types file with Archive, ArchiveMetadata, PaymentArchiveRecord in frontend/src/lib/archive/types.ts
+- [X] T004 [P] Create archive constants file with storage keys, limits (50 archives, 5MB) in frontend/src/lib/archive/constants.ts
+- [X] T005 [P] Create archive validation schemas using Zod in frontend/src/lib/archive/validation.ts
+- [X] T006 [P] Create archive utils for UUID generation, timestamp formatting in frontend/src/lib/archive/utils.ts
 
 ## Phase 2: Foundational Layer
 - [ ] T007 [P] Write test: ArchiveStorage.createDefaultIndex() returns empty ArchiveIndex in frontend/src/lib/archive/__tests__/ArchiveStorage.test.ts
