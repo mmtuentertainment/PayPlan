@@ -89,16 +89,22 @@ export function ArchiveStatistics({ summary }: ArchiveStatisticsProps) {
     return val.toFixed(1);
   };
 
-  // CodeRabbit Fix: Currency-aware amount formatter
+  // CodeRabbit Fix: Currency-aware amount formatter with validation
   const formatCurrency = (amount: number, currencyCode: string): string => {
     if (!isValidNumber(amount)) return '--';
+
+    // Validate currency code is 3-letter ISO 4217 format before Intl.NumberFormat
+    if (!/^[A-Z]{3}$/.test(currencyCode)) {
+      return `${amount.toFixed(2)} ${currencyCode}`;
+    }
+
     try {
       return new Intl.NumberFormat(undefined, {
         style: 'currency',
         currency: currencyCode,
       }).format(amount);
     } catch {
-      // Fallback if currency code invalid
+      // Fallback if Intl.NumberFormat fails despite validation
       return `${amount.toFixed(2)} ${currencyCode}`;
     }
   };

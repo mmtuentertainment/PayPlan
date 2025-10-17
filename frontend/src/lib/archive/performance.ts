@@ -144,10 +144,17 @@ export function measureSync<T>(
   metadata?: Record<string, unknown>
 ): { result: T; log: PerformanceLog } {
   const startTime = performance.now();
-  const result = fn();
-  const duration = performance.now() - startTime;
-  const log = logPerformance(operation, duration, target, metadata);
-  return { result, log };
+  try {
+    const result = fn();
+    const duration = performance.now() - startTime;
+    const log = logPerformance(operation, duration, target, metadata);
+    return { result, log };
+  } catch (error) {
+    // Log duration even when function throws
+    const duration = performance.now() - startTime;
+    logPerformance(operation, duration, target, metadata);
+    throw error; // Re-throw after logging
+  }
 }
 
 /**
@@ -176,10 +183,17 @@ export async function measureAsync<T>(
   metadata?: Record<string, unknown>
 ): Promise<{ result: T; log: PerformanceLog }> {
   const startTime = performance.now();
-  const result = await fn();
-  const duration = performance.now() - startTime;
-  const log = logPerformance(operation, duration, target, metadata);
-  return { result, log };
+  try {
+    const result = await fn();
+    const duration = performance.now() - startTime;
+    const log = logPerformance(operation, duration, target, metadata);
+    return { result, log };
+  } catch (error) {
+    // Log duration even when promise rejects
+    const duration = performance.now() - startTime;
+    logPerformance(operation, duration, target, metadata);
+    throw error; // Re-throw after logging
+  }
 }
 
 /**

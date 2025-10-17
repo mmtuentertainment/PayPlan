@@ -289,9 +289,20 @@ export class PaymentStatusStorage {
   /**
    * Clear all payment status records
    * Used by Feature 016 (Archive System) to reset statuses after archiving
+   *
+   * @returns Result<boolean, StorageError> - true if data cleared, false if nothing to clear
    */
   clearAll(): Result<boolean, StorageError> {
     try {
+      // Check if there's anything to clear
+      const existing = localStorage.getItem(STORAGE_KEY);
+
+      if (existing === null) {
+        // Nothing to clear
+        return { ok: true, value: false };
+      }
+
+      // Clear the data
       localStorage.removeItem(STORAGE_KEY);
       return { ok: true, value: true };
     } catch (error) {
