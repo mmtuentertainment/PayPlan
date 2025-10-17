@@ -25,6 +25,7 @@ interface UsePaymentArchivesReturn {
   createArchive: (name: string, payments: PaymentRecord[]) => Promise<Archive | null>;
   listArchives: () => ArchiveIndexEntry[] | null;
   getArchiveById: (id: string) => Archive | null;
+  deleteArchive: (archiveId: string) => Promise<boolean>;
   archives: ArchiveIndexEntry[];
   isLoading: boolean;
   error: ArchiveError | null;
@@ -219,6 +220,49 @@ export function usePaymentArchives(): UsePaymentArchivesReturn {
   }, [archiveService]);
 
   /**
+   * Delete archive by ID
+   *
+   * Phase 7 (User Story 5): Delete Old Archives
+   * Updates local archives state after deletion.
+   * Cross-tab sync handled via storage events.
+   *
+   * @param archiveId - Archive UUID to delete
+   * @returns Promise<boolean> - true if successful, false if error
+   */
+  const deleteArchive = useCallback(async (
+    archiveId: string
+  ): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = archiveService.deleteArchive(archiveId);
+
+      if (result.ok) {
+        // Update local archives state
+        const listResult = archiveService.listArchives();
+        if (listResult.ok) {
+          setArchives(listResult.value);
+        }
+        return true;
+      } else {
+        setError(result.error);
+        return false;
+      }
+    } catch (err) {
+      // Handle unexpected errors
+      const unexpectedError: ArchiveError = {
+        type: 'Serialization',
+        message: err instanceof Error ? err.message : 'An unexpected error occurred',
+      };
+      setError(unexpectedError);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [archiveService]);
+
+  /**
    * Clear error state
    */
   const clearError = useCallback(() => {
@@ -229,6 +273,7 @@ export function usePaymentArchives(): UsePaymentArchivesReturn {
     createArchive,
     listArchives,
     getArchiveById,
+    deleteArchive,
     archives,
     isLoading,
     error,

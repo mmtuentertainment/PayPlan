@@ -648,4 +648,141 @@ describe('ArchiveStorage - Foundational Layer', () => {
       }
     });
   });
+
+  describe('T089-T094: deleteArchive() - Phase 7 (User Story 5)', () => {
+    it('T089: should remove archive from localStorage', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const testArchive = {
+        id: testArchiveId,
+        name: 'Test Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      // Save archive first
+      storage.saveArchive(testArchive);
+
+      // Verify it exists
+      const key = getArchiveKey(testArchiveId);
+      expect(localStorage.getItem(key)).toBeTruthy();
+
+      // Delete archive
+      const result = storage.deleteArchive(testArchiveId);
+
+      expect(result.ok).toBe(true);
+      // Verify archive was removed from localStorage
+      expect(localStorage.getItem(key)).toBeNull();
+    });
+
+    it('T091: should remove entry from archive index', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+
+      // Create index with entry
+      storage.updateIndex({
+        id: testArchiveId,
+        name: 'Test Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        paymentCount: 0,
+        paidCount: 0,
+        pendingCount: 0,
+      });
+
+      // Verify entry exists in index
+      const indexBefore = storage.loadArchiveIndex();
+      expect(indexBefore.ok && indexBefore.value.archives.length).toBe(1);
+
+      // Delete archive
+      storage.deleteArchive(testArchiveId);
+
+      // Verify entry was removed from index
+      const indexAfter = storage.loadArchiveIndex();
+      expect(indexAfter.ok && indexAfter.value.archives.length).toBe(0);
+    });
+
+    it('T093: should be idempotent (delete twice returns success)', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+      const testArchive = {
+        id: testArchiveId,
+        name: 'Test Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        sourceVersion: '1.0.0',
+        payments: [],
+        metadata: {
+          totalCount: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          dateRange: { earliest: null, latest: null },
+          storageSize: 0,
+        },
+      };
+
+      // Save archive
+      storage.saveArchive(testArchive);
+      storage.updateIndex({
+        id: testArchiveId,
+        name: 'Test Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        paymentCount: 0,
+        paidCount: 0,
+        pendingCount: 0,
+      });
+
+      // Delete once
+      const result1 = storage.deleteArchive(testArchiveId);
+      expect(result1.ok).toBe(true);
+
+      // Delete again (should still succeed)
+      const result2 = storage.deleteArchive(testArchiveId);
+      expect(result2.ok).toBe(true);
+    });
+
+    it('should return Validation error for invalid archive ID', () => {
+      const result = storage.deleteArchive('invalid-id');
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Validation');
+        expect(result.error.message).toContain('Invalid');
+      }
+    });
+
+    it('should update index lastModified timestamp on delete', () => {
+      const testArchiveId = '550e8400-e29b-41d4-a716-446655440000';
+
+      // Create index entry
+      storage.updateIndex({
+        id: testArchiveId,
+        name: 'Test Archive',
+        createdAt: '2025-10-17T14:30:00.000Z',
+        paymentCount: 0,
+        paidCount: 0,
+        pendingCount: 0,
+      });
+
+      const indexBefore = storage.loadArchiveIndex();
+      const timestampBefore = indexBefore.ok ? indexBefore.value.lastModified : '';
+
+      // Small delay to ensure different timestamp
+      vi.useFakeTimers();
+      vi.advanceTimersByTime(10);
+
+      // Delete archive
+      storage.deleteArchive(testArchiveId);
+
+      const indexAfter = storage.loadArchiveIndex();
+      const timestampAfter = indexAfter.ok ? indexAfter.value.lastModified : '';
+
+      expect(timestampAfter).not.toBe(timestampBefore);
+
+      vi.useRealTimers();
+    });
+  });
 });

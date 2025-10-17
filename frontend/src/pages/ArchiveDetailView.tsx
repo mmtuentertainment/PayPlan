@@ -4,7 +4,8 @@
  * Feature: 016-build-a-payment-archive
  * Phase: 4 (User Story 2 - View Archived Payment History)
  * Phase: 5 (User Story 3 - View Archive Statistics)
- * Tasks: T053-T054, T055-T056, T071
+ * Phase: 7 (User Story 5 - Delete Old Archives)
+ * Tasks: T053-T054, T055-T056, T071, T104
  *
  * Archive detail page showing full payment history and statistics.
  * Read-only view with no edit controls.
@@ -12,7 +13,7 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { usePaymentArchives } from '@/hooks/usePaymentArchives';
 import type { Archive, ArchiveSummary } from '@/lib/archive/types';
 import { archiveSchema } from '@/lib/archive/validation';
@@ -21,6 +22,7 @@ import { ArchiveStorage } from '@/lib/archive/ArchiveStorage';
 import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
 import { ArchiveStatistics } from '@/components/archive/ArchiveStatistics';
 import { ExportArchiveButton } from '@/components/archive/ExportArchiveButton';
+import { DeleteArchiveDialog } from '@/components/archive/DeleteArchiveDialog';
 
 /**
  * Format ISO date to readable format
@@ -93,9 +95,11 @@ function formatCurrency(amount: number, currency: string): string {
  */
 export function ArchiveDetailView() {
   const { id } = useParams<{ id: string }>();
-  const { getArchiveById, error } = usePaymentArchives();
+  const navigate = useNavigate();
+  const { getArchiveById, deleteArchive, error } = usePaymentArchives();
   const [archive, setArchive] = useState<Archive | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Initialize ArchiveService for statistics calculation
   const archiveService = useMemo(() => {
@@ -137,6 +141,27 @@ export function ArchiveDetailView() {
     if (!archive) return null;
     return archiveService.calculateStatistics(archive);
   }, [archive, archiveService]);
+
+  // T104: Delete handlers
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!id) return;
+
+    setShowDeleteDialog(false);
+    const success = await deleteArchive(id);
+
+    if (success) {
+      // Redirect to archive list after successful deletion
+      navigate('/archives');
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
+  };
 
   if (isLoading) {
     return (
@@ -197,8 +222,17 @@ export function ArchiveDetailView() {
             </p>
           </div>
 
-          {/* T087: Export Archive Button */}
-          <ExportArchiveButton archive={archive} />
+          {/* T087: Export Archive Button, T104: Delete Archive Button */}
+          <div className="flex gap-2">
+            <ExportArchiveButton archive={archive} />
+            <button
+              onClick={handleDeleteClick}
+              className="px-4 py-2 border border-red-300 text-red-600 rounded text-sm font-medium hover:bg-red-50 transition-colors"
+              aria-label="Delete archive"
+            >
+              Delete Archive
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 text-xs text-gray-500 italic">
@@ -275,6 +309,15 @@ export function ArchiveDetailView() {
         <div className="text-center py-12 text-gray-500">
           No payments in this archive
         </div>
+      )}
+
+      {/* T104: Delete confirmation dialog */}
+      {showDeleteDialog && (
+        <DeleteArchiveDialog
+          archiveName={name}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
       )}
     </div>
   );

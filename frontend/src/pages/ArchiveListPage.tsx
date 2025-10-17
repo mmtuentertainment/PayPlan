@@ -3,6 +3,7 @@
  *
  * Feature: 016-build-a-payment-archive
  * Phase: 4 (User Story 2 - View Archived Payment History)
+ * Phase: 7 (User Story 5 - Delete Old Archives)
  * Tasks: T049-T050, T059-T060
  *
  * Main archive list view page.
@@ -21,10 +22,15 @@ import { Link } from 'react-router-dom';
  * - Loads archive list from index (two-tier architecture)
  * - Shows empty state when no archives exist
  * - Cross-tab sync via storage events
+ * - Delete archives with confirmation
  * - Performance: <100ms load time
  */
 export function ArchiveListPage() {
-  const { archives, isLoading, error } = usePaymentArchives();
+  const { archives, deleteArchive, isLoading, error } = usePaymentArchives();
+
+  const handleDeleteArchive = async (archiveId: string) => {
+    await deleteArchive(archiveId);
+  };
 
   if (isLoading) {
     return (
@@ -123,7 +129,11 @@ export function ArchiveListPage() {
 
       <div className="space-y-4">
         {archives.map((archive) => (
-          <ArchiveListItem key={archive.id} archive={archive} />
+          <ArchiveListItem
+            key={archive.id}
+            archive={archive}
+            onDelete={handleDeleteArchive}
+          />
         ))}
       </div>
 

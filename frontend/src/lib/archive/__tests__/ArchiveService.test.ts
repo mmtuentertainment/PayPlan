@@ -1110,4 +1110,89 @@ describe('ArchiveService - Create Archive MVP', () => {
       }
     });
   });
+
+  describe('Phase 7: deleteArchive()', () => {
+    it('should delete archive by ID successfully', async () => {
+      const payments: PaymentRecord[] = [{
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        provider: 'Test',
+        amount: 100,
+        currency: 'USD',
+        dueISO: '2025-10-15',
+        autopay: false,
+      }];
+
+      // Create archive first
+      const createResult = await service.createArchive('Test Archive', payments);
+      expect(createResult.ok).toBe(true);
+
+      if (createResult.ok) {
+        const archiveId = createResult.value.id;
+
+        // Verify archive exists
+        const loadBefore = service.getArchiveById(archiveId);
+        expect(loadBefore.ok).toBe(true);
+
+        // Delete archive
+        const deleteResult = service.deleteArchive(archiveId);
+        expect(deleteResult.ok).toBe(true);
+
+        // Verify archive no longer exists
+        const loadAfter = service.getArchiveById(archiveId);
+        expect(loadAfter.ok).toBe(false);
+        if (!loadAfter.ok) {
+          expect(loadAfter.error.type).toBe('NotFound');
+        }
+      }
+    });
+
+    it('should return Validation error for invalid UUID', () => {
+      const result = service.deleteArchive('invalid-uuid');
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.type).toBe('Validation');
+        expect(result.error.message).toContain('Invalid');
+      }
+    });
+
+    it('should handle NotFound gracefully (idempotent)', () => {
+      const nonExistentId = '550e8400-e29b-41d4-a716-446655440000';
+
+      // Delete non-existent archive (should succeed - idempotent)
+      const result = service.deleteArchive(nonExistentId);
+
+      expect(result.ok).toBe(true);
+    });
+
+    it('should update archive list after deletion', async () => {
+      const payments: PaymentRecord[] = [{
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        provider: 'Test',
+        amount: 100,
+        currency: 'USD',
+        dueISO: '2025-10-15',
+        autopay: false,
+      }];
+
+      // Create two archives
+      await service.createArchive('Archive 1', payments);
+      const createResult2 = await service.createArchive('Archive 2', payments);
+
+      expect(createResult2.ok).toBe(true);
+
+      // Verify two archives exist
+      const listBefore = service.listArchives();
+      expect(listBefore.ok && listBefore.value.length).toBe(2);
+
+      // Delete one archive
+      if (createResult2.ok) {
+        service.deleteArchive(createResult2.value.id);
+
+        // Verify only one archive remains
+        const listAfter = service.listArchives();
+        expect(listAfter.ok && listAfter.value.length).toBe(1);
+      }
+    });
+  });
 });

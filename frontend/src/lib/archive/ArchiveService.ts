@@ -519,6 +519,34 @@ export class ArchiveService {
   }
 
   /**
+   * Delete archive by ID
+   *
+   * Phase 7 (User Story 5): Delete Old Archives
+   * Validates UUID format and calls ArchiveStorage.deleteArchive().
+   * Idempotent - deleting non-existent archive returns success.
+   *
+   * @param archiveId - Archive UUID to delete
+   * @returns Result<void, ArchiveError> - Success or validation error
+   */
+  deleteArchive(archiveId: string): Result<void, ArchiveError> {
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(archiveId)) {
+      return {
+        ok: false,
+        error: {
+          type: 'Validation',
+          message: ERROR_MESSAGES.INVALID_ARCHIVE_ID,
+          archiveId,
+        },
+      };
+    }
+
+    // Call storage layer to delete
+    return this.archiveStorage.deleteArchive(archiveId);
+  }
+
+  /**
    * T073-T082: Export archive to CSV with metadata columns
    *
    * Transforms PaymentArchiveRecord[] to CSV format with:

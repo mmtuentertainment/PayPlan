@@ -73,6 +73,7 @@ describe('ArchiveDetailView', () => {
       createArchive: vi.fn(),
       listArchives: vi.fn(),
       getArchiveById: mockGetArchiveById,
+      deleteArchive: vi.fn(),
       clearError: vi.fn(),
     });
 
@@ -101,15 +102,18 @@ describe('ArchiveDetailView', () => {
     expect(screen.getByText(/\$45\.00/)).toBeInTheDocument();  // USD format: $45.00
     expect(screen.getByText(/\$100\.00/)).toBeInTheDocument(); // USD format: $100.00
 
-    // T055: Verify NO edit controls exist (read-only)
-    // No checkboxes
+    // T055: Verify NO edit controls exist for individual payment records (read-only)
+    // No checkboxes for selecting individual payments
     const checkboxes = screen.queryAllByRole('checkbox');
     expect(checkboxes).toHaveLength(0);
 
-    // No edit buttons (check for button elements, not table headers)
+    // No edit buttons for individual payment records
     expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /update/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
+
+    // Note: "Delete Archive" button IS present (Phase 7, T104) - this deletes the entire archive,
+    // not individual payment records, so it's not an "edit control" for the payment data
+    expect(screen.getByRole('button', { name: /Delete archive/i })).toBeInTheDocument();
 
     // Should have read-only notice
     expect(screen.getByText(/This archive is read-only/i)).toBeInTheDocument();
@@ -125,6 +129,7 @@ describe('ArchiveDetailView', () => {
       createArchive: vi.fn(),
       listArchives: vi.fn(),
       getArchiveById: mockGetArchiveById,
+      deleteArchive: vi.fn(),
       clearError: vi.fn(),
     });
 
@@ -159,6 +164,7 @@ describe('ArchiveDetailView', () => {
       createArchive: vi.fn(),
       listArchives: vi.fn(),
       getArchiveById: mockGetArchiveById,
+      deleteArchive: vi.fn(),
       clearError: vi.fn(),
     });
 
@@ -192,6 +198,7 @@ describe('ArchiveDetailView', () => {
       createArchive: vi.fn(),
       listArchives: vi.fn(),
       getArchiveById: mockGetArchiveById,
+      deleteArchive: vi.fn(),
       clearError: vi.fn(),
     });
 
@@ -229,6 +236,7 @@ describe('ArchiveDetailView', () => {
         createArchive: vi.fn(),
         listArchives: vi.fn(),
         getArchiveById: mockGetArchiveById,
+        deleteArchive: vi.fn(),
         clearError: vi.fn(),
       });
 
@@ -267,6 +275,7 @@ describe('ArchiveDetailView', () => {
         createArchive: vi.fn(),
         listArchives: vi.fn(),
         getArchiveById: vi.fn().mockReturnValue(null),
+        deleteArchive: vi.fn(),
         clearError: vi.fn(),
       });
 
