@@ -23,6 +23,7 @@ import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage'
 import { ArchiveStatistics } from '@/components/archive/ArchiveStatistics';
 import { ExportArchiveButton } from '@/components/archive/ExportArchiveButton';
 import { DeleteArchiveDialog } from '@/components/archive/DeleteArchiveDialog';
+import { ArchiveErrorBoundary } from '@/components/archive/ArchiveErrorBoundary';
 
 /**
  * Format ISO date to readable format
@@ -84,7 +85,7 @@ function formatCurrency(amount: number, currency: string): string {
 }
 
 /**
- * Archive detail view component
+ * Archive detail view component (internal implementation)
  *
  * Features:
  * - Loads full archive by ID from route params
@@ -93,7 +94,7 @@ function formatCurrency(amount: number, currency: string): string {
  * - Shows payment status and timestamps
  * - Performance: <100ms load time
  */
-export function ArchiveDetailView() {
+function ArchiveDetailViewContent() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getArchiveById, deleteArchive, error } = usePaymentArchives();
@@ -320,5 +321,33 @@ export function ArchiveDetailView() {
         />
       )}
     </div>
+  );
+}
+
+/**
+ * Archive detail view with error boundary (T111)
+ *
+ * Wraps the archive detail view with ArchiveErrorBoundary to handle:
+ * - Corrupted archive data
+ * - Schema validation errors
+ * - Render errors
+ *
+ * @example
+ * ```tsx
+ * <Route path="/archives/:id" element={<ArchiveDetailView />} />
+ * ```
+ */
+export function ArchiveDetailView() {
+  const { id } = useParams<{ id: string }>();
+  const { getArchiveById } = usePaymentArchives();
+
+  // Pre-load archive to get name for error boundary
+  const archive = id ? getArchiveById(id) : null;
+  const archiveName = archive?.name;
+
+  return (
+    <ArchiveErrorBoundary archiveName={archiveName}>
+      <ArchiveDetailViewContent />
+    </ArchiveErrorBoundary>
   );
 }

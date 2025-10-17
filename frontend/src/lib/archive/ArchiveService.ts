@@ -45,6 +45,7 @@ import {
   SCHEMA_VERSION,
 } from './constants';
 import Papa from 'papaparse';
+import { measureSync, PERFORMANCE_TARGETS } from './performance';
 
 /**
  * Service for managing payment archive business logic.
@@ -548,6 +549,7 @@ export class ArchiveService {
 
   /**
    * T073-T082: Export archive to CSV with metadata columns
+   * T113: Performance logging for <3s target
    *
    * Transforms PaymentArchiveRecord[] to CSV format with:
    * - 10 standard payment columns (provider, amount, currency, dueISO, autopay, risk_*, paid_*)
@@ -569,6 +571,20 @@ export class ArchiveService {
    * ```
    */
   exportArchiveToCSV(archive: Archive): string {
+    // T113: Measure performance with <3s target
+    const { result } = measureSync(
+      'exportArchiveToCSV',
+      PERFORMANCE_TARGETS.EXPORT_CSV,
+      () => this._exportArchiveToCSVImpl(archive),
+      { paymentCount: archive.payments.length, archiveId: archive.id }
+    );
+    return result;
+  }
+
+  /**
+   * Internal implementation of exportArchiveToCSV (for performance measurement)
+   */
+  private _exportArchiveToCSVImpl(archive: Archive): string {
     // T075: Transform each PaymentArchiveRecord to CSV row with archive metadata
     const csvRows = archive.payments.map(payment =>
       this.transformArchiveToCSVRow(payment, archive.name, archive.createdAt)

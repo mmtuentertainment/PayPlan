@@ -38,6 +38,7 @@ import {
   MAX_ARCHIVES,
 } from './constants';
 import { getCurrentTimestamp, calculateByteSize } from './utils';
+import { measureSync, PERFORMANCE_TARGETS } from './performance';
 
 /**
  * Service for managing archive persistence in localStorage.
@@ -67,10 +68,24 @@ export class ArchiveStorage {
 
   /**
    * T010: Load archive index from localStorage
+   * T112: Performance logging for <100ms target
    *
    * @returns Result<ArchiveIndex, ArchiveError> - Index or error
    */
   loadArchiveIndex(): Result<ArchiveIndex, ArchiveError> {
+    // T112: Measure performance with <100ms target
+    const { result } = measureSync(
+      'loadArchiveIndex',
+      PERFORMANCE_TARGETS.LOAD_INDEX,
+      () => this._loadArchiveIndexImpl()
+    );
+    return result;
+  }
+
+  /**
+   * Internal implementation of loadArchiveIndex (for performance measurement)
+   */
+  private _loadArchiveIndexImpl(): Result<ArchiveIndex, ArchiveError> {
     try {
       const serialized = localStorage.getItem(ARCHIVE_INDEX_KEY);
 
@@ -355,6 +370,7 @@ export class ArchiveStorage {
 
   /**
    * T044: Load archive from localStorage by ID
+   * T112: Performance logging for <100ms target
    *
    * Retrieves full archive data including all payment records.
    * Used by detail view to display complete archive.
@@ -375,6 +391,20 @@ export class ArchiveStorage {
       };
     }
 
+    // T112: Measure performance with <100ms target
+    const { result } = measureSync(
+      'loadArchive',
+      PERFORMANCE_TARGETS.LOAD_ARCHIVE,
+      () => this._loadArchiveImpl(archiveId),
+      { archiveId }
+    );
+    return result;
+  }
+
+  /**
+   * Internal implementation of loadArchive (for performance measurement)
+   */
+  private _loadArchiveImpl(archiveId: string): Result<Archive, ArchiveError> {
     try {
       const key = `${ARCHIVE_KEY_PREFIX}${archiveId}`;
       const serialized = localStorage.getItem(key);

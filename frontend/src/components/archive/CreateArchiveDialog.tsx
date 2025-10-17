@@ -115,7 +115,7 @@ export function CreateArchiveDialog({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Archive name input */}
+          {/* Archive name input - T114: Enhanced ARIA labels */}
           <div>
             <label htmlFor="archive-name" className="block text-sm font-medium mb-2">
               Archive name:
@@ -131,7 +131,9 @@ export function CreateArchiveDialog({
               maxLength={100}
               required
               aria-invalid={!!error}
-              aria-describedby={error ? 'archive-error' : undefined}
+              aria-describedby={error ? 'archive-error archive-warning' : 'archive-warning'}
+              aria-label="Enter a name for this payment archive"
+              autoFocus
             />
           </div>
 
@@ -145,11 +147,12 @@ export function CreateArchiveDialog({
             </ul>
           </div>
 
-          {/* Warning about reset */}
+          {/* Warning about reset - T114: Enhanced ARIA labels */}
           <div
+            id="archive-warning"
             className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded"
             role="alert"
-            aria-live="assertive"
+            aria-live="polite"
             aria-atomic="true"
           >
             <p className="font-medium text-yellow-800 text-sm mb-1">⚠️ Warning:</p>
@@ -172,19 +175,22 @@ export function CreateArchiveDialog({
             </div>
           )}
 
-          {/* Action buttons */}
+          {/* Action buttons - T114: Enhanced ARIA labels */}
           <div className="flex gap-2 justify-end">
             <Button
               type="button"
               variant="secondary"
               onClick={handleCancel}
               disabled={isLoading}
+              aria-label="Cancel archive creation"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !archiveName.trim()}
+              aria-label={isLoading ? 'Creating archive, please wait' : 'Create payment archive with current statuses'}
+              aria-busy={isLoading}
             >
               {isLoading ? 'Creating...' : 'Create Archive'}
             </Button>

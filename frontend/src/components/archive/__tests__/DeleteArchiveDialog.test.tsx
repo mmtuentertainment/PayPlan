@@ -69,7 +69,7 @@ describe('DeleteArchiveDialog', () => {
       />
     );
 
-    const deleteButton = screen.getByRole('button', { name: /Confirm deletion/i });
+    const deleteButton = screen.getByRole('button', { name: /Permanently delete archive/i });
     await user.click(deleteButton);
 
     expect(onConfirm).toHaveBeenCalledTimes(1);

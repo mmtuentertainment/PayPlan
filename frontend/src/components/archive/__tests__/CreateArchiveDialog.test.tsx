@@ -59,7 +59,8 @@ describe('CreateArchiveDialog', () => {
       await user.type(nameInput, 'October 2025');
 
       // Submit form
-      const createButton = screen.getByRole('button', { name: /create archive/i });
+      // T114: Updated to match enhanced ARIA label
+      const createButton = screen.getByRole('button', { name: /create payment archive/i });
       await user.click(createButton);
 
       // Wait for success message - look for Success title (increased timeout for async with retry)
@@ -83,7 +84,8 @@ describe('CreateArchiveDialog', () => {
       const nameInput = screen.getByLabelText(/archive name/i);
       await user.type(nameInput, 'Test Archive');
 
-      const createButton = screen.getByRole('button', { name: /create archive/i });
+      // T114: Updated to match enhanced ARIA label
+      const createButton = screen.getByRole('button', { name: /create payment archive/i });
       await user.click(createButton);
 
       // Wait for success callback (increased timeout for async with retry)
@@ -117,7 +119,8 @@ describe('CreateArchiveDialog', () => {
   it('should disable create button when name is empty', () => {
     render(<CreateArchiveDialog payments={mockPayments} />);
 
-    const createButton = screen.getByRole('button', { name: /create archive/i });
+    // T114: Updated to match enhanced ARIA label
+    const createButton = screen.getByRole('button', { name: /create payment archive/i });
     expect(createButton).toBeDisabled();
   });
 
@@ -128,7 +131,8 @@ describe('CreateArchiveDialog', () => {
     const nameInput = screen.getByLabelText(/archive name/i);
     await user.type(nameInput, 'Test');
 
-    const createButton = screen.getByRole('button', { name: /create archive/i });
+    // T114: Updated to match enhanced ARIA label
+    const createButton = screen.getByRole('button', { name: /create payment archive/i });
     expect(createButton).not.toBeDisabled();
   });
 
@@ -139,7 +143,8 @@ describe('CreateArchiveDialog', () => {
     const nameInput = screen.getByLabelText(/archive name/i);
     await user.type(nameInput, 'Test Archive');
 
-    const createButton = screen.getByRole('button', { name: /create archive/i });
+    // T114: Updated to match enhanced ARIA label
+    const createButton = screen.getByRole('button', { name: /create payment archive/i });
     await user.click(createButton);
 
     // Should show success state after creation (increased timeout for async with retry)
@@ -174,7 +179,8 @@ describe('CreateArchiveDialog', () => {
     const nameInput = screen.getByLabelText(/archive name/i);
     await user.type(nameInput, 'Test Archive');
 
-    const createButton = screen.getByRole('button', { name: /create archive/i });
+    // T114: Updated to match enhanced ARIA label
+    const createButton = screen.getByRole('button', { name: /create payment archive/i });
     await user.click(createButton);
 
     // Wait for error message (increased timeout for async with retry logic)
@@ -207,7 +213,8 @@ describe('CreateArchiveDialog', () => {
       const nameInput = screen.getByLabelText(/archive name/i);
       await user.type(nameInput, 'Test Archive');
 
-      const createButton = screen.getByRole('button', { name: /create archive/i });
+      // T114: Updated to match enhanced ARIA label
+      const createButton = screen.getByRole('button', { name: /create payment archive/i });
       await user.click(createButton);
 
       // Wait for error message
@@ -247,7 +254,8 @@ describe('CreateArchiveDialog', () => {
       const nameInput = screen.getByLabelText(/archive name/i);
       await user.type(nameInput, 'Test Archive');
 
-      const createButton = screen.getByRole('button', { name: /create archive/i });
+      // T114: Updated to match enhanced ARIA label
+      const createButton = screen.getByRole('button', { name: /create payment archive/i });
 
       // Click and immediately check for loading state
       const clickPromise = user.click(createButton);
