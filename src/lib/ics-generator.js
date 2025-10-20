@@ -30,7 +30,7 @@ function generateICS(installments, timezone) {
         `Installment: ${installment.installment_no}`,
         `Late fee if missed: $${installment.late_fee.toFixed(2)}`,
         installment.autopay ? 'Autopay: Enabled' : 'Autopay: Disabled'
-      ].join('\\n'),
+      ].join('\n'),
       status: 'CONFIRMED',
       busyStatus: 'BUSY',
       organizer: { name: 'PayPlan', email: 'noreply@payplan.app' },
@@ -74,13 +74,15 @@ function generateICSWithTZID(installments, timezone) {
     ''
   ];
 
-  installments.forEach((installment, index) => {
+  installments.forEach((installment) => {
     const dueDate = DateTime.fromISO(installment.due_date, { zone: timezone });
     const startDateTime = dueDate.set({ hour: 9, minute: 0, second: 0 });
     const endDateTime = startDateTime.plus({ minutes: 30 });
-    const alarmDateTime = startDateTime.minus({ days: 1 });
-
-    const uid = `payplan-${installment.provider.toLowerCase()}-${installment.installment_no}-${installment.due_date}@payplan.app`;
+    const providerSlug = installment.provider
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    const uid = `payplan-${providerSlug}-${installment.installment_no}-${installment.due_date}@payplan.app`;
 
     // v0.1.2: Add "(shifted)" annotation if date was moved
     let summary = `BNPL Payment: ${installment.provider} $${installment.amount.toFixed(2)}`;
@@ -88,25 +90,42 @@ function generateICSWithTZID(installments, timezone) {
       summary += ' (shifted)';
     }
 
-    // v0.1.2: Add original due date to description if shifted
-    let description = `Payment due to ${installment.provider}\\nAmount: $${installment.amount.toFixed(2)}\\nInstallment: ${installment.installment_no}`;
+    const descriptionParts = [
+      `Payment due to ${installment.provider}`,
+      `Amount: $${installment.amount.toFixed(2)}`,
+      `Installment: ${installment.installment_no}`
+    ];
+
     if (installment.wasShifted) {
-      description += `\\nOriginally due: ${installment.originalDueDate}\\nShifted to: ${installment.shiftedDueDate}\\nReason: ${installment.shiftReason}`;
+      descriptionParts.push(
+        `Originally due: ${installment.originalDueDate}`,
+        `Shifted to: ${installment.shiftedDueDate}`,
+        `Reason: ${installment.shiftReason}`
+      );
     }
-    description += `\\nLate fee if missed: $${installment.late_fee.toFixed(2)}\\nAutopay: ${installment.autopay ? 'Enabled' : 'Disabled'}`;
+    descriptionParts.push(
+      `Late fee if missed: $${installment.late_fee.toFixed(2)}`,
+      `Autopay: ${installment.autopay ? 'Enabled' : 'Disabled'}`
+    );
+
+    const escapedSummary = escapeICSText(summary);
+    const escapedDescription = escapeICSText(descriptionParts.join('\n'));
+    const alarmDescription = escapeICSText(
+      `Reminder: ${installment.provider} payment of $${installment.amount.toFixed(2)} due tomorrow`
+    );
 
     icsContent.push('BEGIN:VEVENT');
-    icsContent.push(`UID:${uid}`);
+    pushFoldedLine(icsContent, `UID:${uid}`);
     icsContent.push(`DTSTART;TZID=${timezone}:${formatICSDateTime(startDateTime)}`);
     icsContent.push(`DTEND;TZID=${timezone}:${formatICSDateTime(endDateTime)}`);
-    icsContent.push(`DTSTAMP:${formatICSDateTime(DateTime.now().toUTC())}`);
-    icsContent.push(`SUMMARY:${summary}`);
-    icsContent.push(`DESCRIPTION:${description}`);
+    icsContent.push(`DTSTAMP:${formatICSDateTime(DateTime.now(), { utc: true })}`);
+    pushFoldedLine(icsContent, `SUMMARY:${escapedSummary}`);
+    pushFoldedLine(icsContent, `DESCRIPTION:${escapedDescription}`);
     icsContent.push('STATUS:CONFIRMED');
     icsContent.push('BEGIN:VALARM');
     icsContent.push('TRIGGER:-P1DT0H0M0S');
     icsContent.push('ACTION:DISPLAY');
-    icsContent.push(`DESCRIPTION:Reminder: ${installment.provider} payment of $${installment.amount.toFixed(2)} due tomorrow`);
+    pushFoldedLine(icsContent, `DESCRIPTION:${alarmDescription}`);
     icsContent.push('END:VALARM');
     icsContent.push('END:VEVENT');
     icsContent.push('');
@@ -119,10 +138,51 @@ function generateICSWithTZID(installments, timezone) {
 }
 
 /**
- * Format DateTime for ICS format (YYYYMMDDTHHMMSS)
+ * Format DateTime for ICS format (YYYYMMDDTHHMMSS[Z])
  */
-function formatICSDateTime(dateTime) {
-  return dateTime.toFormat('yyyyMMdd\'T\'HHmmss');
+function formatICSDateTime(dateTime, options = {}) {
+  const { utc = false } = options;
+  const dt = utc ? dateTime.toUTC() : dateTime;
+  const base = dt.toFormat("yyyyMMdd'T'HHmmss");
+  return utc ? `${base}Z` : base;
+}
+
+function escapeICSText(text) {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/\n/g, '\\n')
+    .replace(/,/g, '\\,')
+    .replace(/;/g, '\\;');
+}
+
+function foldLine(line) {
+  const MAX_BYTES = 75;
+  const segments = [];
+  let current = '';
+  let currentBytes = 0;
+
+  for (const char of line) {
+    const charBytes = Buffer.from(char, 'utf8').length;
+    if (current && currentBytes + charBytes > MAX_BYTES) {
+      segments.push(current);
+      current = ' ' + char;
+      currentBytes = 1 + charBytes;
+    } else {
+      current += char;
+      currentBytes += charBytes;
+    }
+  }
+
+  if (current) {
+    segments.push(current);
+  }
+
+  return segments.length > 0 ? segments : [line];
+}
+
+function pushFoldedLine(buffer, line) {
+  const segments = foldLine(line);
+  segments.forEach(segment => buffer.push(segment));
 }
 
 module.exports = {

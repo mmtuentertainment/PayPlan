@@ -1,5 +1,4 @@
 const { DateTime } = require('luxon');
-const holidayData = require('../data/us-federal-holidays-2025-2026.json');
 
 /**
  * Shifts payment due dates from weekends/holidays to the next business day
@@ -26,8 +25,8 @@ function shiftToBusinessDays(items, timeZone, options = {}) {
     };
   }
 
-  // Build skip set: weekends + holidays + custom dates
-  const skipSet = buildSkipSet(country, customSkipDates);
+  // Build skip context: weekends + holidays + custom dates
+  const skipContext = buildSkipContext(country, customSkipDates);
 
   const shiftedItems = [];
   const movedDates = [];
@@ -53,23 +52,14 @@ function shiftToBusinessDays(items, timeZone, options = {}) {
     const priority = { WEEKEND: 1, HOLIDAY: 2, CUSTOM: 3 };
 
     // Shift forward until we find a business day
-    while (isNonBusinessDay(dateTime, skipSet)) {
-      const dayOfWeek = dateTime.weekday; // 1=Mon, 7=Sun
-      const dateKey = dateTime.toISODate();
+    while (true) {
+      const candidate = getNonBusinessReason(dateTime, skipContext);
+      if (!candidate) {
+        break;
+      }
 
-      // Track highest-priority reason (CUSTOM > HOLIDAY > WEEKEND)
-      const candidate = skipSet.customSkipDates.has(dateKey)
-        ? 'CUSTOM'
-        : skipSet.holidays.has(dateKey)
-        ? 'HOLIDAY'
-        : dayOfWeek === 6 || dayOfWeek === 7
-        ? 'WEEKEND'
-        : undefined;
-
-      if (candidate) {
-        if (!reason || priority[candidate] > priority[reason]) {
-          reason = candidate;
-        }
+      if (!reason || priority[candidate] > priority[reason]) {
+        reason = candidate;
       }
 
       dateTime = dateTime.plus({ days: 1 });
@@ -120,94 +110,154 @@ function shiftToBusinessDays(items, timeZone, options = {}) {
 /**
  * Build set of non-business days
  */
-function buildSkipSet(country, customSkipDates) {
-  const holidays = new Set();
-
-  // Load holidays for the country
-  if (country === 'US') {
-    for (const year of Object.keys(holidayData)) {
-      for (const holiday of holidayData[year]) {
-        // Use observed date if available
-        const dateToUse = holiday.observed || holiday.date;
-        holidays.add(dateToUse);
-      }
-    }
-  }
-
+function buildSkipContext(country, customSkipDates) {
   return {
-    holidays,
-    customSkipDates: new Set(customSkipDates)
+    country,
+    customSkipDates: new Set(customSkipDates),
+    holidaysByYear: new Map()
   };
 }
 
-/**
- * Check if a date is a non-business day
- */
-function isNonBusinessDay(dateTime, skipSet) {
-  const dayOfWeek = dateTime.weekday; // 1=Mon, 7=Sun
-  const dateKey = dateTime.toISODate();
-
-  // Check weekends (Saturday=6, Sunday=7)
-  if (dayOfWeek === 6 || dayOfWeek === 7) {
-    return true;
-  }
-
-  // Check holidays
-  if (skipSet.holidays.has(dateKey)) {
-    return true;
-  }
-
-  // Check custom skip dates
-  if (skipSet.customSkipDates.has(dateKey)) {
-    return true;
-  }
-
-  return false;
+function isNonBusinessDay(dateTime, skipContext) {
+  return Boolean(getNonBusinessReason(dateTime, skipContext));
 }
 
-/**
- * Check if a specific date is a business day
- * @param {string} dateStr - Date in YYYY-MM-DD format
- * @param {string} timeZone - IANA timezone
- * @param {string} country - Country code
- * @param {Array<string>} customSkipDates - Custom skip dates
- * @returns {boolean}
- */
+function getNonBusinessReason(dateTime, skipContext) {
+  const dateKey = dateTime.toISODate();
+
+  if (skipContext.customSkipDates.has(dateKey)) {
+    return 'CUSTOM';
+  }
+
+  if (skipContext.country !== 'None' && isHoliday(dateTime, skipContext)) {
+    return 'HOLIDAY';
+  }
+
+  const dayOfWeek = dateTime.weekday; // 1=Mon, 7=Sun
+  if (dayOfWeek === 6 || dayOfWeek === 7) {
+    return 'WEEKEND';
+  }
+
+  return null;
+}
+
+function isHoliday(dateTime, skipContext) {
+  if (skipContext.country !== 'US') {
+    return false;
+  }
+
+  const dateKey = dateTime.toISODate();
+  const currentYearHolidays = ensureHolidaySet(skipContext, dateTime.year);
+  if (currentYearHolidays.has(dateKey)) {
+    return true;
+  }
+
+  // Handle observed holidays that fall in adjacent years (e.g., Jan 1 on weekend)
+  const nextYearHolidays = ensureHolidaySet(skipContext, dateTime.year + 1);
+  return nextYearHolidays.has(dateKey);
+}
+
+function ensureHolidaySet(skipContext, year) {
+  if (!skipContext.holidaysByYear.has(year)) {
+    if (skipContext.country === 'US') {
+      skipContext.holidaysByYear.set(year, computeUsFederalHolidays(year));
+    } else {
+      skipContext.holidaysByYear.set(year, new Set());
+    }
+  }
+
+  return skipContext.holidaysByYear.get(year);
+}
+
+function computeUsFederalHolidays(year) {
+  const holidays = new Set();
+
+  const addHoliday = (dt) => {
+    if (!dt || !dt.isValid) return;
+    holidays.add(dt.toISODate());
+
+    // Capture observed holiday adjustments for weekend occurrences
+    if (dt.weekday === 6) {
+      holidays.add(dt.minus({ days: 1 }).toISODate());
+    } else if (dt.weekday === 7) {
+      holidays.add(dt.plus({ days: 1 }).toISODate());
+    }
+  };
+
+  // Fixed-date holidays with observed adjustments
+  addHoliday(DateTime.fromObject({ year, month: 1, day: 1 }));   // New Year's Day
+  addHoliday(DateTime.fromObject({ year, month: 6, day: 19 }));  // Juneteenth
+  addHoliday(DateTime.fromObject({ year, month: 7, day: 4 }));   // Independence Day
+  addHoliday(DateTime.fromObject({ year, month: 11, day: 11 })); // Veterans Day
+  addHoliday(DateTime.fromObject({ year, month: 12, day: 25 })); // Christmas Day
+
+  // Floating holidays
+  addHoliday(nthWeekdayOfMonth(year, 1, 1, 3)); // Martin Luther King Jr. Day (3rd Monday in Jan)
+  addHoliday(nthWeekdayOfMonth(year, 2, 1, 3)); // Presidents' Day (3rd Monday in Feb)
+  addHoliday(lastWeekdayOfMonth(year, 5, 1));   // Memorial Day (last Monday in May)
+  addHoliday(nthWeekdayOfMonth(year, 9, 1, 1)); // Labor Day (1st Monday in Sep)
+  addHoliday(nthWeekdayOfMonth(year, 10, 1, 2)); // Columbus Day (2nd Monday in Oct)
+  addHoliday(nthWeekdayOfMonth(year, 11, 4, 4)); // Thanksgiving (4th Thursday in Nov)
+
+  return holidays;
+}
+
+function nthWeekdayOfMonth(year, month, weekday, occurrence) {
+  let date = DateTime.fromObject({ year, month, day: 1 });
+  let count = 0;
+
+  while (date.month === month) {
+    if (date.weekday === weekday) {
+      count += 1;
+      if (count === occurrence) {
+        return date;
+      }
+    }
+    date = date.plus({ days: 1 });
+  }
+
+  return DateTime.invalid('Invalid occurrence for nthWeekdayOfMonth');
+}
+
+function lastWeekdayOfMonth(year, month, weekday) {
+  const daysInMonth = DateTime.fromObject({ year, month, day: 1 }).daysInMonth;
+  let date = DateTime.fromObject({ year, month, day: daysInMonth });
+
+  while (date.month === month) {
+    if (date.weekday === weekday) {
+      return date;
+    }
+    date = date.minus({ days: 1 });
+  }
+
+  return DateTime.invalid('Unable to find last weekday of month');
+}
+
 function isBusinessDay(dateStr, timeZone, country = 'US', customSkipDates = []) {
-  const skipSet = buildSkipSet(country, customSkipDates);
+  const skipContext = buildSkipContext(country, customSkipDates);
   const dateTime = DateTime.fromISO(dateStr, { zone: timeZone });
 
   if (!dateTime.isValid) {
     return false;
   }
 
-  return !isNonBusinessDay(dateTime, skipSet, customSkipDates);
+  return !isNonBusinessDay(dateTime, skipContext);
 }
 
-/**
- * Find the next business day from a given date
- * @param {string} dateStr - Date in YYYY-MM-DD format
- * @param {string} timeZone - IANA timezone
- * @param {string} country - Country code
- * @param {Array<string>} customSkipDates - Custom skip dates
- * @returns {string} Next business day in YYYY-MM-DD format
- */
 function nextBusinessDay(dateStr, timeZone, country = 'US', customSkipDates = []) {
-  const skipSet = buildSkipSet(country, customSkipDates);
+  const skipContext = buildSkipContext(country, customSkipDates);
   let dateTime = DateTime.fromISO(dateStr, { zone: timeZone });
 
   if (!dateTime.isValid) {
     throw new Error(`Invalid date: ${dateStr}`);
   }
 
-  // Start from next day
   dateTime = dateTime.plus({ days: 1 });
 
-  // Find next business day with infinite loop protection
   let daysShifted = 0;
   const MAX_SHIFT_DAYS = 365;
 
-  while (isNonBusinessDay(dateTime, skipSet, customSkipDates)) {
+  while (isNonBusinessDay(dateTime, skipContext)) {
     dateTime = dateTime.plus({ days: 1 });
     daysShifted++;
 

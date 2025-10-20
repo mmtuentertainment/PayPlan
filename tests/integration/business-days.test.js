@@ -59,8 +59,9 @@ describe('Business-Day Awareness Integration Tests (v0.1.2)', () => {
 
       // Verify ICS uses shifted date (Nov 28)
       const icsDecoded = Buffer.from(response.body.ics, 'base64').toString('utf-8');
+      const unfolded = icsDecoded.replace(/\r\n[\t ]/g, ''); // Unfold folded ICS lines for content checks
       expect(icsDecoded).toContain('20251128T090000'); // Friday Nov 28
-      expect(icsDecoded).toContain('Originally due: 2025-11-27');
+      expect(unfolded).toContain('Originally due: 2025-11-27');
     });
   });
 

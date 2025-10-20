@@ -208,6 +208,21 @@ describe('business-day-shifter', () => {
       expect(result.movedDates[1].shiftedDueDate).toBe('2025-11-28');
     });
 
+    test('handles holidays beyond pre-defined year range', () => {
+      const items = [{
+        provider: 'Affirm',
+        installment_no: 1,
+        due_date: '2027-11-25', // Thanksgiving 2027
+        amount: 90
+      }];
+
+      const result = shiftToBusinessDays(items, DEFAULT_TZ, { country: 'US' });
+
+      expect(result.shiftedItems[0].due_date).toBe('2027-11-26'); // Friday
+      expect(result.shiftedItems[0].shiftReason).toBe('HOLIDAY');
+      expect(result.shiftedItems[0].wasShifted).toBe(true);
+    });
+
     test('handles invalid dates gracefully', () => {
       const items = [{
         provider: 'Klarna',
@@ -257,6 +272,10 @@ describe('business-day-shifter', () => {
       expect(isBusinessDay('2025-11-27', DEFAULT_TZ, 'US')).toBe(false); // Thanksgiving
     });
 
+    test('returns false for generated future holiday', () => {
+      expect(isBusinessDay('2027-11-25', DEFAULT_TZ, 'US')).toBe(false);
+    });
+
     test('returns true for US holiday when country is "None"', () => {
       expect(isBusinessDay('2025-11-27', DEFAULT_TZ, 'None')).toBe(true);
     });
@@ -286,6 +305,10 @@ describe('business-day-shifter', () => {
     test('skips holiday when finding next business day', () => {
       // Day before Thanksgiving
       expect(nextBusinessDay('2025-11-26', DEFAULT_TZ, 'US')).toBe('2025-11-28');
+    });
+
+    test('returns next business day for future holiday', () => {
+      expect(nextBusinessDay('2027-11-25', DEFAULT_TZ, 'US')).toBe('2027-11-26');
     });
 
     test('throws error for invalid date', () => {
