@@ -32,7 +32,9 @@ describe('csvExportService', () => {
         autopay: 'true',
         risk_type: 'COLLISION',
         risk_severity: 'HIGH',
-        risk_message: 'Multiple payments due same day'
+        risk_message: 'Multiple payments due same day',
+        paid_status: '',  // Feature 015 - empty if not tracked
+        paid_timestamp: ''  // Feature 015 - empty if not tracked
       });
     });
 
@@ -51,6 +53,8 @@ describe('csvExportService', () => {
       expect(result.risk_type).toBe('');
       expect(result.risk_severity).toBe('');
       expect(result.risk_message).toBe('');
+      expect(result.paid_status).toBe('');  // Feature 015 - empty if not tracked
+      expect(result.paid_timestamp).toBe('');  // Feature 015 - empty if not tracked
     });
 
     it('should format amount with exactly 2 decimal places (45 → "45.00")', () => {
@@ -284,14 +288,16 @@ describe('csvExportService', () => {
         autopay: 'true',
         risk_type: 'COLLISION',
         risk_severity: 'HIGH',
-        risk_message: 'Multiple payments'
+        risk_message: 'Multiple payments',
+        paid_status: 'paid',  // Feature 015
+        paid_timestamp: '2025-10-14T10:00:00.000Z'  // Feature 015
       }];
 
       const result = generateCSV(rows);
 
       // PapaParse with quotes:true adds quotes to all fields
       const headerLine = result.split('\r\n')[0];
-      expect(headerLine).toBe('"provider","amount","currency","dueISO","autopay","risk_type","risk_severity","risk_message"');
+      expect(headerLine).toBe('"provider","amount","currency","dueISO","autopay","risk_type","risk_severity","risk_message","paid_status","paid_timestamp"');
     });
 
     it('should handle special characters - commas in provider name', () => {
@@ -303,7 +309,9 @@ describe('csvExportService', () => {
         autopay: 'true',
         risk_type: '',
         risk_severity: '',
-        risk_message: ''
+        risk_message: '',
+        paid_status: '',
+        paid_timestamp: ''
       }];
 
       const result = generateCSV(rows);
@@ -321,7 +329,9 @@ describe('csvExportService', () => {
         autopay: 'false',
         risk_type: '',
         risk_severity: '',
-        risk_message: ''
+        risk_message: '',
+        paid_status: '',
+        paid_timestamp: ''
       }];
 
       const result = generateCSV(rows);
@@ -339,7 +349,9 @@ describe('csvExportService', () => {
         autopay: 'true',
         risk_type: '',
         risk_severity: '',
-        risk_message: ''
+        risk_message: '',
+        paid_status: '',
+        paid_timestamp: ''
       }];
 
       const result = generateCSV(rows);
@@ -367,7 +379,9 @@ describe('csvExportService', () => {
           autopay: 'true',
           risk_type: 'COLLISION',
           risk_severity: 'HIGH',
-          risk_message: 'Multiple payments'
+          risk_message: 'Multiple payments',
+          paid_status: 'paid',
+          paid_timestamp: '2025-10-14T10:00:00.000Z'
         },
         {
           provider: 'Affirm',
@@ -377,7 +391,9 @@ describe('csvExportService', () => {
           autopay: 'false',
           risk_type: '',
           risk_severity: '',
-          risk_message: ''
+          risk_message: '',
+          paid_status: 'pending',
+          paid_timestamp: ''
         }
       ];
 
@@ -398,7 +414,9 @@ describe('csvExportService', () => {
         autopay: 'true',
         risk_type: '',
         risk_severity: '',
-        risk_message: ''
+        risk_message: '',
+        paid_status: '',
+        paid_timestamp: ''
       }];
 
       const csvContent = generateCSV(rows);
