@@ -37,7 +37,7 @@ import {
   MAX_STORAGE_SIZE,
   MAX_ARCHIVES,
 } from './constants';
-import { getCurrentTimestamp, calculateByteSize } from './utils';
+import { getCurrentTimestamp } from './utils';
 import { measureSync, PERFORMANCE_TARGETS } from './performance';
 
 /**

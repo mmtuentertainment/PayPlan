@@ -84,7 +84,9 @@ export const csvRowSchema = z.object({
   autopay: z.enum(["true", "false"]),
   risk_type: z.string(),      // Empty string allowed
   risk_severity: z.string(),  // Empty string allowed
-  risk_message: z.string()    // Empty string allowed
+  risk_message: z.string(),   // Empty string allowed
+  paid_status: z.string(),    // Feature 015 - "paid", "pending", or "" (empty string allowed)
+  paid_timestamp: z.string()  // Feature 015 - ISO 8601 timestamp or "" (empty string allowed)
 });
 
 /**

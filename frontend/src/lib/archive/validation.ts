@@ -227,7 +227,7 @@ export function isValidArchiveId(id: string): boolean {
  * @param data - Data to validate
  * @returns Validated archive or error
  */
-export function validateArchive(data: unknown): z.SafeParseReturnType<unknown, z.infer<typeof archiveSchema>> {
+export function validateArchive(data: unknown) {
   return archiveSchema.safeParse(data);
 }
 
@@ -239,6 +239,6 @@ export function validateArchive(data: unknown): z.SafeParseReturnType<unknown, z
  * @param data - Data to validate
  * @returns Validated index or error
  */
-export function validateArchiveIndex(data: unknown): z.SafeParseReturnType<unknown, z.infer<typeof archiveIndexSchema>> {
+export function validateArchiveIndex(data: unknown) {
   return archiveIndexSchema.safeParse(data);
 }

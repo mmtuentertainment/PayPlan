@@ -282,7 +282,7 @@ export class PaymentStatusStorage {
    * Bulk save multiple payment status records (US3)
    * Implementation in T053
    */
-  bulkSaveStatuses(records: PaymentStatusRecord[]): Result<number, StorageError> {
+  bulkSaveStatuses(_records: PaymentStatusRecord[]): Result<number, StorageError> {
     throw new Error('Not implemented - T053 (US3)');
   }
 

@@ -12,14 +12,11 @@
  */
 
 import { z } from 'zod';
-import type { PaymentStatus } from './types';
 
 /**
  * Payment status enum schema
  */
-export const paymentStatusSchema = z.enum(['paid', 'pending'], {
-  errorMap: () => ({ message: 'Status must be "paid" or "pending"' }),
-});
+export const paymentStatusSchema = z.enum(['paid', 'pending']);
 
 /**
  * PaymentStatusRecord validation schema

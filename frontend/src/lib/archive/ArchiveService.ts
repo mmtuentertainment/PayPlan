@@ -21,6 +21,7 @@
 import type {
   Archive,
   ArchiveMetadata,
+  ArchiveIndexEntry,
   PaymentArchiveRecord,
   ArchiveError,
   Result,
@@ -36,7 +37,6 @@ import {
   getCurrentTimestamp,
   calculateByteSize,
   calculatePercentage,
-  generateArchiveFilename,
 } from './utils';
 import {
   MAX_ARCHIVES,
@@ -59,10 +59,16 @@ import { measureSync, PERFORMANCE_TARGETS } from './performance';
  * - Reset payment statuses after successful archive
  */
 export class ArchiveService {
+  private archiveStorage: ArchiveStorage;
+  private paymentStatusStorage: PaymentStatusStorage;
+
   constructor(
-    private archiveStorage: ArchiveStorage,
-    private paymentStatusStorage: PaymentStatusStorage
-  ) {}
+    archiveStorage: ArchiveStorage,
+    paymentStatusStorage: PaymentStatusStorage
+  ) {
+    this.archiveStorage = archiveStorage;
+    this.paymentStatusStorage = paymentStatusStorage;
+  }
 
   /**
    * T016: Create new payment archive from current data
