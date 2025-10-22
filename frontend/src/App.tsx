@@ -12,6 +12,9 @@ import { usePreferences } from './hooks/usePreferences';
 import { RESTORATION_TARGET_MS } from './lib/preferences/constants';
 import { validatePreferenceUpdate } from './lib/preferences/schemas';
 import { ZodError } from 'zod';
+import { ArchiveListPage } from './pages/ArchiveListPage';
+import { ArchiveDetailView } from './pages/ArchiveDetailView';
+import { ROUTES } from './routes';
 
 function App() {
   // Initialize preferences hook at app level
@@ -72,6 +75,8 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/demo" element={<Demo />} />
         <Route path="/import" element={<Import />} />
+        <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
+        <Route path={`${ROUTES.ARCHIVES}/:id`} element={<ArchiveDetailView />} />
         <Route
           path="/settings/preferences"
           element={

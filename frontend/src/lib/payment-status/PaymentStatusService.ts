@@ -191,7 +191,7 @@ export class PaymentStatusService {
    * Bulk mark multiple payments as paid (US3)
    * Implementation in T054
    */
-  bulkMarkAsPaid(paymentIds: string[]): Result<number, StorageError> {
+  bulkMarkAsPaid(_paymentIds: string[]): Result<number, StorageError> {
     throw new Error('Not implemented - T054 (US3)');
   }
 
@@ -199,7 +199,7 @@ export class PaymentStatusService {
    * Bulk mark multiple payments as pending (US3)
    * Implementation in T055
    */
-  bulkMarkAsPending(paymentIds: string[]): Result<number, StorageError> {
+  bulkMarkAsPending(_paymentIds: string[]): Result<number, StorageError> {
     throw new Error('Not implemented - T055 (US3)');
   }
 
@@ -215,7 +215,7 @@ export class PaymentStatusService {
    * Get set of payment IDs that are marked as paid (US2)
    * Implementation in T044
    */
-  getPaidPayments(paymentIds: string[]): Result<Set<string>, StorageError> {
+  getPaidPayments(_paymentIds: string[]): Result<Set<string>, StorageError> {
     throw new Error('Not implemented - T044 (US2)');
   }
 

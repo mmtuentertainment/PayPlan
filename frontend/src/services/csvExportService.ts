@@ -35,7 +35,9 @@ export function transformPaymentToCSVRow(payment: PaymentRecord): CSVRow {
     autopay: payment.autopay.toString(), // Convert boolean to string
     risk_type: payment.risk_type || '',   // Empty string if undefined
     risk_severity: payment.risk_severity || '',
-    risk_message: payment.risk_message || ''
+    risk_message: payment.risk_message || '',
+    paid_status: payment.paid_status || '',  // Feature 015 - empty if not tracked
+    paid_timestamp: payment.paid_timestamp || ''  // Feature 015 - empty if not tracked
   };
 
   // Validate output with Zod schema

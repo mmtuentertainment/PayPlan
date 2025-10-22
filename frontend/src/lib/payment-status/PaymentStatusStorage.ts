@@ -282,16 +282,32 @@ export class PaymentStatusStorage {
    * Bulk save multiple payment status records (US3)
    * Implementation in T053
    */
-  bulkSaveStatuses(records: PaymentStatusRecord[]): Result<number, StorageError> {
+  bulkSaveStatuses(_records: PaymentStatusRecord[]): Result<number, StorageError> {
     throw new Error('Not implemented - T053 (US3)');
   }
 
   /**
-   * Clear all payment status records (US5)
-   * Implementation in T075
+   * Clear all payment status records
+   * Used by Feature 016 (Archive System) to reset statuses after archiving
+   *
+   * @returns Result<boolean, StorageError> - true if data cleared, false if nothing to clear
    */
   clearAll(): Result<boolean, StorageError> {
-    throw new Error('Not implemented - T075 (US5)');
+    try {
+      // Check if there's anything to clear
+      const existing = localStorage.getItem(STORAGE_KEY);
+
+      if (existing === null) {
+        // Nothing to clear
+        return { ok: true, value: false };
+      }
+
+      // Clear the data
+      localStorage.removeItem(STORAGE_KEY);
+      return { ok: true, value: true };
+    } catch (error) {
+      return this.handleStorageError(error);
+    }
   }
 
   /**

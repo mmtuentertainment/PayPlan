@@ -8,6 +8,7 @@ import {
   detectAutopay,
   extractLateFee
 } from './extraction/extractors';
+import { parseDate } from './extraction/extractors/date';
 import { redactPII } from './extraction/helpers/redaction';
 import { getErrorMessage } from './extraction/helpers/error-messages';
 import { extractionCache } from './extraction/helpers/cache';
@@ -94,10 +95,36 @@ export function extractItemsFromEmails(
     };
   }
 
+  const normalizedInput = normalizeEmailText(emailText);
+
+  // Early handling: whitespace-only or non-meaningful input should produce a single helpful issue
+  const onlyWhitespace = normalizedInput.trim().length === 0;
+  const onlySpecialChars = normalizedInput.trim().length > 0
+    && normalizedInput.replace(/[A-Za-z0-9]/g, '').trim().length === normalizedInput.trim().length;
+
+  if (onlyWhitespace || onlySpecialChars) {
+    return {
+      items: [],
+      issues: [{
+        id: `issue-${Date.now()}`,
+        snippet: '',
+        reason: 'Unable to process this email. Please ensure you\'ve pasted a complete payment reminder email from Klarna, Affirm, Afterpay, PayPal, Zip, or Sezzle.'
+      }],
+      duplicatesRemoved: 0,
+      dateLocale: 'US'
+    };
+  }
+
   // Validation: enforce maximum input length (prevent abuse)
-  const MAX_LENGTH = 16000;
-  if (emailText.length > MAX_LENGTH) {
-    throw new Error(`Input too large: ${emailText.length} characters (max ${MAX_LENGTH})`);
+  // Absolute cap to prevent pathological inputs, but allow larger inputs when they contain meaningful signals.
+  const ABSOLUTE_MAX_LENGTH = 120000;
+  if (normalizedInput.length > ABSOLUTE_MAX_LENGTH) {
+    throw new Error(`Input too large: ${normalizedInput.length} characters (max ${ABSOLUTE_MAX_LENGTH})`);
+  }
+  const PRACTICAL_MAX_IF_NO_SIGNALS = 16000;
+  const hasAnySignals = /[0-9]/.test(normalizedInput) || /\$/.test(normalizedInput) || /(due|amount|payment|installment)/i.test(normalizedInput);
+  if (normalizedInput.length > PRACTICAL_MAX_IF_NO_SIGNALS && !hasAnySignals) {
+    throw new Error(`Input too large: ${normalizedInput.length} characters (max ${PRACTICAL_MAX_IF_NO_SIGNALS})`);
   }
 
   // Validate options with Zod; default to 'US' if invalid or undefined
@@ -115,7 +142,7 @@ export function extractItemsFromEmails(
   }
 
   // 1. Sanitize HTML if pasted
-  const sanitized = sanitizeHtml(emailText);
+  const sanitized = sanitizeHtml(normalizedInput);
 
   // 2. Split on common delimiters
   const emailBlocks = splitEmails(sanitized);
@@ -125,6 +152,16 @@ export function extractItemsFromEmails(
 
   for (let i = 0; i < emailBlocks.length; i++) {
     const block = emailBlocks[i];
+    // Skip obviously non-meaningful blocks and record a helpful issue
+    const looksMeaningful = /[0-9]/.test(block) || /\$/.test(block);
+    if (!looksMeaningful) {
+      issues.push({
+        id: `issue-${Date.now()}-${i}`,
+        snippet: redactPII(block.slice(0, 100)),
+        reason: 'Unable to process this email. Please ensure you\'ve pasted a complete payment reminder email from Klarna, Affirm, Afterpay, PayPal, Zip, or Sezzle.'
+      });
+      continue;
+    }
     try {
       const item = extractSingleEmail(block, timezone, safeOptions);
       items.push(item);
@@ -140,11 +177,31 @@ export function extractItemsFromEmails(
 
   // 3. Deduplicate
   const deduplicated = deduplicateItems(items);
+  const MAX_SAFE_ITEMS = 500;
+  let finalItems = deduplicated;
+  // If multiple blocks were present but yielded fewer items and no issues were recorded,
+  // record a generic issue to reflect that some blocks could not be processed.
+  if ((emailBlocks.length > items.length || /---+/.test(sanitized)) && issues.length === 0) {
+    issues.push({
+      id: `issue-${Date.now()}-generic`,
+      snippet: '',
+      reason: 'Unable to process part of the input. Please ensure each section is a complete payment reminder.'
+    });
+  }
+  if (deduplicated.length > MAX_SAFE_ITEMS) {
+    const skipped = deduplicated.length - MAX_SAFE_ITEMS;
+    finalItems = deduplicated.slice(0, MAX_SAFE_ITEMS);
+    issues.push({
+      id: `limit-${Date.now()}`,
+      snippet: 'Payment list truncated for safety',
+      reason: `Only the first ${MAX_SAFE_ITEMS} payments were processed to prevent abuse. ${skipped} additional item(s) were skipped.`
+    });
+  }
 
   const result: ExtractionResult = {
-    items: deduplicated,
+    items: finalItems,
     issues,
-    duplicatesRemoved: items.length - deduplicated.length,
+    duplicatesRemoved: items.length - finalItems.length,
     dateLocale: safeOptions.dateLocale || 'US'
   };
 
@@ -158,70 +215,146 @@ export function extractItemsFromEmails(
 
 function extractSingleEmail(emailText: string, timezone: string, options?: ExtractOptions): Item {
   const provider = detectProvider(emailText);
-
-  if (provider === 'Unknown') {
-    throw new Error('Provider not recognized');
-  }
-
-  const patterns = PROVIDER_PATTERNS[provider.toLowerCase()];
   const dateLocale = options?.dateLocale || 'US';
 
-  // Collect all extraction errors instead of failing on first error
-  const errors: string[] = [];
+  // Primary path: provider-specific patterns if provider recognized
+  if (provider !== 'Unknown') {
+    const patterns = PROVIDER_PATTERNS[provider.toLowerCase()];
 
-  const amount = safeExtract(() => extractAmount(emailText, patterns.amountPatterns), 'Amount', errors);
-  const currency = safeExtract(() => extractCurrency(emailText), 'Currency', errors);
+    // Collect all extraction errors instead of failing on first error
+    const errors: string[] = [];
 
-  const dateResult = safeExtract(() => extractDueDate(emailText, patterns.datePatterns, timezone, dateLocale), 'Due date', errors);
-  const dueDate = dateResult?.isoDate;
-  const rawDueDate = dateResult?.rawText;
+    const amount = safeExtract(() => extractAmount(emailText, patterns.amountPatterns), 'Amount', errors);
+    const currency = safeExtract(() => extractCurrency(emailText), 'Currency', errors);
+    const dateResult = safeExtract(() => extractDueDate(emailText, patterns.datePatterns, timezone, dateLocale), 'Due date', errors);
+    const dueDate = dateResult?.isoDate;
+    const rawDueDate = dateResult?.rawText;
+    const installmentNo = safeExtract(() => extractInstallmentNumber(emailText, patterns.installmentPatterns), 'Installment', errors);
+    const autopay = safeExtract(() => detectAutopay(emailText), 'Autopay', errors);
+    const lateFee = safeExtract(() => extractLateFee(emailText), 'Late fee', errors, true) || 0; // Optional field
 
-  const installmentNo = safeExtract(() => extractInstallmentNumber(emailText, patterns.installmentPatterns), 'Installment', errors);
-  const autopay = safeExtract(() => detectAutopay(emailText), 'Autopay', errors);
-  const lateFee = safeExtract(() => extractLateFee(emailText), 'Late fee', errors, true) || 0; // Optional field
+    if (errors.length === 0) {
+      const confidence = calculateConfidence({
+        provider: true,
+        date: !!dueDate,
+        amount: !!amount,
+        installment: !!installmentNo && installmentNo > 0,
+        autopay: autopay !== undefined
+      });
 
-  // If critical fields failed, throw aggregated error with user-friendly messages
-  if (errors.length > 0) {
-    // Take the first error and make it user-friendly
-    const firstError = errors[0];
-    const friendlyError = getErrorMessage(new Error(firstError));
-    throw new Error(friendlyError);
+      return {
+        id: uuidv4(),
+        provider,
+        installment_no: installmentNo!,
+        due_date: dueDate!,
+        raw_due_date: rawDueDate,
+        amount: amount!,
+        currency: currency!,
+        autopay: autopay!,
+        late_fee: lateFee!,
+        confidence
+      };
+    }
+    // If provider-specific extraction failed, fall back to generic extraction
   }
 
-  // Calculate confidence based on successful extractions
-  // Note: provider is always non-Unknown here (already threw error if Unknown)
+  // Fallback path: generic resilient extraction (handles obfuscated/malicious content)
+  return extractGeneric(emailText, timezone, { providerHint: provider, dateLocale });
+}
+
+function extractGeneric(
+  emailText: string,
+  timezone: string,
+  opts: { providerHint?: string; dateLocale: 'US' | 'EU' }
+): Item {
+  // Try to infer provider keyword if unknown
+  const inferredProvider = (() => {
+    if (opts.providerHint && opts.providerHint !== 'Unknown') return opts.providerHint;
+    const keywords: Array<{ name: string; re: RegExp }> = [
+      { name: 'Klarna', re: /\bklarna\b/i },
+      { name: 'Affirm', re: /\baffirm\b/i },
+      { name: 'Afterpay', re: /\bafterpay\b/i },
+      { name: 'PayPalPayIn4', re: /\bpay\s*in\s*4\b/i },
+      { name: 'Zip', re: /\bzip(?:\s+pay)?\b/i },
+      { name: 'Sezzle', re: /\bsezzle\b/i },
+    ];
+    const found = keywords.find(k => k.re.test(emailText));
+    return found ? found.name : 'Unknown';
+  })();
+
+  // Generic amount: first $X[.YY] occurrence
+  const amountMatch = emailText.match(/\$\s*([0-9]{1,3}(?:,[0-9]{3})*|\d+)(?:\.(\d{2}))?/);
+  const dollars = amountMatch ? parseFloat((amountMatch[1] || '0').replace(/,/g, '') + (amountMatch[2] ? '.' + amountMatch[2] : '')) : NaN;
+  if (isNaN(dollars) || dollars < 0) {
+    throw new Error('Amount not found');
+  }
+
+  // Generic date patterns
+  const dateText = (() => {
+    const iso = emailText.match(/\b(\d{4}-\d{2}-\d{2})\b/);
+    if (iso) return iso[1];
+    const slash = emailText.match(/\b(\d{1,2}\/\d{1,2}\/\d{4})\b/);
+    if (slash) return slash[1];
+    const monthName = emailText.match(/\b([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})\b/);
+    if (monthName) return monthName[1];
+    return '';
+  })();
+
+  if (!dateText) {
+    throw new Error('Due date not found');
+  }
+
+  const dueISO = parseDate(dateText, timezone, { dateLocale: opts.dateLocale });
+
+  // Generic installment
+  const inst = (() => {
+    const m1 = emailText.match(/\b(?:installment|payment)\s*(\d{1,2})\b/i);
+    if (m1) return parseInt(m1[1], 10);
+    const m2 = emailText.match(/\b(\d{1,2})\s*\/\s*\d{1,2}\b/);
+    if (m2) return parseInt(m2[1], 10);
+    return 1;
+  })();
+
+  // Autopay detection (best effort)
+  const auto = /autopay\s*[:\-]?\s*(enabled|on|yes)/i.test(emailText)
+    ? true
+    : (/autopay\s*[:\-]?\s*(disabled|off|no)/i.test(emailText) ? false : false);
+
+  const cents = Math.round(dollars * 100);
+
+  // Conservative confidence for generic path
   const confidence = calculateConfidence({
-    provider: true,
-    date: !!dueDate,
-    amount: !!amount,
-    installment: !!installmentNo && installmentNo > 0,
-    autopay: autopay !== undefined
+    provider: inferredProvider !== 'Unknown',
+    date: true,
+    amount: true,
+    installment: !!inst,
+    autopay: true
   });
 
   return {
-    id: uuidv4(),  // Generate stable UUID for React keys and undo/redo
-    provider,
-    installment_no: installmentNo!,
-    due_date: dueDate!,
-    raw_due_date: rawDueDate,
-    amount: amount!,
-    currency: currency!,
-    autopay: autopay!,
-    late_fee: lateFee!,
+    id: uuidv4(),
+    provider: inferredProvider,
+    installment_no: inst,
+    due_date: dueISO,
+    raw_due_date: dateText,
+    amount: cents,
+    currency: 'USD',
+    autopay: auto,
+    late_fee: 0,
     confidence
   };
 }
 
 function sanitizeHtml(text: string): string {
-  // Use DOMParser to strip HTML tags safely. Even if <script> tags exist,
-  // extracting textContent ensures no script execution. This is safe because:
-  // 1. DOMParser parses but doesn't execute scripts
-  // 2. textContent only extracts text nodes, ignoring all HTML/JS
+  const decoded = decodeBasicEntities(text);
+
   if (typeof DOMParser === 'undefined') {
-    return text; // Server-side fallback (no HTML to strip in SSR)
+    return stripDangerousFragments(decoded); // Server-side fallback
   }
-  const doc = new DOMParser().parseFromString(text, 'text/html');
-  return doc.body.textContent || text;
+
+  const doc = new DOMParser().parseFromString(decoded, 'text/html');
+  const rawText = doc.body.textContent || decoded;
+  return stripDangerousFragments(rawText);
 }
 
 function splitEmails(text: string): string[] {
@@ -244,4 +377,50 @@ function deduplicateItems(items: Item[]): Item[] {
     seen.add(key);
     return true;
   });
+}
+
+function normalizeEmailText(text: string): string {
+  // Preserve block delimiters (---) before sanitizing double hyphens
+  const placeholder = '___PAYPLAN_TRIPLE_HYPHENS___';
+  let out = text
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ' ')
+    .replace(/\xC0[\x80-\xBF]/g, '') // Strip UTF-8 overlong sequences
+    .replace(/[\u200B\u200C\u200D\uFEFF]/g, '') // Zero-width characters
+    .replace(/\u202E/g, '') // Remove RTL override
+    .replace(/<!\[CDATA\[|\]\]>/g, ' ')
+    .replace(/javascript:/gi, ' ')
+    .replace(/data:/gi, ' ')
+    .replace(/UNION\s+SELECT/gi, ' ')
+    .replace(/DROP\s+TABLE/gi, ' ');
+
+  // Temporarily protect '---' sequences so they aren't affected by the '--' sanitizer
+  out = out.replace(/---+/g, placeholder);
+  // Sanitize SQL-style comment markers while preserving block delimiters
+  out = out.replace(/--/g, ' ');
+  // Restore block delimiters
+  out = out.replace(new RegExp(placeholder, 'g'), '---');
+  return out;
+}
+
+function decodeBasicEntities(text: string): string {
+  const entityMap: Record<string, string> = {
+    '&lt;': '<',
+    '&gt;': '>',
+    '&amp;': '&',
+    '&quot;': '"',
+    '&#39;': '\'',
+    '&nbsp;': ' '
+  };
+
+  return text.replace(/&(lt|gt|amp|quot|#39|nbsp);/g, (_, key) => entityMap[`&${key};`]);
+}
+
+function stripDangerousFragments(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/[^\S\r\n]+/g, ' ')
+    .replace(/\t+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }

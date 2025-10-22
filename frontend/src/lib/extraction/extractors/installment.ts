@@ -16,5 +16,14 @@ export function extractInstallmentNumber(text: string, patterns: RegExp[]): numb
       }
     }
   }
+
+  const fallback = text.match(/\b(?:installment|payment)\b[^0-9]{0,6}(\d{1,2})/i);
+  if (fallback && fallback[1]) {
+    const num = parseInt(fallback[1], 10);
+    if (!isNaN(num) && num > 0 && num <= 12) {
+      return num;
+    }
+  }
+
   return 1; // default to first installment
 }

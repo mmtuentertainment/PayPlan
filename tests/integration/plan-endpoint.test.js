@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../index');
-const { DateTime } = require('luxon');
+const { DateTime, Settings } = require('luxon');
 
 /**
  * Generate fixture with relative dates from today
@@ -48,6 +48,37 @@ describe('POST /plan integration tests', () => {
       expect(response.body.normalized[0]).toHaveProperty('provider');
       expect(response.body.normalized[0]).toHaveProperty('dueDate');
       expect(response.body.normalized[0]).toHaveProperty('amount');
+    });
+
+    it('includes payments due today even after midday', async () => {
+      const originalNow = Settings.now;
+      try {
+        const fixedNow = DateTime.fromISO('2025-01-15T18:05:00', { zone: 'America/New_York' });
+        Settings.now = () => fixedNow.toMillis();
+
+        const response = await request(app)
+          .post('/plan')
+          .send({
+            items: [{
+              provider: 'Klarna',
+              installment_no: 1,
+              due_date: '2025-01-15',
+              amount: 120.00,
+              currency: 'USD',
+              autopay: false,
+              late_fee: 15.00
+            }],
+            paycheckDates: ['2025-01-10', '2025-01-24', '2025-02-07'],
+            minBuffer: 200.00,
+            timeZone: 'America/New_York'
+          })
+          .expect(200);
+
+        expect(response.body.actionsThisWeek[0]).toContain('Klarna');
+        expect(response.body.summary).toMatch(/1 BNPL payment/);
+      } finally {
+        Settings.now = originalNow;
+      }
     });
 
     it('should detect risks in mixed providers fixture', async () => {

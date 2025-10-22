@@ -1,3 +1,20 @@
 {
-    "coderabbit.agentType": "Claude Code"
+    "coderabbit.agentType": "Claude Code",
+    "files.watcherExclude": {
+        "**/node_modules/**": true,
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/frontend/node_modules/**": true,
+        "**/.jj/**": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/frontend/node_modules": true
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.jj": true
+    },
+    "typescript.tsserver.maxTsServerMemory": 3072,
+    "typescript.disableAutomaticTypeAcquisition": true
 }

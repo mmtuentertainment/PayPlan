@@ -78,10 +78,10 @@ router.post('/', validatePlanRequest, async (req, res) => {
 
     // Get weekly installments for summary generation
     const { DateTime } = require('luxon');
-    const now = DateTime.now().setZone(timeZone);
-    const weekEnd = now.plus({ days: 7 });
+    const now = DateTime.now().setZone(timeZone).startOf('day');
+    const weekEnd = now.plus({ days: 7 }).endOf('day');
     const weeklyInstallments = normalizedInstallments.filter(installment => {
-      const dueDate = DateTime.fromISO(installment.due_date, { zone: timeZone });
+      const dueDate = DateTime.fromISO(installment.due_date, { zone: timeZone }).startOf('day');
       return dueDate >= now && dueDate <= weekEnd;
     });
 

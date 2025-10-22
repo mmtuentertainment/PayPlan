@@ -135,8 +135,8 @@ export const EmailPreview = React.memo(function EmailPreview({ items, onDelete, 
               const showQuickFix = item.confidence < 0.6 && onApplyFix && onUndoFix;
 
               return (
-                <>
-                  <tr key={rowId} className="border-b">
+                <React.Fragment key={rowId}>
+                  <tr className="border-b">
                     <td className="p-2">{item.provider}</td>
                     <td className="p-2">{item.installment_no}</td>
                     <td className="p-2">{item.due_date}</td>
@@ -177,7 +177,7 @@ export const EmailPreview = React.memo(function EmailPreview({ items, onDelete, 
                       </td>
                     </tr>
                   )}
-                </>
+                </React.Fragment>
               );
             })}
           </tbody>
