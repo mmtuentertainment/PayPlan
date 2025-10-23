@@ -27,6 +27,7 @@ BASE_DIR="${BASE_DIR:-specs/$FEATURE_ID}"
 BASELINE_FILE="${BASELINE_FILE:-$BASE_DIR/BASELINE_METRICS.json}"
 RESULTS_DIR="${RESULTS_DIR:-$BASE_DIR/performance-results}"
 LOG_RETENTION_DAYS="${LOG_RETENTION_DAYS:-7}"
+FRONTEND_DIR="${FRONTEND_DIR:-frontend}"  # Configurable frontend directory
 
 # Validate paths to prevent traversal attacks
 if [[ "$FEATURE_ID" =~ \.\. ]] || [[ "$FEATURE_ID" =~ ^/ ]]; then
@@ -52,13 +53,26 @@ fi
 echo "📊 Measuring Performance Metrics..."
 echo "=================================="
 
+# Validate frontend directory exists
+if [ ! -d "$FRONTEND_DIR" ]; then
+    echo "Error: Frontend directory not found: $FRONTEND_DIR" >&2
+    echo "  Set FRONTEND_DIR environment variable or run from project root" >&2
+    exit 1
+fi
+
+# Check if package.json exists in frontend directory
+if [ ! -f "$FRONTEND_DIR/package.json" ]; then
+    echo "Error: package.json not found in $FRONTEND_DIR" >&2
+    exit 1
+fi
+
 # Measure build time
 echo "⏱️  Measuring build time..."
 START_TIME=$(date +%s%N)
 
-# Run build and capture output to log file for diagnostics
+# Run build from frontend directory and capture output to log file for diagnostics
 BUILD_LOG="$RESULTS_DIR/build-$(date +%Y%m%d-%H%M%S).log"
-if ! npm run build > "$BUILD_LOG" 2>&1; then
+if ! (cd "$FRONTEND_DIR" && npm run build) > "$BUILD_LOG" 2>&1; then
     echo "Error: Build failed. Cannot measure performance metrics." >&2
     echo "Build output (last 20 lines):" >&2
     tail -n 20 "$BUILD_LOG" >&2
@@ -78,7 +92,7 @@ echo "Build time: ${BUILD_TIME_SEC}s (${BUILD_TIME_MS}ms)"
 
 # Measure bundle size (cross-platform)
 echo "📦 Measuring bundle size..."
-FRONTEND_DIST="${FRONTEND_DIST:-frontend/dist}"
+FRONTEND_DIST="${FRONTEND_DIST:-$FRONTEND_DIR/dist}"
 if [ -d "$FRONTEND_DIST" ]; then
     # Use find + wc for cross-platform compatibility (works on macOS and Linux)
     BUNDLE_SIZE=$(find "$FRONTEND_DIST" -type f -exec wc -c {} + 2>/dev/null | awk 'END {print $1}' || echo "0")
@@ -94,18 +108,22 @@ fi
 # This is faster than running the full test suite and more reliable than regex parsing
 echo "🧪 Counting tests..."
 if command -v npx &> /dev/null; then
-    # Use Vitest's --list flag to count tests without running them
+    # Use Vitest's --list flag to count test cases without running them
     # This is 10-100x faster than running the full suite
-    TEST_COUNT=$(cd frontend && npx vitest list 2>/dev/null | grep -c "✓\|Test Files" || echo "0")
+    # Each line in the output is a test case (e.g., "tests/file.test.ts > describe > it")
+    TEST_COUNT=$(cd "$FRONTEND_DIR" && npx vitest list 2>/dev/null | wc -l || echo "0")
 
-    # Fallback: Count test files if vitest list fails
-    if [ "$TEST_COUNT" = "0" ]; then
-        TEST_COUNT=$(find frontend/tests -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l)
+    # Remove leading/trailing whitespace from wc output
+    TEST_COUNT=$(echo "$TEST_COUNT" | tr -d '[:space:]')
+
+    # Fallback: Count test files if vitest list fails or returns 0
+    if [ "$TEST_COUNT" = "0" ] || [ -z "$TEST_COUNT" ]; then
+        TEST_COUNT=$(find "$FRONTEND_DIR/tests" -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l | tr -d '[:space:]')
         echo "  (Counted test files as fallback)"
     fi
 else
     # Fallback: Count test files if npx is not available
-    TEST_COUNT=$(find frontend/tests -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l)
+    TEST_COUNT=$(find "$FRONTEND_DIR/tests" -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l | tr -d '[:space:]')
     echo "  (Counted test files - npx not available)"
 fi
 
