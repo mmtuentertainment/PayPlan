@@ -176,6 +176,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
           aria-modal="true"
           aria-label="Navigation menu"
           className={`fixed top-0 left-0 max-w-80 w-full h-full bg-white shadow-2xl
+            flex flex-col
             transform transition-transform duration-300 ease-out
             motion-reduce:transition-none
             ${entered ? 'translate-x-0' : '-translate-x-full'}
@@ -183,7 +184,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
           style={{ zIndex: Z_INDEX.MOBILE_MENU_DRAWER }}
         >
           {/* Menu header with close button */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
             <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
             <button
               ref={closeButtonRef}
@@ -198,8 +199,8 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
             </button>
           </div>
 
-          {/* Navigation */}
-          <nav aria-label="Main navigation" className="py-4">
+          {/* Navigation - Scrollable content area */}
+          <nav aria-label="Main navigation" className="py-4 overflow-y-auto flex-1">
             {navItems.map(renderNavItem)}
           </nav>
         </div>
