@@ -36,6 +36,45 @@ jobs:
           npm run lint > ../eslint.log 2>&1
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 
+      - name: Test Coverage Guard
+        id: coverage
+        continue-on-error: true
+        run: |
+          cd frontend
+          npm run test:coverage > coverage.log 2>&1 || true
+
+          # Extract coverage percentages from output
+          LINES=$(grep -oP 'All files\s+\|\s+\K[\d.]+' coverage.log | head -1 || echo "0")
+          BRANCHES=$(grep -oP 'All files\s+\|\s+[\d.]+\s+\|\s+\K[\d.]+' coverage.log | head -1 || echo "0")
+          FUNCTIONS=$(grep -oP 'All files\s+\|\s+[\d.]+\s+\|\s+[\d.]+\s+\|\s+\K[\d.]+' coverage.log | head -1 || echo "0")
+          STATEMENTS=$(grep -oP 'All files\s+\|\s+[\d.]+\s+\|\s+[\d.]+\s+\|\s+[\d.]+\s+\|\s+\K[\d.]+' coverage.log | head -1 || echo "0")
+
+          # Thresholds
+          LINES_THRESHOLD=80
+          BRANCHES_THRESHOLD=75
+          FUNCTIONS_THRESHOLD=80
+          STATEMENTS_THRESHOLD=80
+
+          # Check if all thresholds are met
+          PASS=true
+          [ $(echo "$LINES < $LINES_THRESHOLD" | bc -l) -eq 1 ] && PASS=false
+          [ $(echo "$BRANCHES < $BRANCHES_THRESHOLD" | bc -l) -eq 1 ] && PASS=false
+          [ $(echo "$FUNCTIONS < $FUNCTIONS_THRESHOLD" | bc -l) -eq 1 ] && PASS=false
+          [ $(echo "$STATEMENTS < $STATEMENTS_THRESHOLD" | bc -l) -eq 1 ] && PASS=false
+
+          echo "lines=$LINES" >> $GITHUB_OUTPUT
+          echo "branches=$BRANCHES" >> $GITHUB_OUTPUT
+          echo "functions=$FUNCTIONS" >> $GITHUB_OUTPUT
+          echo "statements=$STATEMENTS" >> $GITHUB_OUTPUT
+
+          if [ "$PASS" = true ]; then
+            echo "status=pass" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "status=fail" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
       - name: Performance Budget Guard
         id: perf
         continue-on-error: true
@@ -107,6 +146,28 @@ jobs:
             fi
           else
             echo "⚠️ **SKIPPED** - ESLint log not found" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Coverage Guard Summary
+          echo "### 🧪 Test Coverage Guard" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.coverage.outputs.status }}" == "pass" ]; then
+            echo "✅ **PASS** - All coverage thresholds met" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.coverage.outputs.status }}" == "fail" ]; then
+            echo "❌ **FAIL** - Coverage below threshold" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **SKIPPED** - Coverage test did not run" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Coverage metrics table
+          if [ -n "${{ steps.coverage.outputs.lines }}" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Current | Threshold | Status |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|---------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Lines | ${{ steps.coverage.outputs.lines }}% | 80% | $([ $(echo '${{ steps.coverage.outputs.lines }} >= 80' | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+            echo "| Branches | ${{ steps.coverage.outputs.branches }}% | 75% | $([ $(echo '${{ steps.coverage.outputs.branches }} >= 75' | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+            echo "| Functions | ${{ steps.coverage.outputs.functions }}% | 80% | $([ $(echo '${{ steps.coverage.outputs.functions }} >= 80' | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+            echo "| Statements | ${{ steps.coverage.outputs.statements }}% | 80% | $([ $(echo '${{ steps.coverage.outputs.statements }} >= 80' | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
