@@ -65,7 +65,9 @@ export function useNavigationState(): NavigationState {
         triggerRef.current.focus();
       } catch (error) {
         // Element may have been removed from DOM - fail gracefully
-        console.warn('Could not return focus to trigger element:', error);
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Could not return focus to trigger element:', error);
+        }
       }
       triggerRef.current = null;
       setTriggerElement(null);

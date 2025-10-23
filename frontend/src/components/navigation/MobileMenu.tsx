@@ -10,6 +10,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import FocusLock from 'react-focus-lock';
 import type { NavigationItem } from '../../types/navigation';
+import { Z_INDEX } from '../../constants/zIndex';
 
 export interface MobileMenuProps {
   /** Whether the mobile menu is currently open */
@@ -175,7 +176,8 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
       <div
         data-testid="mobile-menu-backdrop"
         aria-hidden="true"
-        className="fixed inset-0 bg-black/50 z-[999] animate-fade-in"
+        className="fixed inset-0 bg-black/50 animate-fade-in"
+        style={{ zIndex: Z_INDEX.MOBILE_MENU_BACKDROP }}
         onClick={handleBackdropClick}
       />
 
@@ -186,11 +188,12 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
           role="dialog"
           aria-modal="true"
           aria-label="Navigation menu"
-          className={`fixed top-0 left-0 w-80 h-full bg-white z-[1000] shadow-2xl
+          className={`fixed top-0 left-0 max-w-80 w-full h-full bg-white shadow-2xl
             transform transition-transform duration-300 ease-out
             motion-reduce:transition-none
             ${entered ? 'translate-x-0' : '-translate-x-full'}
             ${className}`}
+          style={{ zIndex: Z_INDEX.MOBILE_MENU_DRAWER }}
         >
           {/* Menu header with close button */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
