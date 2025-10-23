@@ -39,8 +39,19 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log error to console (in production, send to error tracking service)
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Sanitize error for production logging (prevent PII/payment data leaks)
+    const sanitizedError = {
+      message: error.message,
+      name: error.name,
+      componentStack: errorInfo.componentStack?.split('\n').slice(0, 5).join('\n'), // Only first 5 lines
+      // Omit: error.stack (may contain user data), raw errorInfo
+    };
+
+    // Only log in development; in production, send to error tracking service
+    if (import.meta.env.DEV) {
+      console.error('ErrorBoundary caught an error:', sanitizedError);
+    }
+    // TODO: In production, send sanitizedError to error tracking service (e.g., Sentry)
 
     this.setState({
       error,

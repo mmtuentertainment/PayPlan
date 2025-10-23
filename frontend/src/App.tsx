@@ -42,7 +42,7 @@ function App() {
   // Performance monitoring (T034: NFR-001 - <100ms restoration)
   useEffect(() => {
     const perfMark = performance.getEntriesByName('preferences-restore-complete');
-    if (perfMark.length > 0 && process.env.NODE_ENV === 'development') {
+    if (perfMark.length > 0 && import.meta.env.DEV) {
       const duration = perfMark[0].duration || 0;
       if (duration > RESTORATION_TARGET_MS) {
         console.warn(
