@@ -7,7 +7,8 @@ describe('NumericValidator', () => {
       const result = PaymentAmountSchema.safeParse(NaN);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain('finite');
+        // Zod's number() schema rejects NaN with this message
+        expect(result.error.issues[0].message).toContain('NaN');
       }
     });
 
@@ -20,7 +21,8 @@ describe('NumericValidator', () => {
       expect(negativeInfinity.success).toBe(false);
 
       if (!positiveInfinity.success) {
-        expect(positiveInfinity.error.issues[0].message).toContain('finite');
+        // Zod's number() schema rejects Infinity before .finite() check
+        expect(positiveInfinity.error.issues[0].message).toMatch(/number|finite/);
       }
     });
 

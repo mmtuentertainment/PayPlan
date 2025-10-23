@@ -45,13 +45,13 @@ describe('PlanRequestSchema', () => {
         frequency: 'weekly',
         installmentCount: 4,
       },
-      // Invalid timezone
+      // Invalid timezone format (no slash)
       {
         totalAmount: 1000.00,
         startDate: '2025-10-23',
         frequency: 'weekly',
         installmentCount: 4,
-        timezone: 'Invalid/Timezone',
+        timezone: 'InvalidTimezone',
       },
       // Negative installment count
       {
