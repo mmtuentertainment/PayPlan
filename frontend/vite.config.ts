@@ -77,18 +77,19 @@ export default defineConfig({
               return 'vendor-large';
             }
 
-            // Group 4: Payment/Business Libraries (Bundle with main vendor)
-            // Explicitly bundle with app code for atomic deployments
+            // Group 4: Payment/Business Libraries (Main vendor chunk)
             // Rationale: These change with business logic, should invalidate together
             // Libraries: zod (validation), uuid (IDs), papaparse (CSV), date-fns (dates)
             // Impact: Cache invalidates with each feature deployment (expected behavior)
+            // Note: Returning 'vendor' places them in the main vendor chunk alongside app code,
+            // ensuring atomic deployments when business logic changes
             if (
               /\/node_modules\/zod\//.test(normalizedId) ||
               /\/node_modules\/uuid\//.test(normalizedId) ||
               /\/node_modules\/papaparse\//.test(normalizedId) ||
               /\/node_modules\/date-fns\//.test(normalizedId)
             ) {
-              return 'vendor'; // Main vendor chunk
+              return 'vendor'; // Main vendor chunk (same as fallthrough below)
             }
 
             // Everything else: Small utilities (~50KB gzipped)
