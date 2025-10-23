@@ -18,7 +18,8 @@ import { ArchiveListPage } from './pages/ArchiveListPage';
 import { ArchiveDetailView } from './pages/ArchiveDetailView';
 import { ROUTES } from './routes';
 import { NavigationHeader } from './components/navigation/NavigationHeader';
-import Breadcrumbs from './components/navigation/Breadcrumbs';
+import { Breadcrumbs } from './components/navigation/Breadcrumbs';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   // Initialize preferences hook at app level
@@ -86,8 +87,20 @@ function App() {
 
       {/* Main content */}
       <main id="main-content" tabIndex={-1}>
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-          <Routes>
+        <ErrorBoundary>
+          <Suspense
+            fallback={
+              <div
+                className="flex items-center justify-center min-h-screen"
+                role="status"
+                aria-live="polite"
+                aria-label="Loading page content"
+              >
+                <span className="text-gray-600">Loading...</span>
+              </div>
+            }
+          >
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/docs" element={<Docs />} />
             <Route path="/privacy" element={<Privacy />} />
@@ -131,7 +144,8 @@ function App() {
           }
         />
           </Routes>
-        </Suspense>
+          </Suspense>
+        </ErrorBoundary>
       </main>
 
       <ErrorTest />

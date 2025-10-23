@@ -2,7 +2,7 @@
 # Performance Measurement Script for Feature 018-technical-debt-cleanup
 # Tracks build time and bundle size against baseline metrics
 
-set -e
+set -euo pipefail
 
 # Dependency checks
 if ! command -v bc &> /dev/null; then
@@ -26,8 +26,28 @@ FEATURE_ID="${FEATURE_ID:-018-technical-debt-cleanup}"
 BASE_DIR="${BASE_DIR:-specs/$FEATURE_ID}"
 BASELINE_FILE="${BASELINE_FILE:-$BASE_DIR/BASELINE_METRICS.json}"
 RESULTS_DIR="${RESULTS_DIR:-$BASE_DIR/performance-results}"
+LOG_RETENTION_DAYS="${LOG_RETENTION_DAYS:-7}"
+
+# Validate paths to prevent traversal attacks
+if [[ "$FEATURE_ID" =~ \.\. ]] || [[ "$FEATURE_ID" =~ ^/ ]]; then
+    echo "Error: FEATURE_ID must not contain '..' or start with '/'" >&2
+    echo "  Got: $FEATURE_ID" >&2
+    exit 1
+fi
+
+if [[ "$BASE_DIR" =~ \.\. ]] || [[ ! "$BASE_DIR" =~ ^specs/ ]]; then
+    echo "Error: BASE_DIR must be under specs/ and not contain '..'" >&2
+    echo "  Got: $BASE_DIR" >&2
+    exit 1
+fi
 
 mkdir -p "$RESULTS_DIR"
+
+# Clean up old log files (keep last N days)
+if [ "$LOG_RETENTION_DAYS" -gt 0 ]; then
+    find "$RESULTS_DIR" -name "*.log" -type f -mtime +"$LOG_RETENTION_DAYS" -delete 2>/dev/null || true
+    find "$RESULTS_DIR" -name "metrics-*.json" -type f -mtime +"$LOG_RETENTION_DAYS" -delete 2>/dev/null || true
+fi
 
 echo "📊 Measuring Performance Metrics..."
 echo "=================================="
@@ -56,14 +76,16 @@ BUILD_TIME_SEC=$(echo "scale=2; $BUILD_TIME_MS / 1000" | bc)
 
 echo "Build time: ${BUILD_TIME_SEC}s (${BUILD_TIME_MS}ms)"
 
-# Measure bundle size
+# Measure bundle size (cross-platform)
 echo "📦 Measuring bundle size..."
-if [ -d "frontend/dist" ]; then
-    BUNDLE_SIZE=$(du -sb frontend/dist | cut -f1)
+FRONTEND_DIST="${FRONTEND_DIST:-frontend/dist}"
+if [ -d "$FRONTEND_DIST" ]; then
+    # Use find + wc for cross-platform compatibility (works on macOS and Linux)
+    BUNDLE_SIZE=$(find "$FRONTEND_DIST" -type f -exec wc -c {} + 2>/dev/null | awk 'END {print $1}' || echo "0")
     BUNDLE_SIZE_MB=$(echo "scale=2; $BUNDLE_SIZE / 1048576" | bc)
     echo "Bundle size: ${BUNDLE_SIZE_MB}MB (${BUNDLE_SIZE} bytes)"
 else
-    echo "Warning: frontend/dist not found, bundle size measurement skipped"
+    echo "Warning: $FRONTEND_DIST not found, bundle size measurement skipped"
     BUNDLE_SIZE=0
     BUNDLE_SIZE_MB="0.00"
 fi

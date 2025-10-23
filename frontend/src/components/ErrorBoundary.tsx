@@ -57,13 +57,34 @@ class ErrorBoundary extends Component<Props, State> {
     });
   };
 
+  handleReload = (): void => {
+    // Perform full page reload to clear cached chunks
+    window.location.reload();
+  };
+
   render(): ReactNode {
     if (this.state.hasError) {
-      const { fallbackTitle = 'Something went wrong', fallbackMessage = 'An unexpected error occurred. Please try again.' } = this.props;
+      const { error } = this.state;
+
+      // Check if this is a chunk loading error (lazy-loaded route failure)
+      const isChunkError =
+        error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('Loading chunk') ||
+        error?.message?.includes('dynamically imported module') ||
+        error?.name === 'ChunkLoadError';
+
+      const {
+        fallbackTitle = isChunkError ? 'Loading Error' : 'Something went wrong',
+        fallbackMessage = isChunkError
+          ? 'Failed to load this page. This may be due to a network issue or a recent update to the application.'
+          : 'An unexpected error occurred. Please try again.'
+      } = this.props;
 
       return (
         <div
           role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
           className="min-h-screen flex items-center justify-center bg-gray-50 px-4"
         >
           <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
@@ -87,24 +108,43 @@ class ErrorBoundary extends Component<Props, State> {
 
             <p className="text-gray-600 mb-6">{fallbackMessage}</p>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <details className="mb-6 p-4 bg-gray-100 rounded text-sm">
                 <summary className="cursor-pointer font-semibold text-gray-700 mb-2">
                   Error Details (Development Only)
                 </summary>
-                <pre className="text-xs text-red-600 overflow-auto">
+                <pre className="text-xs text-red-600 overflow-auto whitespace-pre-wrap">
                   {this.state.error.toString()}
                   {this.state.errorInfo && this.state.errorInfo.componentStack}
                 </pre>
               </details>
             )}
 
-            <button
-              onClick={this.handleReset}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors duration-200"
-            >
-              Try Again
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={this.handleReset}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={this.handleReload}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold py-2 px-4 rounded transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
+              >
+                Reload Page
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500 text-center mt-4">
+              If this problem persists, try clearing your browser cache or{' '}
+              <a
+                href="/"
+                className="text-blue-600 hover:text-blue-800 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+              >
+                return to home page
+              </a>
+              .
+            </p>
           </div>
         </div>
       );
