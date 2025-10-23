@@ -1,10 +1,12 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import Home from './pages/Home';
-import Docs from './pages/Docs';
-import Privacy from './pages/Privacy';
-import Demo from './pages/Demo';
 import Import from './pages/Import';
+
+// Lazy load heavy/infrequently used pages to reduce main bundle size
+const Docs = lazy(() => import('./pages/Docs'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Demo = lazy(() => import('./pages/Demo'));
 import { PreferenceSettings } from './components/preferences/PreferenceSettings';
 import { ToastNotification } from './components/preferences/ToastNotification';
 import { ErrorTest } from './components/ErrorTest';
@@ -16,6 +18,7 @@ import { ArchiveListPage } from './pages/ArchiveListPage';
 import { ArchiveDetailView } from './pages/ArchiveDetailView';
 import { ROUTES } from './routes';
 import { NavigationHeader } from './components/navigation/NavigationHeader';
+import Breadcrumbs from './components/navigation/Breadcrumbs';
 
 function App() {
   // Initialize preferences hook at app level
@@ -78,14 +81,18 @@ function App() {
       {/* Persistent navigation header (Feature 017) */}
       <NavigationHeader />
 
+      {/* Breadcrumb navigation (Feature 017 - User Story 3) */}
+      <Breadcrumbs />
+
       {/* Main content */}
       <main id="main-content" tabIndex={-1}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/docs" element={<Docs />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/demo" element={<Demo />} />
-          <Route path="/import" element={<Import />} />
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/demo" element={<Demo />} />
+            <Route path="/import" element={<Import />} />
           <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
           <Route path={ROUTES.ARCHIVE_DETAIL_PATTERN} element={<ArchiveDetailView />} />
           <Route
@@ -123,7 +130,8 @@ function App() {
             />
           }
         />
-        </Routes>
+          </Routes>
+        </Suspense>
       </main>
 
       <ErrorTest />
