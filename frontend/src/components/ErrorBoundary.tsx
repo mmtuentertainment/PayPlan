@@ -122,12 +122,14 @@ class ErrorBoundary extends Component<Props, State> {
 
             <div className="flex gap-3">
               <button
+                type="button"
                 onClick={this.handleReset}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 Try Again
               </button>
               <button
+                type="button"
                 onClick={this.handleReload}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold py-2 px-4 rounded transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
               >
