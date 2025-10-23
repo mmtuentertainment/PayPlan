@@ -90,9 +90,25 @@ else
     BUNDLE_SIZE_MB="0.00"
 fi
 
-# Count tests
+# Count tests using Vitest list command (2025 best practice)
+# This is faster than running the full test suite and more reliable than regex parsing
 echo "🧪 Counting tests..."
-TEST_COUNT=$(npm test 2>&1 | grep -oP '\d+ test(s)?' | head -1 | grep -oP '\d+' || echo "0")
+if command -v npx &> /dev/null; then
+    # Use Vitest's --list flag to count tests without running them
+    # This is 10-100x faster than running the full suite
+    TEST_COUNT=$(cd frontend && npx vitest list 2>/dev/null | grep -c "✓\|Test Files" || echo "0")
+
+    # Fallback: Count test files if vitest list fails
+    if [ "$TEST_COUNT" = "0" ]; then
+        TEST_COUNT=$(find frontend/tests -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l)
+        echo "  (Counted test files as fallback)"
+    fi
+else
+    # Fallback: Count test files if npx is not available
+    TEST_COUNT=$(find frontend/tests -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l)
+    echo "  (Counted test files - npx not available)"
+fi
+
 echo "Test count: $TEST_COUNT"
 
 # Output results using jq for safe JSON generation

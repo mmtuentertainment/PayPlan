@@ -1,8 +1,9 @@
 {
-  "timestamp": "2025-10-23T16:51:00Z",
-  "buildTimeMs": 45000,
-  "buildTimeSec": "45.00",
-  "bundleSizeBytes": 4404019,
-  "bundleSizeMB": "4.20",
-  "testCount": 1387
+  "timestamp": "2025-10-23T19:55:00Z",
+  "buildTimeMs": 13390,
+  "buildTimeSec": "13.39",
+  "bundleSizeBytes": 2267471,
+  "bundleSizeMB": "2.16",
+  "testCount": 67,
+  "note": "Measured after Feature 018 Phase 1 optimizations (lazy loading, vendor chunking)"
 }

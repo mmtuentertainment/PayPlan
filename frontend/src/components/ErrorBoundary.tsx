@@ -16,6 +16,12 @@ interface State {
 /**
  * ErrorBoundary component to catch React errors and display fallback UI
  *
+ * Features:
+ * - PII-safe error logging (sanitizes stack traces)
+ * - Rate limiting in development (max 1 error per 5 seconds)
+ * - Chunk loading error detection
+ * - WCAG 2.1 AA accessible error UI
+ *
  * Usage:
  * ```tsx
  * <ErrorBoundary>
@@ -24,6 +30,11 @@ interface State {
  * ```
  */
 class ErrorBoundary extends Component<Props, State> {
+  // Rate limiting for development error logs (2025 best practice)
+  // Prevents console spam from render loops or rapid component failures
+  private static lastErrorTime = 0;
+  private static readonly ERROR_LOG_THROTTLE_MS = 5000; // 5 seconds
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -47,9 +58,24 @@ class ErrorBoundary extends Component<Props, State> {
       // Omit: error.stack (may contain user data), raw errorInfo
     };
 
-    // Only log in development; in production, send to error tracking service
+    // Rate-limited logging in development (2025 best practice)
+    // Prevents console spam from render loops or rapid component failures
     if (import.meta.env.DEV) {
-      console.error('ErrorBoundary caught an error:', sanitizedError);
+      const now = Date.now();
+      const timeSinceLastError = now - ErrorBoundary.lastErrorTime;
+
+      if (timeSinceLastError >= ErrorBoundary.ERROR_LOG_THROTTLE_MS) {
+        console.error('ErrorBoundary caught an error:', sanitizedError);
+        ErrorBoundary.lastErrorTime = now;
+      } else {
+        // Silently throttled - prevents console spam
+        const remainingCooldown = Math.ceil(
+          (ErrorBoundary.ERROR_LOG_THROTTLE_MS - timeSinceLastError) / 1000
+        );
+        console.warn(
+          `ErrorBoundary: Additional error throttled (cooldown: ${remainingCooldown}s)`
+        );
+      }
     }
     // TODO: In production, send sanitizedError to error tracking service (e.g., Sentry)
 
