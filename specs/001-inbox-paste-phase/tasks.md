@@ -36,7 +36,7 @@ This is a **web application** with separated frontend and backend:
 
 **Description**: Extract existing `redactPII()` function from `email-extractor.ts` into a new standalone module `redaction.ts` with unit tests. This enables reuse in `EmailIssues.tsx` and enforces DRY.
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 
 **Files to Modify**:
 - ✏️ Create: `frontend/src/lib/extraction/helpers/redaction.ts`
@@ -136,12 +136,12 @@ npx typedoc --entryPoints src/lib/extraction/helpers/redaction.ts --out docs/red
 4. JSDoc renders correctly in IDE hover
 
 **Definition of Done**:
-- [ ] `redaction.ts` created with `redactPII()` function
-- [ ] 5 unit tests pass (email, amount, account, name, combined)
-- [ ] `email-extractor.ts` imports and uses `redactPII` from `redaction.ts`
-- [ ] JSDoc complete with @param, @returns, @example
-- [ ] No lint errors
-- [ ] Git commit: `feat: Extract PII redaction to standalone module`
+- [x] `redaction.ts` created with `redactPII()` function
+- [x] 5 unit tests pass (email, amount, account, name, combined)
+- [x] `email-extractor.ts` imports and uses `redactPII` from `redaction.ts`
+- [x] JSDoc complete with @param, @returns, @example
+- [x] No lint errors
+- [x] Git commit: `feat: Extract PII redaction to standalone module`
 
 **Estimated LOC**: +40 (redaction.ts: ~30, tests: ~50, email-extractor.ts: -10)
 
@@ -151,7 +151,7 @@ npx typedoc --entryPoints src/lib/extraction/helpers/redaction.ts --out docs/red
 
 **Description**: Extend `email-extractor.ts` to calculate a confidence score (0-1) for each extracted `Item` using the weighted signal formula. Add `confidence` field to `Item` interface and implement `calculateConfidence()` function.
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 **Depends On**: T1 (for PII redaction in Issues)
 
 **Files to Modify**:
@@ -352,12 +352,12 @@ npm run build
 3. Build succeeds with no type errors
 
 **Definition of Done**:
-- [ ] `Item.confidence` field added
-- [ ] `calculateConfidence()` function implemented
-- [ ] 7 unit tests pass (matching `confidence-thresholds.yaml`)
-- [ ] JSDoc complete with formula and example
-- [ ] No regressions in existing tests
-- [ ] Git commit: `feat: Add confidence scoring to email extractor`
+- [x] `Item.confidence` field added
+- [x] `calculateConfidence()` function implemented
+- [x] 7 unit tests pass (matching `confidence-thresholds.yaml`)
+- [x] JSDoc complete with formula and example
+- [x] No regressions in existing tests
+- [x] Git commit: `feat: Add confidence scoring to email extractor`
 
 **Estimated LOC**: +50 (calculateConfidence: ~15, extractSingleEmail mods: ~20, tests: ~50)
 
@@ -367,7 +367,7 @@ npm run build
 
 **Description**: Extend `extraction/providers/detector.ts` to support Afterpay emails. Add `'Afterpay'` to `Provider` type union and add `afterpay` entry to `PROVIDER_PATTERNS` with email domain and keyword signatures.
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 **Depends On**: T2 (confidence engine must exist for integration)
 
 **Files to Modify**:
@@ -521,12 +521,12 @@ npm run build
 3. `detectProvider()` correctly identifies Afterpay emails
 
 **Definition of Done**:
-- [ ] `Provider` type includes `'Afterpay'`
-- [ ] `PROVIDER_PATTERNS.afterpay` defined
-- [ ] 2 fixture emails created
-- [ ] 7 unit tests pass (detection, amount, date, installment, autopay, late fee, edge cases)
-- [ ] No regressions in existing provider tests
-- [ ] Git commit: `feat: Add Afterpay provider detector`
+- [x] `Provider` type includes `'Afterpay'`
+- [x] `PROVIDER_PATTERNS.afterpay` defined
+- [x] 2 fixture emails created
+- [x] 7 unit tests pass (detection, amount, date, installment, autopay, late fee, edge cases)
+- [x] No regressions in existing provider tests
+- [x] Git commit: `feat: Add Afterpay provider detector`
 
 **Estimated LOC**: +40 (patterns: ~20, tests: ~50, fixtures: ~30 chars each)
 
@@ -536,7 +536,7 @@ npm run build
 
 **Description**: Update `EmailPreview.tsx` to display confidence pills (High/Med/Low) for each extracted item. Add confidence column to CSV export as last field.
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 **Depends On**: T2 (Item.confidence must exist)
 
 **Files to Modify**:
@@ -690,12 +690,12 @@ npm run dev # Visual verification
 4. Screen reader announces confidence labels
 
 **Definition of Done**:
-- [ ] Confidence pill column added to table
-- [ ] Pills color-coded correctly (green/yellow/red)
-- [ ] Pills have aria-labels
-- [ ] CSV export includes confidence as last column
-- [ ] 3+ unit tests pass
-- [ ] Git commit: `feat: Add confidence pills to EmailPreview UI`
+- [x] Confidence pill column added to table
+- [x] Pills color-coded correctly (green/yellow/red)
+- [x] Pills have aria-labels
+- [x] CSV export includes confidence as last column
+- [x] 3+ unit tests pass
+- [x] Git commit: `feat: Add confidence pills to EmailPreview UI`
 
 **Estimated LOC**: +60 (ConfidencePill: ~25, CSV mod: ~10, tests: ~40)
 
@@ -705,7 +705,7 @@ npm run dev # Visual verification
 
 **Description**: Update `EmailIssues.tsx` to flag items with confidence <0.6 in the Issues section with field-level hints. Add `aria-live="polite"` for accessibility.
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 **Depends On**: T1 (redactPII), T2 (confidence scoring)
 
 **Files to Modify**:
@@ -855,12 +855,12 @@ npm run dev # Visual verification
 4. PII redacted in snippets
 
 **Definition of Done**:
-- [ ] `Issue.fieldHints` added
-- [ ] Low-confidence items flagged in Issues
-- [ ] Field hints display correctly
-- [ ] aria-live="polite" on Issues section
-- [ ] 3+ unit tests pass
-- [ ] Git commit: `feat: Add low-confidence flagging to EmailIssues`
+- [x] `Issue.fieldHints` added
+- [x] Low-confidence items flagged in Issues
+- [x] Field hints display correctly
+- [x] aria-live="polite" on Issues section
+- [x] 3+ unit tests pass
+- [x] Git commit: `feat: Add low-confidence flagging to EmailIssues`
 
 **Estimated LOC**: +50 (email-extractor.ts: ~20, EmailIssues.tsx: ~15, tests: ~30)
 
@@ -870,7 +870,7 @@ npm run dev # Visual verification
 
 **Description**: Write comprehensive unit tests for confidence scoring, Afterpay detector, and PII redaction. Target: 40+ total unit tests across all Phase A' changes.
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 **Depends On**: T1, T2, T3, T4, T5 (all implementation tasks)
 
 **Files to Modify**:
@@ -955,11 +955,11 @@ npm test -- --coverage
 3. No test failures in CI
 
 **Definition of Done**:
-- [ ] 40+ unit tests total
-- [ ] All tests pass
-- [ ] Coverage ≥80% on changed modules
-- [ ] Edge cases covered
-- [ ] Git commit: `test: Add comprehensive unit tests for Phase A'`
+- [x] 40+ unit tests total
+- [x] All tests pass
+- [x] Coverage ≥80% on changed modules
+- [x] Edge cases covered
+- [x] Git commit: `test: Add comprehensive unit tests for Phase A'`
 
 **Estimated LOC**: +200 (integration tests: ~150, edge case tests: ~50)
 
@@ -969,7 +969,7 @@ npm test -- --coverage
 
 **Description**: Write end-to-end integration test that pastes 6 emails (Afterpay, PayPal Pay in 4, Zip, Sezzle, Klarna, Affirm), verifies extraction, CSV export, and plan building. Measure performance (<2s for 50 emails).
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 **Depends On**: T1-T6 (all Phase A' implementation)
 
 **Files to Modify**:
@@ -1081,11 +1081,11 @@ npm test -- inbox-paste-e2e.test.ts
 4. API integration (mocked) works
 
 **Definition of Done**:
-- [ ] E2E test extracts 6 providers
-- [ ] Performance test passes (<2s)
-- [ ] CSV export verified
-- [ ] Total test time <10s
-- [ ] Git commit: `test: Add E2E integration test for Inbox Paste`
+- [x] E2E test extracts 6 providers
+- [x] Performance test passes (<2s)
+- [x] CSV export verified
+- [x] Total test time <10s
+- [x] Git commit: `test: Add E2E integration test for Inbox Paste`
 
 **Estimated LOC**: +100 (test: ~80, fixture: ~20)
 
@@ -1095,7 +1095,7 @@ npm test -- inbox-paste-e2e.test.ts
 
 **Description**: Update README.md with new providers and confidence legend. Ensure JSDoc coverage ≥80% on all changed exports. Add inline code comments for complex logic.
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 **Depends On**: T1-T7 (all implementation and tests)
 
 **Files to Modify**:
@@ -1190,12 +1190,12 @@ npm run build
 4. Inline comments explain complex confidence logic
 
 **Definition of Done**:
-- [ ] README.md updated
-- [ ] JSDoc coverage ≥80%
-- [ ] All public functions documented
-- [ ] Inline comments on complex logic
-- [ ] TypeDoc build succeeds
-- [ ] Git commit: `docs: Update README and JSDoc for Phase A'`
+- [x] README.md updated
+- [x] JSDoc coverage ≥80%
+- [x] All public functions documented
+- [x] Inline comments on complex logic
+- [x] TypeDoc build succeeds
+- [x] Git commit: `docs: Update README and JSDoc for Phase A'`
 
 **Estimated LOC**: +100 (README: ~30, JSDoc: ~50, inline comments: ~20)
 
@@ -1207,7 +1207,7 @@ npm run build
 
 **Description**: Extend `extraction/providers/detector.ts` to support PayPal Pay in 4 emails. Add `'PayPal Pay in 4'` to `Provider` type and add `paypal4` entry to `PROVIDER_PATTERNS`.
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 **Depends On**: T1-T8 (Phase A' complete)
 
 **Files to Modify**:
@@ -1336,12 +1336,12 @@ npm run build
 3. `detectProvider()` correctly identifies PayPal Pay in 4 emails
 
 **Definition of Done**:
-- [ ] `Provider` type includes `'PayPal Pay in 4'`
-- [ ] `PROVIDER_PATTERNS.paypal4` defined
-- [ ] 2 fixture emails created
-- [ ] 5+ unit tests pass
-- [ ] No regressions
-- [ ] Git commit: `feat: Add PayPal Pay in 4 provider detector`
+- [x] `Provider` type includes `'PayPal Pay in 4'`
+- [x] `PROVIDER_PATTERNS.paypal4` defined
+- [x] 2 fixture emails created
+- [x] 5+ unit tests pass
+- [x] No regressions
+- [x] Git commit: `feat: Add PayPal Pay in 4 provider detector`
 
 **Estimated LOC**: +40 (patterns: ~20, tests: ~40, fixtures: ~30 chars each)
 
@@ -1351,7 +1351,7 @@ npm run build
 
 **Description**: Extend `extraction/providers/detector.ts` to support Zip and Sezzle emails. Add both to `Provider` type and add entries to `PROVIDER_PATTERNS`.
 
-**Status**: ⏳ Not Started
+**Status**: ✅ COMPLETE
 **Depends On**: T9 (PayPal Pay in 4 complete)
 
 **Files to Modify**:
@@ -1540,13 +1540,13 @@ npm test # Run all tests to ensure no regressions
 4. Final integration test passes with all 6 providers
 
 **Definition of Done**:
-- [ ] `Provider` type includes `'Zip'` and `'Sezzle'`
-- [ ] `PROVIDER_PATTERNS.zip` and `PROVIDER_PATTERNS.sezzle` defined
-- [ ] 2 fixture emails created
-- [ ] 10+ unit tests pass (5 each for Zip, Sezzle)
-- [ ] No regressions
-- [ ] Final README update
-- [ ] Git commit: `feat: Add Zip and Sezzle provider detectors`
+- [x] `Provider` type includes `'Zip'` and `'Sezzle'`
+- [x] `PROVIDER_PATTERNS.zip` and `PROVIDER_PATTERNS.sezzle` defined
+- [x] 2 fixture emails created
+- [x] 10+ unit tests pass (5 each for Zip, Sezzle)
+- [x] No regressions
+- [x] Final README update
+- [x] Git commit: `feat: Add Zip and Sezzle provider detectors`
 
 **Estimated LOC**: +80 (patterns: ~40, tests: ~80, fixtures: ~30 chars each)
 
@@ -1611,17 +1611,17 @@ T9 → T10 (Zip, Sezzle)
 
 **GATE: All tasks complete when:**
 
-- [ ] All 10 tasks marked complete with DoD checkboxes
-- [ ] All unit tests pass (40+ tests)
-- [ ] Integration test passes (E2E)
-- [ ] Performance test passes (<2s for 50 emails)
-- [ ] JSDoc coverage ≥80%
-- [ ] No lint errors
-- [ ] README.md updated
-- [ ] Git commits for each task
-- [ ] Frontend builds successfully
-- [ ] No regressions in existing functionality
-- [ ] QuickStart validation passes (manual testing)
+- [x] All 10 tasks marked complete with DoD checkboxes
+- [x] All unit tests pass (40+ tests)
+- [x] Integration test passes (E2E)
+- [x] Performance test passes (<2s for 50 emails)
+- [x] JSDoc coverage ≥80%
+- [x] No lint errors
+- [x] README.md updated
+- [x] Git commits for each task
+- [x] Frontend builds successfully
+- [x] No regressions in existing functionality
+- [x] QuickStart validation passes (manual testing)
 
 ---
 
