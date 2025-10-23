@@ -11,12 +11,13 @@ import { NavLink } from 'react-router-dom';
 import FocusLock from 'react-focus-lock';
 import type { NavigationItem, MobileMenuProps } from '../../types/navigation';
 import { Z_INDEX } from '../../constants/zIndex';
+import { MOBILE_MENU_ANIMATION_DURATION } from '../../constants/animations';
 
 /**
  * MobileMenu - Slide-out navigation drawer component
  *
  * Features:
- * - Slide-in animation from left (300ms)
+ * - Slide-in animation from left (see MOBILE_MENU_ANIMATION_DURATION)
  * - Focus trap with react-focus-lock
  * - ESC key closes menu
  * - Backdrop click closes menu
@@ -179,13 +180,14 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
           className={`fixed top-0 left-0 max-w-80 w-full h-full
             bg-white border-r-2 border-gray-300
             flex flex-col
-            transform transition-transform duration-300 ease-out
+            transform transition-transform ease-out
             motion-reduce:transition-none
             ${entered ? 'translate-x-0' : '-translate-x-full'}
             ${className}`}
           style={{
             zIndex: Z_INDEX.MOBILE_MENU_DRAWER,
-            boxShadow: '4px 0 24px 0 rgba(0, 0, 0, 0.2)'
+            boxShadow: '4px 0 24px 0 rgba(0, 0, 0, 0.2)',
+            transitionDuration: `${MOBILE_MENU_ANIMATION_DURATION}ms`,
           }}
         >
           {/* Menu header with close button */}

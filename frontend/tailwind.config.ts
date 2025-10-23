@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import { FADE_IN_DURATION } from './src/constants/animations'
 
 export default {
   darkMode: ["class"],
@@ -21,7 +22,7 @@ export default {
         },
       },
       animation: {
-        'fade-in': 'fade-in 300ms ease-out',
+        'fade-in': `fade-in ${FADE_IN_DURATION}ms ease-out`,
       },
     }
   },
