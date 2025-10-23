@@ -53,10 +53,39 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  // Sanitize error message to prevent PII leaks (2025 security best practice)
+  private sanitizeErrorMessage(message: string): string {
+    // Whitelist approach: Only allow safe technical error patterns
+    // Redact any user input, email addresses, phone numbers, etc.
+
+    // Pattern: email addresses
+    let sanitized = message.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL]');
+
+    // Pattern: phone numbers (various formats)
+    sanitized = sanitized.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[PHONE]');
+    sanitized = sanitized.replace(/\(\d{3}\)\s?\d{3}-\d{4}/g, '[PHONE]');
+
+    // Pattern: credit card numbers (groups of 4 digits)
+    sanitized = sanitized.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, '[CC_REDACTED]');
+
+    // Pattern: SSN
+    sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN]');
+
+    // Pattern: amounts/currency values (might contain sensitive transaction data)
+    sanitized = sanitized.replace(/\$\d+(?:,\d{3})*(?:\.\d{2})?/g, '[AMOUNT]');
+
+    // Truncate if still too long (prevent verbose error leaks)
+    if (sanitized.length > 200) {
+      sanitized = sanitized.substring(0, 200) + '... [truncated]';
+    }
+
+    return sanitized;
+  }
+
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Sanitize error for production logging (prevent PII/payment data leaks)
     const sanitizedError = {
-      message: error.message,
+      message: this.sanitizeErrorMessage(error.message),
       name: error.name,
       componentStack: errorInfo.componentStack?.split('\n').slice(0, 5).join('\n'), // Only first 5 lines
       // Omit: error.stack (may contain user data), raw errorInfo
@@ -91,9 +120,12 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidUpdate(_: Props, prevState: State): void {
     // Focus the alert when error state changes from false to true (a11y improvement)
-    // This ensures screen readers immediately announce the error
+    // Add small delay to allow screen reader to finish announcing aria-live region
+    // (P2: Claude review - immediate focus may interrupt announcement)
     if (!prevState.hasError && this.state.hasError) {
-      this.alertRef.current?.focus();
+      setTimeout(() => {
+        this.alertRef.current?.focus();
+      }, 150); // 150ms delay balances responsiveness with screen reader timing
     }
   }
 

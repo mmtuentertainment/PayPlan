@@ -218,13 +218,36 @@ function AppContent({
                       message: `Invalid preference value: ${err.issues[0]?.message || 'Unknown error'}`,
                       type: 'error',
                     });
-                  } else {
+                  } else if (err instanceof Error) {
                     // Only log unexpected errors in development (prevent PII leaks)
                     if (import.meta.env.DEV) {
                       console.error('Unexpected error during preference save:', err);
                     }
+
+                    // Provide specific error messages for common failure modes (P1: Claude review)
+                    let errorMessage = 'Failed to save preference. Please try again.';
+
+                    // Storage quota exceeded
+                    if (err.name === 'QuotaExceededError' || err.message.includes('quota')) {
+                      errorMessage = 'Storage quota exceeded. Please clear some browser data and try again.';
+                    }
+                    // Network errors (if preferences ever sync)
+                    else if (err.message.includes('network') || err.message.includes('fetch')) {
+                      errorMessage = 'Network error. Please check your connection and try again.';
+                    }
+                    // localStorage disabled/unavailable
+                    else if (err.message.includes('localStorage') || err.message.includes('storage')) {
+                      errorMessage = 'Browser storage is disabled. Please enable cookies/storage and try again.';
+                    }
+
                     setToast({
-                      message: 'Failed to save preference. Please try again.',
+                      message: errorMessage,
+                      type: 'error',
+                    });
+                  } else {
+                    // Non-Error thrown (shouldn't happen, but handle gracefully)
+                    setToast({
+                      message: 'An unexpected error occurred. Please try again.',
                       type: 'error',
                     });
                   }

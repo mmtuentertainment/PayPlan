@@ -43,14 +43,18 @@ describe('PaymentContext Validation', () => {
 
   describe('Amount Validation', () => {
     it('should accept negative amounts (refunds)', () => {
-      // The schema intentionally allows negative amounts for refund scenarios
+      // BUSINESS LOGIC: Negative amounts represent refunds/credits
+      // PayPlan treats refunds as negative transactions at the data layer
+      // No separate "refund" flag/type needed - sign indicates direction
+      // Schema validates range (-1M to 1M) and decimal precision (≤2 places)
       // See csvExportService.test.ts: "should handle negative amounts for refunds"
+      // See spec.md FR-008: Documented business logic for negative amounts
       const validPayments: PaymentRecord[] = [{
         ...validPayment,
         amount: -100.00,  // Negative for refund - VALID
       }];
 
-      // Should NOT throw - refunds are allowed
+      // Should NOT throw - refunds are allowed by schema
       expect(() => {
         const TestComponent = () => {
           const { setPayments } = usePaymentContext();

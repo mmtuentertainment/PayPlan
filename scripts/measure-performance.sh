@@ -137,7 +137,10 @@ echo "Test count: $TEST_COUNT"
 # Output results using jq for safe JSON generation
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # Use millisecond precision in filename to prevent collisions
-RESULTS_FILE="$RESULTS_DIR/metrics-$(date +%Y%m%d-%H%M%S-%3N).json"
+# Generate unique timestamp for results file (POSIX-compliant)
+# Use PID for uniqueness since %3N (milliseconds) is not POSIX (P2: Claude review)
+TIMESTAMP_UNIQUE="$(date +%Y%m%d-%H%M%S)-$$"
+RESULTS_FILE="$RESULTS_DIR/metrics-${TIMESTAMP_UNIQUE}.json"
 
 # Use jq to safely build JSON (prevents injection)
 jq -n \
