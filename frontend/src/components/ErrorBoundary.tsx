@@ -32,8 +32,9 @@ interface State {
 class ErrorBoundary extends Component<Props, State> {
   // Rate limiting for development error logs (2025 best practice)
   // Prevents console spam from render loops or rapid component failures
-  private static lastErrorTime = 0;
-  private static readonly ERROR_LOG_THROTTLE_MS = 5000; // 5 seconds
+  // Using instance fields so each ErrorBoundary instance tracks its own throttle state
+  private lastErrorTime = 0;
+  private readonly ERROR_LOG_THROTTLE_MS = 5000; // 5 seconds
 
   constructor(props: Props) {
     super(props);
@@ -62,15 +63,15 @@ class ErrorBoundary extends Component<Props, State> {
     // Prevents console spam from render loops or rapid component failures
     if (import.meta.env.DEV) {
       const now = Date.now();
-      const timeSinceLastError = now - ErrorBoundary.lastErrorTime;
+      const timeSinceLastError = now - this.lastErrorTime;
 
-      if (timeSinceLastError >= ErrorBoundary.ERROR_LOG_THROTTLE_MS) {
+      if (timeSinceLastError >= this.ERROR_LOG_THROTTLE_MS) {
         console.error('ErrorBoundary caught an error:', sanitizedError);
-        ErrorBoundary.lastErrorTime = now;
+        this.lastErrorTime = now;
       } else {
         // Silently throttled - prevents console spam
         const remainingCooldown = Math.ceil(
-          (ErrorBoundary.ERROR_LOG_THROTTLE_MS - timeSinceLastError) / 1000
+          (this.ERROR_LOG_THROTTLE_MS - timeSinceLastError) / 1000
         );
         console.warn(
           `ErrorBoundary: Additional error throttled (cooldown: ${remainingCooldown}s)`

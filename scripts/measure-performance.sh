@@ -117,14 +117,19 @@ if command -v npx &> /dev/null; then
     TEST_COUNT=$(echo "$TEST_COUNT" | tr -d '[:space:]')
 
     # Fallback: Count test files if vitest list fails or returns 0
+    # WARNING: This creates inconsistent metrics (files ≠ test cases)
+    # Only use fallback for environments where vitest list is unavailable
     if [ "$TEST_COUNT" = "0" ] || [ -z "$TEST_COUNT" ]; then
-        TEST_COUNT=$(find "$FRONTEND_DIR/tests" -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l | tr -d '[:space:]')
-        echo "  (Counted test files as fallback)"
+        TEST_COUNT=$(find "$FRONTEND_DIR/src" "$FRONTEND_DIR/tests" -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l | tr -d '[:space:]')
+        echo "  ⚠️  WARNING: Counted test FILES (vitest list failed). Metrics may be inconsistent."
+        echo "  Test files: $TEST_COUNT (not test cases)"
     fi
 else
     # Fallback: Count test files if npx is not available
-    TEST_COUNT=$(find "$FRONTEND_DIR/tests" -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l | tr -d '[:space:]')
-    echo "  (Counted test files - npx not available)"
+    # WARNING: This creates inconsistent metrics (files ≠ test cases)
+    TEST_COUNT=$(find "$FRONTEND_DIR/src" "$FRONTEND_DIR/tests" -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l | tr -d '[:space:]')
+    echo "  ⚠️  WARNING: Counted test FILES (npx not available). Metrics may be inconsistent."
+    echo "  Test files: $TEST_COUNT (not test cases)"
 fi
 
 echo "Test count: $TEST_COUNT"
@@ -168,23 +173,35 @@ if [ -f "$BASELINE_FILE" ]; then
     BASELINE_BUILD_TIME=$(jq -r '.buildTimeSec // "0"' "$BASELINE_FILE" 2>/dev/null || echo "0")
     BASELINE_BUNDLE_SIZE=$(jq -r '.bundleSizeMB // "0"' "$BASELINE_FILE" 2>/dev/null || echo "0")
 
-    if [ "$BASELINE_BUILD_TIME" != "0" ] && [ "$BASELINE_BUILD_TIME" != "null" ]; then
-        BUILD_INCREASE=$(echo "scale=2; ($BUILD_TIME_SEC / $BASELINE_BUILD_TIME - 1) * 100" | bc)
-        echo "  Build Time Change: ${BUILD_INCREASE}%"
+    # Validate baseline values to prevent division by zero
+    if [ "$BASELINE_BUILD_TIME" != "0" ] && [ "$BASELINE_BUILD_TIME" != "null" ] && [ "$BUILD_TIME_SEC" != "0.00" ]; then
+        # Protect against zero division with bc comparison
+        if (( $(echo "$BASELINE_BUILD_TIME > 0" | bc -l) )); then
+            BUILD_INCREASE=$(echo "scale=2; ($BUILD_TIME_SEC / $BASELINE_BUILD_TIME - 1) * 100" | bc)
+            echo "  Build Time Change: ${BUILD_INCREASE}%"
 
-        # Check threshold (NFR-004: ≤10%)
-        if (( $(echo "$BUILD_INCREASE > 10" | bc -l) )); then
-            echo "  ⚠️  WARNING: Build time increased by more than 10%"
+            # Check threshold (NFR-004: ≤10%)
+            if (( $(echo "$BUILD_INCREASE > 10" | bc -l) )); then
+                echo "  ⚠️  WARNING: Build time increased by more than 10%"
+            fi
+        else
+            echo "  ⚠️  WARNING: Baseline build time is 0 or invalid, skipping comparison"
         fi
     fi
 
-    if [ "$BASELINE_BUNDLE_SIZE" != "0" ] && [ "$BASELINE_BUNDLE_SIZE" != "null" ]; then
-        BUNDLE_INCREASE=$(echo "scale=2; ($BUNDLE_SIZE_MB / $BASELINE_BUNDLE_SIZE - 1) * 100" | bc)
-        echo "  Bundle Size Change: ${BUNDLE_INCREASE}%"
+    # Validate baseline values to prevent division by zero
+    if [ "$BASELINE_BUNDLE_SIZE" != "0" ] && [ "$BASELINE_BUNDLE_SIZE" != "null" ] && [ "$BUNDLE_SIZE_MB" != "0.00" ]; then
+        # Protect against zero division with bc comparison
+        if (( $(echo "$BASELINE_BUNDLE_SIZE > 0" | bc -l) )); then
+            BUNDLE_INCREASE=$(echo "scale=2; ($BUNDLE_SIZE_MB / $BASELINE_BUNDLE_SIZE - 1) * 100" | bc)
+            echo "  Bundle Size Change: ${BUNDLE_INCREASE}%"
 
-        # Check threshold (NFR-004: ≤5%)
-        if (( $(echo "$BUNDLE_INCREASE > 5" | bc -l) )); then
-            echo "  ⚠️  WARNING: Bundle size increased by more than 5%"
+            # Check threshold (NFR-004: ≤5%)
+            if (( $(echo "$BUNDLE_INCREASE > 5" | bc -l) )); then
+                echo "  ⚠️  WARNING: Bundle size increased by more than 5%"
+            fi
+        else
+            echo "  ⚠️  WARNING: Baseline bundle size is 0 or invalid, skipping comparison"
         fi
     fi
 else
