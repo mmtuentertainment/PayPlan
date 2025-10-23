@@ -8,18 +8,10 @@
 
 import { memo, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import type { NavigationItem } from '../../types/navigation';
+import type { NavigationItem, NavigationHeaderProps } from '../../types/navigation';
 import { ROUTES } from '../../routes';
 import { useNavigationState } from '../../hooks/useNavigationState';
 import { MobileMenu } from './MobileMenu';
-
-export interface NavigationHeaderProps {
-  /** Optional CSS class name */
-  className?: string;
-
-  /** Navigation items to display (uses default if not provided) */
-  navItems?: NavigationItem[];
-}
 
 /**
  * Default navigation items for the application
@@ -152,7 +144,7 @@ export const NavigationHeader = memo<NavigationHeaderProps>(function NavigationH
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-navigation-drawer"
               onClick={handleHamburgerClick}
-              className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              className="md:hidden p-2.5 min-w-[44px] min-h-[44px] text-gray-700 hover:bg-gray-100 rounded-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
               {/* Hamburger icon (three horizontal lines) */}
               <svg

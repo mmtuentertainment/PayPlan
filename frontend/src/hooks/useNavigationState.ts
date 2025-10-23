@@ -35,6 +35,7 @@ export function useNavigationState(): NavigationState {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const prevOverflowRef = useRef<string>('');
 
   /**
    * Opens the mobile menu
@@ -42,12 +43,19 @@ export function useNavigationState(): NavigationState {
    * - Stores trigger element for focus return
    * - Disables body scroll
    */
-  const openMobileMenu = useCallback((trigger: HTMLElement) => {
-    setMobileMenuOpen(true);
-    setTriggerElement(trigger);
-    triggerRef.current = trigger;
-    document.body.style.overflow = 'hidden';
-  }, []);
+  const openMobileMenu = useCallback(
+    (trigger: HTMLElement) => {
+      // Only save overflow if menu is not already open
+      if (!mobileMenuOpen) {
+        prevOverflowRef.current = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+      }
+      setMobileMenuOpen(true);
+      setTriggerElement(trigger);
+      triggerRef.current = trigger;
+    },
+    [mobileMenuOpen]
+  );
 
   /**
    * Closes the mobile menu
@@ -57,7 +65,8 @@ export function useNavigationState(): NavigationState {
    */
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
-    document.body.style.overflow = '';
+    // Restore previous overflow value
+    document.body.style.overflow = prevOverflowRef.current || '';
 
     // Safely return focus to the element that opened the menu
     if (triggerRef.current) {
@@ -77,7 +86,7 @@ export function useNavigationState(): NavigationState {
   // Cleanup: ensure body scroll is restored on unmount
   useEffect(() => {
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = prevOverflowRef.current || '';
     };
   }, []);
 

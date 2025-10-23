@@ -71,7 +71,8 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
     if (!isOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      // Only handle Escape if another overlay hasn't already handled it
+      if (event.key === 'Escape' && !event.defaultPrevented) {
         onClose();
       }
     };

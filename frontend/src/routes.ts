@@ -26,6 +26,9 @@ export const ROUTES = {
    */
   ARCHIVE_DETAIL: (archiveId: string) => `/archives/${archiveId}`,
 
+  /** Archive detail route pattern (for React Router path prop) */
+  ARCHIVE_DETAIL_PATTERN: '/archives/:id',
+
   /** User preferences settings page (Feature 017) */
   SETTINGS: '/settings/preferences',
 } as const;

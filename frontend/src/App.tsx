@@ -87,7 +87,7 @@ function App() {
           <Route path="/demo" element={<Demo />} />
           <Route path="/import" element={<Import />} />
           <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
-          <Route path={`${ROUTES.ARCHIVES}/:id`} element={<ArchiveDetailView />} />
+          <Route path={ROUTES.ARCHIVE_DETAIL_PATTERN} element={<ArchiveDetailView />} />
           <Route
             path={ROUTES.SETTINGS}
             element={
