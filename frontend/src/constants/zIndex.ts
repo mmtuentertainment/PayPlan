@@ -19,22 +19,22 @@ export const Z_INDEX = {
   BASE: 0,
 
   /** Sticky headers and navigation */
-  STICKY_HEADER: 40,
+  STICKY_HEADER: 100,
 
   /** Dropdown menus and popovers */
-  DROPDOWN: 50,
+  DROPDOWN: 200,
 
   /** Mobile navigation backdrop overlay */
-  MOBILE_MENU_BACKDROP: 999,
+  MOBILE_MENU_BACKDROP: 900,
 
   /** Mobile navigation drawer */
   MOBILE_MENU_DRAWER: 1000,
 
   /** Modal dialogs */
-  MODAL: 1050,
+  MODAL: 1100,
 
   /** Toast notifications */
-  TOAST: 1100,
+  TOAST: 1200,
 } as const;
 
 export type ZIndexValue = (typeof Z_INDEX)[keyof typeof Z_INDEX];

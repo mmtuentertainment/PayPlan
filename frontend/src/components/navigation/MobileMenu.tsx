@@ -9,22 +9,8 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import FocusLock from 'react-focus-lock';
-import type { NavigationItem } from '../../types/navigation';
+import type { NavigationItem, MobileMenuProps } from '../../types/navigation';
 import { Z_INDEX } from '../../constants/zIndex';
-
-export interface MobileMenuProps {
-  /** Whether the mobile menu is currently open */
-  isOpen: boolean;
-
-  /** Callback fired when menu should close */
-  onClose: () => void;
-
-  /** Navigation items to display in menu */
-  navItems: NavigationItem[];
-
-  /** Optional className for drawer customization */
-  className?: string;
-}
 
 /**
  * MobileMenu - Slide-out navigation drawer component
