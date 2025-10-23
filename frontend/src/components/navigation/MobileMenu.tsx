@@ -159,32 +159,36 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Full-screen semi-transparent backdrop overlay */}
       <div
         data-testid="mobile-menu-backdrop"
         aria-hidden="true"
-        className="fixed inset-0 bg-black/50 animate-fade-in"
+        className="fixed inset-0 bg-black/60 animate-fade-in backdrop-blur-sm"
         style={{ zIndex: Z_INDEX.MOBILE_MENU_BACKDROP }}
         onClick={handleBackdropClick}
       />
 
-      {/* Drawer with Focus Trap */}
+      {/* Solid sidebar drawer overlay */}
       <FocusLock returnFocus>
         <div
           id="mobile-navigation-drawer"
           role="dialog"
           aria-modal="true"
           aria-label="Navigation menu"
-          className={`fixed top-0 left-0 max-w-80 w-full h-full bg-white shadow-2xl
+          className={`fixed top-0 left-0 max-w-80 w-full h-full
+            bg-white border-r-2 border-gray-300
             flex flex-col
             transform transition-transform duration-300 ease-out
             motion-reduce:transition-none
             ${entered ? 'translate-x-0' : '-translate-x-full'}
             ${className}`}
-          style={{ zIndex: Z_INDEX.MOBILE_MENU_DRAWER }}
+          style={{
+            zIndex: Z_INDEX.MOBILE_MENU_DRAWER,
+            boxShadow: '4px 0 24px 0 rgba(0, 0, 0, 0.2)'
+          }}
         >
           {/* Menu header with close button */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+          <div className="flex items-center justify-between p-4 border-b-2 border-gray-300 bg-gray-50 flex-shrink-0">
             <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
             <button
               ref={closeButtonRef}
