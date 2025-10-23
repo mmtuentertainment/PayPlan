@@ -76,7 +76,7 @@ describe('PaymentStatusStorage', () => {
     it('should return validation error for invalid status', () => {
       const record = {
         paymentId: '550e8400-e29b-41d4-a716-446655440000',
-        status: 'invalid-status' as any,
+        status: 'invalid-status' as unknown,
         timestamp: '2025-10-15T14:30:00.000Z',
       };
 
@@ -240,7 +240,7 @@ describe('PaymentStatusStorage', () => {
 
     it('should load within 100ms for 500 records (performance target)', () => {
       // Create 500 records
-      const statuses: any = {};
+      const statuses: Record<string, unknown> = {};
       for (let i = 0; i < 500; i++) {
         const id = `550e8400-e29b-41d4-a716-44665544${i.toString().padStart(4, '0')}`;
         statuses[id] = {

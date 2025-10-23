@@ -787,16 +787,11 @@ describe('Telemetry - Auto-Dismiss Countdown', () => {
     await new Promise(resolve => setTimeout(resolve, 4100));
 
     // Simulate real user interaction - Tab key press to move focus
-    const dialog = screen.getByRole('dialog');
-
     // Fire keydown on document to trigger user interaction flag
     fireEvent.keyDown(document, { key: 'Tab' });
 
     // Wait a bit for state update
     await new Promise(resolve => setTimeout(resolve, 100));
-
-    // The button should be focused (auto-focused on mount)
-    const allowButton = screen.getByRole('button', { name: /Allow/ });
 
     // Verify pause indicator shows (focus is within dialog + user interacted)
     await waitFor(() => {

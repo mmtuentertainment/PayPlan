@@ -2,18 +2,22 @@ import { createHash } from 'crypto';
 import { getRedisClient } from './redis.js';
 import { buildProblem, PROBLEM_TYPES } from './problem.js';
 import type { ServerResponse } from 'http';
+import type {
+  JsonValue,
+  IdempotencyResult,
+  IdempotencyCacheEntry,
+  RequestWithHeaders,
+  CachedSuccessResult
+} from './idempotency.types.js';
 
 const TTL_SECONDS = parseInt(process.env.IDEMPOTENCY_TTL_SECONDS || '60', 10);
 
-export interface IdempotencyResult {
-  type: 'miss' | 'hit' | 'conflict';
-  cachedResponse?: any;
-}
+export type { IdempotencyResult, CachedSuccessResult } from './idempotency.types.js';
 
 /**
  * Canonicalize JSON object for stable hashing (sorted keys)
  */
-function canonicalizeJson(obj: any): string {
+function canonicalizeJson(obj: JsonValue): string {
   if (obj === null) return 'null';
   if (typeof obj !== 'object') return JSON.stringify(obj);
   if (Array.isArray(obj)) {
@@ -28,7 +32,7 @@ function canonicalizeJson(obj: any): string {
 /**
  * Generate SHA-256 hash of request body
  */
-export function hashBody(body: any): string {
+export function hashBody(body: JsonValue): string {
   const canonical = canonicalizeJson(body);
   return createHash('sha256').update(canonical).digest('hex');
 }
@@ -62,7 +66,7 @@ export async function checkIdempotency(
       return { type: 'miss' };
     }
 
-    const entry = typeof cached === 'string' ? JSON.parse(cached) : cached;
+    const entry: IdempotencyCacheEntry = typeof cached === 'string' ? JSON.parse(cached) as IdempotencyCacheEntry : cached;
 
     // Check if body hash matches
     if (entry.bodyHash === bodyHash) {
@@ -73,7 +77,7 @@ export async function checkIdempotency(
     } else {
       return { type: 'conflict' };
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[Idempotency] Check failed:', error);
     return { type: 'miss' }; // Fail open
   }
@@ -87,27 +91,27 @@ export async function cacheResponse(
   path: string,
   idempotencyKey: string,
   bodyHash: string,
-  response: any
+  response: JsonValue
 ): Promise<void> {
   const redis = getRedisClient();
   if (!redis) return;
 
   try {
     const key = getCacheKey(method, path, idempotencyKey);
-    const entry = {
+    const entry: IdempotencyCacheEntry = {
       bodyHash,
       response,
       timestamp: Date.now()
     };
 
     await redis.set(key, JSON.stringify(entry), { ex: TTL_SECONDS });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[Idempotency] Cache failed:', error);
     // Don't throw - caching failure shouldn't block response
   }
 }
 
-export function sendIdempotencyConflict(res: ServerResponse, _host: string): void {
+export function sendIdempotencyConflict(res: ServerResponse, _host: string): void { // eslint-disable-line @typescript-eslint/no-unused-vars
   const problem = buildProblem({
     type: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.type,
     title: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.title,
@@ -123,7 +127,7 @@ export function sendIdempotencyConflict(res: ServerResponse, _host: string): voi
 /**
  * Get Idempotency-Key from request headers
  */
-export function getIdempotencyKey(req: any): string | undefined {
+export function getIdempotencyKey(req: RequestWithHeaders): string | undefined {
   const key = req.headers?.['idempotency-key'];
   if (!key) return undefined;
   return Array.isArray(key) ? key[0] : key;
@@ -144,7 +148,7 @@ export async function hasCachedSuccess(
   path: string,
   idempotencyKey: string,
   bodyHash: string
-): Promise<{ hit: 'miss' | 'replay' | 'conflict'; response?: any }> {
+): Promise<CachedSuccessResult> {
   const result = await checkIdempotency(method, path, idempotencyKey, bodyHash);
 
   if (result.type === 'hit') {
@@ -164,7 +168,7 @@ export async function cacheSuccess(
   path: string,
   idempotencyKey: string,
   bodyHash: string,
-  response: any
+  response: JsonValue
 ): Promise<void> {
   return cacheResponse(method, path, idempotencyKey, bodyHash, response);
 }

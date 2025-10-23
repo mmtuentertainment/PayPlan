@@ -18,12 +18,13 @@ export async function parseCsvString(input: string): Promise<CsvRow[]> {
   if (!trimmed) return [];
   const res = Papa.parse(trimmed, { header: true, skipEmptyLines: true });
   if (res.errors?.length) throw new Error(res.errors[0].message);
-  const rows = (res.data as any[]).slice(0, 2000);
+  const rows = (res.data as unknown[]).slice(0, 2000);
   return rows.map((r, i) => {
     try {
       return RowSchema.parse(r);
-    } catch (e: any) {
-      throw new Error(`Row ${i + 1}: ${e.message}`);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      throw new Error(`Row ${i + 1}: ${message}`);
     }
   });
 }
@@ -36,11 +37,12 @@ export async function parseCsvFile(file: File): Promise<CsvRow[]> {
       complete: (res) => {
         if (res.errors?.length) return reject(new Error(res.errors[0].message));
         try {
-          const rows = (res.data as any[]).slice(0, 2000).map((r, i) => {
+          const rows = (res.data as unknown[]).slice(0, 2000).map((r, i) => {
             try {
               return RowSchema.parse(r);
-            } catch (e: any) {
-              throw new Error(`Row ${i + 1}: ${e.message}`);
+            } catch (e: unknown) {
+              const message = e instanceof Error ? e.message : String(e);
+              throw new Error(`Row ${i + 1}: ${message}`);
             }
           });
           resolve(rows);

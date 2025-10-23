@@ -177,7 +177,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
           role="dialog"
           aria-modal="true"
           aria-label="Navigation menu"
-          className={`fixed top-0 left-0 max-w-80 w-full h-full
+          className={`fixed top-0 left-0 w-80 h-full
             bg-white border-r-2 border-gray-300
             flex flex-col
             transform transition-transform ease-out
@@ -188,6 +188,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
             zIndex: Z_INDEX.MOBILE_MENU_DRAWER,
             boxShadow: '4px 0 24px 0 rgba(0, 0, 0, 0.2)',
             transitionDuration: `${MOBILE_MENU_ANIMATION_DURATION}ms`,
+            backgroundColor: '#ffffff',
           }}
         >
           {/* Menu header with close button */}

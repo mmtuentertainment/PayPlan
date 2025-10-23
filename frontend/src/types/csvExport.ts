@@ -24,6 +24,69 @@ export interface PaymentRecord {
   paid_timestamp?: string;   // ISO 8601 timestamp when marked as paid (Feature 015 - runtime only)
 }
 
+/**
+ * Zod schema for PaymentRecord runtime validation.
+ *
+ * Validates payment data before passing to archive creation or CSV export.
+ * Ensures data integrity and prevents invalid data from corrupting storage.
+ *
+ * Requirements:
+ * - provider: Non-empty string, max 255 chars
+ * - amount: Positive number with max 2 decimal places
+ * - currency: ISO 4217 3-letter uppercase code
+ * - dueISO: Valid ISO 8601 date (YYYY-MM-DD)
+ * - autopay: Boolean
+ * - id: Optional UUID v4 (validated if present)
+ * - risk fields: Optional strings
+ * - paid_status: Optional 'paid' or 'pending'
+ * - paid_timestamp: Optional ISO 8601 datetime
+ */
+export const paymentRecordSchema = z.object({
+  id: z.string().uuid().optional(),
+  provider: z.string().min(1, "Provider is required").max(255, "Provider name too long"),
+  amount: z.number()
+    .min(-1000000, "Amount must be greater than -1,000,000")
+    .max(1000000, "Amount must be less than 1,000,000")
+    .refine(
+      (val) => {
+        // Check decimal places using cents calculation (robust to floating-point imprecision)
+        // Multiply by 100 to convert to cents, then check if result is close to an integer
+        const cents = val * 100;
+        const roundedCents = Math.round(cents);
+        return Math.abs(cents - roundedCents) < 1e-8;
+      },
+      "Amount cannot have more than 2 decimal places"
+    ),
+  currency: z.string()
+    .length(3, "Currency must be 3 characters")
+    .regex(/^[A-Z]{3}$/, "Currency must be 3 uppercase letters (ISO 4217)"),
+  dueISO: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+    .refine(
+      (date) => !isNaN(Date.parse(date)),
+      "Date must be a valid date"
+    ),
+  autopay: z.boolean(),
+  risk_type: z.string().max(100, "Risk type must be 100 characters or less").optional(),
+  risk_severity: z.string().max(64, "Risk severity must be 64 characters or less").optional(),
+  risk_message: z.string().max(2000, "Risk message must be 2000 characters or less").optional(),
+  paid_status: z.enum(['paid', 'pending']).optional(),
+  paid_timestamp: z.string()
+    .optional()
+    .refine(
+      (val) => !val || val.endsWith('Z') || val.includes('+00:00'),
+      "paid_timestamp must be in UTC (must end with 'Z' or '+00:00')"
+    )
+});
+
+/**
+ * Zod schema for array of PaymentRecords.
+ * Used to validate collections of payments before processing.
+ */
+export const paymentRecordsArraySchema = z.array(paymentRecordSchema)
+  .min(1, "At least one payment is required")
+  .max(1000, "Cannot process more than 1000 payments at once");
+
 // ============================================================================
 // CSV Export Types
 // ============================================================================

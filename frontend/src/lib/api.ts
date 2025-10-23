@@ -70,7 +70,7 @@ export async function buildPlan(body: PlanRequest): Promise<PlanResponse> {
     if (ctype.includes("application/problem+json")) {
       const p = await res.json().catch(() => ({}));
       const msg = [p.title, p.detail].filter(Boolean).join(" — ") || `API error ${res.status}`;
-      const e: any = new Error(msg);
+      const e = new Error(msg) as Error & { problem?: unknown };
       e.problem = p;
       throw e;
     }

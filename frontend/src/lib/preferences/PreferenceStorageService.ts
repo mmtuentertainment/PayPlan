@@ -538,13 +538,13 @@ export class PreferenceStorageService {
   ): Result<never, StorageError> {
     if (error instanceof Error) {
       // Handle cross-browser QuotaExceeded variants
-      const DOMEx = (globalThis as any).DOMException;
+      const DOMEx = (globalThis as { DOMException?: typeof DOMException }).DOMException;
       const isQuota =
         error.name === 'QuotaExceededError' ||
         error.name === 'QUOTA_EXCEEDED_ERR' ||
         (DOMEx &&
           error instanceof DOMEx &&
-          ((error as any).code === 22 || (error as any).code === 1014));
+          ('code' in error && (error.code === 22 || error.code === 1014)));
 
       if (isQuota) {
         return {

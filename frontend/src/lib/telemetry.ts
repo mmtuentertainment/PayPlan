@@ -75,10 +75,13 @@ export const CONSENT_KEY = "pp.telemetryConsent";
 export function isDNT(): boolean {
   if (typeof navigator === "undefined") return false;
 
+  const nav = navigator as Navigator & { msDoNotTrack?: string };
+  const win = window as Window & { doNotTrack?: string };
+
   return (
     navigator.doNotTrack === "1" ||
-    (navigator as any).msDoNotTrack === "1" ||
-    (window as any).doNotTrack === "1"
+    nav.msDoNotTrack === "1" ||
+    win.doNotTrack === "1"
   );
 }
 

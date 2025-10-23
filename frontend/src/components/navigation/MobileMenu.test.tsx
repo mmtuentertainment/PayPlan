@@ -5,7 +5,7 @@
  * Tests slide-out drawer, focus trap, keyboard navigation, and accessibility.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -82,7 +82,7 @@ describe('MobileMenu - Rendering', () => {
   });
 
   it('accepts custom className prop', () => {
-    const { container } = renderWithRouter(
+    renderWithRouter(
       <MobileMenu
         isOpen={true}
         onClose={vi.fn()}

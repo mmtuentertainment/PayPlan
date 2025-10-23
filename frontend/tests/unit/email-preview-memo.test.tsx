@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EmailPreview } from '../../src/components/EmailPreview';
 import type { Item } from '../../src/lib/email-extractor';
-import { createMockItem, KLARNA_ITEM, AFFIRM_ITEM } from '../fixtures/mock-items';
+import { createMockItem, AFFIRM_ITEM } from '../fixtures/mock-items';
 
 describe('EmailPreview - React.memo behavior', () => {
   const mockItem: Item = createMockItem({

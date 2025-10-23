@@ -60,7 +60,7 @@ export function validateTimezone(timezone: string): string {
       throw new Error(`Invalid timezone: "${timezone}". Must be valid IANA timezone (e.g., "America/New_York")`);
     }
     return timezone;
-  } catch (_e) {
+  } catch {
     throw new Error(`Invalid timezone: "${timezone}". Must be valid IANA timezone (e.g., "America/New_York")`);
   }
 }

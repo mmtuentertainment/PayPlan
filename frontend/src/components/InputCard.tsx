@@ -132,7 +132,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
         }));
       }
 
-      const body: any = { items, minBuffer, timeZone: tzDetected };
+      const body: Record<string, unknown> = { items, minBuffer, timeZone: tzDetected };
       if (mode === "explicit") {
         const list = paycheckDates.split(",").map(s => s.trim()).filter(Boolean);
         if (list.length > 0) body.paycheckDates = list;
@@ -149,11 +149,12 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
         body.customSkipDates = skipDates;
       }
 
-      const res = await buildPlan(body);
+      const res = await buildPlan(body as any); // Type assertion needed - dynamic body construction
       onResult(res);
       onIcsReady(res.ics);
-    } catch (e: any) {
-      setError(e?.message || "Failed to build plan.");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to build plan.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -195,7 +196,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
           </div>
         </div>
 
-        <Tabs value={tab} onValueChange={(v: any) => setTab(v)}>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as "paste" | "upload" | "emails")}>
           <TabsList>
             <TabsTrigger value="paste">Paste CSV</TabsTrigger>
             <TabsTrigger value="upload">Upload CSV</TabsTrigger>
@@ -255,7 +256,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
 
         <fieldset className="space-y-2">
           <legend className="font-medium">Paydays</legend>
-          <RadioGroup value={mode} onValueChange={(v: any) => setMode(v)} className="grid gap-2 sm:grid-cols-2">
+          <RadioGroup value={mode} onValueChange={(v) => setMode(v as "explicit" | "cadence")} className="grid gap-2 sm:grid-cols-2">
             <div className="flex items-center gap-2">
               <RadioGroupItem id="explicit" value="explicit" />
               <Label htmlFor="explicit">Explicit dates</Label>
@@ -280,7 +281,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
                 <Label>Cadence</Label>
-                <Select value={payCadence} onValueChange={(v: any) => setPayCadence(v)}>
+                <Select value={payCadence} onValueChange={(v) => setPayCadence(v as "weekly" | "biweekly" | "semimonthly" | "monthly")}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="weekly">weekly</SelectItem>
