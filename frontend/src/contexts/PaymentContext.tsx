@@ -17,35 +17,21 @@
  */
 
 import { useContext, useState, useMemo } from 'react';
-import { z } from 'zod';
 import type { PaymentRecord } from '@/types/csvExport';
+import { paymentRecordSchema } from '@/types/csvExport';
 import { PaymentContext } from './PaymentContext.context';
 import type { PaymentContextType, PaymentContextProviderProps } from './PaymentContext.types';
 
 /**
  * PaymentRecord validation schema
  *
- * CodeRabbit Fix: Validates critical fields to prevent invalid data
- * from causing NaN or security issues in archive system.
+ * Now imported from @/types/csvExport for single source of truth.
+ * The csvExport schema includes:
+ * - Support for negative amounts (refunds) within -1M to 1M range
+ * - Robust decimal validation using cents calculation
+ * - UTC-only timestamps
+ * - Risk field max lengths (100/64/2000 chars)
  */
-const paymentRecordSchema = z.object({
-  id: z.string().uuid('Payment ID must be UUID v4').optional(),
-  provider: z.string().min(1, 'Provider required').max(255),
-  amount: z.number()
-    .positive('Amount must be positive')
-    .refine(
-      (val) => Number.isInteger(val * 100),
-      { message: 'Amount must have at most 2 decimal places' }
-    ),
-  currency: z.string().length(3, 'Currency must be ISO 4217 code').regex(/^[A-Z]{3}$/),
-  dueISO: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Due date must be YYYY-MM-DD'),
-  autopay: z.boolean(),
-  risk_type: z.string().optional(),
-  risk_severity: z.string().optional(),
-  risk_message: z.string().optional(),
-  paid_status: z.enum(['paid', 'pending']).optional(),
-  paid_timestamp: z.string().optional(),
-});
 
 /**
  * Hook to access payment context

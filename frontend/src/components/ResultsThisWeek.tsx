@@ -71,10 +71,15 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
           });
         }
 
-        // Show generic error to user (don't expose field paths/internal details)
+        // Surface user-safe summary of first issue without exposing PII
+        const firstIssue = error.issues[0];
+        const fieldName = firstIssue?.path[firstIssue.path.length - 1];
+        const fieldStr = typeof fieldName === 'string' ? fieldName : 'field';
+        const userMessage = `Unable to create archive. Invalid ${fieldStr} in payment data.`;
+
         setValidationError('Invalid payment data');
         setWarningToast({
-          message: 'Unable to create archive. Payment data is invalid.',
+          message: userMessage,
           type: 'error'
         });
       } else {
@@ -95,6 +100,7 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
   const handleCloseArchiveDialog = () => {
     setIsArchiveDialogOpen(false);
     setValidationError(null);
+    setValidatedPayments([]); // Clear to avoid stale state
   };
 
   // T031: Handle successful archive creation
@@ -166,6 +172,11 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
 
   const hasPayments = normalizedPayments.length > 0;
 
+  // Type guard for payments with IDs
+  const hasPaymentId = (payment: PaymentRecord): payment is PaymentRecord & { id: string } => {
+    return payment.id !== undefined && payment.id !== null && payment.id !== '';
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -178,25 +189,25 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
         {normalizedPayments.length > 0 ? (
           <div className="space-y-2">
             {normalizedPayments
-              .filter((payment) => payment.id !== undefined) // Only show payments with IDs
+              .filter(hasPaymentId) // Type guard ensures payment.id is string
               .map((payment) => {
-                const paymentId = payment.id as string; // Safe after filter
-                const statusResult = getStatus(paymentId);
+                // TypeScript knows payment.id is string after type guard
+                const statusResult = getStatus(payment.id);
                 const status = statusResult.ok ? statusResult.value : 'pending';
                 const isPaid = status === 'paid';
 
                 return (
                   <div
-                    key={paymentId}
+                    key={payment.id}
                     className={`flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition-colors ${
                       isPaid ? 'opacity-60' : ''
                     }`}
                   >
                     {/* T038: PaymentCheckbox integration */}
                     <PaymentCheckbox
-                      paymentId={paymentId}
+                      paymentId={payment.id}
                       status={status}
-                      onToggle={() => toggleStatus(paymentId)}
+                      onToggle={() => toggleStatus(payment.id)}
                     />
 
                   {/* T039: StatusIndicator integration */}
