@@ -14,10 +14,11 @@
  * - PaymentRecord type definition
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { PaymentContextProvider, usePaymentContext } from '../PaymentContext';
 import type { PaymentRecord } from '@/types/csvExport';
+import { useState } from 'react';
 
 describe('PaymentContext Validation', () => {
   // Valid baseline payment (from existing test patterns)
@@ -30,50 +31,66 @@ describe('PaymentContext Validation', () => {
     autopay: false,                               // Boolean
   };
 
+  // Helper component that uses the real provider with actual validation
+  function TestWrapper({ children }: { children: React.ReactNode }) {
+    const [payments, setPayments] = useState<PaymentRecord[]>([]);
+    return (
+      <PaymentContextProvider value={{ payments, setPayments }}>
+        {children}
+      </PaymentContextProvider>
+    );
+  }
+
   describe('Amount Validation', () => {
-    it('should reject negative amounts', () => {
-      // Based on edge-cases-amounts.test.ts:452-465 pattern
-      const invalidPayments: PaymentRecord[] = [{
+    it('should accept negative amounts (refunds)', () => {
+      // BUSINESS LOGIC: Negative amounts represent refunds/credits
+      // PayPlan treats refunds as negative transactions at the data layer
+      // No separate "refund" flag/type needed - sign indicates direction
+      // Schema validates range (-1M to 1M) and decimal precision (≤2 places)
+      // See csvExportService.test.ts: "should handle negative amounts for refunds"
+      // See spec.md FR-008: Documented business logic for negative amounts
+      const validPayments: PaymentRecord[] = [{
         ...validPayment,
-        amount: -100.00,  // Negative (refund scenario)
+        amount: -100.00,  // Negative for refund - VALID
       }];
 
+      // Should NOT throw - refunds are allowed by schema
       expect(() => {
         const TestComponent = () => {
           const { setPayments } = usePaymentContext();
-          setPayments(invalidPayments);  // Triggers Zod validation
+          setPayments(validPayments);
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
-      }).toThrow(/positive/i);
+      }).not.toThrow();
     });
 
-    it('should reject zero amounts', () => {
-      const invalidPayments: PaymentRecord[] = [{
+    it('should accept zero amounts', () => {
+      // Zero is a valid amount (edge case: $0 payment or fully refunded)
+      const validPayments: PaymentRecord[] = [{
         ...validPayment,
-        amount: 0.00,  // Zero is not positive
+        amount: 0.00,  // Zero - VALID
       }];
 
+      // Should NOT throw
       expect(() => {
         const TestComponent = () => {
           const { setPayments } = usePaymentContext();
-          setPayments(invalidPayments);
+          setPayments(validPayments);
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
-      }).toThrow(/positive/i);
+      }).not.toThrow();
     });
 
     it('should accept small amounts (0.01)', () => {
@@ -91,11 +108,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).not.toThrow();
     });
@@ -114,11 +130,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).not.toThrow();
     });
@@ -137,11 +152,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).toThrow(/decimal|precision|2 decimal/i);
     });
@@ -160,11 +174,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).not.toThrow();
     });
@@ -184,11 +197,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).toThrow(/3.*letter|iso.*4217|currency/i);
     });
@@ -206,11 +218,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).toThrow(/[A-Z]|uppercase|currency/i);
     });
@@ -257,11 +268,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).toThrow(/YYYY-MM-DD|date.*format/i);
     });
@@ -279,11 +289,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).toThrow(/YYYY-MM-DD|date/i);
     });
@@ -334,11 +343,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).toThrow(/uuid/i);
     });
@@ -356,11 +364,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).not.toThrow();
     });
@@ -378,11 +385,10 @@ describe('PaymentContext Validation', () => {
           return null;
         };
 
-        const mockSetPayments = vi.fn();
         render(
-          <PaymentContextProvider value={{ payments: [], setPayments: mockSetPayments }}>
+          <TestWrapper>
             <TestComponent />
-          </PaymentContextProvider>
+          </TestWrapper>
         );
       }).not.toThrow();
     });
