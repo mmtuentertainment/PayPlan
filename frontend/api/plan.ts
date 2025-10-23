@@ -20,6 +20,7 @@ import type {
   RequestWithUrl,
   JsonResponseBody
 } from "./plan.types.js";
+import { errorSanitizer } from "../../backend/src/lib/security/ErrorSanitizer.js";
 
 // v0.1 core libs (ESM) - typed module references
 let calculatePaydays: PayPlanModules['calculatePaydays'] | undefined;
@@ -154,7 +155,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           type: "/problems/idempotency-key-conflict",
           title: "Idempotency Key Conflict",
           status: 409,
-          detail: "This Idempotency-Key was used with a different request body. Use a new key or wait 60 seconds.",
+          detail: "This Idempotency-Key was used with a different request body. Use a new key or wait 24 hours.",
           instance,
         });
         return sendProblem(res, p);
@@ -274,7 +275,20 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return json(res, 200, responseData);
 
   } catch (err: unknown) {
-    console.error('[API] Internal error:', err);
+    // FR-002: Sanitize errors to prevent implementation details from leaking to clients
+    const error = err instanceof Error ? err : new Error(String(err));
+
+    const sanitized = errorSanitizer.sanitize(error, {
+      requestId: instance,
+      endpoint: instance,
+      method: req.method || 'POST',
+      additionalData: {
+        clientIp: clientIp || 'unknown'
+      }
+    });
+
+    // Log full error details server-side only
+    console.error('[API] Internal error:', sanitized.serverLog);
 
     // Ensure rate limit headers are set even on error
     try {
@@ -284,14 +298,12 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       // Ignore rate limit header errors in error path
     }
 
-    // Type guard for error message extraction
-    const errorMessage = err instanceof Error ? err.message : "Unexpected error occurred";
-
+    // FR-002: Return only generic message to client
     const p = buildProblem({
       type: "/problems/internal-error",
       title: "Internal Server Error",
       status: 500,
-      detail: errorMessage,
+      detail: sanitized.clientMessage,
       instance,
     });
     return sendProblem(res, p);

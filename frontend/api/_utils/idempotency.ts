@@ -9,8 +9,10 @@ import type {
   RequestWithHeaders,
   CachedSuccessResult
 } from './idempotency.types.js';
+import { validateCacheEntry } from '../../../../backend/src/lib/validation/IdempotencySchemas.js';
 
-const TTL_SECONDS = parseInt(process.env.IDEMPOTENCY_TTL_SECONDS || '60', 10);
+// FR-005: 24-hour TTL for duplicate prevention (86400 seconds)
+const TTL_SECONDS = parseInt(process.env.IDEMPOTENCY_TTL_SECONDS || '86400', 10);
 
 export type { IdempotencyResult, CachedSuccessResult } from './idempotency.types.js';
 
@@ -66,20 +68,30 @@ export async function checkIdempotency(
       return { type: 'miss' };
     }
 
-    const entry: IdempotencyCacheEntry = typeof cached === 'string' ? JSON.parse(cached) as IdempotencyCacheEntry : cached;
+    // FR-003: Validate cache entry before use to prevent crashes from malformed data
+    const parsedCache = typeof cached === 'string' ? JSON.parse(cached) as unknown : cached;
+
+    // Validate with Zod schema (throws if invalid)
+    const entry = validateCacheEntry({
+      hash: parsedCache?.bodyHash,
+      timestamp: parsedCache?.timestamp,
+      result: parsedCache?.response,
+      ttl: parsedCache?.ttl || TTL_SECONDS * 1000
+    }) as IdempotencyCacheEntry & { hash: string; timestamp: number; result: unknown; ttl: number };
 
     // Check if body hash matches
-    if (entry.bodyHash === bodyHash) {
+    if (entry.hash === bodyHash) {
       return {
         type: 'hit',
-        cachedResponse: entry.response
+        cachedResponse: entry.result
       };
     } else {
       return { type: 'conflict' };
     }
   } catch (error: unknown) {
-    console.error('[Idempotency] Check failed:', error);
-    return { type: 'miss' }; // Fail open
+    // FR-004: Fail-closed pattern - abort operation on validation failure
+    console.error('[Idempotency] Check failed (validation error):', error);
+    throw new Error('Idempotency check failed: cache validation error');
   }
 }
 
@@ -116,7 +128,7 @@ export function sendIdempotencyConflict(res: ServerResponse, _host: string): voi
     type: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.type,
     title: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.title,
     status: PROBLEM_TYPES.IDEMPOTENCY_KEY_CONFLICT.status,
-    detail: 'The Idempotency-Key has been used with a different request body. Use a new key or wait 60 seconds for the cache to expire.'
+    detail: 'The Idempotency-Key has been used with a different request body. Use a new key or wait 24 hours for the cache to expire.'
   });
 
   res.statusCode = 409;

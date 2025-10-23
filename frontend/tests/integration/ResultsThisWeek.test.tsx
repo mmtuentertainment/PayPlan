@@ -207,8 +207,8 @@ describe('ResultsThisWeek - CSV Export', () => {
     const csvButton = screen.getByRole('button', { name: /download csv/i });
     await user.click(csvButton);
 
-    // Should log error
-    expect(consoleErrorSpy).toHaveBeenCalledWith('CSV export failed:', expect.any(Error));
+    // Should log error with ConsoleGuard's [DEV] prefix in development
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[DEV]', 'CSV export failed:', expect.any(Error));
 
     consoleErrorSpy.mockRestore();
     vi.restoreAllMocks();
