@@ -25,10 +25,10 @@ export const Z_INDEX = {
   DROPDOWN: 200,
 
   /** Mobile navigation backdrop overlay */
-  MOBILE_MENU_BACKDROP: 900,
+  MOBILE_MENU_BACKDROP: 9999,
 
   /** Mobile navigation drawer */
-  MOBILE_MENU_DRAWER: 1000,
+  MOBILE_MENU_DRAWER: 10000,
 
   /** Modal dialogs */
   MODAL: 1100,
