@@ -6,12 +6,12 @@
  *
  * Stack order (bottom to top):
  * - Base content: auto/0
- * - Sticky header: 40
- * - Dropdowns/Popovers: 50
- * - Mobile menu backdrop: 999
- * - Mobile menu drawer: 1000
- * - Modals: 1050
- * - Toasts: 1100
+ * - Sticky header: 100
+ * - Dropdowns/Popovers: 200
+ * - Mobile menu backdrop: 1000
+ * - Mobile menu drawer: 1050
+ * - Modals: 1100 (must be above mobile menu for dialogs to work)
+ * - Toasts: 1200 (highest priority for notifications)
  */
 
 export const Z_INDEX = {
@@ -25,15 +25,15 @@ export const Z_INDEX = {
   DROPDOWN: 200,
 
   /** Mobile navigation backdrop overlay */
-  MOBILE_MENU_BACKDROP: 9999,
+  MOBILE_MENU_BACKDROP: 1000,
 
   /** Mobile navigation drawer */
-  MOBILE_MENU_DRAWER: 10000,
+  MOBILE_MENU_DRAWER: 1050,
 
-  /** Modal dialogs */
+  /** Modal dialogs (must be above mobile menu) */
   MODAL: 1100,
 
-  /** Toast notifications */
+  /** Toast notifications (highest priority) */
   TOAST: 1200,
 } as const;
 

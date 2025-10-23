@@ -1,15 +1,20 @@
 // Minimal results card to satisfy MVP view + Copy + ICS download (T011 hook).
 // T038-T040: Integrated payment status tracking (Feature 015)
+// T027-T032: User Story 2 - Create Archive from Results (Feature 017)
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { exportPaymentsToCSV, downloadCSV } from "@/services/csvExportService";
 import type { PaymentRecord } from "@/types/csvExport";
+import { paymentRecordsArraySchema } from "@/types/csvExport";
 import { ToastNotification } from "@/components/preferences/ToastNotification";
 import { usePaymentStatus } from "@/hooks/usePaymentStatus";
 import { PaymentCheckbox } from "@/components/payment-status/PaymentCheckbox";
 import { StatusIndicator } from "@/components/payment-status/StatusIndicator";
+import { CreateArchiveDialog } from "@/components/archive/CreateArchiveDialog";
+import { ZodError } from "zod";
+import * as Dialog from "@radix-ui/react-dialog";
 
 type Props = {
   actions: string[];
@@ -21,8 +26,88 @@ type Props = {
 export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalizedPayments = [] }: Props) {
   const [warningToast, setWarningToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  // T028-T029: Dialog state management for Create Archive (Feature 017)
+  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
+  const [validatedPayments, setValidatedPayments] = useState<PaymentRecord[]>([]);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   // T038: Payment status tracking hook (Feature 015)
   const { toggleStatus, getStatus } = usePaymentStatus();
+
+  // Refs for timeout cleanup
+  const successToastTimeoutRef = useRef<number | null>(null);
+  const warningToastTimeoutRef = useRef<number | null>(null);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (successToastTimeoutRef.current !== null) {
+        window.clearTimeout(successToastTimeoutRef.current);
+      }
+      if (warningToastTimeoutRef.current !== null) {
+        window.clearTimeout(warningToastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // T029: Dialog open/close handlers with validation
+  // Note: Radix UI Dialog handles escape key and backdrop clicks automatically
+  const handleOpenArchiveDialog = () => {
+    // Clear previous validation error
+    setValidationError(null);
+
+    try {
+      // Validate payment data before opening dialog
+      const validated = paymentRecordsArraySchema.parse(normalizedPayments);
+      setValidatedPayments(validated);
+      setIsArchiveDialogOpen(true);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        // Log detailed validation errors for debugging
+        console.error('Payment validation failed:', {
+          issues: error.issues,
+          paymentCount: normalizedPayments.length
+        });
+
+        // Show generic error to user (don't expose field paths/internal details)
+        setValidationError('Invalid payment data');
+        setWarningToast({
+          message: 'Unable to create archive. Payment data is invalid.',
+          type: 'error'
+        });
+      } else {
+        // Log unexpected errors for debugging
+        console.error('Unexpected validation error:', error);
+
+        setValidationError('Unknown validation error');
+        setWarningToast({
+          message: 'Unable to create archive. Please try again.',
+          type: 'error'
+        });
+      }
+    }
+  };
+
+  const handleCloseArchiveDialog = () => {
+    setIsArchiveDialogOpen(false);
+    setValidationError(null);
+  };
+
+  // T031: Handle successful archive creation
+  const handleArchiveSuccess = (archiveName: string) => {
+    handleCloseArchiveDialog();
+
+    // React automatically escapes JSX content, so no manual sanitization needed
+    setWarningToast({
+      message: `Archive "${archiveName}" created successfully!`,
+      type: 'success'
+    });
+    // Auto-dismiss success message after 3 seconds (cleanup on unmount)
+    successToastTimeoutRef.current = window.setTimeout(() => {
+      setWarningToast(null);
+      successToastTimeoutRef.current = null;
+    }, 3000);
+  };
 
   function downloadIcs() {
     if (!icsBase64) return;
@@ -56,9 +141,12 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
 
       downloadCSV(csvContent, metadata.filename);
 
-      // Dismiss warning after download starts
+      // Dismiss warning after download starts (cleanup on unmount)
       if (metadata.shouldWarn) {
-        setTimeout(() => setWarningToast(null), 2000);
+        warningToastTimeoutRef.current = window.setTimeout(() => {
+          setWarningToast(null);
+          warningToastTimeoutRef.current = null;
+        }, 2000);
       }
     } catch (error) {
       console.error('CSV export failed:', error);
@@ -126,13 +214,23 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
           </ol>
         )}
 
-        <div className="flex gap-2">
+        {/* T030-T032: Create Archive button with proper styling */}
+        <div className="flex flex-wrap gap-2">
           <Button onClick={onCopy}>Copy Plan</Button>
           <Button variant="secondary" onClick={downloadIcs} disabled={!icsBase64}>
             Download .ics
           </Button>
           <Button variant="secondary" onClick={handleDownloadCSV} disabled={!hasPayments}>
             Download CSV
+          </Button>
+          <Button
+            variant="default"
+            onClick={handleOpenArchiveDialog}
+            disabled={!hasPayments}
+            className="min-h-[44px] min-w-[44px]"
+            aria-label="Create archive from current payment results"
+          >
+            Create Archive
           </Button>
         </div>
         {icsBase64 && (
@@ -148,6 +246,28 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
           onDismiss={() => setWarningToast(null)}
         />
       )}
+
+      {/* T030: Render CreateArchiveDialog with Radix UI Dialog for proper accessibility */}
+      <Dialog.Root open={isArchiveDialogOpen && !validationError} onOpenChange={setIsArchiveDialogOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50 z-[1100] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+          <Dialog.Content
+            className="fixed left-[50%] top-[50%] z-[1100] translate-x-[-50%] translate-y-[-50%] p-4 max-w-lg w-full"
+            aria-describedby="archive-dialog-description"
+          >
+            {/* Hidden title and description for screen reader accessibility (Radix requirement) */}
+            <Dialog.Title className="sr-only">Archive Creation Dialog</Dialog.Title>
+            <Dialog.Description id="archive-dialog-description" className="sr-only">
+              Create an archive of your current payment data to save your progress
+            </Dialog.Description>
+            <CreateArchiveDialog
+              payments={validatedPayments}
+              onSuccess={handleArchiveSuccess}
+              onCancel={handleCloseArchiveDialog}
+            />
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </Card>
   );
 }

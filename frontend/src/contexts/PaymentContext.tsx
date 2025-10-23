@@ -1,5 +1,5 @@
 /**
- * PaymentContext - React Context for sharing payment data across components
+ * PaymentContext - React Context Provider for sharing payment data across components
  *
  * Feature: 016-build-a-payment-archive
  * Phase: 1 (Setup & Dependencies)
@@ -11,13 +11,16 @@
  * not just PaymentStatusRecord (paymentId, status, timestamp).
  *
  * CodeRabbit Fix: Added Zod validation for security
+ * React Fast Refresh Fix: Split context/types into separate files
  *
  * @see SOLUTIONS.md Section 2 - Payment Schedule Source
  */
 
-import { createContext, useContext, useState, useMemo, type ReactNode } from 'react';
+import { useContext, useState, useMemo } from 'react';
 import { z } from 'zod';
 import type { PaymentRecord } from '@/types/csvExport';
+import { PaymentContext } from './PaymentContext.context';
+import type { PaymentContextType, PaymentContextProviderProps } from './PaymentContext.types';
 
 /**
  * PaymentRecord validation schema
@@ -45,27 +48,6 @@ const paymentRecordSchema = z.object({
 });
 
 /**
- * Payment Context interface
- *
- * Provides current payment schedule data to child components.
- * Used by archive creation to snapshot payment details alongside status tracking.
- */
-export interface PaymentContextType {
-  /** Current payment schedule with full details */
-  payments: PaymentRecord[];
-
-  /** Update payment schedule (used by Home.tsx when new data loaded) */
-  setPayments: (payments: PaymentRecord[]) => void;
-}
-
-/**
- * Payment Context for sharing payment data
- * CodeRabbit Fix: Removed unused defaultContext (dead code)
- * Using undefined default to enable proper hook validation
- */
-export const PaymentContext = createContext<PaymentContextType | undefined>(undefined);
-
-/**
  * Hook to access payment context
  *
  * @throws Error if used outside PaymentContextProvider
@@ -79,6 +61,7 @@ export const PaymentContext = createContext<PaymentContextType | undefined>(unde
  * }
  * ```
  */
+// eslint-disable-next-line react-refresh/only-export-components -- Hooks are allowed exports
 export function usePaymentContext(): PaymentContextType {
   const context = useContext(PaymentContext);
 
@@ -112,11 +95,6 @@ export function usePaymentContext(): PaymentContextType {
  * }
  * ```
  */
-export interface PaymentContextProviderProps {
-  value: PaymentContextType;
-  children: ReactNode;
-}
-
 export function PaymentContextProvider({ value, children }: PaymentContextProviderProps) {
   // Internal state with validation
   const [internalPayments, setInternalPayments] = useState<PaymentRecord[]>(value.payments);
