@@ -36,9 +36,12 @@ if [[ "$FEATURE_ID" =~ \.\. ]] || [[ "$FEATURE_ID" =~ ^/ ]]; then
     exit 1
 fi
 
-if [[ "$BASE_DIR" =~ \.\. ]] || [[ ! "$BASE_DIR" =~ ^specs/ ]]; then
-    echo "Error: BASE_DIR must be under specs/ and not contain '..'" >&2
+# CRITICAL: Proper anchoring to prevent path traversal (Claude review)
+# Pattern ^specs/[a-zA-Z0-9_-]+$ ensures path is ONLY under specs/ directory
+if [[ "$BASE_DIR" =~ \.\. ]] || [[ ! "$BASE_DIR" =~ ^specs/[a-zA-Z0-9_-]+$ ]]; then
+    echo "Error: BASE_DIR must be under specs/ and contain only alphanumeric, underscore, or hyphen characters" >&2
     echo "  Got: $BASE_DIR" >&2
+    echo "  Valid example: specs/018-technical-debt-cleanup" >&2
     exit 1
 fi
 

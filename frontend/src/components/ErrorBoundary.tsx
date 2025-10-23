@@ -39,6 +39,9 @@ class ErrorBoundary extends Component<Props, State> {
   // Ref for focus management (a11y improvement)
   private alertRef = createRef<HTMLDivElement>();
 
+  // Timeout ID for focus management cleanup (prevents memory leaks)
+  private focusTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -83,13 +86,22 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Sanitize error for production logging (prevent PII/payment data leaks)
-    const sanitizedError = {
-      message: this.sanitizeErrorMessage(error.message),
-      name: error.name,
-      componentStack: errorInfo.componentStack?.split('\n').slice(0, 5).join('\n'), // Only first 5 lines
-      // Omit: error.stack (may contain user data), raw errorInfo
-    };
+    // PII sanitization strategy (CRITICAL: Claude review)
+    // Development: Show full errors for debugging (no sanitization)
+    // Production: Sanitize aggressively to prevent PII/payment data leaks
+    const errorDetails = import.meta.env.DEV
+      ? {
+          message: error.message, // Full message for debugging
+          name: error.name,
+          stack: error.stack, // Full stack trace for debugging
+          componentStack: errorInfo.componentStack, // Full component stack for debugging
+        }
+      : {
+          message: this.sanitizeErrorMessage(error.message), // Sanitized for production
+          name: error.name,
+          componentStack: errorInfo.componentStack?.split('\n').slice(0, 5).join('\n'), // Only first 5 lines
+          // Omit: error.stack (may contain user data in production)
+        };
 
     // Rate-limited logging in development (2025 best practice)
     // Prevents console spam from render loops or rapid component failures
@@ -98,7 +110,7 @@ class ErrorBoundary extends Component<Props, State> {
       const timeSinceLastError = now - this.lastErrorTime;
 
       if (timeSinceLastError >= this.ERROR_LOG_THROTTLE_MS) {
-        console.error('ErrorBoundary caught an error:', sanitizedError);
+        console.error('ErrorBoundary caught an error:', errorDetails);
         this.lastErrorTime = now;
       } else {
         // Silently throttled - prevents console spam
@@ -110,7 +122,7 @@ class ErrorBoundary extends Component<Props, State> {
         );
       }
     }
-    // TODO: In production, send sanitizedError to error tracking service (e.g., Sentry)
+    // TODO: In production, send errorDetails to error tracking service (e.g., Sentry)
 
     this.setState({
       error,
@@ -123,9 +135,17 @@ class ErrorBoundary extends Component<Props, State> {
     // Add small delay to allow screen reader to finish announcing aria-live region
     // (P2: Claude review - immediate focus may interrupt announcement)
     if (!prevState.hasError && this.state.hasError) {
-      setTimeout(() => {
+      this.focusTimeoutId = setTimeout(() => {
         this.alertRef.current?.focus();
       }, 150); // 150ms delay balances responsiveness with screen reader timing
+    }
+  }
+
+  componentWillUnmount(): void {
+    // Clean up pending timeout to prevent memory leaks (CRITICAL: Claude review)
+    if (this.focusTimeoutId !== null) {
+      clearTimeout(this.focusTimeoutId);
+      this.focusTimeoutId = null;
     }
   }
 

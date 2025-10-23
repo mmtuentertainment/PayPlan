@@ -7,10 +7,13 @@ import { visualizer } from 'rollup-plugin-visualizer'
 export default defineConfig({
   plugins: [
     react(),
-    // Gate bundle visualizer behind ANALYZE flag for security & performance
-    // Usage: ANALYZE=true npm run build
-    // Prevents shipping analysis artifacts to production and reduces build overhead
-    ...(process.env.ANALYZE
+    // Double-gate bundle visualizer: DEV mode + ANALYZE flag (CRITICAL: Claude review)
+    // Usage: ANALYZE=true npm run build (only works in development)
+    // Rationale:
+    // 1. DEV check prevents shipping analysis artifacts to production builds
+    // 2. ANALYZE flag prevents overhead in normal dev builds
+    // 3. Double-gating is defense-in-depth security pattern
+    ...(process.env.NODE_ENV !== 'production' && process.env.ANALYZE
       ? [
           visualizer({
             filename: './build-analysis/stats.html',
