@@ -12,15 +12,23 @@ import {
   computeBodyHash,
   getIdempotencyKey,
 } from "./_utils/idempotency.js";
+import type {
+  InstallmentItem,
+  NormalizedInstallment,
+  PlanRequestBody,
+  PayPlanModules,
+  RequestWithUrl,
+  JsonResponseBody
+} from "./plan.types.js";
 
-// v0.1 core libs (ESM)
-let calculatePaydays: any;
-let detectRisks: any;
-let generateWeeklyActions: any;
-let generateSummary: any;
-let formatRiskFlags: any;
-let normalizeOutput: any;
-let generateICSWithTZID: any;
+// v0.1 core libs (ESM) - typed module references
+let calculatePaydays: PayPlanModules['calculatePaydays'] | undefined;
+let detectRisks: PayPlanModules['detectRisks'] | undefined;
+let generateWeeklyActions: PayPlanModules['generateWeeklyActions'] | undefined;
+let generateSummary: PayPlanModules['generateSummary'] | undefined;
+let formatRiskFlags: PayPlanModules['formatRiskFlags'] | undefined;
+let normalizeOutput: PayPlanModules['normalizeOutput'] | undefined;
+let generateICSWithTZID: PayPlanModules['generateICSWithTZID'] | undefined;
 
 async function loadModules() {
   const payday = await import('../src/lib/payday-calculator.js');
@@ -48,19 +56,19 @@ function setCors(res: ServerResponse) {
   res.setHeader("Access-Control-Max-Age", "86400"); // 24h
 }
 
-function json(res: ServerResponse, status: number, body: any) {
+function json(res: ServerResponse, status: number, body: JsonResponseBody) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(body));
 }
 
-async function readJson(req: IncomingMessage): Promise<any> {
+async function readJson(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
     let data = "";
     req.on("data", (c) => (data += c));
     req.on("end", () => {
       try {
-        resolve(data ? JSON.parse(data) : {});
+        resolve(data ? JSON.parse(data) as unknown : {});
       } catch (e) {
         reject(e);
       }
@@ -71,7 +79,7 @@ async function readJson(req: IncomingMessage): Promise<any> {
 
 function getPath(req: IncomingMessage) {
   // instance should reflect request path (RFC 9457); strip query if present
-  const url = (req as any).url || "/api/plan";
+  const url = (req as RequestWithUrl).url || "/api/plan";
   return String(url).split("?")[0] || "/api/plan";
 }
 
@@ -123,10 +131,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     // ---- 3. Read Body ----
-    const body = await readJson(req);
+    const rawBody = await readJson(req);
+    const body = rawBody as Partial<PlanRequestBody>;
 
     // ---- 4. Idempotency Precheck ----
-    const idemKey = getIdempotencyKey(req);
+    const idemKey = getIdempotencyKey(req as RequestWithUrl);
     let bodyHash: string | undefined;
 
     if (idemKey) {
@@ -137,7 +146,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
       if (cached.hit === "replay") {
         res.setHeader("X-Idempotent-Replayed", "true");
-        return json(res, 200, cached.response);
+        return json(res, 200, cached.response as JsonResponseBody);
       }
 
       if (cached.hit === "conflict") {
@@ -153,7 +162,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     // ---- 5. Validate Body ----
-    const items = Array.isArray(body?.items) ? body.items : null;
+    const items = Array.isArray(body?.items) ? body.items as InstallmentItem[] : null;
 
     if (!items || items.length === 0) {
       const p = buildProblem({
@@ -202,17 +211,23 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     // ---- 6. Process (v0.1 deterministic algorithm) ----
-    const normalizedInstallments = items
-      .map((item: any) => ({
+    const normalizedInstallments: NormalizedInstallment[] = items
+      .map((item) => ({
         provider: item.provider,
         installment_no: item.installment_no,
         due_date: item.due_date,
-        amount: parseFloat(item.amount),
+        amount: typeof item.amount === 'string' ? parseFloat(item.amount) : item.amount,
         currency: item.currency,
         autopay: item.autopay,
-        late_fee: parseFloat(item.late_fee)
+        late_fee: typeof item.late_fee === 'string' ? parseFloat(item.late_fee) : item.late_fee
       }))
-      .sort((a: any, b: any) => a.due_date.localeCompare(b.due_date));
+      .sort((a, b) => a.due_date.localeCompare(b.due_date));
+
+    // Type guard: Ensure modules are loaded
+    if (!calculatePaydays || !detectRisks || !generateWeeklyActions || !generateSummary ||
+        !formatRiskFlags || !normalizeOutput || !generateICSWithTZID) {
+      throw new Error('PayPlan modules not loaded');
+    }
 
     const paydays = calculatePaydays({
       paycheckDates,
@@ -226,7 +241,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     const now = DateTime.now().setZone(timeZone);
     const weekEnd = now.plus({ days: 7 });
-    const weeklyInstallments = normalizedInstallments.filter((installment: any) => {
+    const weeklyInstallments = normalizedInstallments.filter((installment) => {
       const dueDate = DateTime.fromISO(installment.due_date, { zone: timeZone });
       return dueDate >= now && dueDate <= weekEnd;
     });
@@ -258,22 +273,25 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     // ---- 8. Return Success (200 OK, existing format) ----
     return json(res, 200, responseData);
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[API] Internal error:', err);
 
     // Ensure rate limit headers are set even on error
     try {
       const rl = await checkLimit(clientIp);
       setRateHeaders(res, rl.headers);
-    } catch (_e) {
+    } catch {
       // Ignore rate limit header errors in error path
     }
+
+    // Type guard for error message extraction
+    const errorMessage = err instanceof Error ? err.message : "Unexpected error occurred";
 
     const p = buildProblem({
       type: "/problems/internal-error",
       title: "Internal Server Error",
       status: 500,
-      detail: err?.message || "Unexpected error occurred",
+      detail: errorMessage,
       instance,
     });
     return sendProblem(res, p);

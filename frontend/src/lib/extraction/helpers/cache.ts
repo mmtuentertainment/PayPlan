@@ -24,7 +24,7 @@ export class ExtractionCache {
   /**
    * Generate hash for email text + timezone + options
    */
-  private hash(emailText: string, timezone: string, options?: any): string {
+  private hash(emailText: string, timezone: string, options?: unknown): string {
     // Simple hash using length + first/last chars + timezone + options
     const optionsStr = options ? JSON.stringify(options) : '';
     const sample = emailText.length > 100
@@ -45,7 +45,7 @@ export class ExtractionCache {
   /**
    * Get cached result if available and not expired
    */
-  get(emailText: string, timezone: string, options?: any): ExtractionResult | null {
+  get(emailText: string, timezone: string, options?: unknown): ExtractionResult | null {
     const key = this.hash(emailText, timezone, options);
     const entry = this.cache.get(key);
 
@@ -73,7 +73,7 @@ export class ExtractionCache {
   /**
    * Store result in cache
    */
-  set(emailText: string, timezone: string, result: ExtractionResult, options?: any): void {
+  set(emailText: string, timezone: string, result: ExtractionResult, options?: unknown): void {
     const key = this.hash(emailText, timezone, options);
 
     // Evict oldest if at capacity

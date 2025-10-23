@@ -11,7 +11,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PreferenceCategory } from '../../../src/lib/preferences/types';
-import type { UserPreference, StorageError } from '../../../src/lib/preferences/types';
+import type { UserPreference } from '../../../src/lib/preferences/types';
 
 // Service to be implemented in T022
 import { PreferenceStorageService } from '../../../src/lib/preferences/PreferenceStorageService';
@@ -261,7 +261,7 @@ describe('PreferenceStorageService.savePreference()', () => {
   // ============================================================================
 
   it('should return Serialization error for circular references', () => {
-    const circularValue: any = { foo: 'bar' };
+    const circularValue: Record<string, unknown> = { foo: 'bar' };
     circularValue.self = circularValue; // Create circular reference
 
     const invalidPreference: UserPreference = {

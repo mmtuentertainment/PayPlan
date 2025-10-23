@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EmailPreview } from '../../src/components/EmailPreview';
 
 vi.mock('../../src/components/DateQuickFix', () => ({
-  DateQuickFix: ({ rowId, onFix, onUndo }: any) => (
+  DateQuickFix: ({ rowId, onFix, onUndo }: { rowId: string; onFix: (date: string) => void; onUndo: () => void }) => (
     <div data-testid={`quick-fix-${rowId}`}>
       <button onClick={() => onFix('2025-11-01')}>Apply fix</button>
       <button onClick={() => onUndo()}>Undo fix</button>

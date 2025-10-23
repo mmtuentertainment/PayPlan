@@ -90,9 +90,8 @@ describe('Performance Logging', () => {
     it('logs duration even when function throws', () => {
       const throwingFn = () => {
         // Simulate some work before throwing
-        let sum = 0;
         for (let i = 0; i < 100; i++) {
-          sum += i;
+          // Work simulation
         }
         throw new Error('Test error');
       };
@@ -210,9 +209,8 @@ describe('Performance Logging', () => {
       const timer = startTimer('timerOp', 100);
 
       // Simulate some work
-      let sum = 0;
       for (let i = 0; i < 1000; i++) {
-        sum += i;
+        // Work simulation
       }
 
       const log = timer.end();

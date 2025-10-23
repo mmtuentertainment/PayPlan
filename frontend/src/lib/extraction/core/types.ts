@@ -68,5 +68,5 @@ export interface ExtractionContext {
   timezone: string;
   dateLocale: DateLocale;
   item: Partial<Item>;
-  patterns?: any; // Provider-specific patterns
+  patterns?: unknown; // Provider-specific patterns
 }

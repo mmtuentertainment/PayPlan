@@ -170,24 +170,28 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
         {/* T038-T040: Payment status tracking UI (Feature 015) */}
         {normalizedPayments.length > 0 ? (
           <div className="space-y-2">
-            {normalizedPayments.map((payment) => {
-              const statusResult = getStatus(payment.id!);
-              const status = statusResult.ok ? statusResult.value : 'pending';
-              const isPaid = status === 'paid';
+            {normalizedPayments
+              .filter((payment) => payment.id !== undefined) // Only show payments with IDs
+              .map((payment) => {
+                // TypeScript now knows payment.id is defined
+                const paymentId = payment.id as string;
+                const statusResult = getStatus(paymentId);
+                const status = statusResult.ok ? statusResult.value : 'pending';
+                const isPaid = status === 'paid';
 
-              return (
-                <div
-                  key={payment.id}
-                  className={`flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition-colors ${
-                    isPaid ? 'opacity-60' : ''
-                  }`}
-                >
-                  {/* T038: PaymentCheckbox integration */}
-                  <PaymentCheckbox
-                    paymentId={payment.id!}
-                    status={status}
-                    onToggle={() => toggleStatus(payment.id!)}
-                  />
+                return (
+                  <div
+                    key={paymentId}
+                    className={`flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition-colors ${
+                      isPaid ? 'opacity-60' : ''
+                    }`}
+                  >
+                    {/* T038: PaymentCheckbox integration */}
+                    <PaymentCheckbox
+                      paymentId={paymentId}
+                      status={status}
+                      onToggle={() => toggleStatus(paymentId)}
+                    />
 
                   {/* T039: StatusIndicator integration */}
                   <StatusIndicator status={status} />
@@ -252,7 +256,7 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50 z-[1100] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
           <Dialog.Content
-            className="fixed left-[50%] top-[50%] z-[1100] translate-x-[-50%] translate-y-[-50%] p-4 max-w-lg w-full"
+            className="fixed left-[50%] top-[50%] z-[1150] translate-x-[-50%] translate-y-[-50%] p-4 max-w-lg w-full"
             aria-describedby="archive-dialog-description"
           >
             {/* Hidden title and description for screen reader accessibility (Radix requirement) */}

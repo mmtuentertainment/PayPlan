@@ -41,9 +41,9 @@ describe('extractDomain()', () => {
   });
 
   test('returns null for non-string input', () => {
-    expect(extractDomain(null as any)).toBe(null);
-    expect(extractDomain(undefined as any)).toBe(null);
-    expect(extractDomain(123 as any)).toBe(null);
+    expect(extractDomain(null as unknown)).toBe(null);
+    expect(extractDomain(undefined as unknown)).toBe(null);
+    expect(extractDomain(123 as unknown)).toBe(null);
   });
 });
 
@@ -72,7 +72,7 @@ describe('isDomainAllowed()', () => {
   test('handles empty or invalid inputs', () => {
     expect(isDomainAllowed('', ['klarna.com'])).toBe(false);
     expect(isDomainAllowed('klarna.com', [])).toBe(false);
-    expect(isDomainAllowed('klarna.com', null as any)).toBe(false);
+    expect(isDomainAllowed('klarna.com', null as unknown)).toBe(false);
   });
 
   test('does not match partial domain names', () => {
@@ -206,7 +206,7 @@ describe('isSuspiciousDomain()', () => {
 
   test('returns true for empty domain', () => {
     expect(isSuspiciousDomain('')).toBe(true);
-    expect(isSuspiciousDomain(null as any)).toBe(true);
+    expect(isSuspiciousDomain(null as unknown)).toBe(true);
   });
 });
 
@@ -275,6 +275,7 @@ describe('PROVIDER_DOMAINS', () => {
   });
 
   test('each provider has at least one domain', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(PROVIDER_DOMAINS).forEach(([_provider, domains]) => {
       expect(domains.length).toBeGreaterThan(0);
       expect(Array.isArray(domains)).toBe(true);

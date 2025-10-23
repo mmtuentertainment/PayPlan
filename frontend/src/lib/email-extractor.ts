@@ -316,9 +316,9 @@ function extractGeneric(
   })();
 
   // Autopay detection (best effort)
-  const auto = /autopay\s*[:\-]?\s*(enabled|on|yes)/i.test(emailText)
+  const auto = /autopay\s*[:-]?\s*(enabled|on|yes)/i.test(emailText)
     ? true
-    : (/autopay\s*[:\-]?\s*(disabled|off|no)/i.test(emailText) ? false : false);
+    : (/autopay\s*[:-]?\s*(disabled|off|no)/i.test(emailText) ? false : false);
 
   const cents = Math.round(dollars * 100);
 
@@ -384,8 +384,10 @@ function normalizeEmailText(text: string): string {
   const placeholder = '___PAYPLAN_TRIPLE_HYPHENS___';
   let out = text
     .replace(/\r\n?/g, '\n')
+    // eslint-disable-next-line no-control-regex -- Intentionally stripping control characters for security
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ' ')
     .replace(/\xC0[\x80-\xBF]/g, '') // Strip UTF-8 overlong sequences
+    // eslint-disable-next-line no-misleading-character-class -- Intentionally handling zero-width Unicode characters
     .replace(/[\u200B\u200C\u200D\uFEFF]/g, '') // Zero-width characters
     .replace(/\u202E/g, '') // Remove RTL override
     .replace(/<!\[CDATA\[|\]\]>/g, ' ')

@@ -25,8 +25,8 @@ describe('validateTimezone', () => {
 
   it('rejects empty or non-string input', () => {
     expect(() => validateTimezone('')).toThrow('must be a non-empty string');
-    expect(() => validateTimezone(null as any)).toThrow('must be a non-empty string');
-    expect(() => validateTimezone(undefined as any)).toThrow('must be a non-empty string');
+    expect(() => validateTimezone(null as unknown)).toThrow('must be a non-empty string');
+    expect(() => validateTimezone(undefined as unknown)).toThrow('must be a non-empty string');
   });
 });
 

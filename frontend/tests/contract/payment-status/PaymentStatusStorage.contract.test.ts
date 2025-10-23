@@ -47,7 +47,7 @@ describe('PaymentStatusStorage Contract Validation', () => {
     });
 
     it('✅ Invalid paymentId throws Validation error', () => {
-      const record: any = {
+      const record: unknown = {
         paymentId: 'not-a-uuid',
         status: 'paid',
         timestamp: '2025-10-15T14:30:00.000Z',
@@ -62,7 +62,7 @@ describe('PaymentStatusStorage Contract Validation', () => {
     });
 
     it('✅ Invalid status enum throws Validation error', () => {
-      const record: any = {
+      const record: unknown = {
         paymentId: '550e8400-e29b-41d4-a716-446655440000',
         status: 'invalid',
         timestamp: '2025-10-15T14:30:00.000Z',
@@ -77,7 +77,7 @@ describe('PaymentStatusStorage Contract Validation', () => {
     });
 
     it('✅ Invalid timestamp throws Validation error', () => {
-      const record: any = {
+      const record: unknown = {
         paymentId: '550e8400-e29b-41d4-a716-446655440000',
         status: 'paid',
         timestamp: 'not-iso-8601',
@@ -197,7 +197,7 @@ describe('PaymentStatusStorage Contract Validation', () => {
     });
 
     it('✅ Performance: 500 records load in <100ms', () => {
-      const statuses: any = {};
+      const statuses: Record<string, unknown> = {};
       for (let i = 0; i < 500; i++) {
         const id = `550e8400-e29b-41d4-a716-44665544${i.toString().padStart(4, '0')}`;
         statuses[id] = {
@@ -230,7 +230,7 @@ describe('PaymentStatusStorage Contract Validation', () => {
   // ==========================================================================
   describe('Performance contract', () => {
     it('✅ Load 500 records in <100ms (NFR-001)', () => {
-      const statuses: any = {};
+      const statuses: Record<string, unknown> = {};
       for (let i = 0; i < 500; i++) {
         const id = `550e8400-e29b-41d4-a716-44665544${i.toString().padStart(4, '0')}`;
         statuses[id] = {

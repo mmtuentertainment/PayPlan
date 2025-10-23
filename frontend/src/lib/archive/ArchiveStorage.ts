@@ -98,7 +98,7 @@ export class ArchiveStorage {
       let parsed;
       try {
         parsed = JSON.parse(serialized);
-      } catch (parseError) {
+      } catch {
         // CodeRabbit Fix: Privacy-safe logging (no sensitive data)
         console.warn('Archive index reset due to corruption');
         localStorage.removeItem(ARCHIVE_INDEX_KEY);
@@ -178,13 +178,13 @@ export class ArchiveStorage {
   ): Result<never, ArchiveError> {
     if (error instanceof Error) {
       // Handle cross-browser QuotaExceeded variants
-      const DOMEx = (globalThis as any).DOMException;
+      const DOMEx = (globalThis as { DOMException?: typeof DOMException }).DOMException;
       const isQuota =
         error.name === 'QuotaExceededError' ||
         error.name === 'QUOTA_EXCEEDED_ERR' ||
         (DOMEx &&
           error instanceof DOMEx &&
-          ((error as any).code === 22 || (error as any).code === 1014));
+          ('code' in error && (error.code === 22 || error.code === 1014)));
 
       if (isQuota) {
         return {
@@ -425,7 +425,7 @@ export class ArchiveStorage {
       let parsed;
       try {
         parsed = JSON.parse(serialized);
-      } catch (parseError) {
+      } catch {
         console.warn('Archive corrupted:', archiveId);
         return {
           ok: false,

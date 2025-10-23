@@ -141,7 +141,8 @@ export class PaymentStatusStorage {
         parsed = JSON.parse(serialized);
       } catch (parseError) {
         // JSON parse error: corrupted data, clear and return defaults
-        console.warn('Corrupted payment status data (invalid JSON), resetting to defaults');
+        const errorMessage = parseError instanceof Error ? parseError.message : 'Unknown parse error';
+        console.warn(`Corrupted payment status data (invalid JSON): ${errorMessage}. Raw value length: ${serialized.length} chars. Resetting to defaults.`);
         localStorage.removeItem(STORAGE_KEY);
         return { ok: true, value: this.createDefaultCollection() };
       }
@@ -282,7 +283,7 @@ export class PaymentStatusStorage {
    * Bulk save multiple payment status records (US3)
    * Implementation in T053
    */
-  bulkSaveStatuses(_records: PaymentStatusRecord[]): Result<number, StorageError> {
+  bulkSaveStatuses(_records: PaymentStatusRecord[]): Result<number, StorageError> { // eslint-disable-line @typescript-eslint/no-unused-vars
     throw new Error('Not implemented - T053 (US3)');
   }
 
@@ -405,13 +406,13 @@ export class PaymentStatusStorage {
   ): Result<never, StorageError> {
     if (error instanceof Error) {
       // Handle cross-browser QuotaExceeded variants
-      const DOMEx = (globalThis as any).DOMException;
+      const DOMEx = (globalThis as { DOMException?: typeof DOMException }).DOMException;
       const isQuota =
         error.name === 'QuotaExceededError' ||
         error.name === 'QUOTA_EXCEEDED_ERR' ||
         (DOMEx &&
           error instanceof DOMEx &&
-          ((error as any).code === 22 || (error as any).code === 1014));
+          ('code' in error && (error.code === 22 || error.code === 1014)));
 
       if (isQuota) {
         return {
