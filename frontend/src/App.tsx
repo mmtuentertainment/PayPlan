@@ -20,6 +20,7 @@ import { ArchiveListPage } from './pages/ArchiveListPage';
 import { ArchiveDetailView } from './pages/ArchiveDetailView';
 import { ROUTES } from './routes';
 import { NavigationHeader } from './components/navigation/NavigationHeader';
+import Breadcrumbs from './components/navigation/Breadcrumbs';
 
 function App() {
   // Initialize preferences hook at app level
@@ -165,14 +166,18 @@ function AppContent({
       {/* Persistent navigation header (Feature 017) */}
       <NavigationHeader />
 
+      {/* Breadcrumb navigation (Feature 017 - User Story 3) */}
+      <Breadcrumbs />
+
       {/* Main content */}
       <main id="main-content" tabIndex={-1}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/docs" element={<Docs />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/demo" element={<Demo />} />
-          <Route path="/import" element={<Import />} />
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/demo" element={<Demo />} />
+            <Route path="/import" element={<Import />} />
           <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
           <Route path={ROUTES.ARCHIVE_DETAIL_PATTERN} element={<ArchiveDetailView />} />
           <Route
@@ -210,7 +215,8 @@ function AppContent({
             />
           }
         />
-        </Routes>
+          </Routes>
+        </Suspense>
       </main>
 
       <ErrorTest />
