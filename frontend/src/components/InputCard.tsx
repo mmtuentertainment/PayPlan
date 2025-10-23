@@ -149,7 +149,7 @@ export default function InputCard({ onResult, onIcsReady }: Props) {
         body.customSkipDates = skipDates;
       }
 
-      const res = await buildPlan(body);
+      const res = await buildPlan(body as any); // Type assertion needed - dynamic body construction
       onResult(res);
       onIcsReady(res.ics);
     } catch (e: unknown) {

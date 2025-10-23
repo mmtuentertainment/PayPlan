@@ -63,11 +63,13 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
       setIsArchiveDialogOpen(true);
     } catch (error) {
       if (error instanceof ZodError) {
-        // Log detailed validation errors for debugging
-        console.error('Payment validation failed:', {
-          issues: error.issues,
-          paymentCount: normalizedPayments.length
-        });
+        // Log detailed validation errors for debugging (dev-only)
+        if (import.meta.env.DEV) {
+          console.error('Payment validation failed:', {
+            issues: error.issues,
+            paymentCount: normalizedPayments.length
+          });
+        }
 
         // Show generic error to user (don't expose field paths/internal details)
         setValidationError('Invalid payment data');
@@ -76,8 +78,10 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
           type: 'error'
         });
       } else {
-        // Log unexpected errors for debugging
-        console.error('Unexpected validation error:', error);
+        // Log unexpected errors for debugging (dev-only)
+        if (import.meta.env.DEV) {
+          console.error('Unexpected validation error:', error);
+        }
 
         setValidationError('Unknown validation error');
         setWarningToast({
@@ -149,7 +153,10 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
         }, 2000);
       }
     } catch (error) {
-      console.error('CSV export failed:', error);
+      // Log error details in development only
+      if (import.meta.env.DEV) {
+        console.error('CSV export failed:', error);
+      }
       setWarningToast({
         message: 'CSV export failed. Please try again.',
         type: 'error'
@@ -173,8 +180,7 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
             {normalizedPayments
               .filter((payment) => payment.id !== undefined) // Only show payments with IDs
               .map((payment) => {
-                // TypeScript now knows payment.id is defined
-                const paymentId = payment.id as string;
+                const paymentId = payment.id as string; // Safe after filter
                 const statusResult = getStatus(paymentId);
                 const status = statusResult.ok ? statusResult.value : 'pending';
                 const isPaid = status === 'paid';
