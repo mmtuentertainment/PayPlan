@@ -31,6 +31,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
   onClose,
   navItems,
   className = '',
+  drawerId,
 }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [entered, setEntered] = useState(false);
@@ -171,7 +172,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
       {/* Solid sidebar drawer overlay */}
       <FocusLock returnFocus>
         <div
-          id="mobile-navigation-drawer"
+          id={drawerId}
           role="dialog"
           aria-modal="true"
           aria-label="Navigation menu"

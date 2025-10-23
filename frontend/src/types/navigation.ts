@@ -135,6 +135,9 @@ export interface MobileMenuProps {
 
   /** Optional className for drawer customization */
   className?: string;
+
+  /** Optional unique ID for drawer (generated via useId() for aria-controls linkage) */
+  drawerId?: string;
 }
 
 /**

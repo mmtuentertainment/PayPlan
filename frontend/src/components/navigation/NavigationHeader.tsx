@@ -6,7 +6,7 @@
  * Provides links to Home, Archives, and Settings with WCAG 2.1 AA compliance.
  */
 
-import { memo, useRef } from 'react';
+import { memo, useRef, useId } from 'react';
 import { NavLink } from 'react-router-dom';
 import type { NavigationItem, NavigationHeaderProps } from '../../types/navigation';
 import { ROUTES } from '../../routes';
@@ -48,6 +48,7 @@ export const NavigationHeader = memo<NavigationHeaderProps>(function NavigationH
   navItems = DEFAULT_NAV_ITEMS,
 }) {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const drawerId = useId();
   const { mobileMenuOpen, openMobileMenu, closeMobileMenu } =
     useNavigationState();
 
@@ -142,7 +143,7 @@ export const NavigationHeader = memo<NavigationHeaderProps>(function NavigationH
               type="button"
               aria-label="Open navigation menu"
               aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-navigation-drawer"
+              aria-controls={drawerId}
               onClick={handleHamburgerClick}
               className="md:hidden p-2.5 min-w-[44px] min-h-[44px] text-gray-700 hover:bg-gray-100 rounded-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
@@ -171,6 +172,7 @@ export const NavigationHeader = memo<NavigationHeaderProps>(function NavigationH
         isOpen={mobileMenuOpen}
         onClose={closeMobileMenu}
         navItems={navItems}
+        drawerId={drawerId}
       />
     </>
   );
