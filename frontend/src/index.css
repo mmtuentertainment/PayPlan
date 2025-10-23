@@ -24,7 +24,7 @@ code {
 
 /* Skip Link for Accessibility (WCAG 2.1 AA - Feature 017) */
 .skip-link {
-  position: absolute;
+  position: fixed;
   top: -40px;
   left: 0;
   background: #000;
@@ -35,6 +35,12 @@ code {
   border-radius: 0 0 4px 0;
   font-weight: 600;
   transition: top 0.2s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
 }
 
 .skip-link:focus {

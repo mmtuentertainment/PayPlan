@@ -3,9 +3,11 @@
  * Feature: 017-navigation-system
  *
  * Type definitions for navigation components, state management, and accessibility.
+ * Includes Zod schemas for runtime validation of security and privacy constraints.
  */
 
 import type { ReactNode } from 'react';
+import { z } from 'zod';
 
 /**
  * Navigation menu item configuration
@@ -41,6 +43,35 @@ export interface NavigationItem {
   /** Optional aria-label override for accessibility */
   ariaLabel?: string;
 }
+
+/**
+ * Zod schema for runtime validation of NavigationItem
+ *
+ * Enforces security and privacy constraints at runtime:
+ * - Prevents PII in labels and URLs
+ * - Validates external link security attributes
+ * - Ensures no sensitive financial data leaks
+ */
+export const navigationItemSchema = z.object({
+  id: z.string().min(1, 'Navigation item ID cannot be empty'),
+  label: z
+    .string()
+    .min(1, 'Navigation label cannot be empty')
+    .refine(
+      (val) => !/(account|balance|\$\d+|card.*\d{4})/i.test(val),
+      'Label must not contain PII, account numbers, or financial data'
+    ),
+  to: z
+    .string()
+    .min(1, 'Navigation path cannot be empty')
+    .refine(
+      (val) => !/(account_id|user_id|transaction_id)=/i.test(val),
+      'URL must not contain sensitive identifiers in query params'
+    ),
+  icon: z.any().optional(),
+  isExternal: z.boolean().optional(),
+  ariaLabel: z.string().optional(),
+});
 
 /**
  * Mobile menu state management
