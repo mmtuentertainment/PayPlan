@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { MobileMenu } from './MobileMenu';
 import type { NavigationItem } from '../../types/navigation';
@@ -153,62 +153,6 @@ describe('MobileMenu - Close Behavior', () => {
     await user.click(dialog);
 
     expect(onClose).not.toHaveBeenCalled();
-  });
-});
-
-describe('MobileMenu - Body Scroll Lock', () => {
-  let originalBodyOverflow: string;
-
-  beforeEach(() => {
-    originalBodyOverflow = document.body.style.overflow;
-  });
-
-  afterEach(() => {
-    document.body.style.overflow = originalBodyOverflow;
-  });
-
-  it('disables body scroll when open', () => {
-    const { rerender } = renderWithRouter(
-      <MobileMenu isOpen={false} onClose={vi.fn()} navItems={mockNavItems} />
-    );
-
-    expect(document.body.style.overflow).toBe('');
-
-    rerender(
-      <MemoryRouter>
-        <MobileMenu isOpen={true} onClose={vi.fn()} navItems={mockNavItems} />
-      </MemoryRouter>
-    );
-
-    expect(document.body.style.overflow).toBe('hidden');
-  });
-
-  it('re-enables body scroll when closed', () => {
-    const { rerender } = renderWithRouter(
-      <MobileMenu isOpen={true} onClose={vi.fn()} navItems={mockNavItems} />
-    );
-
-    expect(document.body.style.overflow).toBe('hidden');
-
-    rerender(
-      <MemoryRouter>
-        <MobileMenu isOpen={false} onClose={vi.fn()} navItems={mockNavItems} />
-      </MemoryRouter>
-    );
-
-    expect(document.body.style.overflow).toBe('');
-  });
-
-  it('restores body scroll on unmount', () => {
-    const { unmount } = renderWithRouter(
-      <MobileMenu isOpen={true} onClose={vi.fn()} navItems={mockNavItems} />
-    );
-
-    expect(document.body.style.overflow).toBe('hidden');
-
-    unmount();
-
-    expect(document.body.style.overflow).toBe('');
   });
 });
 

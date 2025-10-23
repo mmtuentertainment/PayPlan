@@ -6,7 +6,7 @@
  * keyboard navigation, and WCAG 2.1 AA compliance.
  */
 
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import FocusLock from 'react-focus-lock';
 import type { NavigationItem } from '../../types/navigation';
@@ -46,6 +46,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
   className = '',
 }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [entered, setEntered] = useState(false);
 
   /**
    * Base link styles for mobile menu items
@@ -60,23 +61,6 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
    * Active link additional styles
    */
   const activeLinkClasses = 'bg-blue-50 text-blue-700 font-semibold';
-
-  /**
-   * Body scroll lock effect
-   * Locks body scroll when menu opens, unlocks when closes
-   */
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
-    // Cleanup: always restore body scroll on unmount
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
 
   /**
    * ESC key handler effect
@@ -104,6 +88,22 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
   useEffect(() => {
     if (isOpen && closeButtonRef.current) {
       closeButtonRef.current.focus();
+    }
+  }, [isOpen]);
+
+  /**
+   * Slide-in animation effect
+   * Stages the enter animation on first paint
+   */
+  useEffect(() => {
+    if (isOpen) {
+      const id = requestAnimationFrame(() => setEntered(true));
+      return () => {
+        cancelAnimationFrame(id);
+        setEntered(false);
+      };
+    } else {
+      setEntered(false);
     }
   }, [isOpen]);
 
@@ -182,12 +182,14 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
       {/* Drawer with Focus Trap */}
       <FocusLock returnFocus>
         <div
+          id="mobile-navigation-drawer"
           role="dialog"
           aria-modal="true"
           aria-label="Navigation menu"
           className={`fixed top-0 left-0 w-80 h-full bg-white z-[1000] shadow-2xl
             transform transition-transform duration-300 ease-out
             motion-reduce:transition-none
+            ${entered ? 'translate-x-0' : '-translate-x-full'}
             ${className}`}
         >
           {/* Menu header with close button */}
@@ -207,7 +209,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
           </div>
 
           {/* Navigation */}
-          <nav role="navigation" aria-label="Main navigation" className="py-4">
+          <nav aria-label="Main navigation" className="py-4">
             {navItems.map(renderNavItem)}
           </nav>
         </div>

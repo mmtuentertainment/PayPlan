@@ -89,7 +89,7 @@ function App() {
           <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
           <Route path={`${ROUTES.ARCHIVES}/:id`} element={<ArchiveDetailView />} />
           <Route
-            path="/settings/preferences"
+            path={ROUTES.SETTINGS}
             element={
             <PreferenceSettings
               preferences={{

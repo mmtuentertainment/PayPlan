@@ -7,8 +7,8 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { NavigationHeader } from './NavigationHeader';
 import type { NavigationItem } from '../../types/navigation';
 
@@ -227,6 +227,17 @@ describe('NavigationHeader - Mobile View', () => {
     await user.keyboard('{Escape}');
 
     expect(hamburger).toHaveFocus();
+  });
+
+  it('hamburger button has aria-controls linkage to drawer', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<NavigationHeader navItems={testNavItems} />);
+
+    const hamburger = screen.getByRole('button', { name: /menu/i });
+    await user.click(hamburger);
+
+    const dialog = screen.getByRole('dialog', { name: /navigation menu/i });
+    expect(hamburger).toHaveAttribute('aria-controls', dialog.id);
   });
 
   it('locks body scroll when menu opens', async () => {

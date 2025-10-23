@@ -118,6 +118,7 @@ export const NavigationHeader = memo<NavigationHeaderProps>(function NavigationH
       <NavLink
         key={id}
         to={to}
+        {...(to === ROUTES.HOME ? { end: true } : {})}
         {...(ariaLabel && { 'aria-label': ariaLabel })}
         className={({ isActive }) =>
           `${baseLinkClasses} ${isActive ? activeLinkClasses : ''}`
@@ -131,11 +132,9 @@ export const NavigationHeader = memo<NavigationHeaderProps>(function NavigationH
   return (
     <>
       <header
-        role="banner"
         className={`bg-white border-b border-gray-200 shadow-sm ${className}`}
       >
         <nav
-          role="navigation"
           aria-label="Main navigation"
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         >
@@ -151,6 +150,7 @@ export const NavigationHeader = memo<NavigationHeaderProps>(function NavigationH
               type="button"
               aria-label="Open navigation menu"
               aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation-drawer"
               onClick={handleHamburgerClick}
               className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
