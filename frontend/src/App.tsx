@@ -135,11 +135,11 @@ function AppContent({
 
           if (duration > TARGET_MS) {
             console.warn(
-              `⚠️ [Feature 017] Route navigation slow: ${duration.toFixed(2)}ms (target: <${TARGET_MS}ms) to ${location.pathname}`
+              `⚠️ [Feature 018] Route navigation slow: ${duration.toFixed(2)}ms (target: <${TARGET_MS}ms) to ${location.pathname}`
             );
           } else {
             console.log(
-              `✅ [Feature 017] Route navigation: ${duration.toFixed(2)}ms to ${location.pathname}`
+              `✅ [Feature 018] Route navigation: ${duration.toFixed(2)}ms to ${location.pathname}`
             );
           }
         }
@@ -210,13 +210,19 @@ function AppContent({
                   updatePreference(validated.category, validated.value, validated.optIn);
                 } catch (err) {
                   if (err instanceof ZodError) {
-                    console.error('Preference validation failed:', err.issues);
+                    // Only log detailed validation errors in development (prevent PII leaks)
+                    if (import.meta.env.DEV) {
+                      console.error('Preference validation failed:', err.issues);
+                    }
                     setToast({
                       message: `Invalid preference value: ${err.issues[0]?.message || 'Unknown error'}`,
                       type: 'error',
                     });
                   } else {
-                    console.error('Unexpected error during preference save:', err);
+                    // Only log unexpected errors in development (prevent PII leaks)
+                    if (import.meta.env.DEV) {
+                      console.error('Unexpected error during preference save:', err);
+                    }
                     setToast({
                       message: 'Failed to save preference. Please try again.',
                       type: 'error',

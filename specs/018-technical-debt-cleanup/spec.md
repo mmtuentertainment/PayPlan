@@ -129,7 +129,11 @@ Developers need maintainable code that works across different environments. Curr
 
 - **FR-006**: All interactive buttons MUST meet WCAG 2.1 AA minimum touch target size of 44×44 pixels on mobile devices
 - **FR-007**: API MUST validate all request data before processing to reject malformed payment information
-- **FR-008**: System MUST validate numeric data before financial calculations to prevent invalid results (negative amounts are valid and treated as refunds)
+- **FR-008**: System MUST validate numeric data before financial calculations to prevent invalid results. Business logic:
+  - Negative amounts (-1,000,000 to -0.01): Valid refund transactions
+  - Zero amounts (0.00): Valid edge case for fully refunded or $0 promotional payments
+  - Positive amounts (0.01 to 1,000,000): Standard payment transactions
+  - All amounts must have ≤2 decimal places for currency accuracy
 - **FR-009**: UI components MUST validate all input values at runtime to prevent invalid state
 - **FR-010**: System MUST handle missing or unsupported browser APIs gracefully without errors
 

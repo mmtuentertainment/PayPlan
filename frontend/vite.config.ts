@@ -7,12 +7,19 @@ import { visualizer } from 'rollup-plugin-visualizer'
 export default defineConfig({
   plugins: [
     react(),
-    visualizer({
-      filename: './build-analysis/stats.html',
-      open: false,
-      gzipSize: true,
-      brotliSize: true,
-    }),
+    // Gate bundle visualizer behind ANALYZE flag for security & performance
+    // Usage: ANALYZE=true npm run build
+    // Prevents shipping analysis artifacts to production and reduces build overhead
+    ...(process.env.ANALYZE
+      ? [
+          visualizer({
+            filename: './build-analysis/stats.html',
+            open: false,
+            gzipSize: true,
+            brotliSize: true,
+          }),
+        ]
+      : []),
   ],
   resolve: {
     alias: {

@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, createRef } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 
 interface Props {
@@ -35,6 +35,9 @@ class ErrorBoundary extends Component<Props, State> {
   // Using instance fields so each ErrorBoundary instance tracks its own throttle state
   private lastErrorTime = 0;
   private readonly ERROR_LOG_THROTTLE_MS = 5000; // 5 seconds
+
+  // Ref for focus management (a11y improvement)
+  private alertRef = createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);
@@ -86,6 +89,14 @@ class ErrorBoundary extends Component<Props, State> {
     });
   }
 
+  componentDidUpdate(_: Props, prevState: State): void {
+    // Focus the alert when error state changes from false to true (a11y improvement)
+    // This ensures screen readers immediately announce the error
+    if (!prevState.hasError && this.state.hasError) {
+      this.alertRef.current?.focus();
+    }
+  }
+
   handleReset = (): void => {
     // Reset error state to try rendering the component tree again
     this.setState({
@@ -124,6 +135,8 @@ class ErrorBoundary extends Component<Props, State> {
           aria-live="assertive"
           aria-atomic="true"
           aria-describedby="error-message"
+          tabIndex={-1}
+          ref={this.alertRef}
           className="min-h-screen flex items-center justify-center bg-gray-50 px-4"
         >
           <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
