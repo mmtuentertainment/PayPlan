@@ -3,74 +3,12 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 import { visualizer } from 'rollup-plugin-visualizer'
 
-/**
- * Vendor chunk configuration
- * Explicitly lists packages per chunk for deterministic, auditable bundling
- */
-const VENDOR_CHUNKS = {
-  'vendor-react': ['react', 'react-dom', 'react-router', 'react-router-dom'],
-  'vendor-ui': ['@radix-ui'],
-  'vendor-icons': ['lucide-react'],
-  'vendor-swagger': ['swagger', 'ramda', '@swagger-api'],
-  'vendor-utils': ['zod', 'luxon', 'papaparse', 'uuid', 'clsx', 'ics'],
-  // Add payment/financial libs here when implemented
-  // 'vendor-payment': ['stripe', '@stripe/stripe-js', etc.]
-} as const;
-
-/**
- * Extract package name from module ID
- * Handles both regular and scoped packages (@scope/name)
- *
- * @param id - Module ID from Rollup
- * @returns Package name or null if not a node_module
- */
-function extractPackageName(id: string): string | null {
-  if (!id.includes('node_modules')) {
-    return null;
-  }
-
-  const parts = id.split('node_modules/').pop()?.split('/');
-  if (!parts || parts.length === 0) {
-    return null;
-  }
-
-  // Handle scoped packages (@scope/package)
-  if (parts[0].startsWith('@')) {
-    return parts.length > 1 ? `${parts[0]}/${parts[1]}` : parts[0];
-  }
-
-  return parts[0];
-}
-
-/**
- * Determine chunk name for a given module ID
- *
- * @param id - Module ID from Rollup
- * @returns Chunk name or undefined (let Vite decide)
- */
-function getChunkName(id: string): string | undefined {
-  const packageName = extractPackageName(id);
-  if (!packageName) {
-    return undefined;
-  }
-
-  // Check explicit chunk mappings
-  for (const [chunkName, packages] of Object.entries(VENDOR_CHUNKS)) {
-    if (packages.some(pkg => packageName === pkg || packageName.startsWith(`${pkg}/`))) {
-      return chunkName;
-    }
-  }
-
-  // All other node_modules go to generic vendor chunk
-  return 'vendor';
-}
-
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     visualizer({
-      filename: './dist/stats.html',
+      filename: './build-analysis/stats.html',
       open: false,
       gzipSize: true,
       brotliSize: true,
@@ -84,7 +22,49 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: getChunkName,
+        manualChunks(id) {
+          // Consolidated vendor chunking strategy for better cache stability
+          // and predictable loading behavior for payment/BNPL code
+
+          // Normalize path for robust matching across platforms
+          const normalizedId = id.replace(/\\/g, '/');
+
+          if (normalizedId.includes('/node_modules/')) {
+            // Group 1: React Core (most stable, rarely changes)
+            // Bundle React, ReactDOM, and React Router together as they're tightly coupled
+            // and share the same release cycle
+            if (
+              /\/node_modules\/react\//.test(normalizedId) ||
+              /\/node_modules\/react-dom\//.test(normalizedId) ||
+              /\/node_modules\/react-router/.test(normalizedId)
+            ) {
+              return 'vendor-react';
+            }
+
+            // Group 2: UI Framework (Radix UI - moderate change frequency)
+            // Keep Radix separate as it's large and updates independently from React
+            if (/\/node_modules\/@radix-ui\//.test(normalizedId)) {
+              return 'vendor-ui';
+            }
+
+            // Group 3: Large Libraries (icons, swagger - low change frequency)
+            // These are large, stable libraries that benefit from separate caching
+            if (
+              /\/node_modules\/lucide-react\//.test(normalizedId) ||
+              /\/node_modules\/swagger/.test(normalizedId) ||
+              /\/node_modules\/@swagger-api\//.test(normalizedId) ||
+              /\/node_modules\/ramda\//.test(normalizedId)
+            ) {
+              return 'vendor-large';
+            }
+
+            // Everything else: Small utilities and payment libraries
+            // Bundle remaining dependencies (zod, uuid, papaparse, etc.) with main vendor
+            // This includes payment-related libraries which should load predictably
+            // with the application code
+            return 'vendor';
+          }
+        },
       },
     },
   },

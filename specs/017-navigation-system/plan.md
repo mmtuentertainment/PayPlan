@@ -11,9 +11,9 @@ Add persistent navigation header, mobile menu, breadcrumbs, and wire CreateArchi
 ## Technical Context
 
 **Language/Version**: TypeScript 5.8.3, Node.js 20.x
-**Primary Dependencies**: React 19.1.1, React Router DOM 7.9.3, Radix UI, Tailwind CSS 4.1.13
+**Primary Dependencies**: React 19.1.1, React Router DOM 7.9.3, react-focus-lock 2.13.6, @radix-ui/react-tooltip, Radix UI, Tailwind CSS 4.1.13
 **Storage**: N/A (transient UI state only)
-**Testing**: Vitest 3.2.4, Testing Library React 16.3.0, vitest-axe 0.1.0
+**Testing**: Vitest 3.2.4, Testing Library React 16.3.0, vitest-axe 0.1.0, @testing-library/user-event 14.5.2
 **Target Platform**: Web browsers (mobile + desktop), ≥320px width
 **Project Type**: Web application (frontend SPA + backend API)
 **Performance Goals**: <200ms route changes, <300ms menu animations (SC-007, SC-008)

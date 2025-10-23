@@ -260,7 +260,7 @@ describe('MobileMenu - Accessibility', () => {
 
     const dialog = screen.getByRole('dialog');
     const nav = within(dialog).getByRole('navigation', {
-      name: /main navigation/i,
+      name: /mobile navigation menu/i,
     });
     expect(nav).toBeInTheDocument();
   });

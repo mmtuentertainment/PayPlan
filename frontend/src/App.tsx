@@ -1,7 +1,9 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useState, lazy, Suspense } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import Home from './pages/Home';
 import Import from './pages/Import';
+import type { PreferenceCategoryType, UserPreference } from './lib/preferences/types';
 
 // Lazy load heavy/infrequently used pages to reduce main bundle size
 const Docs = lazy(() => import('./pages/Docs'));
@@ -18,7 +20,7 @@ import { ArchiveListPage } from './pages/ArchiveListPage';
 import { ArchiveDetailView } from './pages/ArchiveDetailView';
 import { ROUTES } from './routes';
 import { NavigationHeader } from './components/navigation/NavigationHeader';
-import { Breadcrumbs } from './components/navigation/Breadcrumbs';
+import Breadcrumbs from './components/navigation/Breadcrumbs';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -74,6 +76,89 @@ function App() {
 
   return (
     <BrowserRouter>
+      <AppContent
+        preferences={preferences}
+        updatePreference={updatePreference}
+        resetPreferences={resetPreferences}
+        toast={toast}
+        setToast={setToast}
+      />
+    </BrowserRouter>
+  );
+}
+
+// Toast type for notification state
+interface Toast {
+  message: string;
+  type: 'success' | 'error';
+}
+
+// AppContent props interface
+interface AppContentProps {
+  preferences: Map<PreferenceCategoryType, UserPreference>;
+  updatePreference: (
+    category: PreferenceCategoryType,
+    value: unknown,
+    optInStatus?: boolean
+  ) => void;
+  resetPreferences: (category?: PreferenceCategoryType) => void;
+  toast: Toast | null;
+  setToast: Dispatch<SetStateAction<Toast | null>>;
+}
+
+// Separate component to access useLocation inside BrowserRouter (needed for T045 performance logging)
+function AppContent({
+  preferences,
+  updatePreference,
+  resetPreferences,
+  toast,
+  setToast,
+}: AppContentProps) {
+  const location = useLocation();
+
+  // T045: Performance logging for route navigation (SC-007: <200ms target)
+  useEffect(() => {
+    // Mark navigation start
+    performance.mark('navigation-start');
+
+    // Schedule measurement after next paint
+    requestAnimationFrame(() => {
+      performance.mark('navigation-end');
+
+      try {
+        performance.measure('route-navigation', 'navigation-start', 'navigation-end');
+        const measure = performance.getEntriesByName('route-navigation').pop();
+
+        if (measure && process.env.NODE_ENV === 'development') {
+          const duration = measure.duration;
+          const TARGET_MS = 200; // SC-007 target
+
+          if (duration > TARGET_MS) {
+            console.warn(
+              `⚠️ [Feature 017] Route navigation slow: ${duration.toFixed(2)}ms (target: <${TARGET_MS}ms) to ${location.pathname}`
+            );
+          } else {
+            console.log(
+              `✅ [Feature 017] Route navigation: ${duration.toFixed(2)}ms to ${location.pathname}`
+            );
+          }
+        }
+
+        // Clean up marks
+        performance.clearMarks('navigation-start');
+        performance.clearMarks('navigation-end');
+        performance.clearMeasures('route-navigation');
+      } catch (err) {
+        // Log error only in development (CodeRabbit: prevent silent failures)
+        if (import.meta.env.DEV) {
+          console.debug('Performance API error:', err);
+        }
+      }
+    });
+  }, [location.pathname]);
+
+  return (
+    <>
       {/* Skip link for accessibility (WCAG 2.1 AA - Feature 017) */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -158,7 +243,7 @@ function App() {
           onDismiss={() => setToast(null)}
         />
       )}
-    </BrowserRouter>
+    </>
   );
 }
 
