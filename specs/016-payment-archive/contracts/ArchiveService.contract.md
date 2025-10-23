@@ -1,6 +1,6 @@
 # Contract: ArchiveService
 
-**Feature**: 016-build-a-payment-archive
+**Feature**: 016-payment-archive-archive
 **Component**: ArchiveService
 **Type**: Service (Business Logic Layer)
 **Location**: `frontend/src/lib/archive/ArchiveService.ts`

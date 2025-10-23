@@ -1,6 +1,6 @@
 # Data Model: Payment History Archive System
 
-**Feature**: 016-build-a-payment
+**Feature**: 016-payment-archive
 **Date**: 2025-10-17
 **Phase**: 1 (Design & Contracts)
 

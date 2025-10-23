@@ -4,7 +4,7 @@
 
 ```bash
 cd /home/matt/PROJECTS/PayPlan
-git checkout 016-build-a-payment
+git checkout 016-payment-archive
 git status
 ```
 
@@ -13,7 +13,7 @@ git status
 ## Current Status Summary
 
 **Feature**: Payment History Archive System (Feature 016)
-**Branch**: `016-build-a-payment`
+**Branch**: `016-payment-archive`
 **Status**: 104/125 tasks complete (83%) - Phases 1-7 done, Phase 8 in progress
 **Current Commit**: `0ab888e` (Phase 8 implementation)
 **Tests**: 163/169 archive tests passing (6 ARIA label updates needed)
@@ -70,7 +70,7 @@ git status
 
 ## 📋 NEXT STEPS - Execute This Plan
 
-**Location**: `/home/matt/PROJECTS/PayPlan/specs/016-build-a-payment/FINAL_CODERABBIT_PLAN.md`
+**Location**: `/home/matt/PROJECTS/PayPlan/specs/016-payment-archive/FINAL_CODERABBIT_PLAN.md`
 
 The comprehensive fix plan is organized in 6 phases:
 
@@ -116,7 +116,7 @@ The comprehensive fix plan is organized in 6 phases:
 
 ### Planning Documents
 ```
-specs/016-build-a-payment/
+specs/016-payment-archive/
 ├── spec.md                    # Feature specification (5 user stories)
 ├── research.md                # Technical research
 ├── data-model.md              # Entity definitions with Zod schemas
@@ -195,7 +195,7 @@ This feature follows the Spec-Kit methodology:
 
 ## 📝 Deferred Items Documentation
 
-**File**: `specs/016-build-a-payment/DEFERRED_ENHANCEMENTS.md`
+**File**: `specs/016-payment-archive/DEFERRED_ENHANCEMENTS.md`
 
 ### When to Address Deferred Items:
 
@@ -239,7 +239,7 @@ This feature follows the Spec-Kit methodology:
 
 ### Step 1: Read the Plan
 ```bash
-cat specs/016-build-a-payment/FINAL_CODERABBIT_PLAN.md
+cat specs/016-payment-archive/FINAL_CODERABBIT_PLAN.md
 ```
 
 ### Step 2: Execute Phases Sequentially
@@ -277,7 +277,7 @@ gh issue comment MMT-20 --body "Feature 016 fully complete - all CodeRabbit fixe
 gh pr create --title "Feature 016: Payment History Archive System (Complete)" --body "All 125 tasks + CodeRabbit hardening"
 
 # Merge when ready
-gh pr merge 016-build-a-payment --merge
+gh pr merge 016-payment-archive --merge
 ```
 
 ---
@@ -325,11 +325,11 @@ gh pr merge 016-build-a-payment --merge
 ## 🔗 Quick Links
 
 - Linear Issue: MMT-20
-- Branch: 016-build-a-payment
-- Plan: specs/016-build-a-payment/FINAL_CODERABBIT_PLAN.md
-- API Docs: specs/016-build-a-payment/IMPLEMENTATION.md
-- Deferrals: specs/016-build-a-payment/DEFERRED_ENHANCEMENTS.md
-- Tasks: specs/016-build-a-payment/tasks.md (125 total)
+- Branch: 016-payment-archive
+- Plan: specs/016-payment-archive/FINAL_CODERABBIT_PLAN.md
+- API Docs: specs/016-payment-archive/IMPLEMENTATION.md
+- Deferrals: specs/016-payment-archive/DEFERRED_ENHANCEMENTS.md
+- Tasks: specs/016-payment-archive/tasks.md (125 total)
 
 ---
 

@@ -128,8 +128,8 @@ export interface PaymentArchiveRecord {
 2. Archive stores **full snapshots**, not references, ensuring immutability even if source data changes.
 
 **Files to Update**:
-- ✅ `specs/016-build-a-payment/data-model.md` Section 1 (Archive entity)
-- ✅ `specs/016-build-a-payment/contracts/ArchiveService.contract.md` (createArchive method)
+- ✅ `specs/016-payment-archive/data-model.md` Section 1 (Archive entity)
+- ✅ `specs/016-payment-archive/contracts/ArchiveService.contract.md` (createArchive method)
 - ✅ Add new type definition to planning docs
 
 ---

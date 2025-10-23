@@ -1,6 +1,6 @@
 # Feature Specification: OpenAPI v1 for POST /api/plan
 
-**Feature Branch**: `007-0022-openapi-v1-plan`
+**Feature Branch**: `009-openapi-v1-plan`
 **Created**: 2025-10-08
 **Status**: Draft - Pending MUST Clarifications
 **Input**: User description: "Author a docs-only, authoritative OpenAPI 3.1 spec for POST /api/plan that reflects the API we currently ship. Zero runtime changes. This operationalizes 'OpenAPI is source of truth' and aligns CI Spectral lint + our guardrails."

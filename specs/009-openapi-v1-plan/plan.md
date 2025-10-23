@@ -1,7 +1,7 @@
 # Implementation Plan: OpenAPI v1 for POST /api/plan
 
-**Branch**: `007-0022-openapi-v1-plan` | **Date**: 2025-10-08 | **Spec**: [spec.md](spec.md)
-**Input**: Feature specification from `/home/matt/PROJECTS/PayPlan/specs/007-0022-openapi-v1-plan/spec.md`
+**Branch**: `009-openapi-v1-plan` | **Date**: 2025-10-08 | **Spec**: [spec.md](spec.md)
+**Input**: Feature specification from `/home/matt/PROJECTS/PayPlan/specs/009-openapi-v1-plan/spec.md`
 
 ## Execution Flow (/plan command scope)
 ```
@@ -85,7 +85,7 @@ Create an authoritative OpenAPI 3.1 specification (`api/openapi.yaml`) documenti
 
 ### Documentation (this feature)
 ```
-specs/007-0022-openapi-v1-plan/
+specs/009-openapi-v1-plan/
 ├── spec.md              # Feature specification (existing)
 ├── plan.md              # This file (/plan command output)
 ├── research.md          # Phase 0 output (OpenAPI 3.1 best practices)

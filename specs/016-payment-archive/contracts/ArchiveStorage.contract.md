@@ -1,6 +1,6 @@
 # Contract: ArchiveStorage
 
-**Feature**: 016-build-a-payment-archive
+**Feature**: 016-payment-archive-archive
 **Component**: ArchiveStorage
 **Type**: Service (Storage Layer)
 **Location**: `frontend/src/lib/archive/ArchiveStorage.ts`

@@ -145,7 +145,7 @@ Original Tasks (ALL COMPLETE ✅):
 - [X] T115 [P] Add keyboard navigation support to ArchiveListItem in frontend/src/components/archive/ArchiveListItem.tsx
 - [X] T116 [P] Add ARIA labels to DeleteArchiveDialog buttons in frontend/src/components/archive/DeleteArchiveDialog.tsx
 - [X] T117 [P] Update CLAUDE.md with Feature 016 technologies and commands in /home/matt/PROJECTS/PayPlan/CLAUDE.md
-- [X] T118 [P] Create archive feature documentation with API examples in /home/matt/PROJECTS/PayPlan/specs/016-build-a-payment/IMPLEMENTATION.md
+- [X] T118 [P] Create archive feature documentation with API examples in /home/matt/PROJECTS/PayPlan/specs/016-payment-archive/IMPLEMENTATION.md
 
 Deferred to v2.0.0 (Optional Enhancements):
 - [ ] T119 [DEFERRED] Add export confirmation dialog before CSV download in ExportArchiveButton.tsx (30 min)

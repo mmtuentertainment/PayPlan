@@ -627,11 +627,11 @@ When schema changes are needed:
 
 ## Support & Documentation
 
-- **Feature Spec**: `/specs/016-build-a-payment/spec.md`
-- **Tasks**: `/specs/016-build-a-payment/tasks.md`
-- **Solutions**: `/specs/016-build-a-payment/SOLUTIONS.md`
-- **Clarifications**: `/specs/016-build-a-payment/CLARIFICATIONS.md`
-- **Contract**: `/specs/016-build-a-payment/contracts/`
+- **Feature Spec**: `/specs/016-payment-archive/spec.md`
+- **Tasks**: `/specs/016-payment-archive/tasks.md`
+- **Solutions**: `/specs/016-payment-archive/SOLUTIONS.md`
+- **Clarifications**: `/specs/016-payment-archive/CLARIFICATIONS.md`
+- **Contract**: `/specs/016-payment-archive/contracts/`
 
 ---
 

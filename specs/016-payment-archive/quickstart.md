@@ -1,6 +1,6 @@
 # Quickstart: Payment History Archive System - Manual Testing Guide
 
-**Feature**: 016-build-a-payment-archive
+**Feature**: 016-payment-archive-archive
 **Date**: 2025-10-17
 **Purpose**: Manual testing scenarios to validate payment history archive functionality before automated test implementation
 
@@ -11,7 +11,7 @@
 1. **Development Environment**:
    ```bash
    cd /home/matt/PROJECTS/PayPlan
-   git checkout 016-build-a-payment
+   git checkout 016-payment-archive
    npm install  # Backend dependencies
    cd frontend && npm install  # Frontend dependencies
    ```

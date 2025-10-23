@@ -1,6 +1,6 @@
 # Feature Specification: Payment History Archive System
 
-**Feature Branch**: `016-build-a-payment-archive`
+**Feature Branch**: `016-payment-archive-archive`
 **Created**: 2025-10-17
 **Status**: Draft
 **Input**: User description: "Build a payment history archive system that allows users to snapshot their current payment statuses (from Feature 015) when starting a new billing cycle. Users can mark payments as paid/pending throughout the month, then create a named archive (e.g., 'October 2025') that preserves that historical tracking data before resetting all payments to pending for the next cycle. Archives are immutable snapshots stored separately in localStorage with their own keys, support viewing past payment history, exporting archived data to CSV with archive metadata, and deleting old archives to manage storage space. The system must handle up to 50 archives (~500KB total), support Unicode names including emoji, auto-handle duplicate archive names, enforce a 5MB total storage limit, gracefully handle corrupted archives, provide cross-tab synchronization, and maintain <100ms performance for archive list views."

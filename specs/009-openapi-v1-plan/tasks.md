@@ -1,6 +1,6 @@
 # Implementation Tasks: OpenAPI v1 for POST /api/plan
 
-**Feature Branch**: `007-0022-openapi-v1-plan`
+**Feature Branch**: `009-openapi-v1-plan`
 **Date**: 2025-10-08
 **Input**: [plan.md](plan.md), [data-model.md](data-model.md), [research.md](research.md)
 
