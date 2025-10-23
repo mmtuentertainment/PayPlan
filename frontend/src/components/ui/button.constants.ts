@@ -21,6 +21,9 @@ export const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
+        // Note: default and sm both use h-11 (44px) on mobile for WCAG 2.1 AA compliance
+        // Differentiation on mobile: padding (px-4 vs px-3) and text size (text-sm vs text-xs)
+        // Desktop sizes differ to provide visual hierarchy where touch targets are not required
         default: "h-11 px-4 py-2 md:h-9", // 44px mobile (WCAG ✅), 36px desktop
         sm: "h-11 rounded-md px-3 text-xs md:h-8", // 44px mobile (WCAG ✅), 32px desktop - text-xs (12px) maintains 3.57:1 aspect ratio per Material Design 3
         lg: "h-12 rounded-md px-8 md:h-10", // 48px mobile (WCAG ✅), 40px desktop

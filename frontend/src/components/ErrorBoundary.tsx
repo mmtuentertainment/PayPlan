@@ -123,6 +123,7 @@ class ErrorBoundary extends Component<Props, State> {
           role="alert"
           aria-live="assertive"
           aria-atomic="true"
+          aria-describedby="error-message"
           className="min-h-screen flex items-center justify-center bg-gray-50 px-4"
         >
           <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
@@ -144,7 +145,7 @@ class ErrorBoundary extends Component<Props, State> {
               <h1 className="text-2xl font-bold text-gray-900">{fallbackTitle}</h1>
             </div>
 
-            <p className="text-gray-600 mb-6">{fallbackMessage}</p>
+            <p id="error-message" className="text-gray-600 mb-6">{fallbackMessage}</p>
 
             {import.meta.env.DEV && this.state.error && (
               <details className="mb-6 p-4 bg-gray-100 rounded text-sm">
