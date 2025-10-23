@@ -129,7 +129,7 @@ function AppContent({
         performance.measure('route-navigation', 'navigation-start', 'navigation-end');
         const measure = performance.getEntriesByName('route-navigation').pop();
 
-        if (measure && process.env.NODE_ENV === 'development') {
+        if (measure && import.meta.env.DEV) {
           const duration = measure.duration;
           const TARGET_MS = 200; // SC-007 target
 
