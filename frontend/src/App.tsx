@@ -15,6 +15,7 @@ import { ZodError } from 'zod';
 import { ArchiveListPage } from './pages/ArchiveListPage';
 import { ArchiveDetailView } from './pages/ArchiveDetailView';
 import { ROUTES } from './routes';
+import { NavigationHeader } from './components/navigation/NavigationHeader';
 
 function App() {
   // Initialize preferences hook at app level
@@ -69,17 +70,27 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/docs" element={<Docs />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/demo" element={<Demo />} />
-        <Route path="/import" element={<Import />} />
-        <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
-        <Route path={`${ROUTES.ARCHIVES}/:id`} element={<ArchiveDetailView />} />
-        <Route
-          path="/settings/preferences"
-          element={
+      {/* Skip link for accessibility (WCAG 2.1 AA - Feature 017) */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
+      {/* Persistent navigation header (Feature 017) */}
+      <NavigationHeader />
+
+      {/* Main content */}
+      <main id="main-content" tabIndex={-1}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/docs" element={<Docs />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="/import" element={<Import />} />
+          <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
+          <Route path={`${ROUTES.ARCHIVES}/:id`} element={<ArchiveDetailView />} />
+          <Route
+            path="/settings/preferences"
+            element={
             <PreferenceSettings
               preferences={{
                 version: '1.0.0',
@@ -112,7 +123,9 @@ function App() {
             />
           }
         />
-      </Routes>
+        </Routes>
+      </main>
+
       <ErrorTest />
 
       {/* Global toast notification system */}

@@ -7,6 +7,8 @@ Auto-generated from all feature plans. Last updated: 2025-10-17
 - TypeScript 5.8.3 (frontend), Node.js 20.x (backend) + React 19.1.1, Zod 4.1.11 (validation), uuid 13.0.0 (unique IDs), Vitest 3.2.4 (testing) (015-build-a-payment)
 - Browser localStorage (privacy-first, no server persistence), Two-tier archive storage architecture (016-build-a-payment)
 - React Router 7.0.2 (client-side routing), Performance monitoring utilities (016-build-a-payment)
+- TypeScript 5.8.3, Node.js 20.x + React 19.1.1, React Router DOM 7.9.3, Radix UI, Tailwind CSS 4.1.13 (017-navigation-system)
+- N/A (transient UI state only) (017-navigation-system)
 
 ## Project Structure
 ```
@@ -33,9 +35,9 @@ TypeScript 5.8 (frontend), Node.js 20.x (backend): Follow standard conventions
 - **Accessibility**: WCAG 2.1 AA compliant (ARIA labels, keyboard navigation)
 
 ## Recent Changes
+- 017-navigation-system: Added TypeScript 5.8.3, Node.js 20.x + React 19.1.1, React Router DOM 7.9.3, Radix UI, Tailwind CSS 4.1.13
 - 016-build-a-payment: Added Payment Archive System with create/view/statistics/export/delete functionality, error boundaries, performance logging, and accessibility enhancements
 - 015-build-a-payment: Added TypeScript 5.8.3 (frontend), Node.js 20.x (backend) + React 19.1.1, Zod 4.1.11 (validation), uuid 13.0.0 (unique IDs), Vitest 3.2.4 (testing)
-- 014-build-a-csv: Added TypeScript 5.8 (frontend), Node.js 20.x (backend) + React 19, PapaParse 5.5.3 (CSV generation), Zod 4.1.11 (validation)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

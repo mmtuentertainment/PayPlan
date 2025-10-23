@@ -1,8 +1,9 @@
 /**
  * Application Routes Constants
  *
- * Feature: 016-build-a-payment-archive
- * Phase: 8 (Polish & Cross-Cutting) - Phase F
+ * Features:
+ * - 016-build-a-payment-archive (Archives routes)
+ * - 017-navigation-system (Settings route)
  *
  * Centralized route constants to prevent string duplication
  * and enable easier refactoring.
@@ -24,4 +25,7 @@ export const ROUTES = {
    * @returns Route path with archiveId
    */
   ARCHIVE_DETAIL: (archiveId: string) => `/archives/${archiveId}`,
+
+  /** User preferences settings page (Feature 017) */
+  SETTINGS: '/settings/preferences',
 } as const;
