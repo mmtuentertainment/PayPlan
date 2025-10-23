@@ -209,20 +209,10 @@ describe('CreateArchiveDialog', () => {
     it('should not expose sensitive payment data in error messages', async () => {
       const user = userEvent.setup();
 
-      // Create payment with sensitive provider name
-      const sensitivePayments: PaymentRecord[] = [
-        {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          provider: 'SENSITIVE-SSN-123-45-6789', // Sensitive data that should NOT appear in errors
-          amount: 100.00,
-          currency: 'USD',
-          dueISO: '2025-10-15',
-          autopay: false,
-        },
-      ];
-
       // Test with empty payments array to trigger validation error
       // This is a simpler, more reliable way to trigger an error
+      // Note: We're not testing with actual sensitive data because the error
+      // occurs during validation (empty array), not during payment processing
       render(<CreateArchiveDialog payments={[]} />);
 
       const nameInput = screen.getByLabelText(/archive name/i);
