@@ -188,6 +188,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
             zIndex: Z_INDEX.MOBILE_MENU_DRAWER,
             boxShadow: '4px 0 24px 0 rgba(0, 0, 0, 0.2)',
             transitionDuration: `${MOBILE_MENU_ANIMATION_DURATION}ms`,
+            backgroundColor: '#ffffff',
           }}
         >
           {/* Menu header with close button */}
