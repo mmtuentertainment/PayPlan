@@ -113,27 +113,43 @@ Confirmed via `npm list` that Immer is not installed in PayPlan dependencies. Re
 ## Decision 4: Button Size Implementation
 
 ### Decision
-**No changes needed** - existing button system already exceeds WCAG 2.1 AA requirements with responsive 44px (mobile) / 36px (desktop) pattern.
+**Changes required** - update `sm` button variant from 40px to 44px to meet WCAG 2.1 AA requirements on mobile devices.
 
 ### Rationale
-Analysis of `/frontend/src/components/ui/button.constants.ts` revealed the existing implementation already enforces WCAG 2.1 AA compliant sizing. The button constants define minimum heights that exceed the 44×44px requirement on mobile devices. The Tailwind CSS classes (`min-h-11` = 44px, `min-h-9` = 36px) provide responsive sizing that adapts to viewport. FR-006 requirement is already satisfied by the current implementation.
+Analysis of `/frontend/src/components/ui/button.constants.ts` revealed that the `sm` variant originally used `h-10` (40px) on mobile, which fails to meet the WCAG 2.1 AA minimum target size of 44×44px. CodeRabbit correctly identified this non-compliance in finding MMT-26. The fix updates the `sm` variant to use `h-11` (44px) on mobile while maintaining smaller sizes (`h-8` = 32px) on desktop where mouse precision allows it.
+
+**Before (Non-compliant)**:
+```typescript
+sm: "h-10 rounded-md px-3 text-xs md:h-8", // 40px mobile ❌, 32px desktop
+```
+
+**After (WCAG 2.1 AA Compliant)**:
+```typescript
+sm: "h-11 rounded-md px-3 text-xs md:h-8", // 44px mobile ✅, 32px desktop
+```
 
 ### Alternatives Considered
-- **CSS min-width/height overrides**: Would add redundant styles. Rejected because existing implementation already complies.
-- **Padding adjustments**: Could increase touch target without visual changes. Rejected as unnecessary when base sizes already comply.
-- **Wrapper components**: Extra DOM nodes for touch targets. Rejected as over-engineering.
+- **CSS min-width/height overrides**: Would add redundant styles. Rejected in favor of updating the base Tailwind classes directly.
+- **Padding adjustments**: Could increase touch target without visual changes. Rejected because changing the base height is clearer and more maintainable.
+- **Wrapper components**: Extra DOM nodes for touch targets. Rejected as over-engineering when a simple class change suffices.
+- **Uniform sizing across breakpoints**: Would make desktop buttons unnecessarily large. Rejected because responsive sizing is more appropriate.
 
 ### Implementation Notes
-- ✅ Current implementation: `sm` variant = 36px, `default` variant = 44px on mobile
+- ✅ **Change applied in commit 8588402**: `sm` variant updated from `h-10` (40px) to `h-11` (44px) on mobile
+- ✅ All button variants now meet WCAG 2.1 AA on mobile:
+  - `default`: 44px mobile, 36px desktop
+  - `sm`: 44px mobile (fixed from 40px), 32px desktop
+  - `lg`: 48px mobile, 40px desktop
+  - `icon`: 44px mobile, 36px desktop
 - ✅ Responsive pattern: Larger targets on mobile (where touch is primary input)
-- ✅ CodeRabbit finding about "button 'sm' variant 40px < 44px" appears to be outdated
-- 📦 Existing constants file: `/frontend/src/components/ui/button.constants.ts`
-- 🎯 Verification step: Manual testing on mobile devices to confirm 44×44px minimum
-- 🔍 **Action item**: Verify CodeRabbit issue MMT-26 is based on current code, may already be resolved
+- 📦 Modified file: `/frontend/src/components/ui/button.constants.ts`
+- 🎯 Verification: Manual testing on mobile devices confirmed 44×44px minimum
+- ✅ **CodeRabbit issue MMT-26 resolved**
 
 ### References
 - WCAG 2.1 AA Target Size: https://www.w3.org/WAI/WCAG21/Understanding/target-size.html
 - Button constants: `/frontend/src/components/ui/button.constants.ts`
+- Fix commit: `8588402` - "fix: Update button 'sm' size to 44px for WCAG 2.1 AA compliance (FR-006)"
 
 ---
 
@@ -219,7 +235,7 @@ Based on codebase analysis, confirmed versions for this feature:
 | 1. Environment Detection | `import.meta.env.DEV` | Vite-native, better tree-shaking | Migration needed in 7 files |
 | 2. Cache Validation | Shallow Zod + `.passthrough()` | <1ms overhead, prevents crashes | Structure validation only |
 | 3. Atomic Updates | `useOptimistic` + functional setState | React 19 native, no Immer needed | Refactor PaymentContext |
-| 4. Button Sizing | No changes needed | Already WCAG 2.1 AA compliant | Verify MMT-26 is resolved |
+| 4. Button Sizing | Update `sm` variant: 40px → 44px | Fix WCAG 2.1 AA non-compliance | MMT-26 resolved in commit 8588402 |
 | 5. PII Sanitization | Recursive traversal + blocklist | Combines two existing patterns | Unify sanitization logic |
 
 ---
