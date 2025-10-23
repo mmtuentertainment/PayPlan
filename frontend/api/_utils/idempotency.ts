@@ -9,7 +9,7 @@ import type {
   RequestWithHeaders,
   CachedSuccessResult
 } from './idempotency.types.js';
-import { validateCacheEntry } from '../../../../backend/src/lib/validation/IdempotencySchemas.js';
+import { validateCacheEntry } from './validation/IdempotencySchemas.js';
 
 // FR-005: 24-hour TTL for duplicate prevention (86400 seconds)
 const TTL_SECONDS = parseInt(process.env.IDEMPOTENCY_TTL_SECONDS || '86400', 10);

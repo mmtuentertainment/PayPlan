@@ -20,7 +20,7 @@ import type {
   RequestWithUrl,
   JsonResponseBody
 } from "./plan.types.js";
-import { errorSanitizer } from "../../backend/src/lib/security/ErrorSanitizer.js";
+import { errorSanitizer } from "./_utils/security/ErrorSanitizer.js";
 
 // v0.1 core libs (ESM) - typed module references
 let calculatePaydays: PayPlanModules['calculatePaydays'] | undefined;
