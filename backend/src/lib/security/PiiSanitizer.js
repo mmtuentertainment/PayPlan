@@ -114,7 +114,7 @@ class PiiSanitizer {
 
     // Check for circular references
     if (visited.has(data)) {
-      return '[Circular]';
+      throw new Error('Circular reference detected in data structure');
     }
 
     // Add to visited set

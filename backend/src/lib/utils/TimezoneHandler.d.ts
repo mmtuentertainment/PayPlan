@@ -6,14 +6,14 @@ export class TimezoneHandler {
   constructor();
 
   /**
-   * Set of valid IANA timezone identifiers
+   * Set of valid IANA timezone identifiers (readonly)
    */
-  validTimezones: Set<string>;
+  readonly validTimezones: ReadonlySet<string>;
 
   /**
-   * Gets the list of valid IANA timezone identifiers
+   * Gets the list of valid IANA timezone identifiers (returns immutable view)
    */
-  getValidTimezones(): Set<string>;
+  getValidTimezones(): ReadonlySet<string>;
 
   /**
    * Validates that a timezone string is in valid IANA format

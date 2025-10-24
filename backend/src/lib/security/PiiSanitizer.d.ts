@@ -6,9 +6,9 @@ export class PiiSanitizer {
   constructor();
 
   /**
-   * PII field patterns to detect and remove
+   * PII field patterns to detect and remove (readonly)
    */
-  piiPatterns: string[];
+  readonly piiPatterns: readonly string[];
 
   /**
    * Sanitizes an object by removing all PII fields recursively

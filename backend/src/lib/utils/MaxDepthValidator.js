@@ -114,6 +114,8 @@ class MaxDepthValidator {
 
         // Find maximum depth among array elements
         let maxChildDepth = 0;
+
+        // Check indexed elements
         for (const item of data) {
           const childDepth = this.getDepthWithCircularCheck(item, visited);
           maxChildDepth = Math.max(maxChildDepth, childDepth);
@@ -124,11 +126,29 @@ class MaxDepthValidator {
           }
         }
 
+        // Also check non-numeric properties (arrays can have custom properties)
+        const keys = Reflect.ownKeys(data);
+        for (const key of keys) {
+          // Skip numeric indices and 'length' (already checked above)
+          if (typeof key === 'number' || key === 'length' ||
+              (typeof key === 'string' && /^\d+$/.test(key))) {
+            continue;
+          }
+
+          const childDepth = this.getDepthWithCircularCheck(data[key], visited);
+          maxChildDepth = Math.max(maxChildDepth, childDepth);
+
+          // Early exit optimization
+          if (1 + maxChildDepth > this.maxDepth) {
+            return 1 + maxChildDepth;
+          }
+        }
+
         return 1 + maxChildDepth;
       }
 
-      // Handle objects
-      const keys = Object.keys(data);
+      // Handle objects (use Reflect.ownKeys to include Symbol properties)
+      const keys = Reflect.ownKeys(data);
       if (keys.length === 0) {
         return 1;
       }
