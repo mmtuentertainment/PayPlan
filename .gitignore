@@ -26,3 +26,6 @@ stats.html
 # Logs and audits (avoid committing machine-specific files/paths)
 logs/
 *.audit.json
+
+# Claude Code local skills (user-specific, not shared)
+.claude/skills/
