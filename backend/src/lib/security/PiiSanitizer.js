@@ -29,13 +29,57 @@ class PiiSanitizer {
     /**
      * PII field patterns to detect and remove (case-insensitive).
      * Uses substring matching to catch variants like userEmail, billingAddress, etc.
+     *
+     * Categories:
+     * - Contact: email, phone, address
+     * - Identity: name, ssn, dob, birthdate, dateofbirth
+     * - Government IDs: passport, license, driverslicense, nationalid
+     * - Financial: card, cardnumber, pan, cvv, cvc, expiry, account, bankaccount, routing, iban, swift
+     * - Tax: tin, taxid, vat
+     * - Network: ip, ipaddress
      */
     this.piiPatterns = [
+      // Contact information
       'email',
-      'name',
       'phone',
       'address',
+
+      // Personal identity
+      'name',
       'ssn',
+      'dob',
+      'birthdate',
+      'dateofbirth',
+
+      // Government IDs
+      'passport',
+      'license',
+      'driverslicense',
+      'nationalid',
+
+      // Payment card information
+      'card',
+      'cardnumber',
+      'pan',
+      'cvv',
+      'cvc',
+      'expiry',
+
+      // Bank account information
+      'account',
+      'bankaccount',
+      'routing',
+      'iban',
+      'swift',
+
+      // Tax identifiers
+      'tin',
+      'taxid',
+      'vat',
+
+      // Network identifiers
+      'ip',
+      'ipaddress',
     ];
   }
 
@@ -46,7 +90,9 @@ class PiiSanitizer {
    * or a new object with PII fields removed if found.
    *
    * @param {*} data - The data to sanitize (object, array, or primitive)
+   * @param {WeakSet} visited - Set of visited objects for circular detection (internal)
    * @returns {*} Sanitized data with PII removed
+   * @throws {Error} If circular reference detected
    *
    * @example
    * sanitize({ email: 'user@example.com', amount: 100 })
@@ -56,7 +102,7 @@ class PiiSanitizer {
    * const clean = { id: '123', amount: 100 };
    * sanitize(clean) === clean // true (same reference, no PII found)
    */
-  sanitize(data) {
+  sanitize(data, visited = new WeakSet()) {
     // Handle primitives and null/undefined
     if (data === null || data === undefined) {
       return data;
@@ -66,25 +112,55 @@ class PiiSanitizer {
       return data;
     }
 
-    // Handle arrays
-    if (Array.isArray(data)) {
-      return this.sanitizeArray(data);
+    // Check for circular references
+    if (visited.has(data)) {
+      return '[Circular]';
     }
 
-    // Handle objects
-    return this.sanitizeObject(data);
+    // Add to visited set
+    visited.add(data);
+
+    // Handle special object types
+    if (data instanceof Date) {
+      return data.toISOString();
+    }
+
+    if (data instanceof RegExp) {
+      return data.toString();
+    }
+
+    if (data instanceof Map) {
+      const result = {};
+      for (const [key, value] of data.entries()) {
+        result[key] = this.sanitize(value, visited);
+      }
+      return result;
+    }
+
+    if (data instanceof Set) {
+      return Array.from(data).map(item => this.sanitize(item, visited));
+    }
+
+    // Handle arrays
+    if (Array.isArray(data)) {
+      return this.sanitizeArray(data, visited);
+    }
+
+    // Handle plain objects
+    return this.sanitizeObject(data, visited);
   }
 
   /**
    * Sanitizes an array, preserving reference if no PII found in any element.
    *
    * @param {Array} arr - Array to sanitize
+   * @param {WeakSet} visited - Set of visited objects for circular detection
    * @returns {Array} Sanitized array (same reference if no changes, new array if changed)
    */
-  sanitizeArray(arr) {
+  sanitizeArray(arr, visited) {
     let hasChanges = false;
     const sanitized = arr.map((item) => {
-      const cleaned = this.sanitize(item);
+      const cleaned = this.sanitize(item, visited);
       if (cleaned !== item) {
         hasChanges = true;
       }
@@ -97,15 +173,24 @@ class PiiSanitizer {
 
   /**
    * Sanitizes an object, removing PII fields recursively.
+   * Includes prototype pollution protection.
    *
    * @param {Object} obj - Object to sanitize
+   * @param {WeakSet} visited - Set of visited objects for circular detection
    * @returns {Object} Sanitized object (same reference if no PII, new object if PII removed)
    */
-  sanitizeObject(obj) {
+  sanitizeObject(obj, visited) {
     let hasChanges = false;
     const result = {};
 
     for (const [key, value] of Object.entries(obj)) {
+      // Prototype pollution protection: skip dangerous keys
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        hasChanges = true;
+        // Skip this field (remove it)
+        continue;
+      }
+
       // Check if key matches any PII pattern (case-insensitive)
       if (this.isPiiField(key)) {
         hasChanges = true;
@@ -114,7 +199,7 @@ class PiiSanitizer {
       }
 
       // Recursively sanitize nested values
-      const sanitizedValue = this.sanitize(value);
+      const sanitizedValue = this.sanitize(value, visited);
 
       // Track if nested value changed
       if (sanitizedValue !== value) {

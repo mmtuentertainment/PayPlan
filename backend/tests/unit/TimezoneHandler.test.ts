@@ -6,10 +6,10 @@
  * date comparisons (FR-014, Tasks T074-T075).
  */
 
-const { TimezoneHandler } = require('../../src/lib/utils/TimezoneHandler');
+import { TimezoneHandler } from '../../src/lib/utils/TimezoneHandler';
 
 describe('TimezoneHandler', () => {
-  let handler: any;
+  let handler: TimezoneHandler;
 
   beforeEach(() => {
     handler = new TimezoneHandler();
@@ -110,7 +110,7 @@ describe('TimezoneHandler', () => {
       const sorted = handler.sortDates(dates);
 
       // Verify sorted order by converting to timestamps
-      const timestamps = sorted.map((d: string) => handler.toTimestamp(d));
+      const timestamps = sorted.map(d => handler.toTimestamp(d));
       for (let i = 1; i < timestamps.length; i++) {
         expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i - 1]);
       }

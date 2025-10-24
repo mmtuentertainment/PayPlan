@@ -6,10 +6,14 @@
  * data leakage (FR-013, Tasks T053-T057).
  */
 
+// Use require for CommonJS interop (backend uses .js files)
 const { PiiSanitizer } = require('../../src/lib/security/PiiSanitizer');
 
+// Import type for type safety
+import type { PiiSanitizer as PiiSanitizerType } from '../../src/lib/security/PiiSanitizer';
+
 describe('PiiSanitizer', () => {
-  let sanitizer: any;
+  let sanitizer: PiiSanitizerType;
 
   beforeEach(() => {
     sanitizer = new PiiSanitizer();
@@ -258,15 +262,15 @@ describe('PiiSanitizer', () => {
       expect(result).toEqual({ amount: 100 });
     });
 
-    it('should document circular reference limitation', () => {
+    it('should handle circular references gracefully', () => {
       const input: any = { id: 1, amount: 100 };
       input.self = input; // Circular reference
 
-      // Limitation: Circular references will cause stack overflow
-      // This is acceptable because cache data should be JSON-serializable
-      // JSON-serializable data cannot contain circular references
-      // Document this as a known limitation
-      expect(() => sanitizer.sanitize(input)).toThrow(RangeError);
+      // Feature 018 fix: Circular references are now detected and replaced with '[Circular]'
+      const result = sanitizer.sanitize(input);
+      expect(result.id).toBe(1);
+      expect(result.amount).toBe(100);
+      expect(result.self).toBe('[Circular]');
     });
   });
 });
