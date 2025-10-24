@@ -9,6 +9,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { axe } from 'vitest-axe';
 import { NavigationHeader } from './NavigationHeader';
 import type { NavigationItem } from '../../types/navigation';
 
@@ -307,6 +308,35 @@ describe('NavigationHeader - Accessibility', () => {
 
     const header = container.querySelector('header');
     expect(header).toHaveClass('custom-class');
+  });
+
+  // T015: vitest-axe accessibility tests
+  it('should have no accessibility violations on desktop view', async () => {
+    const { container } = renderWithRouter(<NavigationHeader navItems={testNavItems} />);
+    const results = await axe(container);
+    expect(results.violations).toEqual([]);
+  });
+
+  it('should have no accessibility violations with active link', async () => {
+    const { container } = renderWithRouter(
+      <NavigationHeader navItems={testNavItems} />,
+      '/archives'
+    );
+    const results = await axe(container);
+    expect(results.violations).toEqual([]);
+  });
+
+  it('should have no accessibility violations in mobile menu', async () => {
+    const user = userEvent.setup();
+    const { container } = renderWithRouter(<NavigationHeader navItems={testNavItems} />);
+
+    // Open mobile menu by clicking the menu button
+    const menuButton = screen.getByRole('button', { name: /menu/i });
+    await user.click(menuButton);
+
+    // Run axe on the entire container with mobile menu open
+    const results = await axe(container);
+    expect(results.violations).toEqual([]);
   });
 });
 

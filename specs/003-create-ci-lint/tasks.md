@@ -93,12 +93,12 @@ npm run lint  # Should pass if no legacy imports exist
 ```
 
 **Acceptance Criteria**:
-- [ ] Rule added to `.eslintrc.cjs`
-- [ ] 3 legacy paths blocked (exact names)
-- [ ] 3 legacy patterns blocked (globs)
-- [ ] Error messages include ❌, correct path, Delta 0013 reference
-- [ ] Lint passes on current codebase
-- [ ] ~30 LOC added
+- [x] Rule added to `.eslintrc.cjs`
+- [x] 3 legacy paths blocked (exact names)
+- [x] 3 legacy patterns blocked (globs)
+- [x] Error messages include ❌, correct path, Delta 0013 reference
+- [x] Lint passes on current codebase
+- [x] ~30 LOC added
 
 **Dependencies**: None
 
@@ -181,15 +181,15 @@ node scripts/audit-spec-paths.mjs  # Should pass (specs already realigned in Del
 ```
 
 **Acceptance Criteria**:
-- [ ] Script created at `scripts/audit-spec-paths.mjs`
-- [ ] Executable with Node 20+
-- [ ] Uses only built-in modules (no external deps)
-- [ ] Scans all `specs/**/*.md` files
-- [ ] Detects legacy paths (provider-detectors, date-parser, redact)
-- [ ] Detects test paths without frontend/ prefix
-- [ ] Outputs file:line format for errors
-- [ ] Exit code 0 (pass) or 1 (fail)
-- [ ] ~80 LOC total
+- [x] Script created at `scripts/audit-spec-paths.mjs`
+- [x] Executable with Node 20+
+- [x] Uses only built-in modules (no external deps)
+- [x] Scans all `specs/**/*.md` files
+- [x] Detects legacy paths (provider-detectors, date-parser, redact)
+- [x] Detects test paths without frontend/ prefix
+- [x] Outputs file:line format for errors
+- [x] Exit code 0 (pass) or 1 (fail)
+- [x] ~80 LOC total
 
 **Dependencies**: None
 
@@ -268,12 +268,12 @@ npm run test:perf  # Should pass (current performance ~50-200ms)
 ```
 
 **Acceptance Criteria**:
-- [ ] Test file created at `frontend/tests/performance/ci-gate.test.ts`
-- [ ] Uses median-of-3 sampling
-- [ ] Outputs PERF_METRIC and PERF_THRESHOLD lines
-- [ ] Threshold: 250ms
-- [ ] Test passes with current codebase
-- [ ] ~40 LOC added
+- [x] Test file created at `frontend/tests/performance/ci-gate.test.ts`
+- [x] Uses median-of-3 sampling
+- [x] Outputs PERF_METRIC and PERF_THRESHOLD lines
+- [x] Threshold: 250ms
+- [x] Test passes with current codebase
+- [x] ~40 LOC added
 
 **Dependencies**: T005 (npm script for test:perf)
 
@@ -349,13 +349,13 @@ npm run test:perf  # Should pass (current performance ~50-200ms)
 - Push to branch to trigger CI (after all guards implemented)
 
 **Acceptance Criteria**:
-- [ ] 3 guard steps added to CI workflow
-- [ ] ESLint step runs `npm run lint`
-- [ ] Performance step outputs GitHub Actions summary table
-- [ ] Performance step calculates delta vs 150ms baseline
-- [ ] Performance step fails if ≥250ms
-- [ ] Audit step runs `node scripts/audit-spec-paths.mjs`
-- [ ] ~40 LOC added to workflow
+- [x] 3 guard steps added to CI workflow
+- [x] ESLint step runs `npm run lint`
+- [x] Performance step outputs GitHub Actions summary table
+- [x] Performance step calculates delta vs 150ms baseline
+- [x] Performance step fails if ≥250ms
+- [x] Audit step runs `node scripts/audit-spec-paths.mjs`
+- [x] ~40 LOC added to workflow
 
 **Dependencies**: T001 (ESLint rules), T002 (audit script), T003 (performance test), T005 (npm scripts)
 
@@ -403,11 +403,11 @@ npm run audit:specs # ✅ Should pass
 ```
 
 **Acceptance Criteria**:
-- [ ] `frontend/package.json` has "lint" script
-- [ ] `frontend/package.json` has "test:perf" script
-- [ ] Root `package.json` has "audit:specs" script
-- [ ] All 3 scripts executable locally
-- [ ] ~5 LOC added
+- [x] `frontend/package.json` has "lint" script
+- [x] `frontend/package.json` has "test:perf" script
+- [x] Root `package.json` has "audit:specs" script
+- [x] All 3 scripts executable locally
+- [x] ~5 LOC added
 
 **Dependencies**: None (can be done early)
 
@@ -458,11 +458,11 @@ npx eslint tests/fixtures/eslint/valid-import.fixture.ts
 ```
 
 **Acceptance Criteria**:
-- [ ] Invalid fixture created with 3 legacy imports
-- [ ] Valid fixture created with 3 modular imports + orchestrator
-- [ ] Invalid fixture fails lint with clear error messages
-- [ ] Valid fixture passes lint
-- [ ] Error messages reference Delta 0013
+- [x] Invalid fixture created with 3 legacy imports
+- [x] Valid fixture created with 3 modular imports + orchestrator
+- [x] Invalid fixture fails lint with clear error messages
+- [x] Valid fixture passes lint
+- [x] Error messages reference Delta 0013
 
 **Dependencies**: T001 (ESLint rules must exist first)
 
@@ -516,11 +516,11 @@ node scripts/audit-spec-paths.mjs
 ```
 
 **Acceptance Criteria**:
-- [ ] Invalid fixture created with 3 legacy path references
-- [ ] Valid fixture created with 4 modular path references
-- [ ] Audit script detects invalid fixture errors
-- [ ] Audit script passes on valid fixture
-- [ ] Errors output in file:line format
+- [x] Invalid fixture created with 3 legacy path references
+- [x] Valid fixture created with 4 modular path references
+- [x] Audit script detects invalid fixture errors
+- [x] Audit script passes on valid fixture
+- [x] Errors output in file:line format
 
 **Dependencies**: T002 (audit script must exist first)
 
@@ -556,12 +556,12 @@ node scripts/audit-spec-paths.mjs
    - Verify median is correct (middle value after sorting)
 
 **Acceptance Criteria**:
-- [ ] Test runs successfully
-- [ ] Test passes (median < 250ms)
-- [ ] PERF_METRIC line outputs actual median
-- [ ] PERF_THRESHOLD line outputs 250
-- [ ] Metrics parseable via grep/cut
-- [ ] Median calculation verified (middle of 3 runs)
+- [x] Test runs successfully
+- [x] Test passes (median < 250ms)
+- [x] PERF_METRIC line outputs actual median
+- [x] PERF_THRESHOLD line outputs 250
+- [x] Metrics parseable via grep/cut
+- [x] Median calculation verified (middle of 3 runs)
 
 **Dependencies**: T003 (performance test), T005 (npm script)
 
@@ -638,13 +638,13 @@ git revert <commit-sha>  # Single revert restores pre-guard state
 ```
 
 **Acceptance Criteria**:
-- [ ] Delta file created at `ops/deltas/0014_ci_lint_perf.md`
-- [ ] All file changes documented
-- [ ] LOC budget tracked (~155/200)
-- [ ] Guard details explained
-- [ ] Verification commands included
-- [ ] Rollback instructions provided
-- [ ] References to spec/plan/contracts
+- [x] Delta file created at `ops/deltas/0014_ci_lint_perf.md`
+- [x] All file changes documented
+- [x] LOC budget tracked (~155/200)
+- [x] Guard details explained
+- [x] Verification commands included
+- [x] Rollback instructions provided
+- [x] References to spec/plan/contracts
 
 **Dependencies**: T001-T005 (all implementation complete)
 
@@ -712,19 +712,19 @@ All three can run simultaneously (different files, no conflicts).
 ## Task Checklist
 
 ### Phase 3.1: Setup & Configuration
-- [ ] **T001**: Add ESLint path restriction rules (30 min, ~30 LOC)
-- [ ] **T002**: Create spec path audit script (60 min, ~80 LOC)
-- [ ] **T003**: Add performance budget test (45 min, ~40 LOC)
-- [ ] **T004**: Update CI workflow with guard steps (45 min, ~40 LOC)
-- [ ] **T005**: Add npm script entries (10 min, ~5 LOC)
+- [x] **T001**: Add ESLint path restriction rules (30 min, ~30 LOC)
+- [x] **T002**: Create spec path audit script (60 min, ~80 LOC)
+- [x] **T003**: Add performance budget test (45 min, ~40 LOC)
+- [x] **T004**: Update CI workflow with guard steps (45 min, ~40 LOC)
+- [x] **T005**: Add npm script entries (10 min, ~5 LOC)
 
 ### Phase 3.2: Testing & Validation (Parallel)
-- [ ] **T006 [P]**: Create ESLint test fixtures (20 min)
-- [ ] **T007 [P]**: Create spec audit test fixtures (20 min)
-- [ ] **T008 [P]**: Test performance gate locally (15 min)
+- [x] **T006 [P]**: Create ESLint test fixtures (20 min)
+- [x] **T007 [P]**: Create spec audit test fixtures (20 min)
+- [x] **T008 [P]**: Test performance gate locally (15 min)
 
 ### Phase 3.3: Documentation
-- [ ] **T009**: Create delta documentation (30 min)
+- [x] **T009**: Create delta documentation (30 min)
 
 **Total Estimated Duration**: ~4.5 hours (can be reduced to ~3 hours with parallelization)
 
@@ -735,35 +735,35 @@ All three can run simultaneously (different files, no conflicts).
 Before marking feature complete:
 
 ### ESLint Guard
-- [ ] `cd frontend && npm run lint` passes
-- [ ] Invalid import fixture fails with 3 errors
-- [ ] Valid import fixture passes
-- [ ] Error messages reference Delta 0013
+- [x] `cd frontend && npm run lint` passes
+- [x] Invalid import fixture fails with 3 errors
+- [x] Valid import fixture passes
+- [x] Error messages reference Delta 0013
 
 ### Performance Budget
-- [ ] `cd frontend && npm run test:perf` passes
-- [ ] Test outputs PERF_METRIC and PERF_THRESHOLD
-- [ ] Median < 250ms
-- [ ] Median calculation correct (middle of 3 runs)
+- [x] `cd frontend && npm run test:perf` passes
+- [x] Test outputs PERF_METRIC and PERF_THRESHOLD
+- [x] Median < 250ms
+- [x] Median calculation correct (middle of 3 runs)
 
 ### Spec Path Audit
-- [ ] `npm run audit:specs` passes
-- [ ] Invalid fixture detected and reported
-- [ ] Valid fixture passes
-- [ ] Output in file:line format
+- [x] `npm run audit:specs` passes
+- [x] Invalid fixture detected and reported
+- [x] Valid fixture passes
+- [x] Output in file:line format
 
 ### CI Integration
-- [ ] All 3 guards added to `.github/workflows/ci.yml`
-- [ ] Performance step includes GitHub Actions summary
-- [ ] CI fails if any guard fails
+- [x] All 3 guards added to `.github/workflows/ci.yml`
+- [x] Performance step includes GitHub Actions summary
+- [x] CI fails if any guard fails
 
 ### LOC Budget
-- [ ] Total LOC ≤200 (target: ~155)
-- [ ] No runtime code changes (only configs/tests/scripts)
+- [x] Total LOC ≤200 (target: ~155)
+- [x] No runtime code changes (only configs/tests/scripts)
 
 ### Rollback
-- [ ] Single `git revert` removes all guards cleanly
-- [ ] No breaking changes to existing code
+- [x] Single `git revert` removes all guards cleanly
+- [x] No breaking changes to existing code
 
 ---
 

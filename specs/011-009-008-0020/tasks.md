@@ -57,7 +57,7 @@
 
 ## Phase 3.1: Setup & Test Structure (5 min)
 
-### T001: Verify existing test infrastructure
+### T001: ✅ Verify existing test infrastructure
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Goal**: Confirm Vitest + @testing-library/react available, existing tests pass
 **Actions**:
@@ -68,6 +68,7 @@ npm test telemetry
 **Success**: Existing tests pass (Allow/Decline button tests)
 **Dependencies**: None
 **Estimated Time**: 2 min
+**Status**: ✅ COMPLETE
 
 ---
 
@@ -78,7 +79,7 @@ npm test telemetry
 
 ### Countdown Behavior Tests
 
-#### T002 [P]: Test countdown starts at 10 seconds
+#### T002: ✅ ✅ [P] Test countdown starts at 10 seconds
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"countdown starts at 10 seconds on banner mount"`
 **Assertion**: Countdown text shows "Auto-dismissing in 10s..."
@@ -92,7 +93,7 @@ it('countdown starts at 10 seconds on banner mount', () => {
 });
 ```
 
-#### T003 [P]: Test countdown decrements every second
+#### T003: ✅ ✅ [P] Test countdown decrements every second
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"countdown decrements by 1 every second"`
 **Assertion**: After 1s → "9s", after 2s → "8s", after 3s → "7s"
@@ -115,7 +116,7 @@ it('countdown decrements by 1 every second', () => {
 });
 ```
 
-#### T004 [P]: Test auto-dismiss at countdown=0
+#### T004: ✅ ✅ [P] Test auto-dismiss at countdown=0
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"banner dismisses and sets opt_out when countdown reaches 0"`
 **Assertion**: After 10s → banner hidden, localStorage = "opt_out"
@@ -137,7 +138,7 @@ it('banner dismisses and sets opt_out when countdown reaches 0', () => {
 
 ### Pause Behavior Tests
 
-#### T005 [P]: Test countdown pauses on hover
+#### T005: ✅ ✅ [P] Test countdown pauses on hover
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"countdown pauses when user hovers over banner"`
 **Assertion**: Hover at 7s → wait 3s → still shows 7s
@@ -161,7 +162,7 @@ it('countdown pauses when user hovers over banner', () => {
 });
 ```
 
-#### T006 [P]: Test countdown resumes after hover leaves
+#### T006: ✅ ✅ [P] Test countdown resumes after hover leaves
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"countdown resumes when hover ends"`
 **Assertion**: Hover → mouseLeave → countdown continues from paused value
@@ -186,7 +187,7 @@ it('countdown resumes when hover ends', () => {
 });
 ```
 
-#### T007 [P]: Test countdown pauses on focus
+#### T007: ✅ ✅ [P] Test countdown pauses on focus
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"countdown pauses when element receives focus"`
 **Assertion**: Tab to button → countdown stops
@@ -210,7 +211,7 @@ it('countdown pauses when element receives focus', () => {
 });
 ```
 
-#### T008 [P]: Test pause on tab visibility change
+#### T008: ✅ ✅ [P] Test pause on tab visibility change
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"countdown pauses when tab becomes hidden"`
 **Assertion**: Simulate `document.hidden = true` → countdown stops
@@ -238,7 +239,7 @@ it('countdown pauses when tab becomes hidden', () => {
 
 ### Visual Indicator Tests
 
-#### T009 [P]: Test pause indicator appears
+#### T009: ✅ ✅ [P] Test pause indicator appears
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"shows pause indicator when countdown is paused"`
 **Assertion**: Hover → "Paused" text visible
@@ -257,7 +258,7 @@ it('shows pause indicator when countdown is paused', () => {
 
 ### Accessibility Tests
 
-#### T010 [P]: Test screen reader announcements at milestones
+#### T010: ✅ ✅ [P] Test screen reader announcements at milestones
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"announces countdown at 10s, 5s, 0s only"`
 **Assertion**: aria-live region updates at 10s, 5s, 0s (not 9s, 8s, 7s...)
@@ -286,7 +287,7 @@ it('announces countdown at 10s, 5s, 0s only', () => {
 });
 ```
 
-#### T011 [P]: Test auto-dismiss announcement
+#### T011: ✅ ✅ [P] Test auto-dismiss announcement
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"announces 'Analytics banner auto-dismissed' on timeout"`
 **Assertion**: At countdown=0 → aria-live shows dismissal message
@@ -306,7 +307,7 @@ it('announces auto-dismissed on timeout', () => {
 });
 ```
 
-#### T012 [P]: Test focus restoration after auto-dismiss
+#### T012: ✅ ✅ [P] Test focus restoration after auto-dismiss
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"restores focus to previous element after auto-dismiss"`
 **Assertion**: Focus input → banner appears → auto-dismiss → input focused again
@@ -336,7 +337,7 @@ it('restores focus to previous element after auto-dismiss', () => {
 
 ### User Interaction Tests
 
-#### T013 [P]: Test user action cancels countdown
+#### T013: ✅ ✅ [P] Test user action cancels countdown
 **File**: `frontend/tests/integration/telemetry.test.tsx`
 **Test Name**: `"clicking Decline cancels countdown and dismisses banner"`
 **Assertion**: At 7s → click Decline → banner hides immediately
@@ -384,7 +385,7 @@ npm test telemetry
 
 **Dependencies**: ALL Phase 3.2 tests must be written and failing
 
-### T014: Add countdown state and timer logic
+### T014: ✅ Add countdown state and timer logic
 **File**: `frontend/src/components/TelemetryConsentBanner.tsx`
 **Goal**: Implement basic countdown (10 → 0) with setInterval
 **Changes**:
@@ -412,7 +413,7 @@ useEffect(() => {
 }, [visible]);
 ```
 
-### T015: Add auto-dismiss trigger at countdown=0
+### T015: ✅ Add auto-dismiss trigger at countdown=0
 **File**: `frontend/src/components/TelemetryConsentBanner.tsx`
 **Goal**: Call handleDecline() when countdown reaches 0
 **Changes**:
@@ -430,7 +431,7 @@ useEffect(() => {
 }, [countdown, visible, handleDecline]);
 ```
 
-### T016: Add pause state logic (hover, focus, tab)
+### T016: ✅ Add pause state logic (hover, focus, tab)
 **File**: `frontend/src/components/TelemetryConsentBanner.tsx`
 **Goal**: Track hover, focus, tab visibility → compute isPaused
 **Changes**:
@@ -474,7 +475,7 @@ useEffect(() => {
 }, []);
 ```
 
-### T017: Add countdown resume logic
+### T017: ✅ Add countdown resume logic
 **File**: `frontend/src/components/TelemetryConsentBanner.tsx`
 **Goal**: Ensure countdown resumes when pause conditions clear
 **Changes**: Verify timer restarts when `isPaused` becomes false
@@ -484,7 +485,7 @@ useEffect(() => {
 
 **Note**: This should work automatically from T016's `useEffect` dependency on `isPaused`
 
-### T018: Add visual pause indicator
+### T018: ✅ Add visual pause indicator
 **File**: `frontend/src/components/TelemetryConsentBanner.tsx`
 **Goal**: Show "Paused" text when isPaused=true
 **Changes**: Conditional rendering in countdown display area
@@ -502,7 +503,7 @@ useEffect(() => {
 )}
 ```
 
-### T019: Add selective screen reader announcements
+### T019: ✅ Add selective screen reader announcements
 **File**: `frontend/src/components/TelemetryConsentBanner.tsx`
 **Goal**: Announce at 10s, 5s, 0s only (not every second)
 **Changes**:
@@ -528,7 +529,7 @@ const handleAutoDismiss = useCallback(() => {
 }, []);
 ```
 
-### T020: Add focus restoration on auto-dismiss
+### T020: ✅ Add focus restoration on auto-dismiss
 **File**: `frontend/src/components/TelemetryConsentBanner.tsx`
 **Goal**: Save previous focus on mount, restore on auto-dismiss
 **Changes**:
@@ -575,7 +576,7 @@ npm test telemetry
 
 ## Phase 3.4: Integration & Polish (20 min)
 
-### T021 [P]: Run manual quickstart validation
+### T021: ✅ [P] Run manual quickstart validation
 **File**: `specs/011-009-008-0020/quickstart.md`
 **Goal**: Execute all 10 manual test scenarios
 **Actions**: Follow quickstart.md step-by-step
@@ -595,7 +596,7 @@ npm test telemetry
 9. Focus restoration
 10. Reduced motion (if OS setting available)
 
-### T022 [P]: Verify LOC budget
+### T022: ✅ [P] Verify LOC budget
 **File**: `frontend/src/components/TelemetryConsentBanner.tsx`
 **Goal**: Confirm ≤60 LOC added (excluding tests)
 **Action**: Count net lines added (additions - deletions)
@@ -607,7 +608,7 @@ git diff main frontend/src/components/TelemetryConsentBanner.tsx | grep -E '^\+'
 # Should be <= 60 (excluding test file)
 ```
 
-### T023 [P]: Run full test suite with coverage
+### T023: ✅ [P] Run full test suite with coverage
 **File**: All tests
 **Goal**: Verify >80% coverage for TelemetryConsentBanner.tsx
 **Actions**:

@@ -20,6 +20,8 @@ frontend/*.htm
 
 # Build artifacts
 frontend_files/
+build-analysis/
+stats.html
 
 # Logs and audits (avoid committing machine-specific files/paths)
 logs/

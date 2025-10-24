@@ -1,8 +1,9 @@
 {
-  "timestamp": "2025-10-23T16:51:00Z",
-  "buildTimeMs": 45000,
-  "buildTimeSec": "45.00",
-  "bundleSizeBytes": 4404019,
-  "bundleSizeMB": "4.20",
-  "testCount": 1387
+  "timestamp": "2025-10-23T20:04:00Z",
+  "buildTimeMs": 18500,
+  "buildTimeSec": "18.50",
+  "bundleSizeBytes": 2267527,
+  "bundleSizeMB": "2.16",
+  "testCount": 1416,
+  "note": "Measured after Feature 018 Phase 1 optimizations (lazy loading, vendor chunking). Test count is actual test cases from vitest list."
 }

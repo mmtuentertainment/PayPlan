@@ -208,7 +208,7 @@ export const MobileMenu = memo<MobileMenuProps>(function MobileMenu({
           </div>
 
           {/* Navigation - Scrollable content area */}
-          <nav aria-label="Main navigation" className="py-4 overflow-y-auto flex-1">
+          <nav aria-label="Mobile navigation menu" className="py-4 overflow-y-auto flex-1">
             {navItems.map(renderNavItem)}
           </nav>
         </div>

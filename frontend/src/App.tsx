@@ -1,7 +1,9 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useState, lazy, Suspense } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import Home from './pages/Home';
 import Import from './pages/Import';
+import type { PreferenceCategoryType, UserPreference } from './lib/preferences/types';
 
 // Lazy load heavy/infrequently used pages to reduce main bundle size
 const Docs = lazy(() => import('./pages/Docs'));
@@ -19,6 +21,7 @@ import { ArchiveDetailView } from './pages/ArchiveDetailView';
 import { ROUTES } from './routes';
 import { NavigationHeader } from './components/navigation/NavigationHeader';
 import Breadcrumbs from './components/navigation/Breadcrumbs';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   // Initialize preferences hook at app level
@@ -39,7 +42,7 @@ function App() {
   // Performance monitoring (T034: NFR-001 - <100ms restoration)
   useEffect(() => {
     const perfMark = performance.getEntriesByName('preferences-restore-complete');
-    if (perfMark.length > 0 && process.env.NODE_ENV === 'development') {
+    if (perfMark.length > 0 && import.meta.env.DEV) {
       const duration = perfMark[0].duration || 0;
       if (duration > RESTORATION_TARGET_MS) {
         console.warn(
@@ -73,6 +76,89 @@ function App() {
 
   return (
     <BrowserRouter>
+      <AppContent
+        preferences={preferences}
+        updatePreference={updatePreference}
+        resetPreferences={resetPreferences}
+        toast={toast}
+        setToast={setToast}
+      />
+    </BrowserRouter>
+  );
+}
+
+// Toast type for notification state
+interface Toast {
+  message: string;
+  type: 'success' | 'error';
+}
+
+// AppContent props interface
+interface AppContentProps {
+  preferences: Map<PreferenceCategoryType, UserPreference>;
+  updatePreference: (
+    category: PreferenceCategoryType,
+    value: unknown,
+    optInStatus?: boolean
+  ) => void;
+  resetPreferences: (category?: PreferenceCategoryType) => void;
+  toast: Toast | null;
+  setToast: Dispatch<SetStateAction<Toast | null>>;
+}
+
+// Separate component to access useLocation inside BrowserRouter (needed for T045 performance logging)
+function AppContent({
+  preferences,
+  updatePreference,
+  resetPreferences,
+  toast,
+  setToast,
+}: AppContentProps) {
+  const location = useLocation();
+
+  // T045: Performance logging for route navigation (SC-007: <200ms target)
+  useEffect(() => {
+    // Mark navigation start
+    performance.mark('navigation-start');
+
+    // Schedule measurement after next paint
+    requestAnimationFrame(() => {
+      performance.mark('navigation-end');
+
+      try {
+        performance.measure('route-navigation', 'navigation-start', 'navigation-end');
+        const measure = performance.getEntriesByName('route-navigation').pop();
+
+        if (measure && import.meta.env.DEV) {
+          const duration = measure.duration;
+          const TARGET_MS = 200; // SC-007 target
+
+          if (duration > TARGET_MS) {
+            console.warn(
+              `⚠️ [Feature 018] Route navigation slow: ${duration.toFixed(2)}ms (target: <${TARGET_MS}ms) to ${location.pathname}`
+            );
+          } else {
+            console.log(
+              `✅ [Feature 018] Route navigation: ${duration.toFixed(2)}ms to ${location.pathname}`
+            );
+          }
+        }
+
+        // Clean up marks
+        performance.clearMarks('navigation-start');
+        performance.clearMarks('navigation-end');
+        performance.clearMeasures('route-navigation');
+      } catch (err) {
+        // Log error only in development (CodeRabbit: prevent silent failures)
+        if (import.meta.env.DEV) {
+          console.debug('Performance API error:', err);
+        }
+      }
+    });
+  }, [location.pathname]);
+
+  return (
+    <>
       {/* Skip link for accessibility (WCAG 2.1 AA - Feature 017) */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -86,8 +172,20 @@ function App() {
 
       {/* Main content */}
       <main id="main-content" tabIndex={-1}>
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-          <Routes>
+        <ErrorBoundary>
+          <Suspense
+            fallback={
+              <div
+                className="flex items-center justify-center min-h-screen"
+                role="status"
+                aria-live="polite"
+                aria-label="Loading page content"
+              >
+                <span className="text-gray-600">Loading...</span>
+              </div>
+            }
+          >
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/docs" element={<Docs />} />
             <Route path="/privacy" element={<Privacy />} />
@@ -112,15 +210,44 @@ function App() {
                   updatePreference(validated.category, validated.value, validated.optIn);
                 } catch (err) {
                   if (err instanceof ZodError) {
-                    console.error('Preference validation failed:', err.issues);
+                    // Only log detailed validation errors in development (prevent PII leaks)
+                    if (import.meta.env.DEV) {
+                      console.error('Preference validation failed:', err.issues);
+                    }
                     setToast({
                       message: `Invalid preference value: ${err.issues[0]?.message || 'Unknown error'}`,
                       type: 'error',
                     });
-                  } else {
-                    console.error('Unexpected error during preference save:', err);
+                  } else if (err instanceof Error) {
+                    // Only log unexpected errors in development (prevent PII leaks)
+                    if (import.meta.env.DEV) {
+                      console.error('Unexpected error during preference save:', err);
+                    }
+
+                    // Provide specific error messages for common failure modes (P1: Claude review)
+                    let errorMessage = 'Failed to save preference. Please try again.';
+
+                    // Storage quota exceeded
+                    if (err.name === 'QuotaExceededError' || err.message.includes('quota')) {
+                      errorMessage = 'Storage quota exceeded. Please clear some browser data and try again.';
+                    }
+                    // Network errors (if preferences ever sync)
+                    else if (err.message.includes('network') || err.message.includes('fetch')) {
+                      errorMessage = 'Network error. Please check your connection and try again.';
+                    }
+                    // localStorage disabled/unavailable
+                    else if (err.message.includes('localStorage') || err.message.includes('storage')) {
+                      errorMessage = 'Browser storage is disabled. Please enable cookies/storage and try again.';
+                    }
+
                     setToast({
-                      message: 'Failed to save preference. Please try again.',
+                      message: errorMessage,
+                      type: 'error',
+                    });
+                  } else {
+                    // Non-Error thrown (shouldn't happen, but handle gracefully)
+                    setToast({
+                      message: 'An unexpected error occurred. Please try again.',
                       type: 'error',
                     });
                   }
@@ -131,7 +258,8 @@ function App() {
           }
         />
           </Routes>
-        </Suspense>
+          </Suspense>
+        </ErrorBoundary>
       </main>
 
       <ErrorTest />
@@ -144,7 +272,7 @@ function App() {
           onDismiss={() => setToast(null)}
         />
       )}
-    </BrowserRouter>
+    </>
   );
 }
 

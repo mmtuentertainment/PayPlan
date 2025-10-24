@@ -2,7 +2,7 @@
 # Performance Measurement Script for Feature 018-technical-debt-cleanup
 # Tracks build time and bundle size against baseline metrics
 
-set -e
+set -euo pipefail
 
 # Dependency checks
 if ! command -v bc &> /dev/null; then
@@ -26,19 +26,56 @@ FEATURE_ID="${FEATURE_ID:-018-technical-debt-cleanup}"
 BASE_DIR="${BASE_DIR:-specs/$FEATURE_ID}"
 BASELINE_FILE="${BASELINE_FILE:-$BASE_DIR/BASELINE_METRICS.json}"
 RESULTS_DIR="${RESULTS_DIR:-$BASE_DIR/performance-results}"
+LOG_RETENTION_DAYS="${LOG_RETENTION_DAYS:-7}"
+FRONTEND_DIR="${FRONTEND_DIR:-frontend}"  # Configurable frontend directory
+
+# Validate paths to prevent traversal attacks
+if [[ "$FEATURE_ID" =~ \.\. ]] || [[ "$FEATURE_ID" =~ ^/ ]]; then
+    echo "Error: FEATURE_ID must not contain '..' or start with '/'" >&2
+    echo "  Got: $FEATURE_ID" >&2
+    exit 1
+fi
+
+# CRITICAL: Proper anchoring to prevent path traversal (Claude review)
+# Pattern ^specs/[a-zA-Z0-9_-]+$ ensures path is ONLY under specs/ directory
+if [[ "$BASE_DIR" =~ \.\. ]] || [[ ! "$BASE_DIR" =~ ^specs/[a-zA-Z0-9_-]+$ ]]; then
+    echo "Error: BASE_DIR must be under specs/ and contain only alphanumeric, underscore, or hyphen characters" >&2
+    echo "  Got: $BASE_DIR" >&2
+    echo "  Valid example: specs/018-technical-debt-cleanup" >&2
+    exit 1
+fi
 
 mkdir -p "$RESULTS_DIR"
 
+# Clean up old log files (keep last N days)
+if [ "$LOG_RETENTION_DAYS" -gt 0 ]; then
+    find "$RESULTS_DIR" -name "*.log" -type f -mtime +"$LOG_RETENTION_DAYS" -delete 2>/dev/null || true
+    find "$RESULTS_DIR" -name "metrics-*.json" -type f -mtime +"$LOG_RETENTION_DAYS" -delete 2>/dev/null || true
+fi
+
 echo "📊 Measuring Performance Metrics..."
 echo "=================================="
+
+# Validate frontend directory exists
+if [ ! -d "$FRONTEND_DIR" ]; then
+    echo "Error: Frontend directory not found: $FRONTEND_DIR" >&2
+    echo "  Set FRONTEND_DIR environment variable or run from project root" >&2
+    exit 1
+fi
+
+# Check if package.json exists in frontend directory
+if [ ! -f "$FRONTEND_DIR/package.json" ]; then
+    echo "Error: package.json not found in $FRONTEND_DIR" >&2
+    exit 1
+fi
 
 # Measure build time
 echo "⏱️  Measuring build time..."
 START_TIME=$(date +%s%N)
 
-# Run build and capture output to log file for diagnostics
+# Run build from frontend directory and capture output to log file for diagnostics
 BUILD_LOG="$RESULTS_DIR/build-$(date +%Y%m%d-%H%M%S).log"
-if ! npm run build > "$BUILD_LOG" 2>&1; then
+if ! (cd "$FRONTEND_DIR" && npm run build) > "$BUILD_LOG" 2>&1; then
     echo "Error: Build failed. Cannot measure performance metrics." >&2
     echo "Build output (last 20 lines):" >&2
     tail -n 20 "$BUILD_LOG" >&2
@@ -56,27 +93,57 @@ BUILD_TIME_SEC=$(echo "scale=2; $BUILD_TIME_MS / 1000" | bc)
 
 echo "Build time: ${BUILD_TIME_SEC}s (${BUILD_TIME_MS}ms)"
 
-# Measure bundle size
+# Measure bundle size (cross-platform)
 echo "📦 Measuring bundle size..."
-if [ -d "frontend/dist" ]; then
-    BUNDLE_SIZE=$(du -sb frontend/dist | cut -f1)
+FRONTEND_DIST="${FRONTEND_DIST:-$FRONTEND_DIR/dist}"
+if [ -d "$FRONTEND_DIST" ]; then
+    # Use find + wc for cross-platform compatibility (works on macOS and Linux)
+    BUNDLE_SIZE=$(find "$FRONTEND_DIST" -type f -exec wc -c {} + 2>/dev/null | awk 'END {print $1}' || echo "0")
     BUNDLE_SIZE_MB=$(echo "scale=2; $BUNDLE_SIZE / 1048576" | bc)
     echo "Bundle size: ${BUNDLE_SIZE_MB}MB (${BUNDLE_SIZE} bytes)"
 else
-    echo "Warning: frontend/dist not found, bundle size measurement skipped"
+    echo "Warning: $FRONTEND_DIST not found, bundle size measurement skipped"
     BUNDLE_SIZE=0
     BUNDLE_SIZE_MB="0.00"
 fi
 
-# Count tests
+# Count tests using Vitest list command (2025 best practice)
+# This is faster than running the full test suite and more reliable than regex parsing
 echo "🧪 Counting tests..."
-TEST_COUNT=$(npm test 2>&1 | grep -oP '\d+ test(s)?' | head -1 | grep -oP '\d+' || echo "0")
+if command -v npx &> /dev/null; then
+    # Use Vitest's --list flag to count test cases without running them
+    # This is 10-100x faster than running the full suite
+    # Each line in the output is a test case (e.g., "tests/file.test.ts > describe > it")
+    TEST_COUNT=$(cd "$FRONTEND_DIR" && npx vitest list 2>/dev/null | wc -l || echo "0")
+
+    # Remove leading/trailing whitespace from wc output
+    TEST_COUNT=$(echo "$TEST_COUNT" | tr -d '[:space:]')
+
+    # Fallback: Count test files if vitest list fails or returns 0
+    # WARNING: This creates inconsistent metrics (files ≠ test cases)
+    # Only use fallback for environments where vitest list is unavailable
+    if [ "$TEST_COUNT" = "0" ] || [ -z "$TEST_COUNT" ]; then
+        TEST_COUNT=$(find "$FRONTEND_DIR/src" "$FRONTEND_DIR/tests" -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l | tr -d '[:space:]')
+        echo "  ⚠️  WARNING: Counted test FILES (vitest list failed). Metrics may be inconsistent."
+        echo "  Test files: $TEST_COUNT (not test cases)"
+    fi
+else
+    # Fallback: Count test files if npx is not available
+    # WARNING: This creates inconsistent metrics (files ≠ test cases)
+    TEST_COUNT=$(find "$FRONTEND_DIR/src" "$FRONTEND_DIR/tests" -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l | tr -d '[:space:]')
+    echo "  ⚠️  WARNING: Counted test FILES (npx not available). Metrics may be inconsistent."
+    echo "  Test files: $TEST_COUNT (not test cases)"
+fi
+
 echo "Test count: $TEST_COUNT"
 
 # Output results using jq for safe JSON generation
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # Use millisecond precision in filename to prevent collisions
-RESULTS_FILE="$RESULTS_DIR/metrics-$(date +%Y%m%d-%H%M%S-%3N).json"
+# Generate unique timestamp for results file (POSIX-compliant)
+# Use PID for uniqueness since %3N (milliseconds) is not POSIX (P2: Claude review)
+TIMESTAMP_UNIQUE="$(date +%Y%m%d-%H%M%S)-$$"
+RESULTS_FILE="$RESULTS_DIR/metrics-${TIMESTAMP_UNIQUE}.json"
 
 # Use jq to safely build JSON (prevents injection)
 jq -n \
@@ -112,23 +179,35 @@ if [ -f "$BASELINE_FILE" ]; then
     BASELINE_BUILD_TIME=$(jq -r '.buildTimeSec // "0"' "$BASELINE_FILE" 2>/dev/null || echo "0")
     BASELINE_BUNDLE_SIZE=$(jq -r '.bundleSizeMB // "0"' "$BASELINE_FILE" 2>/dev/null || echo "0")
 
-    if [ "$BASELINE_BUILD_TIME" != "0" ] && [ "$BASELINE_BUILD_TIME" != "null" ]; then
-        BUILD_INCREASE=$(echo "scale=2; ($BUILD_TIME_SEC / $BASELINE_BUILD_TIME - 1) * 100" | bc)
-        echo "  Build Time Change: ${BUILD_INCREASE}%"
+    # Validate baseline values to prevent division by zero
+    if [ "$BASELINE_BUILD_TIME" != "0" ] && [ "$BASELINE_BUILD_TIME" != "null" ] && [ "$BUILD_TIME_SEC" != "0.00" ]; then
+        # Protect against zero division with bc comparison
+        if (( $(echo "$BASELINE_BUILD_TIME > 0" | bc -l) )); then
+            BUILD_INCREASE=$(echo "scale=2; ($BUILD_TIME_SEC / $BASELINE_BUILD_TIME - 1) * 100" | bc)
+            echo "  Build Time Change: ${BUILD_INCREASE}%"
 
-        # Check threshold (NFR-004: ≤10%)
-        if (( $(echo "$BUILD_INCREASE > 10" | bc -l) )); then
-            echo "  ⚠️  WARNING: Build time increased by more than 10%"
+            # Check threshold (NFR-004: ≤10%)
+            if (( $(echo "$BUILD_INCREASE > 10" | bc -l) )); then
+                echo "  ⚠️  WARNING: Build time increased by more than 10%"
+            fi
+        else
+            echo "  ⚠️  WARNING: Baseline build time is 0 or invalid, skipping comparison"
         fi
     fi
 
-    if [ "$BASELINE_BUNDLE_SIZE" != "0" ] && [ "$BASELINE_BUNDLE_SIZE" != "null" ]; then
-        BUNDLE_INCREASE=$(echo "scale=2; ($BUNDLE_SIZE_MB / $BASELINE_BUNDLE_SIZE - 1) * 100" | bc)
-        echo "  Bundle Size Change: ${BUNDLE_INCREASE}%"
+    # Validate baseline values to prevent division by zero
+    if [ "$BASELINE_BUNDLE_SIZE" != "0" ] && [ "$BASELINE_BUNDLE_SIZE" != "null" ] && [ "$BUNDLE_SIZE_MB" != "0.00" ]; then
+        # Protect against zero division with bc comparison
+        if (( $(echo "$BASELINE_BUNDLE_SIZE > 0" | bc -l) )); then
+            BUNDLE_INCREASE=$(echo "scale=2; ($BUNDLE_SIZE_MB / $BASELINE_BUNDLE_SIZE - 1) * 100" | bc)
+            echo "  Bundle Size Change: ${BUNDLE_INCREASE}%"
 
-        # Check threshold (NFR-004: ≤5%)
-        if (( $(echo "$BUNDLE_INCREASE > 5" | bc -l) )); then
-            echo "  ⚠️  WARNING: Bundle size increased by more than 5%"
+            # Check threshold (NFR-004: ≤5%)
+            if (( $(echo "$BUNDLE_INCREASE > 5" | bc -l) )); then
+                echo "  ⚠️  WARNING: Bundle size increased by more than 5%"
+            fi
+        else
+            echo "  ⚠️  WARNING: Baseline bundle size is 0 or invalid, skipping comparison"
         fi
     fi
 else
