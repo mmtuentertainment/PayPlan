@@ -189,4 +189,87 @@ describe('TimezoneHandler', () => {
       expect(handler.areSameInstant(date1, date2)).toBe(true);
     });
   });
+
+  describe('BNPL-critical edge cases (CodeRabbit)', () => {
+    it('should handle end-of-month dates (Feb 28 vs Feb 29)', () => {
+      // Non-leap year
+      const feb28_2025 = '2025-02-28T12:00:00Z';
+      expect(() => handler.toTimestamp(feb28_2025)).not.toThrow();
+
+      // Leap year
+      const feb29_2024 = '2024-02-29T12:00:00Z';
+      expect(() => handler.toTimestamp(feb29_2024)).not.toThrow();
+
+      // Verify chronological ordering
+      const feb28_2024 = '2024-02-28T12:00:00Z';
+      expect(handler.compare(feb28_2024, feb29_2024)).toBeLessThan(0);
+    });
+
+    it('should handle grace-period boundaries (23:59:59 vs 00:00:00)', () => {
+      const lastSecond = '2025-01-15T23:59:59Z';
+      const midnight = '2025-01-16T00:00:00Z';
+
+      // One second apart
+      const ts1 = handler.toTimestamp(lastSecond);
+      const ts2 = handler.toTimestamp(midnight);
+      expect(ts2 - ts1).toBe(1000); // 1 second in milliseconds
+
+      // Comparisons treat them correctly
+      expect(handler.compare(lastSecond, midnight)).toBeLessThan(0);
+      expect(handler.areSameInstant(lastSecond, midnight)).toBe(false);
+    });
+
+    it('should handle negative timezone offsets correctly', () => {
+      // Los Angeles is UTC-8 (or UTC-7 during DST)
+      const la_time = '2025-01-15T10:00:00-08:00'; // 18:00 UTC
+      const utc_time = '2025-01-15T18:00:00Z';
+
+      // Should represent same instant
+      expect(handler.areSameInstant(la_time, utc_time)).toBe(true);
+
+      // Timestamp arithmetic should work correctly
+      const ts1 = handler.toTimestamp(la_time);
+      const ts2 = handler.toTimestamp(utc_time);
+      expect(ts1).toBe(ts2);
+    });
+
+    it('should handle month boundaries correctly', () => {
+      const endOfJan = '2025-01-31T23:59:59Z';
+      const startOfFeb = '2025-02-01T00:00:00Z';
+
+      expect(handler.compare(endOfJan, startOfFeb)).toBeLessThan(0);
+
+      // One second apart
+      const ts1 = handler.toTimestamp(endOfJan);
+      const ts2 = handler.toTimestamp(startOfFeb);
+      expect(ts2 - ts1).toBe(1000);
+    });
+
+    it('should handle timezone offset edge cases (+14:00 and -12:00)', () => {
+      // Line Islands (Kiritimati) is UTC+14
+      const kiritimati = '2025-01-16T02:00:00+14:00'; // 2025-01-15 12:00 UTC
+      // Baker Island is UTC-12
+      const baker = '2025-01-15T00:00:00-12:00'; // 2025-01-15 12:00 UTC
+
+      // Same instant despite 26-hour offset difference
+      expect(handler.areSameInstant(kiritimati, baker)).toBe(true);
+    });
+
+    it('should sort mixed timezone dates correctly', () => {
+      const dates = [
+        '2025-01-15T23:00:00+09:00', // Tokyo, earliest UTC
+        '2025-01-15T08:00:00-05:00', // EST
+        '2025-01-15T10:00:00-08:00', // PST
+        '2025-01-15T15:00:00Z',      // UTC, latest
+      ];
+
+      const sorted = handler.sortDates(dates);
+      const timestamps = sorted.map(d => handler.toTimestamp(d));
+
+      // Verify ascending order
+      for (let i = 1; i < timestamps.length; i++) {
+        expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i - 1]);
+      }
+    });
+  });
 });

@@ -2,8 +2,23 @@
  * TimezoneHandler TypeScript Definitions
  */
 
+/**
+ * Configuration options for TimezoneHandler
+ */
+export interface TimezoneHandlerConfig {
+  /**
+   * Restrict to specific allowed timezones (default: all IANA timezones)
+   */
+  allowedTimezones?: string[];
+
+  /**
+   * Enable strict validation mode (default: false)
+   */
+  strictMode?: boolean;
+}
+
 export class TimezoneHandler {
-  constructor();
+  constructor(config?: TimezoneHandlerConfig);
 
   /**
    * Set of valid IANA timezone identifiers (readonly)
@@ -50,4 +65,28 @@ export class TimezoneHandler {
   areSameInstant(date1: string | Date | number, date2: string | Date | number): boolean;
 }
 
+/**
+ * Factory function to create a configured TimezoneHandler instance
+ *
+ * Use this for custom configurations (e.g., restrict allowed timezones, strict mode).
+ * For standard usage, use the exported singleton `timezoneHandler`.
+ *
+ * @param config - Optional configuration
+ * @returns New TimezoneHandler instance
+ *
+ * @example
+ * // Create handler with restricted timezones
+ * const usHandler = createTimezoneHandler({
+ *   allowedTimezones: ['America/New_York', 'America/Chicago', 'America/Los_Angeles'],
+ *   strictMode: true
+ * });
+ */
+export function createTimezoneHandler(config?: TimezoneHandlerConfig): TimezoneHandler;
+
+/**
+ * Default TimezoneHandler singleton instance
+ *
+ * Uses all IANA timezones with standard validation.
+ * For custom configurations, use `createTimezoneHandler()`.
+ */
 export const timezoneHandler: TimezoneHandler;
