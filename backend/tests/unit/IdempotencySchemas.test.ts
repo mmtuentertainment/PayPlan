@@ -6,7 +6,6 @@
  * malformed data (FR-003, FR-011).
  */
 
-const { describe, it, expect } = require('@jest/globals');
 const { IdempotencyCacheEntrySchema, IdempotencyCacheKeySchema } = require('../../src/lib/validation/IdempotencySchemas');
 
 describe('IdempotencySchemas', () => {
@@ -42,8 +41,8 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('hash'))).toBe(true);
-        expect(result.error.issues.some((issue) => issue.message.includes('64-character'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.path.includes('hash'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.message.includes('64-character'))).toBe(true);
       }
     });
 
@@ -59,7 +58,7 @@ describe('IdempotencySchemas', () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('hash'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.path.includes('hash'))).toBe(true);
       }
     });
 
@@ -76,7 +75,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('timestamp'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.path.includes('timestamp'))).toBe(true);
       }
     });
 
@@ -93,7 +92,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('timestamp'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.path.includes('timestamp'))).toBe(true);
       }
     });
 
@@ -140,7 +139,7 @@ describe('IdempotencySchemas', () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('ttl'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.path.includes('ttl'))).toBe(true);
       }
     });
 
@@ -156,7 +155,7 @@ describe('IdempotencySchemas', () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('ttl'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.path.includes('ttl'))).toBe(true);
       }
     });
 
@@ -236,7 +235,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('operation'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.path.includes('operation'))).toBe(true);
       }
     });
 
@@ -252,7 +251,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('resourceId'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.path.includes('resourceId'))).toBe(true);
       }
     });
 
@@ -268,7 +267,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('hash'))).toBe(true);
+        expect(result.error.issues.some((issue: any) => issue.path.includes('hash'))).toBe(true);
       }
     });
 
