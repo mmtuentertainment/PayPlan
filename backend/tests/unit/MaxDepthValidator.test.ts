@@ -120,9 +120,7 @@ describe('MaxDepthValidator', () => {
         },
       };
 
-      expect(() => validator.validate(input)).toThrow('JSON depth exceeds maximum allowed depth');
-      expect(() => validator.validate(input)).toThrow('11');
-      expect(() => validator.validate(input)).toThrow('10');
+      expect(() => validator.validate(input)).toThrow('JSON depth exceeds maximum allowed');
     });
 
     it('should reject deeply nested array structures', () => {
@@ -267,19 +265,16 @@ describe('MaxDepthValidator', () => {
       expect(validator.getDepth(big)).toBe(0);
     });
 
-    it('should provide clear error message with actual depth', () => {
+    it('should provide generic error message without exposing depth (CodeRabbit: info leak)', () => {
       const input = {
         l1: { l2: { l3: { l4: { l5: { l6: { l7: { l8: { l9: { l10: { l11: 'x' } } } } } } } } } },
       };
 
-      try {
-        validator.validate(input);
-        fail('Should have thrown error');
-      } catch (error: any) {
-        expect(error.message).toContain('11'); // Actual depth
-        expect(error.message).toContain('10'); // Max allowed
-        expect(error.message).toContain('depth');
-      }
+      // Should throw generic error without exposing actual depth (prevents info leak)
+      expect(() => validator.validate(input)).toThrow('JSON depth exceeds maximum allowed');
+
+      // Should NOT expose actual depth value
+      expect(() => validator.validate(input)).not.toThrow('11');
     });
 
     it('should allow custom max depth in constructor', () => {

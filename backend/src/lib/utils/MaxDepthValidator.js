@@ -63,9 +63,8 @@ class MaxDepthValidator {
     const actualDepth = this.getDepthWithCircularCheck(data, visited);
 
     if (actualDepth > this.maxDepth) {
-      throw new Error(
-        `JSON depth exceeds maximum allowed depth of ${this.maxDepth} (actual: ${actualDepth})`
-      );
+      // Generic error message - don't expose actual depth (info leak)
+      throw new Error('JSON depth exceeds maximum allowed');
     }
   }
 
@@ -76,6 +75,13 @@ class MaxDepthValidator {
    * - Primitives (string, number, boolean, null, undefined): depth 0
    * - Empty object/array: depth 1
    * - Object/array with nested values: 1 + max(child depths)
+   *
+   * Implementation uses Reflect.ownKeys() to inspect ALL own properties including:
+   * - String-keyed properties (enumerable and non-enumerable)
+   * - Symbol-keyed properties
+   * - Custom array properties (beyond indexed elements)
+   *
+   * Circular reference detection uses WeakSet to track visited objects.
    *
    * @param {*} data - Data to measure
    * @param {WeakSet} visited - Set of visited objects for circular detection (internal)

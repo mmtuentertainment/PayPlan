@@ -116,14 +116,16 @@ describe('TimezoneHandler', () => {
       }
     });
 
-    it('should handle ISO 8601 strings without timezone', () => {
-      const dateNoTz = '2025-01-15T10:00:00'; // No timezone, assume UTC
-      const dateUtc = '2025-01-15T10:00:00Z'; // Explicit UTC
+    it('should reject ISO 8601 strings without timezone (CodeRabbit: prevent ambiguity)', () => {
+      const dateNoTz = '2025-01-15T10:00:00'; // No timezone - ambiguous!
 
-      const ts1 = handler.toTimestamp(dateNoTz);
-      const ts2 = handler.toTimestamp(dateUtc);
+      // Should throw error instead of silently assuming UTC
+      expect(() => handler.toTimestamp(dateNoTz)).toThrow('Ambiguous date string without timezone');
+      expect(() => handler.toTimestamp(dateNoTz)).toThrow('2025-01-15T10:00:00');
 
-      expect(ts1).toBe(ts2);
+      // Explicit timezone should work
+      const dateUtc = '2025-01-15T10:00:00Z';
+      expect(() => handler.toTimestamp(dateUtc)).not.toThrow();
     });
 
     it('should handle Date objects', () => {

@@ -170,14 +170,16 @@ class TimezoneHandler {
 
     // Handle string
     if (typeof date === 'string') {
-      // ISO 8601 strings without timezone are treated as UTC
-      // If no timezone specified, append 'Z' to force UTC parsing
-      let dateStr = date;
+      // ISO 8601 strings MUST include explicit timezone to avoid ambiguity
+      // Reject timezone-less strings to prevent silent UTC assumption
       if (!/Z|[+-]\d{2}:\d{2}$/.test(date)) {
-        dateStr = date + 'Z';
+        throw new Error(
+          `Ambiguous date string without timezone: "${date}". ` +
+          'Provide explicit timezone (e.g., "2025-01-15T10:00:00Z" for UTC or "2025-01-15T10:00:00-05:00" for EST)'
+        );
       }
 
-      const parsed = new Date(dateStr);
+      const parsed = new Date(date);
       const timestamp = parsed.getTime();
 
       if (isNaN(timestamp)) {
