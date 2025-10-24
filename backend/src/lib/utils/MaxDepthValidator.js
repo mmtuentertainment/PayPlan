@@ -60,7 +60,7 @@ class MaxDepthValidator {
    */
   validate(data) {
     const visited = new WeakSet();
-    const actualDepth = this.getDepthWithCircularCheck(data, 0, visited);
+    const actualDepth = this.getDepthWithCircularCheck(data, visited);
 
     if (actualDepth > this.maxDepth) {
       throw new Error(
@@ -78,17 +78,16 @@ class MaxDepthValidator {
    * - Object/array with nested values: 1 + max(child depths)
    *
    * @param {*} data - Data to measure
-   * @param {number} currentDepth - Current recursion depth (internal)
    * @param {WeakSet} visited - Set of visited objects for circular detection (internal)
    * @returns {number} Maximum depth of the structure
    * @throws {Error} If circular reference detected
    *
    * @example
-   * getDepthWithCircularCheck('string', 0, new WeakSet()) // 0
-   * getDepthWithCircularCheck({}, 0, new WeakSet()) // 1
-   * getDepthWithCircularCheck({ a: { b: 'c' } }, 0, new WeakSet()) // 3
+   * getDepthWithCircularCheck('string', new WeakSet()) // 0
+   * getDepthWithCircularCheck({}, new WeakSet()) // 1
+   * getDepthWithCircularCheck({ a: { b: 'c' } }, new WeakSet()) // 3
    */
-  getDepthWithCircularCheck(data, currentDepth = 0, visited = new WeakSet()) {
+  getDepthWithCircularCheck(data, visited = new WeakSet()) {
     // Primitives have depth 0
     if (data === null || data === undefined) {
       return 0;
@@ -116,7 +115,7 @@ class MaxDepthValidator {
         // Find maximum depth among array elements
         let maxChildDepth = 0;
         for (const item of data) {
-          const childDepth = this.getDepthWithCircularCheck(item, currentDepth + 1, visited);
+          const childDepth = this.getDepthWithCircularCheck(item, visited);
           maxChildDepth = Math.max(maxChildDepth, childDepth);
 
           // Early exit optimization: stop if we already exceed limit
@@ -137,7 +136,7 @@ class MaxDepthValidator {
       // Find maximum depth among object properties
       let maxChildDepth = 0;
       for (const key of keys) {
-        const childDepth = this.getDepthWithCircularCheck(data[key], currentDepth + 1, visited);
+        const childDepth = this.getDepthWithCircularCheck(data[key], visited);
         maxChildDepth = Math.max(maxChildDepth, childDepth);
 
         // Early exit optimization: stop if we already exceed limit
@@ -158,11 +157,10 @@ class MaxDepthValidator {
    *
    * @deprecated Use validate() instead which includes circular reference detection
    * @param {*} data - Data to measure
-   * @param {number} currentDepth - Current recursion depth (internal)
    * @returns {number} Maximum depth of the structure
    */
-  getDepth(data, currentDepth = 0) {
-    return this.getDepthWithCircularCheck(data, currentDepth, new WeakSet());
+  getDepth(data) {
+    return this.getDepthWithCircularCheck(data, new WeakSet());
   }
 }
 

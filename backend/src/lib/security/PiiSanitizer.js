@@ -228,7 +228,7 @@ class PiiSanitizer {
   isPiiField(fieldName) {
     const lowerFieldName = fieldName.toLowerCase();
     return this.piiPatterns.some((pattern) =>
-      lowerFieldName.includes(pattern.toLowerCase())
+      lowerFieldName.includes(pattern)
     );
   }
 }

@@ -18,12 +18,12 @@ export class PiiSanitizer {
   /**
    * Sanitizes an array
    */
-  sanitizeArray(arr: any[], visited: WeakSet<object>): any[];
+  sanitizeArray(arr: any[], visited?: WeakSet<object>): any[];
 
   /**
    * Sanitizes an object
    */
-  sanitizeObject(obj: Record<string, any>, visited: WeakSet<object>): Record<string, any>;
+  sanitizeObject(obj: Record<string, any>, visited?: WeakSet<object>): Record<string, any>;
 
   /**
    * Checks if a field name matches any PII pattern
