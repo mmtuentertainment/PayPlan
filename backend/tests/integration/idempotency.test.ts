@@ -8,8 +8,6 @@
  * - 24-hour TTL enforcement (FR-005)
  */
 
-const { describe, it, expect, beforeEach, afterEach } = require('@jest/globals');
-
 // These tests will be implemented once idempotency.ts is updated
 // For now, creating placeholder structure
 

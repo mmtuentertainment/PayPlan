@@ -3,10 +3,11 @@
  * Feature 018: Technical Debt Cleanup - User Story 1 (P0)
  *
  * Tests idempotency cache schema validation to prevent crashes from
- * malformed data (FR-003, FR-011).
+ * malformed data (FR-003, FR-003, FR-011).
  */
 
-const { describe, it, expect } = require('@jest/globals');
+import { ZodIssue } from 'zod';
+
 const { IdempotencyCacheEntrySchema, IdempotencyCacheKeySchema } = require('../../src/lib/validation/IdempotencySchemas');
 
 describe('IdempotencySchemas', () => {
@@ -42,8 +43,8 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('hash'))).toBe(true);
-        expect(result.error.issues.some((issue) => issue.message.includes('64-character'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.path.includes('hash'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.message.includes('64-character'))).toBe(true);
       }
     });
 
@@ -59,7 +60,7 @@ describe('IdempotencySchemas', () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('hash'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.path.includes('hash'))).toBe(true);
       }
     });
 
@@ -76,7 +77,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('timestamp'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.path.includes('timestamp'))).toBe(true);
       }
     });
 
@@ -93,7 +94,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('timestamp'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.path.includes('timestamp'))).toBe(true);
       }
     });
 
@@ -140,7 +141,7 @@ describe('IdempotencySchemas', () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('ttl'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.path.includes('ttl'))).toBe(true);
       }
     });
 
@@ -156,7 +157,7 @@ describe('IdempotencySchemas', () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('ttl'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.path.includes('ttl'))).toBe(true);
       }
     });
 
@@ -236,7 +237,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('operation'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.path.includes('operation'))).toBe(true);
       }
     });
 
@@ -252,7 +253,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('resourceId'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.path.includes('resourceId'))).toBe(true);
       }
     });
 
@@ -268,7 +269,7 @@ describe('IdempotencySchemas', () => {
       expect(result.success).toBe(false);
       // CodeRabbit: Add specific field/message assertions
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.path.includes('hash'))).toBe(true);
+        expect(result.error.issues.some((issue: ZodIssue) => issue.path.includes('hash'))).toBe(true);
       }
     });
 

@@ -16,11 +16,11 @@
  * @see SOLUTIONS.md Section 2 - Payment Schedule Source
  */
 
-import { useContext, useState, useMemo } from 'react';
+import { useContext, useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import type { PaymentRecord } from '@/types/csvExport';
 import { paymentRecordSchema } from '@/types/csvExport';
 import { PaymentContext } from './PaymentContext.context';
-import type { PaymentContextType, PaymentContextProviderProps } from './PaymentContext.types';
+import type { PaymentContextType, PaymentContextProviderProps, PaymentUpdater } from './PaymentContext.types';
 
 /**
  * PaymentRecord validation schema
@@ -65,6 +65,9 @@ export function usePaymentContext(): PaymentContextType {
  * CodeRabbit Fix: Wraps to own internal state with validation.
  * Validates payment data before updating state to prevent NaN/security issues.
  *
+ * Feature 018: Phase 4 - Added atomic updates using functional setState (T068-T070)
+ * Prevents race conditions during concurrent updates.
+ *
  * Wraps the application to provide payment data to all child components.
  * Typically used in Home.tsx to wrap the main app content.
  *
@@ -85,38 +88,64 @@ export function PaymentContextProvider({ value, children }: PaymentContextProvid
   // Internal state with validation
   const [internalPayments, setInternalPayments] = useState<PaymentRecord[]>(value.payments);
 
-  // Validated setter that wraps the provided setter
-  const validatedSetPayments = useMemo(() => {
-    return (payments: PaymentRecord[]) => {
-      // Validate each payment record
-      const validationResults = payments.map((payment, index) => ({
-        index,
-        result: paymentRecordSchema.safeParse(payment),
-      }));
+  // Use ref to store parent setter (stable reference, prevents infinite loops)
+  const parentSetterRef = useRef(value.setPayments);
 
-      // Check for validation failures
-      const failures = validationResults.filter(v => !v.result.success);
+  // Update ref when parent setter changes
+  useEffect(() => {
+    parentSetterRef.current = value.setPayments;
+  }, [value.setPayments]);
 
-      if (failures.length > 0) {
-        // Log all validation errors
-        failures.forEach(({ index, result }) => {
-          if (!result.success) {
-            console.error(`Payment validation failed at index ${index}:`, result.error.format());
-          }
-        });
+  // Validation helper (extracted for reuse)
+  const validatePayments = useCallback((payments: PaymentRecord[]) => {
+    // Validate each payment record
+    const validationResults = payments.map((payment, index) => ({
+      index,
+      result: paymentRecordSchema.safeParse(payment),
+    }));
 
-        // Throw error with detailed message
-        throw new Error(
-          `Payment validation failed for ${failures.length} record(s). ` +
-          `Check console for details. First error: ${failures[0]?.result.success === false ? failures[0].result.error.issues[0]?.message : 'unknown'}`
-        );
-      }
+    // Check for validation failures
+    const failures = validationResults.filter(v => !v.result.success);
 
-      // All valid - update internal state and call original setter
-      setInternalPayments(payments);
-      value.setPayments(payments);
-    };
-  }, [value]);
+    if (failures.length > 0) {
+      // Log all validation errors
+      failures.forEach(({ index, result }) => {
+        if (!result.success) {
+          console.error(`Payment validation failed at index ${index}:`, result.error.format());
+        }
+      });
+
+      // Throw error with detailed message
+      throw new Error(
+        `Payment validation failed for ${failures.length} record(s). ` +
+        `Check console for details. First error: ${failures[0]?.result.success === false ? failures[0].result.error.issues[0]?.message : 'unknown'}`
+      );
+    }
+
+    return payments; // Return validated payments
+  }, []);
+
+  // Validated setter with atomic updates (Feature 018: T068-T070)
+  // Based on "Wrapped State Setter Pattern" by Kyle Shevlin
+  // https://kyleshevlin.com/wrapped-state-setter-pattern/
+  const validatedSetPayments = useCallback((updater: PaymentRecord[] | PaymentUpdater) => {
+    // Wrap the internal state setter
+    setInternalPayments((currentPayments) => {
+      // Determine nextState: resolve function or use value directly
+      const nextState = typeof updater === 'function'
+        ? updater(currentPayments)
+        : updater;
+
+      // Validate the nextState before updating
+      const validated = validatePayments(nextState);
+
+      // Also update parent setter with validated state
+      // Use ref to avoid dependency loop (parent setter is stable via ref)
+      parentSetterRef.current(validated);
+
+      return validated;
+    });
+  }, [validatePayments]); // Note: no value dependency, uses ref instead
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo<PaymentContextType>(

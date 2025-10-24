@@ -6,7 +6,6 @@
  * details from leaking to clients (FR-002).
  */
 
-const { describe, it, expect } = require('@jest/globals');
 const { errorSanitizer } = require('../../src/lib/security/ErrorSanitizer');
 
 describe('ErrorSanitizer', () => {
