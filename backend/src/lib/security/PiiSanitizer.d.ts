@@ -16,17 +16,23 @@ export class PiiSanitizer {
    * Generic type parameter preserves the input type structure while
    * removing PII fields. Note: PII fields will be omitted from return type.
    *
+   * Circular references are replaced with '[Circular]' placeholder to prevent
+   * crashes in logging/observability code.
+   *
    * @param data - Data to sanitize (object, array, or primitive)
-   * @param visited - Internal circular reference tracking (do not provide)
    * @returns Sanitized copy of data with PII fields removed
-   * @throws Error if circular reference detected
    *
    * @example
    * const input = { id: '123', email: 'user@example.com', amount: 100 };
    * const output = sanitizer.sanitize(input);
    * // output: { id: '123', amount: 100 } (email removed)
+   *
+   * @example
+   * const circular = { a: 1 }; circular.self = circular;
+   * const output = sanitizer.sanitize(circular);
+   * // output: { a: 1, self: '[Circular]' }
    */
-  sanitize<T>(data: T, visited?: WeakSet<object>): T;
+  sanitize<T>(data: T): T;
 
   // Private helper methods (not part of public API):
   // - sanitizeArray(arr, visited): Internal array sanitization

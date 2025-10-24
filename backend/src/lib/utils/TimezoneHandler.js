@@ -175,9 +175,10 @@ class TimezoneHandler {
       let dateStr = date;
       if (!/Z|[+-]\d{2}:\d{2}$/.test(date)) {
         // Warn about ambiguous date but maintain backward compatibility
-        if (typeof console !== 'undefined' && console.warn) {
+        // Note: Redact date string to avoid logging PII
+        if (typeof console !== 'undefined' && console.warn && process.env.NODE_ENV !== 'production') {
           console.warn(
-            `[TimezoneHandler] Ambiguous date string without timezone: "${date}". ` +
+            '[TimezoneHandler] Ambiguous date string without timezone detected (value redacted for security). ' +
             'Assuming UTC. For clarity, use explicit timezone (e.g., "2025-01-15T10:00:00Z" or "2025-01-15T10:00:00-05:00")'
           );
         }

@@ -26,6 +26,11 @@ stats.html
 # Logs and audits (avoid committing machine-specific files/paths)
 logs/
 *.audit.json
+audit-report.json
+
+# Binary artifacts and Windows metadata
+*.skill
+*:Zone.Identifier
 
 # Claude Code local skills (user-specific, not shared)
 .claude/skills/

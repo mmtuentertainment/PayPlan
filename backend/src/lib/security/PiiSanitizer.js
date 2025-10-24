@@ -89,10 +89,12 @@ class PiiSanitizer {
    * Uses structural sharing: returns the same reference if no PII is found,
    * or a new object with PII fields removed if found.
    *
+   * Circular references are detected and replaced with '[Circular]' placeholder
+   * to prevent crashes in logging/observability code.
+   *
    * @param {*} data - The data to sanitize (object, array, or primitive)
-   * @param {WeakSet} visited - Set of visited objects for circular detection (internal)
+   * @param {WeakSet} visited - Set of visited objects for circular detection (internal use only)
    * @returns {*} Sanitized data with PII removed
-   * @throws {Error} If circular reference detected
    *
    * @example
    * sanitize({ email: 'user@example.com', amount: 100 })
@@ -101,6 +103,10 @@ class PiiSanitizer {
    * @example
    * const clean = { id: '123', amount: 100 };
    * sanitize(clean) === clean // true (same reference, no PII found)
+   *
+   * @example
+   * const circular = { a: 1 }; circular.self = circular;
+   * sanitize(circular) // Returns: { a: 1, self: '[Circular]' }
    */
   sanitize(data, visited = new WeakSet()) {
     // Handle primitives and null/undefined
@@ -112,9 +118,10 @@ class PiiSanitizer {
       return data;
     }
 
-    // Check for circular references
+    // Check for circular references - return placeholder instead of throwing
+    // to prevent crashes in logging/observability code
     if (visited.has(data)) {
-      throw new Error('Circular reference detected in data structure');
+      return '[Circular]';
     }
 
     // Add to visited set
@@ -132,7 +139,11 @@ class PiiSanitizer {
     if (data instanceof Map) {
       const result = {};
       for (const [key, value] of data.entries()) {
-        result[key] = this.sanitize(value, visited);
+        // Sanitize keys to prevent PII leaks through Map keys
+        const sanitizedKey = typeof key === 'string' && this.isPiiField(key)
+          ? '[REDACTED]'
+          : String(key);
+        result[sanitizedKey] = this.sanitize(value, visited);
       }
       return result;
     }

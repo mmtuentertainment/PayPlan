@@ -320,12 +320,15 @@ describe('PiiSanitizer', () => {
       expect(result).toEqual({ amount: 100 });
     });
 
-    it('should throw error on circular references', () => {
+    it('should handle circular references gracefully', () => {
       const input: any = { id: 1, amount: 100 };
       input.self = input; // Circular reference
 
-      // Feature 018 fix: Circular references now throw error (CodeRabbit round 3)
-      expect(() => sanitizer.sanitize(input)).toThrow('Circular reference detected in data structure');
+      // Feature 018 fix: Circular references return '[Circular]' to prevent crashes (CodeRabbit round 7)
+      const result = sanitizer.sanitize(input);
+      expect(result.id).toBe(1);
+      expect(result.amount).toBe(100);
+      expect(result.self).toBe('[Circular]');
     });
   });
 });
