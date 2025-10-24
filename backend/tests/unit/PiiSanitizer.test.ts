@@ -69,6 +69,64 @@ describe('PiiSanitizer', () => {
         timestamp: '2025-10-24',
       });
     });
+
+    // Financial PII fields (CodeRabbit: critical for BNPL context)
+    it('should remove cardNumber field', () => {
+      const input = { cardNumber: '4111111111111111', amount: 100 };
+      const result = sanitizer.sanitize(input);
+      expect(result).toEqual({ amount: 100 });
+      expect(result).not.toHaveProperty('cardNumber');
+    });
+
+    it('should remove card field', () => {
+      const input = { card: '4111111111111111', amount: 100 };
+      const result = sanitizer.sanitize(input);
+      expect(result).toEqual({ amount: 100 });
+      expect(result).not.toHaveProperty('card');
+    });
+
+    it('should remove cvv field', () => {
+      const input = { cvv: '123', amount: 100 };
+      const result = sanitizer.sanitize(input);
+      expect(result).toEqual({ amount: 100 });
+      expect(result).not.toHaveProperty('cvv');
+    });
+
+    it('should remove bankAccount field', () => {
+      const input = { bankAccount: '123456789', amount: 100 };
+      const result = sanitizer.sanitize(input);
+      expect(result).toEqual({ amount: 100 });
+      expect(result).not.toHaveProperty('bankAccount');
+    });
+
+    it('should remove routing field', () => {
+      const input = { routing: '021000021', amount: 100 };
+      const result = sanitizer.sanitize(input);
+      expect(result).toEqual({ amount: 100 });
+      expect(result).not.toHaveProperty('routing');
+    });
+
+    it('should remove multiple financial PII fields together', () => {
+      const input = {
+        cardNumber: '4111111111111111',
+        cvv: '123',
+        expiry: '12/25',
+        bankAccount: '123456789',
+        routing: '021000021',
+        amount: 100,
+        currency: 'USD',
+      };
+      const result = sanitizer.sanitize(input);
+      expect(result).toEqual({
+        amount: 100,
+        currency: 'USD',
+      });
+      expect(result).not.toHaveProperty('cardNumber');
+      expect(result).not.toHaveProperty('cvv');
+      expect(result).not.toHaveProperty('expiry');
+      expect(result).not.toHaveProperty('bankAccount');
+      expect(result).not.toHaveProperty('routing');
+    });
   });
 
   describe('T055: handles nested PII fields', () => {

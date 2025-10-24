@@ -240,6 +240,33 @@ describe('MaxDepthValidator', () => {
       expect(validator.getDepth(undefined)).toBe(0);
     });
 
+    it('should detect circular references and throw controlled error (CodeRabbit)', () => {
+      const input: any = { a: 1 };
+      input.circular = input; // Create circular reference
+
+      // Should throw controlled error, not stack overflow
+      expect(() => validator.validate(input)).toThrow('Circular reference detected');
+      expect(() => validator.validate(input)).not.toThrow(/Maximum call stack/);
+    });
+
+    it('should handle Date objects safely (CodeRabbit)', () => {
+      const input = { timestamp: new Date(), value: 100 };
+      expect(() => validator.validate(input)).not.toThrow();
+      expect(validator.getDepth(input)).toBe(2);
+    });
+
+    it('should handle primitive Symbol values safely (CodeRabbit)', () => {
+      const sym = Symbol('test');
+      expect(() => validator.validate(sym)).not.toThrow();
+      expect(validator.getDepth(sym)).toBe(0);
+    });
+
+    it('should handle BigInt values safely (CodeRabbit)', () => {
+      const big = BigInt(999999999999);
+      expect(() => validator.validate(big)).not.toThrow();
+      expect(validator.getDepth(big)).toBe(0);
+    });
+
     it('should provide clear error message with actual depth', () => {
       const input = {
         l1: { l2: { l3: { l4: { l5: { l6: { l7: { l8: { l9: { l10: { l11: 'x' } } } } } } } } } },
