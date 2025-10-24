@@ -5,6 +5,9 @@
  * Frontend tests are executed separately via: npm run test:frontend
  */
 module.exports = {
+  // TypeScript support via ts-jest
+  preset: 'ts-jest',
+
   // Exclude frontend directory from Jest test discovery
   testPathIgnorePatterns: [
     '/node_modules/',
@@ -21,6 +24,11 @@ module.exports = {
 
   // Test environment for backend (Node.js)
   testEnvironment: 'node',
+
+  // Transform TypeScript files with ts-jest
+  transform: {
+    '^.+\\.ts$': 'ts-jest',
+  },
 
   // Coverage paths should also exclude frontend
   coveragePathIgnorePatterns: [

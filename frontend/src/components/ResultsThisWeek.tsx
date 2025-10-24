@@ -15,6 +15,7 @@ import { StatusIndicator } from "@/components/payment-status/StatusIndicator";
 import { CreateArchiveDialog } from "@/components/archive/CreateArchiveDialog";
 import { ZodError } from "zod";
 import * as Dialog from "@radix-ui/react-dialog";
+import { consoleGuard } from "@/lib/security/ConsoleGuard";
 
 type Props = {
   actions: string[];
@@ -64,12 +65,10 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
     } catch (error) {
       if (error instanceof ZodError) {
         // Log detailed validation errors for debugging (dev-only)
-        if (import.meta.env.DEV) {
-          console.error('Payment validation failed:', {
-            issues: error.issues,
-            paymentCount: normalizedPayments.length
-          });
-        }
+        consoleGuard.error('Payment validation failed:', {
+          issues: error.issues,
+          paymentCount: normalizedPayments.length
+        });
 
         // Surface user-safe summary of first issue without exposing PII
         const firstIssue = error.issues[0];
@@ -84,9 +83,7 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
         });
       } else {
         // Log unexpected errors for debugging (dev-only)
-        if (import.meta.env.DEV) {
-          console.error('Unexpected validation error:', error);
-        }
+        consoleGuard.error('Unexpected validation error:', error);
 
         setValidationError('Unknown validation error');
         setWarningToast({
@@ -160,9 +157,7 @@ export default function ResultsThisWeek({ actions, icsBase64, onCopy, normalized
       }
     } catch (error) {
       // Log error details in development only
-      if (import.meta.env.DEV) {
-        console.error('CSV export failed:', error);
-      }
+      consoleGuard.error('CSV export failed:', error);
       setWarningToast({
         message: 'CSV export failed. Please try again.',
         type: 'error'

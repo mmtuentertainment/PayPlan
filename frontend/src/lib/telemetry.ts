@@ -9,6 +9,8 @@
  * - No cookies, no external dependencies
  */
 
+import { getDoNotTrack } from './validation/RuntimeTypeGuard';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -72,17 +74,20 @@ export const CONSENT_KEY = "pp.telemetryConsent";
 // DNT DETECTION
 // ============================================================================
 
+/**
+ * Check if Do Not Track is enabled
+ *
+ * Uses RuntimeTypeGuard for proper TypeScript typing (FR-010)
+ */
 export function isDNT(): boolean {
-  if (typeof navigator === "undefined") return false;
+  const dntValue = getDoNotTrack();
 
-  const nav = navigator as Navigator & { msDoNotTrack?: string };
-  const win = window as Window & { doNotTrack?: string };
+  if (dntValue === null) {
+    return false;
+  }
 
-  return (
-    navigator.doNotTrack === "1" ||
-    nav.msDoNotTrack === "1" ||
-    win.doNotTrack === "1"
-  );
+  // DNT header can be "1" (enabled), "0" (disabled), or "unspecified"
+  return dntValue === "1";
 }
 
 // ============================================================================
