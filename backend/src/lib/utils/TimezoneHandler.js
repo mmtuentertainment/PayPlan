@@ -170,16 +170,21 @@ class TimezoneHandler {
 
     // Handle string
     if (typeof date === 'string') {
-      // ISO 8601 strings MUST include explicit timezone to avoid ambiguity
-      // Reject timezone-less strings to prevent silent UTC assumption
+      // ISO 8601 strings without timezone: treated as UTC (with console warning)
+      // Best practice: always provide explicit timezone (Z or +/-HH:MM)
+      let dateStr = date;
       if (!/Z|[+-]\d{2}:\d{2}$/.test(date)) {
-        throw new Error(
-          `Ambiguous date string without timezone: "${date}". ` +
-          'Provide explicit timezone (e.g., "2025-01-15T10:00:00Z" for UTC or "2025-01-15T10:00:00-05:00" for EST)'
-        );
+        // Warn about ambiguous date but maintain backward compatibility
+        if (typeof console !== 'undefined' && console.warn) {
+          console.warn(
+            `[TimezoneHandler] Ambiguous date string without timezone: "${date}". ` +
+            'Assuming UTC. For clarity, use explicit timezone (e.g., "2025-01-15T10:00:00Z" or "2025-01-15T10:00:00-05:00")'
+          );
+        }
+        dateStr = date + 'Z'; // Assume UTC for backward compatibility
       }
 
-      const parsed = new Date(date);
+      const parsed = new Date(dateStr);
       const timestamp = parsed.getTime();
 
       if (isNaN(timestamp)) {
