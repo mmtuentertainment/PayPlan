@@ -7,6 +7,16 @@ import * as telemetry from '@/lib/telemetry';
 import { usePreferences } from '@/hooks/usePreferences';
 import { PreferenceCategory } from '@/lib/preferences/types';
 import { timezoneValueSchema } from '@/lib/preferences/schemas';
+import {
+  CsvSizeError,
+  CsvRowCountError,
+  CsvDelimiterError,
+  CsvParseError,
+  CsvDateFormatError,
+  CsvDateRealError,
+  CsvCurrencyError,
+  isCsvError,
+} from '@/lib/csv-errors';
 
 interface Risk { type: 'COLLISION'|'WEEKEND_AUTOPAY'; severity: 'high'|'medium'|'low'; message: string; affectedItems?: string[]; }
 interface CSVRow { provider: string; amount: string; currency: string; dueISO: string; autopay: string; }
@@ -44,10 +54,10 @@ export default function Import() {
   const parseCSV = (text: string): { rows: CSVRow[]; delimiter: telemetry.DelimiterType } => {
     // Strip UTF-8 BOM and check for empty file
     const normalized = text.replace(/^\uFEFF/, '').trim();
-    if (!normalized) throw new Error('CSV file is empty');
+    if (!normalized) throw new CsvParseError('CSV file is empty');
 
     const lines = normalized.split(/\r?\n/);
-    if (lines.length === 1) throw new Error('No data rows found');
+    if (lines.length === 1) throw new CsvParseError('No data rows found');
 
     // T010: Delimiter detection - normalize header (BOM already stripped at line 17)
     const header = lines[0].trim();
@@ -57,12 +67,12 @@ export default function Import() {
       // Check for semicolon delimiter or wrong field count
       if (header.includes(';')) {
         delimiter = 'semicolon';
-        throw new Error('Parse failure: expected comma-delimited CSV');
+        throw new CsvDelimiterError('Parse failure: expected comma-delimited CSV', delimiter);
       }
       if (header.split(',').length !== 5) {
-        throw new Error('Parse failure: expected comma-delimited CSV');
+        throw new CsvParseError('Parse failure: expected comma-delimited CSV');
       }
-      throw new Error('Invalid CSV headers. Expected: provider,amount,currency,dueISO,autopay');
+      throw new CsvParseError('Invalid CSV headers. Expected: provider,amount,currency,dueISO,autopay');
     }
 
     const rows = lines
@@ -70,7 +80,7 @@ export default function Import() {
       .filter(line => line.trim().length > 0)
       .map(line => {
         const v = line.split(',').map(s => s.trim());
-        if (v.length !== 5) throw new Error('Parse failure: expected comma-delimited CSV');
+        if (v.length !== 5) throw new CsvParseError('Parse failure: expected comma-delimited CSV');
         return { provider: v[0], amount: v[1], currency: v[2], dueISO: v[3], autopay: v[4] };
       });
 
@@ -79,24 +89,24 @@ export default function Import() {
 
   const csvRowToItem = (row: CSVRow, rowNum: number, tz: string): Item => {
     const provider = row.provider.trim();
-    if (!provider) throw new Error(`Missing provider in row ${rowNum}`);
+    if (!provider) throw new CsvParseError(`Missing provider in row ${rowNum}`, rowNum);
     const amount = parseFloat(row.amount);
-    if (isNaN(amount) || amount <= 0) throw new Error(`Invalid amount in row ${rowNum}`);
+    if (isNaN(amount) || amount <= 0) throw new CsvParseError(`Invalid amount in row ${rowNum}`, rowNum);
     const currency = row.currency.trim().toUpperCase();
     if (!/^[A-Z]{3}$/.test(currency)) {
-      throw new Error(`Invalid currency code in row ${rowNum}: ${row.currency.trim()} (expected 3-letter ISO 4217 code)`);
+      throw new CsvCurrencyError(rowNum, row.currency.trim());
     }
     const dueISO = row.dueISO.trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dueISO)) throw new Error(`Invalid date format in row ${rowNum}. Expected YYYY-MM-DD`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dueISO)) throw new CsvDateFormatError(rowNum, dueISO);
 
     // T011: Real calendar date validation
     const dt = DateTime.fromISO(dueISO, { zone: tz });
     if (!dt.isValid) {
-      throw new Error(`Invalid date in row ${rowNum}: ${dueISO}`);
+      throw new CsvDateRealError(rowNum, dueISO);
     }
 
     const autopayStr = row.autopay.trim().toLowerCase();
-    if (autopayStr !== 'true' && autopayStr !== 'false') throw new Error(`Invalid autopay value in row ${rowNum}`);
+    if (autopayStr !== 'true' && autopayStr !== 'false') throw new CsvParseError(`Invalid autopay value in row ${rowNum}`, rowNum);
     return { id: `csv-${rowNum}`, provider, amount, currency, due_date: dueISO, autopay: autopayStr === 'true', installment_no: 1, late_fee: 0, confidence: 1.0 };
   };
 
@@ -111,9 +121,10 @@ export default function Import() {
     try {
       // T009: Pre-parse guards - file size
       if (file.size > 1_048_576) {
+        const error = new CsvSizeError(file.size, 1_048_576);
         setResults(null);
-        setError('CSV too large (max 1MB)');
-        telemetry.error({ phase: 'size', size_bucket: sizeBucket });
+        setError(error.message);
+        telemetry.error({ phase: error.phase, size_bucket: sizeBucket });
         setProcessing(false);
         return;
       }
@@ -126,9 +137,10 @@ export default function Import() {
       const rowBucket = telemetry.bucketRows(dataRowCount);
 
       if (nonEmptyLines.length > 1001) { // 1 header + 1000 data rows
+        const error = new CsvRowCountError(dataRowCount, 1000);
         setResults(null);
-        setError('Too many rows (max 1000)');
-        telemetry.error({ phase: 'rows', row_bucket: rowBucket, size_bucket: sizeBucket });
+        setError(error.message);
+        telemetry.error({ phase: error.phase, row_bucket: rowBucket, size_bucket: sizeBucket });
         setProcessing(false);
         return;
       }
@@ -163,23 +175,27 @@ export default function Import() {
       const errorMsg = err instanceof Error ? err.message : 'Failed to process CSV';
       setError(errorMsg);
 
-      // Track error with appropriate phase (use text from outer scope)
+      // Track error with appropriate phase using instanceof checks (Issue #27)
       const lines = text.trim().split(/\r?\n/);
       const dataRowCount = Math.max(0, lines.filter(l => l.trim()).length - 1);
       const rowBucket = telemetry.bucketRows(dataRowCount);
 
+      // Type-safe phase detection using instanceof checks
       let phase: telemetry.CsvErrorInput['phase'] = 'parse';
       let delimiter: telemetry.DelimiterType | undefined = 'comma';
 
-      if (errorMsg.includes('semicolon') || errorMsg.includes('delimiter')) {
-        phase = 'delimiter';
-        delimiter = 'semicolon';
-      } else if (errorMsg.includes('date format')) {
-        phase = 'date_format';
-      } else if (errorMsg.includes('Invalid date')) {
-        phase = 'date_real';
-      } else if (errorMsg.includes('currency')) {
-        phase = 'currency';
+      if (err instanceof CsvDelimiterError) {
+        phase = err.phase;
+        delimiter = err.detectedDelimiter;
+      } else if (err instanceof CsvDateFormatError) {
+        phase = err.phase;
+      } else if (err instanceof CsvDateRealError) {
+        phase = err.phase;
+      } else if (err instanceof CsvCurrencyError) {
+        phase = err.phase;
+      } else if (isCsvError(err)) {
+        // Catch-all for other CSV errors (CsvParseError, etc.)
+        phase = err.phase as telemetry.CsvErrorInput['phase'];
       }
 
       telemetry.error({

@@ -10,6 +10,7 @@
  */
 
 import { getDoNotTrack } from './validation/RuntimeTypeGuard';
+import { isCsvError, type CsvDelimiterError } from './csv-errors';
 
 // ============================================================================
 // TYPES
@@ -233,6 +234,33 @@ function emitEvent(event: TelemetryEvent): void {
   }
 
   transport(event);
+}
+
+// ============================================================================
+// ERROR HELPERS (Issue #27)
+// ============================================================================
+
+/**
+ * Extract phase from CSV error using instanceof checks
+ *
+ * Replaces fragile string matching with type-safe error detection.
+ */
+export function extractPhaseFromError(err: unknown): CsvErrorInput['phase'] {
+  if (isCsvError(err)) {
+    // All CSV errors have a typed phase property
+    return err.phase as CsvErrorInput['phase'];
+  }
+  return 'parse'; // Default fallback for unknown errors
+}
+
+/**
+ * Extract delimiter from CSV delimiter error
+ */
+export function extractDelimiterFromError(err: unknown): DelimiterType | undefined {
+  if (isCsvError(err) && 'detectedDelimiter' in err) {
+    return (err as CsvDelimiterError).detectedDelimiter;
+  }
+  return 'comma'; // Default delimiter
 }
 
 // ============================================================================
