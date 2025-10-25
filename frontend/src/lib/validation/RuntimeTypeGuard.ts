@@ -215,6 +215,11 @@ export function isArray(value: unknown): value is unknown[] {
  *
  * Implements FR-010: Browser APIs accessed with proper TypeScript types
  *
+ * Checks multiple sources for DNT signal:
+ * 1. navigator.doNotTrack (modern browsers)
+ * 2. navigator.msDoNotTrack (Internet Explorer)
+ * 3. window.doNotTrack (older browsers)
+ *
  * @returns The Do Not Track value or null if not available
  */
 export function getDoNotTrack(): string | null {
@@ -229,5 +234,9 @@ export function getDoNotTrack(): string | null {
     msDoNotTrack?: string | null;
   };
 
-  return nav.doNotTrack ?? nav.msDoNotTrack ?? null;
+  const win = (typeof window !== 'undefined' ? window : {}) as Window & {
+    doNotTrack?: string | null;
+  };
+
+  return nav.doNotTrack ?? nav.msDoNotTrack ?? win.doNotTrack ?? null;
 }

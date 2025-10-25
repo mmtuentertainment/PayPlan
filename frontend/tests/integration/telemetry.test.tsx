@@ -103,14 +103,14 @@ describe('Telemetry - DNT Respected', () => {
     Object.defineProperty(navigator, 'doNotTrack', { value: '1', configurable: true });
     expect(telemetry.isDNT()).toBe(true);
 
-    // Reset
-    Object.defineProperty(navigator, 'doNotTrack', { value: '0', configurable: true });
+    // Reset to undefined to test fallback chain
+    Object.defineProperty(navigator, 'doNotTrack', { value: undefined, configurable: true });
 
     // Test navigator.msDoNotTrack
     Object.defineProperty(navigator, 'msDoNotTrack', { value: '1', configurable: true });
     expect(telemetry.isDNT()).toBe(true);
 
-    // Reset
+    // Reset to undefined to test fallback chain
     Object.defineProperty(navigator, 'msDoNotTrack', { value: undefined, configurable: true });
 
     // Test window.doNotTrack
