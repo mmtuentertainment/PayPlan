@@ -1357,13 +1357,19 @@ describe('PiiSanitizer', () => {
    * Validates that complex regex patterns complete quickly even with pathological inputs
    */
   describe('ReDoS Protection', () => {
+    // Configurable ReDoS protection thresholds for CI environment tuning
+    // Single field operations should complete very quickly (<10ms default)
+    // Mixed pathological inputs allow slightly more time (<50ms default)
+    const REDOS_THRESHOLD_MS = parseThreshold(process.env.PII_SANITIZER_REDOS_THRESHOLD_MS, 10);
+    const REDOS_MIXED_THRESHOLD_MS = parseThreshold(process.env.PII_SANITIZER_REDOS_MIXED_THRESHOLD_MS, 50);
+
     it('should handle extremely long field names without performance degradation', () => {
       const maliciousField = 'a'.repeat(1000) + 'Password' + 'b'.repeat(1000);
       const input = { [maliciousField]: 'value', id: '123' };
       const start = performance.now();
       sanitizer.sanitize(input);
       const duration = performance.now() - start;
-      expect(duration).toBeLessThan(10); // Should complete in <10ms
+      expect(duration).toBeLessThan(REDOS_THRESHOLD_MS);
     });
 
     it('should handle deeply nested pattern-like field names quickly', () => {
@@ -1372,7 +1378,7 @@ describe('PiiSanitizer', () => {
       const start = performance.now();
       sanitizer.sanitize(input);
       const duration = performance.now() - start;
-      expect(duration).toBeLessThan(10); // Should complete in <10ms
+      expect(duration).toBeLessThan(REDOS_THRESHOLD_MS);
     });
 
     it('should handle alternating case patterns without performance degradation', () => {
@@ -1381,7 +1387,7 @@ describe('PiiSanitizer', () => {
       const start = performance.now();
       sanitizer.sanitize(input);
       const duration = performance.now() - start;
-      expect(duration).toBeLessThan(10); // Should complete in <10ms
+      expect(duration).toBeLessThan(REDOS_THRESHOLD_MS);
     });
 
     it('should handle many underscores without performance degradation', () => {
@@ -1390,7 +1396,7 @@ describe('PiiSanitizer', () => {
       const start = performance.now();
       sanitizer.sanitize(input);
       const duration = performance.now() - start;
-      expect(duration).toBeLessThan(10); // Should complete in <10ms
+      expect(duration).toBeLessThan(REDOS_THRESHOLD_MS);
     });
 
     it('should handle mixed pathological inputs without performance degradation', () => {
@@ -1405,7 +1411,7 @@ describe('PiiSanitizer', () => {
       const start = performance.now();
       sanitizer.sanitize(input);
       const duration = performance.now() - start;
-      expect(duration).toBeLessThan(50); // All 4 fields in <50ms total
+      expect(duration).toBeLessThan(REDOS_MIXED_THRESHOLD_MS);
     });
   });
 
