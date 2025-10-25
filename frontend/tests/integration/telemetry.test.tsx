@@ -575,8 +575,8 @@ describe('Telemetry - ARIA Live Announcements', () => {
   it('should have live region with role="status"', () => {
     render(<TelemetryConsentBanner />);
 
-    // Live region should exist when banner is visible
-    const liveRegion = screen.getByRole('status');
+    // Live region should exist when banner is visible (use name to select countdown announcements)
+    const liveRegion = screen.getByRole('status', { name: 'Countdown announcements' });
     expect(liveRegion).toBeInTheDocument();
 
     // Live region should announce countdown at mount (10 seconds)
@@ -587,7 +587,7 @@ describe('Telemetry - ARIA Live Announcements', () => {
   it('should have correct ARIA attributes', () => {
     render(<TelemetryConsentBanner />);
 
-    const liveRegion = screen.getByRole('status');
+    const liveRegion = screen.getByRole('status', { name: 'Countdown announcements' });
 
     // Check aria-live="polite"
     expect(liveRegion).toHaveAttribute('aria-live', 'polite');
@@ -603,16 +603,13 @@ describe('Telemetry - ARIA Live Announcements', () => {
   it('should announce "Anonymous analytics enabled" on opt-in', async () => {
     render(<TelemetryConsentBanner />);
 
-    // Initially shows countdown announcement
-    const liveRegion = screen.getByRole('status');
-    expect(liveRegion).toHaveTextContent(/10 seconds/);
-
     const allowButton = screen.getByText('Allow analytics');
     fireEvent.click(allowButton);
 
-    // Live region text should be set immediately
+    // Consent state announcement live region text should be set immediately (Issue #30)
+    const consentLiveRegion = screen.getByRole('status', { name: 'Consent state announcements' });
     await waitFor(() => {
-      expect(liveRegion).toHaveTextContent('Anonymous analytics enabled');
+      expect(consentLiveRegion).toHaveTextContent('Anonymous analytics enabled');
     });
   });
 
@@ -620,16 +617,13 @@ describe('Telemetry - ARIA Live Announcements', () => {
   it('should announce "Analytics disabled" on opt-out (Decline)', async () => {
     render(<TelemetryConsentBanner />);
 
-    // Initially shows countdown announcement
-    const liveRegion = screen.getByRole('status');
-    expect(liveRegion).toHaveTextContent(/10 seconds/);
-
     const declineButton = screen.getByText('Decline');
     fireEvent.click(declineButton);
 
-    // Live region text should be set immediately
+    // Consent state announcement live region text should be set immediately (Issue #30)
+    const consentLiveRegion = screen.getByRole('status', { name: 'Consent state announcements' });
     await waitFor(() => {
-      expect(liveRegion).toHaveTextContent('Analytics disabled');
+      expect(consentLiveRegion).toHaveTextContent('Analytics disabled');
     });
   });
 
@@ -637,16 +631,13 @@ describe('Telemetry - ARIA Live Announcements', () => {
   it('should announce "Analytics disabled" on Escape key', async () => {
     render(<TelemetryConsentBanner />);
 
-    // Initially shows countdown announcement
-    const liveRegion = screen.getByRole('status');
-    expect(liveRegion).toHaveTextContent(/10 seconds/);
-
     const dialog = screen.getByRole('dialog');
     fireEvent.keyDown(dialog, { key: 'Escape' });
 
-    // Live region text should be set immediately
+    // Consent state announcement live region text should be set immediately (Issue #30)
+    const consentLiveRegion = screen.getByRole('status', { name: 'Consent state announcements' });
     await waitFor(() => {
-      expect(liveRegion).toHaveTextContent('Analytics disabled');
+      expect(consentLiveRegion).toHaveTextContent('Analytics disabled');
     });
   });
 });
@@ -848,7 +839,7 @@ describe('Telemetry - Auto-Dismiss Countdown', () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
     render(<TelemetryConsentBanner />);
 
-    const liveRegion = screen.getByRole('status');
+    const liveRegion = screen.getByRole('status', { name: 'Countdown announcements' });
 
     // At 10s
     expect(liveRegion).toHaveTextContent(/10 seconds/);
@@ -873,7 +864,7 @@ describe('Telemetry - Auto-Dismiss Countdown', () => {
   it('announces auto-dismissed on timeout', async () => {
     render(<TelemetryConsentBanner />);
 
-    const liveRegion = screen.getByRole('status');
+    const liveRegion = screen.getByRole('status', { name: 'Countdown announcements' });
 
     // Wait for countdown to complete (10s) + a bit more for auto-dismiss to trigger
     await new Promise(resolve => setTimeout(resolve, 10100));

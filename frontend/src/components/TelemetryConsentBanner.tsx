@@ -298,6 +298,7 @@ export function TelemetryConsentBanner() {
         role="status"
         aria-live="polite"
         aria-atomic="true"
+        aria-label="Countdown announcements"
         className="sr-only"
       >
         {announcementText}
@@ -307,6 +308,7 @@ export function TelemetryConsentBanner() {
         role="status"
         aria-live="polite"
         aria-atomic="true"
+        aria-label="Consent state announcements"
         className="sr-only"
       >
         {consentStateAnnouncement}
