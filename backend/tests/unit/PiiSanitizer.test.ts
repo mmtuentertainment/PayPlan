@@ -20,8 +20,8 @@ import {
   calculatePercentile,
 } from '../helpers/performance';
 
-// Dummy value for security scanner hygiene - tests field name detection, not value validation
-const DUMMY_SECRET = 'REDACTED_TEST_VALUE';
+// Test constant for security scanner hygiene - tests field name detection, not value validation
+const TEST_REDACTED_VALUE = 'REDACTED_TEST_VALUE';
 
 /**
  * Test Helper Functions
@@ -453,31 +453,31 @@ describe('PiiSanitizer', () => {
   describe('US2: Authentication Secret Detection', () => {
     describe('standalone authentication secret fields', () => {
       it('T032: should sanitize password field', () => {
-        expectFieldSanitized(sanitizer, 'password', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'password', TEST_REDACTED_VALUE);
       });
 
       it('T033: should sanitize passwd field', () => {
-        expectFieldSanitized(sanitizer, 'passwd', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'passwd', TEST_REDACTED_VALUE);
       });
 
       it('T034: should sanitize token field', () => {
-        expectFieldSanitized(sanitizer, 'token', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'token', TEST_REDACTED_VALUE);
       });
 
       it('T035: should sanitize apiKey field', () => {
-        expectFieldSanitized(sanitizer, 'apiKey', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'apiKey', TEST_REDACTED_VALUE);
       });
 
       it('T036: should sanitize api_key field', () => {
-        expectFieldSanitized(sanitizer, 'api_key', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'api_key', TEST_REDACTED_VALUE);
       });
 
       it('T037: should sanitize secret field', () => {
-        expectFieldSanitized(sanitizer, 'secret', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'secret', TEST_REDACTED_VALUE);
       });
 
       it('T038: should sanitize auth field', () => {
-        expectFieldSanitized(sanitizer, 'auth', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'auth', TEST_REDACTED_VALUE);
       });
 
       it('T039: should sanitize credential field', () => {
@@ -489,55 +489,55 @@ describe('PiiSanitizer', () => {
       });
 
       it('T041: should sanitize authorization field', () => {
-        expectFieldSanitized(sanitizer, 'authorization', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'authorization', TEST_REDACTED_VALUE);
       });
     });
 
     describe('camelCase authentication secret fields', () => {
       it('T042: should sanitize userPassword field (camelCase)', () => {
-        expectFieldSanitized(sanitizer, 'userPassword', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'userPassword', TEST_REDACTED_VALUE);
       });
 
       it('T043: should sanitize user_password field (snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'user_password', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'user_password', TEST_REDACTED_VALUE);
       });
 
       it('T044: should sanitize accessToken field (camelCase)', () => {
-        expectFieldSanitized(sanitizer, 'accessToken', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'accessToken', TEST_REDACTED_VALUE);
       });
 
       it('T045: should sanitize access_token field (snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'access_token', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'access_token', TEST_REDACTED_VALUE);
       });
 
       it('T046: should sanitize secretKey field (camelCase)', () => {
-        expectFieldSanitized(sanitizer, 'secretKey', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'secretKey', TEST_REDACTED_VALUE);
       });
 
       it('T047: should sanitize secret_key field (snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'secret_key', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'secret_key', TEST_REDACTED_VALUE);
       });
 
       it('T048: should sanitize clientSecret field (camelCase)', () => {
-        expectFieldSanitized(sanitizer, 'clientSecret', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'clientSecret', TEST_REDACTED_VALUE);
       });
 
       it('T049: should sanitize client_secret field (snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'client_secret', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'client_secret', TEST_REDACTED_VALUE);
       });
     });
 
     describe('case-insensitive authentication secret matching', () => {
       it('T050: should sanitize PASSWORD (uppercase)', () => {
-        expectFieldSanitized(sanitizer, 'PASSWORD', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'PASSWORD', TEST_REDACTED_VALUE);
       });
 
       it('T051: should sanitize Token (capitalized)', () => {
-        expectFieldSanitized(sanitizer, 'Token', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'Token', TEST_REDACTED_VALUE);
       });
 
       it('T052: should sanitize API_KEY (uppercase snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'API_KEY', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'API_KEY', TEST_REDACTED_VALUE);
       });
     });
 
@@ -602,23 +602,23 @@ describe('PiiSanitizer', () => {
 
       // Verify compound patterns still work
       it('should STILL sanitize apiKey field (compound auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'apiKey', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'apiKey', TEST_REDACTED_VALUE);
       });
 
       it('should STILL sanitize api_key field (compound auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'api_key', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'api_key', TEST_REDACTED_VALUE);
       });
 
       it('should STILL sanitize accessKey field (compound auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'accessKey', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'accessKey', TEST_REDACTED_VALUE);
       });
 
       it('should STILL sanitize access_key field (compound auth secret, snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'access_key', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'access_key', TEST_REDACTED_VALUE);
       });
 
       it('should STILL sanitize secretKey field (compound auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'secretKey', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'secretKey', TEST_REDACTED_VALUE);
       });
     });
 
@@ -645,28 +645,28 @@ describe('PiiSanitizer', () => {
 
       // Authentication secret patterns with numeric suffixes
       it('should sanitize password1 (versioned auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'password1', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'password1', TEST_REDACTED_VALUE);
       });
 
       it('should sanitize token_2 (versioned snake_case auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'token_2', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'token_2', TEST_REDACTED_VALUE);
       });
 
       it('should sanitize apiKey3 (versioned camelCase auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'apiKey3', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'apiKey3', TEST_REDACTED_VALUE);
       });
 
       it('should sanitize API_KEY_123 (versioned uppercase snake_case auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'API_KEY_123', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'API_KEY_123', TEST_REDACTED_VALUE);
       });
 
       // Compound fields with versioned auth secrets
       it('should sanitize userPassword1 (compound versioned auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'userPassword1', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'userPassword1', TEST_REDACTED_VALUE);
       });
 
       it('should sanitize access_token_2 (compound versioned snake_case auth secret)', () => {
-        expectFieldSanitized(sanitizer, 'access_token_2', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'access_token_2', TEST_REDACTED_VALUE);
       });
     });
 
@@ -679,11 +679,11 @@ describe('PiiSanitizer', () => {
       });
 
       it('should sanitize password12345 (5-digit numeric suffix)', () => {
-        expectFieldSanitized(sanitizer, 'password12345', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'password12345', TEST_REDACTED_VALUE);
       });
 
       it('should sanitize token_99999 (snake_case with 5-digit suffix)', () => {
-        expectFieldSanitized(sanitizer, 'token_99999', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'token_99999', TEST_REDACTED_VALUE);
       });
 
       it('should sanitize userEmail123456789 (camelCase with 9-digit suffix)', () => {
@@ -691,7 +691,7 @@ describe('PiiSanitizer', () => {
       });
 
       it('should sanitize api_key_1000000 (snake_case auth secret with 7-digit suffix)', () => {
-        expectFieldSanitized(sanitizer, 'api_key_1000000', DUMMY_SECRET);
+        expectFieldSanitized(sanitizer, 'api_key_1000000', TEST_REDACTED_VALUE);
       });
     });
 
@@ -824,7 +824,7 @@ describe('PiiSanitizer', () => {
 
         // Act - sanitize auth secret field multiple times
         for (let i = 0; i < 10; i++) {
-          freshSanitizer.sanitize({ tokenId: DUMMY_SECRET, amount: 100 });
+          freshSanitizer.sanitize({ tokenId: TEST_REDACTED_VALUE, amount: 100 });
         }
 
         // Assert - no telemetry emitted in development
@@ -838,7 +838,7 @@ describe('PiiSanitizer', () => {
         const freshSanitizer = new PiiSanitizer();
 
         // Act - sanitize auth secret field
-        freshSanitizer.sanitize({ passwordFile: DUMMY_SECRET, amount: 100 });
+        freshSanitizer.sanitize({ passwordFile: TEST_REDACTED_VALUE, amount: 100 });
 
         // Assert - no telemetry emitted in test
         expect(consoleLogSpy).not.toHaveBeenCalled();
@@ -851,7 +851,7 @@ describe('PiiSanitizer', () => {
         const freshSanitizer = new PiiSanitizer();
 
         // Act - sanitize auth secret field
-        freshSanitizer.sanitize({ tokenId: DUMMY_SECRET, amount: 100 });
+        freshSanitizer.sanitize({ tokenId: TEST_REDACTED_VALUE, amount: 100 });
 
         // Assert - telemetry emitted exactly once
         expect(consoleLogSpy).toHaveBeenCalledTimes(1);
@@ -867,7 +867,7 @@ describe('PiiSanitizer', () => {
         });
 
         // CRITICAL: Verify no field values are logged
-        expect(telemetryCall).not.toContain(DUMMY_SECRET);
+        expect(telemetryCall).not.toContain(TEST_REDACTED_VALUE);
         expect(telemetryData).not.toHaveProperty('fieldValue');
         expect(telemetryData).not.toHaveProperty('value');
       });
@@ -882,7 +882,7 @@ describe('PiiSanitizer', () => {
         // Use versioned field names (apiKey1, apiKey2, ..., apiKey1000) to bypass cache
         const iterations = 1000;
         for (let i = 0; i < iterations; i++) {
-          freshSanitizer.sanitize({ [`apiKey${i}`]: DUMMY_SECRET, amount: 100 });
+          freshSanitizer.sanitize({ [`apiKey${i}`]: TEST_REDACTED_VALUE, amount: 100 });
         }
 
         // Assert - roughly 1% sampling (allow some variance)
@@ -900,9 +900,9 @@ describe('PiiSanitizer', () => {
         const freshSanitizer = new PiiSanitizer();
 
         // Act - sanitize various auth secret fields
-        freshSanitizer.sanitize({ password: DUMMY_SECRET });
-        freshSanitizer.sanitize({ apiKeyFilename: DUMMY_SECRET });
-        freshSanitizer.sanitize({ secretManagerConfig: DUMMY_SECRET });
+        freshSanitizer.sanitize({ password: TEST_REDACTED_VALUE });
+        freshSanitizer.sanitize({ apiKeyFilename: TEST_REDACTED_VALUE });
+        freshSanitizer.sanitize({ secretManagerConfig: TEST_REDACTED_VALUE });
 
         // Assert - 3 telemetry events emitted
         expect(consoleLogSpy).toHaveBeenCalledTimes(3);
@@ -951,7 +951,7 @@ describe('PiiSanitizer', () => {
         // Use versioned field names (token1, token2, ..., token100) to bypass cache
         const iterations = 100;
         for (let i = 0; i < iterations; i++) {
-          freshSanitizer.sanitize({ [`token${i}`]: DUMMY_SECRET, amount: 100 });
+          freshSanitizer.sanitize({ [`token${i}`]: TEST_REDACTED_VALUE, amount: 100 });
         }
 
         // Assert - roughly 50% sampling (allow variance)
