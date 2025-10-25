@@ -839,14 +839,14 @@ describe('PiiSanitizer', () => {
     describe('performance validation (Contract 12, FR-008, SC-004)', () => {
       // CodeRabbit fix (Issue 2): Configurable performance thresholds via environment variables
       // CodeRabbit fix (Issue 7): Validate parsed values with fallbacks for invalid inputs
-      const parseThreshold = (envVar: string | undefined, defaultValue: number, min: number = 1): number => {
+      const parseThreshold = (envVar: string | undefined, defaultValue: number, min: number = 1, max: number = 10000): number => {
         if (!envVar) return defaultValue;
         const parsed = parseInt(envVar, 10);
-        if (!Number.isFinite(parsed) || parsed <= 0 || !Number.isInteger(parsed)) {
-          console.warn(`[PiiSanitizer] Invalid env threshold "${envVar}", using default ${defaultValue}ms`);
+        if (!Number.isFinite(parsed) || parsed < min || parsed > max || !Number.isInteger(parsed)) {
+          console.warn(`[PiiSanitizer] Invalid env threshold "${envVar}" (must be ${min}-${max}ms), using default ${defaultValue}ms`);
           return defaultValue;
         }
-        return Math.max(parsed, min);
+        return parsed;
       };
 
       const parsePercentile = (envVar: string | undefined, defaultValue: number): number => {
@@ -1031,6 +1031,63 @@ describe('PiiSanitizer', () => {
       expect(result.id).toBe(1);
       expect(result.amount).toBe(100);
       expect(result.self).toBe('[Circular]');
+    });
+  });
+
+  /**
+   * Security: ReDoS (Regular Expression Denial of Service) Protection
+   * Validates that complex regex patterns complete quickly even with pathological inputs
+   */
+  describe('ReDoS Protection', () => {
+    it('should handle extremely long field names without performance degradation', () => {
+      const maliciousField = 'a'.repeat(1000) + 'Password' + 'b'.repeat(1000);
+      const input = { [maliciousField]: 'value', id: '123' };
+      const start = performance.now();
+      sanitizer.sanitize(input);
+      const duration = performance.now() - start;
+      expect(duration).toBeLessThan(10); // Should complete in <10ms
+    });
+
+    it('should handle deeply nested pattern-like field names quickly', () => {
+      const maliciousField = 'user_email_address_backup_primary_fallback_secondary_tertiary_quaternary';
+      const input = { [maliciousField]: 'value', id: '123' };
+      const start = performance.now();
+      sanitizer.sanitize(input);
+      const duration = performance.now() - start;
+      expect(duration).toBeLessThan(10); // Should complete in <10ms
+    });
+
+    it('should handle alternating case patterns without performance degradation', () => {
+      const maliciousField = 'uSeRpAsSwOrDtOkEnApIkEyAuThOrIzAtIoN';
+      const input = { [maliciousField]: 'value', id: '123' };
+      const start = performance.now();
+      sanitizer.sanitize(input);
+      const duration = performance.now() - start;
+      expect(duration).toBeLessThan(10); // Should complete in <10ms
+    });
+
+    it('should handle many underscores without performance degradation', () => {
+      const maliciousField = '_'.repeat(100) + 'password' + '_'.repeat(100);
+      const input = { [maliciousField]: 'value', id: '123' };
+      const start = performance.now();
+      sanitizer.sanitize(input);
+      const duration = performance.now() - start;
+      expect(duration).toBeLessThan(10); // Should complete in <10ms
+    });
+
+    it('should handle mixed pathological inputs without performance degradation', () => {
+      const input = {
+        ['a'.repeat(500) + 'email' + 'b'.repeat(500)]: 'value1',
+        ['p'.repeat(200) + 'Token' + 'q'.repeat(200)]: 'value2',
+        ['_'.repeat(50) + 'apiKey' + '_'.repeat(50)]: 'value3',
+        ['xYzAbC'.repeat(100) + 'secret']: 'value4',
+        id: '123',
+      };
+
+      const start = performance.now();
+      sanitizer.sanitize(input);
+      const duration = performance.now() - start;
+      expect(duration).toBeLessThan(50); // All 4 fields in <50ms total
     });
   });
 });

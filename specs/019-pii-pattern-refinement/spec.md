@@ -11,7 +11,7 @@
 
 - Q: When a field name contains BOTH a legitimate technical term AND an authentication secret (e.g., `apiKeyFilename`, `tokenId`, `secretManagerConfig`), should the authentication secret pattern take precedence? → A: Authentication secrets take precedence - any field containing auth pattern (password, token, apiKey, secret, auth, credential) at word boundary is sanitized regardless of other terms
 
-- Q: The spec mentions 8 new authentication patterns and 24 existing PII patterns. When checking field names, does the order matter for performance or correctness? → A: Check authentication secrets first, then other PII patterns (prioritize security-critical patterns for early detection)
+- Q: The spec mentions authentication patterns and 24 existing PII patterns. When checking field names, does the order matter for performance or correctness? → A: Check authentication secrets first, then other PII patterns (prioritize security-critical patterns for early detection). Current implementation includes 13 authentication patterns: password, passwd, token, bearer, apikey, api_key, accesskey, access_key, secret, auth, credential, credentials, authorization
 
 ## User Scenarios & Testing
 
@@ -116,7 +116,7 @@ An operations team relies on existing sanitization behavior for compliance audit
 
 - **FR-002**: System MUST support both camelCase word boundaries (e.g., `firstName` → 'first' and 'Name') and snake_case word boundaries (e.g., `first_name` → 'first' and 'name')
 
-- **FR-003**: System MUST add authentication secret patterns to the sanitization list: `password`, `passwd`, `token`, `apiKey`, `secret`, `auth`, `credential`, `authorization`. System MUST also support versioned field variants with numeric suffixes (e.g., `password1`, `token_2`, `apiKey3`) for both authentication secrets and regular PII patterns
+- **FR-003**: System MUST add authentication secret patterns to the sanitization list: `password`, `passwd`, `token`, `bearer`, `apikey`, `api_key`, `accesskey`, `access_key`, `secret`, `auth`, `credential`, `credentials`, `authorization` (13 patterns total). System MUST also support versioned field variants with numeric suffixes (e.g., `password1`, `token_2`, `apiKey3`) for both authentication secrets and regular PII patterns
 
 - **FR-004**: System MUST scope the 'ip' pattern to only match complete IP address field names (e.g., `ipAddress`, `remote_ip`, `client_ip`, `clientIp`) and not incidental 'ip' substrings (e.g., `zip`, `ship`, `relationship`)
 
