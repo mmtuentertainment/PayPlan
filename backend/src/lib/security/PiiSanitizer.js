@@ -27,8 +27,44 @@
 class PiiSanitizer {
   constructor() {
     /**
-     * PII field patterns to detect and remove (case-insensitive).
-     * Uses substring matching to catch variants like userEmail, billingAddress, etc.
+     * Authentication secret patterns (HIGHEST PRIORITY - Feature 019, US2, Task T057)
+     *
+     * These use AGGRESSIVE matching strategy (GitGuardian approach):
+     * - Match even in compound fields like tokenId, passwordFile
+     * - Cost of missing a secret >> cost of false positive
+     *
+     * Industry-standard approach (from GitLeaks, TruffleHog, secrets-patterns-db):
+     * Treat compound patterns as separate alternatives: (api_key|apikey)
+     */
+    this.authSecretPatterns = [
+      'password',      // User passwords
+      'passwd',        // Unix-style password field
+      'token',         // Access tokens, refresh tokens, JWT tokens
+      'bearer',        // Bearer tokens (CodeRabbit: OAuth 2.0 pattern)
+      'apikey',        // API keys as single word (matches 'apiKey', 'APIKEY')
+      'api',           // API prefix for snake_case (matches 'api_key', 'API_KEY', 'apiToken')
+      'key',           // Key suffix for compounds (matches 'secretKey', 'secret_key', 'accessKey')
+      'secret',        // Generic secrets, client secrets, secret keys
+      'auth',          // Auth tokens, auth headers
+      'credential',    // Single credential field
+      'credentials',   // Plural credentials field (explicit pattern for T040)
+      'authorization', // Authorization headers
+    ];
+
+    /**
+     * Regular PII field patterns to detect and remove (case-insensitive).
+     * Uses word boundary matching to catch variants like userEmail, billingAddress, etc.
+     *
+     * These use CONSERVATIVE matching strategy:
+     * - Do NOT match compound reference fields like accountId, cardType
+     * - Match only actual data fields like account, card, userName
+     *
+     * Pattern Evaluation Priority (FR-013):
+     * 1. Authentication secrets (checked first via authSecretPatterns)
+     * 2. Financial information
+     * 3. Personal identity
+     * 4. Contact information
+     * 5. Network identifiers
      *
      * Categories:
      * - Contact: email, phone, address
@@ -81,6 +117,16 @@ class PiiSanitizer {
       'ip',
       'ipaddress',
     ];
+
+    // CodeRabbit fix (Issue 5): Precompile regexes once in constructor to avoid
+    // creating 400K+ RegExp objects per test. Massive performance improvement!
+    this.authSecretRegexes = this.authSecretPatterns.map(pattern =>
+      this.createAuthSecretRegex(pattern)
+    );
+
+    this.piiRegexes = this.piiPatterns.map(pattern =>
+      this.createWordBoundaryRegex(pattern)
+    );
   }
 
   /**
@@ -225,21 +271,109 @@ class PiiSanitizer {
   }
 
   /**
-   * Checks if a field name matches any PII pattern (case-insensitive substring match).
+   * Creates a CONSERVATIVE word boundary regex for regular PII patterns.
+   * Feature 019: Task T027 - Word boundary regex helper function
+   * CodeRabbit fix (Issue 9): Support versioned fields (email1, email_2)
+   *
+   * Strategy (3 alternatives):
+   * 1. Exact match: pattern alone or with numeric suffix (e.g., 'name', 'email1')
+   * 2. snake_case: _pattern, pattern_, _pattern_ or with numeric suffix (e.g., 'user_name', 'email_2')
+   * 3. camelCase suffix: lowercase+Pattern (e.g., 'userName', 'bankAccount')
+   *
+   * Does NOT match compound prefix fields like accountId, cardType to avoid false positives.
+   */
+  createWordBoundaryRegex(pattern) {
+    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const lowerPattern = escapedPattern.toLowerCase();
+    const capitalizedPattern = escapedPattern.charAt(0).toUpperCase() + escapedPattern.slice(1).toLowerCase();
+
+    const caseInsensitivePattern = lowerPattern
+      .split('')
+      .map(char => /[a-z]/.test(char) ? `[${char}${char.toUpperCase()}]` : char)
+      .join('');
+
+    // CodeRabbit fix (Issue 9): Support versioned fields with optional numeric suffix
+    // Examples: email1, name_2, userName3, email_backup_1
+    return new RegExp(
+      `^${caseInsensitivePattern}(?:[0-9]+)?$|(?:^|_)${caseInsensitivePattern}(?:[0-9]+)?(?:_|$)|[a-z]${capitalizedPattern}(?=[A-Z0-9]|_|$)`
+    );
+  }
+
+  /**
+   * Creates an AGGRESSIVE word boundary regex for authentication secret patterns.
+   * Feature 019: US2, Task T059 - Authentication secret detection
+   * CodeRabbit fix (Issue 9): Support versioned fields (token1, password_2)
+   *
+   * GitGuardian approach: Cost of missing a secret >> cost of false positive
+   *
+   * Strategy (4 alternatives):
+   * 1. Exact match: pattern alone or with numeric suffix (e.g., 'token', 'token1', 'password2')
+   * 2. snake_case: _pattern, pattern_, _pattern_ or with numeric suffix (e.g., 'access_token', 'API_KEY_2')
+   * 3. camelCase suffix: lowercase+Pattern (e.g., 'accessToken', 'userPassword')
+   * 4. camelCase/snake_case prefix: ^pattern(?=[A-Z]|_) (e.g., 'tokenId', 'passwordFile', 'api_key')
+   *
+   * Alternative 4 enables matching compound fields where auth secret is the PRIMARY concept:
+   * - tokenId (reference to a token - still sensitive)
+   * - passwordFile (file containing passwords - sensitive)
+   * - api_key (API key in snake_case - sensitive)
+   */
+  createAuthSecretRegex(pattern) {
+    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const lowerPattern = escapedPattern.toLowerCase();
+    const capitalizedPattern = escapedPattern.charAt(0).toUpperCase() + escapedPattern.slice(1).toLowerCase();
+
+    const caseInsensitivePattern = lowerPattern
+      .split('')
+      .map(char => /[a-z]/.test(char) ? `[${char}${char.toUpperCase()}]` : char)
+      .join('');
+
+    // 4 alternatives: exact, snake_case, camelCase suffix, AND camelCase/snake_case prefix
+    // CodeRabbit fix (Issue 9): Support versioned auth fields with optional numeric suffix
+    // Examples: token1, password_2, API_KEY_3, accessToken123
+    return new RegExp(
+      `^${caseInsensitivePattern}(?:[0-9]+)?$|(?:^|_)${caseInsensitivePattern}(?:[0-9]+)?(?:_|$)|[a-z]${capitalizedPattern}(?=[A-Z0-9]|_|$)|^${caseInsensitivePattern}(?=[A-Z0-9_])`
+    );
+  }
+
+  /**
+   * Checks if a field name matches any PII pattern using word boundary detection.
+   * Feature 019: Task T028, T060 - Two-tier detection strategy
+   * CodeRabbit fix (Issue 5): Use precompiled regexes for massive performance boost
+   *
+   * Priority order (FR-013):
+   * 1. Authentication secrets (AGGRESSIVE matching) - checked first
+   * 2. Regular PII (CONSERVATIVE matching) - checked second
    *
    * @param {string} fieldName - The field name to check
-   * @returns {boolean} True if field contains PII pattern
+   * @returns {boolean} True if field matches PII pattern at word boundary
    *
    * @example
-   * isPiiField('email') // true
-   * isPiiField('userEmail') // true
-   * isPiiField('billingAddress') // true
-   * isPiiField('amount') // false
+   * // Authentication secrets (aggressive)
+   * isPiiField('tokenId') // true - auth secret prefix match
+   * isPiiField('passwordFile') // true - auth secret prefix match
+   * isPiiField('API_KEY') // true - auth secret match
+   *
+   * // Regular PII (conservative)
+   * isPiiField('email') // true - exact match
+   * isPiiField('userName') // true - camelCase boundary match
+   * isPiiField('accountId') // false - 'account' not at word boundary (conservative)
+   * isPiiField('filename') // false - 'name' not at word boundary
    */
   isPiiField(fieldName) {
-    const lowerFieldName = fieldName.toLowerCase();
-    return this.piiPatterns.some((pattern) =>
-      lowerFieldName.includes(pattern)
+    // 1. Check authentication secrets first (HIGHEST PRIORITY, AGGRESSIVE)
+    // CodeRabbit fix: Use precompiled regexes instead of creating new ones
+    const matchesAuthSecret = this.authSecretRegexes.some(regex =>
+      regex.test(fieldName)
+    );
+
+    if (matchesAuthSecret) {
+      return true;
+    }
+
+    // 2. Check regular PII patterns (CONSERVATIVE)
+    // CodeRabbit fix: Use precompiled regexes instead of creating new ones
+    return this.piiRegexes.some(regex =>
+      regex.test(fieldName)
     );
   }
 }
