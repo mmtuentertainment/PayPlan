@@ -8,10 +8,17 @@
 
 // Use require for CommonJS interop (backend uses .js files)
 const { PiiSanitizer } = require('../../src/lib/security/PiiSanitizer');
-const { performance } = require('perf_hooks'); // Node.js performance API for cross-platform compatibility
 
 // Import type for type safety
 import type { PiiSanitizer as PiiSanitizerType } from '../../src/lib/security/PiiSanitizer';
+
+// Import shared performance testing utilities
+import {
+  parseThreshold,
+  parsePercentile,
+  measurePerformance as measurePerf,
+  calculatePercentile,
+} from '../helpers/performance';
 
 // Dummy value for security scanner hygiene - tests field name detection, not value validation
 const DUMMY_SECRET = 'REDACTED_TEST_VALUE';
@@ -51,51 +58,14 @@ function expectFieldSanitized(
 
 /**
  * Helper to measure sanitization performance and return sample timings.
- * CodeRabbit fix (Issue 2): Return individual samples for percentile-based checking.
+ * Wraps shared measurePerformance utility with sanitizer-specific logic.
  */
 function measurePerformance(
   sanitizer: PiiSanitizerType,
   data: any,
   iterations: number = 1000
 ): number[] {
-  const samples: number[] = [];
-  for (let i = 0; i < iterations; i++) {
-    const start = performance.now();
-    sanitizer.sanitize(data);
-    const duration = performance.now() - start;
-    samples.push(duration);
-  }
-  return samples;
-}
-
-/**
- * Calculate percentile from sorted array of samples.
- * CodeRabbit fix (Issue 2): Percentile-based performance checking.
- * CodeRabbit fix (Issue 3): Copy input array to avoid mutation.
- *
- * @param samples - Array of timing samples (will NOT be mutated)
- * @param percentile - Percentile to calculate (0-100)
- * @returns Value at the given percentile
- */
-function calculatePercentile(samples: number[], percentile: number): number {
-  if (samples.length === 0) {
-    return 0;
-  }
-
-  // Copy array to avoid mutating caller's data
-  const sorted = samples.slice().sort((a, b) => a - b);
-
-  // Calculate index (linear interpolation between closest ranks)
-  const index = (percentile / 100) * (sorted.length - 1);
-  const lower = Math.floor(index);
-  const upper = Math.ceil(index);
-  const weight = index % 1;
-
-  if (lower === upper) {
-    return sorted[lower];
-  }
-
-  return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+  return measurePerf(() => sanitizer.sanitize(data), iterations);
 }
 
 describe('PiiSanitizer', () => {
@@ -912,26 +882,7 @@ describe('PiiSanitizer', () => {
     describe('performance validation (Contract 12, FR-008, SC-004)', () => {
       // CodeRabbit fix (Issue 2): Configurable performance thresholds via environment variables
       // CodeRabbit fix (Issue 7): Validate parsed values with fallbacks for invalid inputs
-      const parseThreshold = (envVar: string | undefined, defaultValue: number, min: number = 1, max: number = 10000): number => {
-        if (!envVar) return defaultValue;
-        const parsed = parseInt(envVar, 10);
-        if (!Number.isFinite(parsed) || parsed < min || parsed > max || !Number.isInteger(parsed)) {
-          console.warn(`[PiiSanitizer] Invalid env threshold "${envVar}" (must be ${min}-${max}ms), using default ${defaultValue}ms`);
-          return defaultValue;
-        }
-        return parsed;
-      };
-
-      const parsePercentile = (envVar: string | undefined, defaultValue: number): number => {
-        if (!envVar) return defaultValue;
-        const parsed = parseInt(envVar, 10);
-        if (!Number.isFinite(parsed) || parsed < 1 || parsed > 100 || !Number.isInteger(parsed)) {
-          console.warn(`[PiiSanitizer] Invalid percentile "${envVar}", using default P${defaultValue}`);
-          return defaultValue;
-        }
-        return parsed;
-      };
-
+      // Performance utilities imported from shared helpers/performance.ts
       const THRESHOLD_TYPICAL_MS = parseThreshold(process.env.PII_SANITIZER_THRESHOLD_TYPICAL_MS, 50);
       const THRESHOLD_LARGE_MS = parseThreshold(process.env.PII_SANITIZER_THRESHOLD_LARGE_MS, 100);
       const THRESHOLD_ARRAY_MS = parseThreshold(process.env.PII_SANITIZER_THRESHOLD_ARRAY_MS, 50);
