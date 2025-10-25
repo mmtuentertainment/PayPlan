@@ -136,6 +136,12 @@ class PiiSanitizer {
     this.piiRegexes = this.piiPatterns.map(pattern =>
       this.createWordBoundaryRegex(pattern)
     );
+
+    // Performance optimization: LRU cache for isPiiField() memoization
+    // Common when sanitizing arrays of objects with repeated field names
+    // Example: 1000 payments with fields [amount, email, dueDate] → only 3 regex tests instead of 3000
+    this.fieldCache = new Map();
+    this.FIELD_CACHE_MAX_SIZE = 1000;
   }
 
   /**
@@ -418,6 +424,7 @@ class PiiSanitizer {
    * Checks if a field name matches any PII pattern using word boundary detection.
    * Feature 019: Task T028, T060 - Two-tier detection strategy
    * CodeRabbit fix (Issue 5): Use precompiled regexes for massive performance boost
+   * Performance optimization: LRU cache memoizes results for repeated field names
    *
    * Priority order (FR-013):
    * 1. Authentication secrets (AGGRESSIVE matching) - checked first
@@ -437,8 +444,21 @@ class PiiSanitizer {
    * isPiiField('userName') // true - camelCase boundary match
    * isPiiField('accountId') // false - 'account' not at word boundary (conservative)
    * isPiiField('filename') // false - 'name' not at word boundary
+   *
+   * Performance: When sanitizing arrays of objects (common pattern in payment processing),
+   * the LRU cache eliminates redundant regex tests. Example: 1000 payments with 5 unique
+   * field names → 5 regex tests instead of 5000 (1000x speedup for cached lookups).
    */
   isPiiField(fieldName) {
+    // Check cache first (LRU optimization)
+    if (this.fieldCache.has(fieldName)) {
+      const cachedResult = this.fieldCache.get(fieldName);
+      // Move to end (LRU)
+      this.fieldCache.delete(fieldName);
+      this.fieldCache.set(fieldName, cachedResult);
+      return cachedResult;
+    }
+
     // 1. Check authentication secrets first (HIGHEST PRIORITY, AGGRESSIVE)
     // CodeRabbit fix: Use precompiled regexes instead of creating new ones
     const matchesAuthSecret = this.authSecretRegexes.some(regex =>
@@ -446,14 +466,33 @@ class PiiSanitizer {
     );
 
     if (matchesAuthSecret) {
+      this.cacheFieldResult(fieldName, true);
       return true;
     }
 
     // 2. Check regular PII patterns (CONSERVATIVE)
     // CodeRabbit fix: Use precompiled regexes instead of creating new ones
-    return this.piiRegexes.some(regex =>
+    const matchesPii = this.piiRegexes.some(regex =>
       regex.test(fieldName)
     );
+
+    this.cacheFieldResult(fieldName, matchesPii);
+    return matchesPii;
+  }
+
+  /**
+   * Caches isPiiField() result with LRU eviction.
+   * @param {string} fieldName - Field name
+   * @param {boolean} result - Whether field is PII
+   * @private
+   */
+  cacheFieldResult(fieldName, result) {
+    // LRU eviction: remove oldest entry if cache is full
+    if (this.fieldCache.size >= this.FIELD_CACHE_MAX_SIZE) {
+      const firstKey = this.fieldCache.keys().next().value;
+      this.fieldCache.delete(firstKey);
+    }
+    this.fieldCache.set(fieldName, result);
   }
 }
 

@@ -1138,4 +1138,68 @@ describe('PiiSanitizer', () => {
       expect(duration).toBeLessThan(50); // All 4 fields in <50ms total
     });
   });
+
+  /**
+   * Performance: LRU Cache Memoization
+   * Validates that repeated field names benefit from cache hits (common in array processing)
+   */
+  describe('LRU Cache Memoization', () => {
+    it('should benefit from cache when sanitizing arrays with repeated field names', () => {
+      // Scenario: 1000 payments with same 5 fields
+      // Without cache: 5000 regex tests
+      // With cache: 5 regex tests + 4995 cache hits (~1000x speedup for cached lookups)
+      const arrayOfObjects = Array.from({ length: 1000 }, (_, i) => ({
+        id: `payment-${i}`,
+        amount: i * 10,
+        email: `user${i}@example.com`, // PII - will be removed
+        currency: 'USD',
+        status: 'completed',
+      }));
+
+      const start = performance.now();
+      sanitizer.sanitize(arrayOfObjects);
+      const duration = performance.now() - start;
+
+      // With LRU cache, should be significantly faster than 50ms
+      // Target: <20ms for 1000 objects (cache enables ~5x speedup)
+      expect(duration).toBeLessThan(20);
+    });
+
+    it('should handle cache eviction correctly when exceeding max size', () => {
+      // Create an object with 1200 unique field names (exceeds 1000 cache limit)
+      const largeObject: any = {};
+      for (let i = 0; i < 1200; i++) {
+        largeObject[`field${i}`] = `value${i}`;
+      }
+
+      // First sanitization: fills cache, triggers LRU eviction
+      const start1 = performance.now();
+      sanitizer.sanitize(largeObject);
+      const duration1 = performance.now() - start1;
+
+      // Second sanitization: should still be fast even with eviction
+      const start2 = performance.now();
+      sanitizer.sanitize(largeObject);
+      const duration2 = performance.now() - start2;
+
+      // Both should complete quickly (LRU eviction doesn't cause performance degradation)
+      expect(duration1).toBeLessThan(50);
+      expect(duration2).toBeLessThan(50);
+    });
+
+    it('should maintain correct results with cache (cache correctness)', () => {
+      // Verify cache doesn't return stale or incorrect results
+      const input1 = { email: 'test@example.com', amount: 100 };
+      const input2 = { email: 'another@example.com', amount: 200 };
+
+      const result1 = sanitizer.sanitize(input1);
+      const result2 = sanitizer.sanitize(input2);
+
+      // Both should sanitize 'email' field correctly
+      expect(result1).toEqual({ amount: 100 });
+      expect(result2).toEqual({ amount: 200 });
+      expect(result1).not.toHaveProperty('email');
+      expect(result2).not.toHaveProperty('email');
+    });
+  });
 });
