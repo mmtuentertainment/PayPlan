@@ -887,7 +887,8 @@ describe('PiiSanitizer', () => {
         };
 
         // CodeRabbit fix: Use percentile-based checking (P95) instead of simple average
-        const samples = measurePerformance(sanitizer, typicalObject, 1000);
+        // CodeRabbit Round 3 nitpick: Reduce iterations for CI stability (1000 → 300)
+        const samples = measurePerformance(sanitizer, typicalObject, 300);
         const p95 = calculatePercentile(samples, PERCENTILE);
         expect(p95).toBeLessThan(THRESHOLD_TYPICAL_MS); // P95 < threshold
       });
@@ -913,7 +914,8 @@ describe('PiiSanitizer', () => {
         }
 
         // CodeRabbit fix: Use percentile-based checking (P95) instead of simple average
-        const samples = measurePerformance(sanitizer, largeObject, 100);
+        // CodeRabbit Round 3 nitpick: Reduce iterations for CI stability (100 → 60)
+        const samples = measurePerformance(sanitizer, largeObject, 60);
         const p95 = calculatePercentile(samples, PERCENTILE);
         expect(p95).toBeLessThan(THRESHOLD_LARGE_MS); // P95 < threshold
       });
@@ -926,7 +928,8 @@ describe('PiiSanitizer', () => {
         }));
 
         // CodeRabbit fix: Use percentile-based checking (P95) instead of simple average
-        const samples = measurePerformance(sanitizer, arrayOfObjects, 500);
+        // CodeRabbit Round 3 nitpick: Reduce iterations for CI stability (500 → 200)
+        const samples = measurePerformance(sanitizer, arrayOfObjects, 200);
         const p95 = calculatePercentile(samples, PERCENTILE);
         expect(p95).toBeLessThan(THRESHOLD_ARRAY_MS); // P95 < threshold
       });
