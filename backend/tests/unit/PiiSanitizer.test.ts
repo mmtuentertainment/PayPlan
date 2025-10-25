@@ -699,6 +699,31 @@ describe('PiiSanitizer', () => {
         expectFieldSanitized(sanitizer, 'access_token_2', DUMMY_SECRET);
       });
     });
+
+    describe('Large numeric suffixes (>3 digits) - Coverage Gap', () => {
+      // Verify that (?:[0-9]+)? pattern handles arbitrarily long numeric suffixes
+      // This closes the final coverage gap for versioned field support
+
+      it('should sanitize email9999 (4-digit numeric suffix)', () => {
+        expectFieldSanitized(sanitizer, 'email9999', 'user@example.com');
+      });
+
+      it('should sanitize password12345 (5-digit numeric suffix)', () => {
+        expectFieldSanitized(sanitizer, 'password12345', DUMMY_SECRET);
+      });
+
+      it('should sanitize token_99999 (snake_case with 5-digit suffix)', () => {
+        expectFieldSanitized(sanitizer, 'token_99999', DUMMY_SECRET);
+      });
+
+      it('should sanitize userEmail123456789 (camelCase with 9-digit suffix)', () => {
+        expectFieldSanitized(sanitizer, 'userEmail123456789', 'user@example.com');
+      });
+
+      it('should sanitize api_key_1000000 (snake_case auth secret with 7-digit suffix)', () => {
+        expectFieldSanitized(sanitizer, 'api_key_1000000', DUMMY_SECRET);
+      });
+    });
   });
 
   /**
