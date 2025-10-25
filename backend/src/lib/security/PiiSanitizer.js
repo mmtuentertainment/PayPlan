@@ -505,6 +505,33 @@ class PiiSanitizer {
     );
 
     if (matchesAuthSecret) {
+      // Optional production telemetry sampling for auth-secret matches
+      // Enhancement: Monitor redacted field names (no values) to detect unexpected over-redaction
+      //
+      // Sampling strategy:
+      // - Only enabled in production (NODE_ENV === 'production')
+      // - Default 1% sampling rate (configurable via PII_REDACT_SAMPLING_RATE env var)
+      // - Emits structured logger.info event with fieldName and category only
+      // - NEVER logs field values (privacy-first)
+      //
+      // Example log output:
+      // { event: 'PII_REDACTION', category: 'auth_secret', fieldName: 'tokenId' }
+      //
+      // Use case: Detect if Alternative 4 (AGGRESSIVE prefix matching) is redacting
+      // unexpected reference fields that could be non-sensitive identifiers
+      if (
+        process.env.NODE_ENV === 'production' &&
+        Math.random() < (process.env.PII_REDACT_SAMPLING_RATE ? Number(process.env.PII_REDACT_SAMPLING_RATE) : 0.01)
+      ) {
+        // Log only fieldName and category, NEVER the value
+        // Use console.log for structured logging (can be replaced with logger.info in production)
+        console.log(JSON.stringify({
+          event: 'PII_REDACTION',
+          category: 'auth_secret',
+          fieldName: fieldName,
+        }));
+      }
+
       this.cacheFieldResult(fieldName, true);
       return true;
     }

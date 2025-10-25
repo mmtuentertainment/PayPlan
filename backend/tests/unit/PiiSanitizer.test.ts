@@ -774,6 +774,220 @@ describe('PiiSanitizer', () => {
         expectFieldSanitized(sanitizer, 'clientIp', '192.168.1.1');
       });
     });
+
+    describe('Production Telemetry Sampling - Auth Secret Monitoring', () => {
+      // Enhancement: Optional production telemetry sampling for auth-secret matches
+      // Monitors redacted field names (no values) to detect unexpected over-redaction
+      //
+      // Sampling strategy:
+      // - Only enabled in production (NODE_ENV === 'production')
+      // - Default 1% sampling rate (configurable via PII_REDACT_SAMPLING_RATE env var)
+      // - Emits structured logger.info event with fieldName and category only
+      // - NEVER logs field values (privacy-first)
+
+      let originalEnv: string | undefined;
+      let originalSamplingRate: string | undefined;
+      let consoleLogSpy: any;
+
+      beforeEach(() => {
+        // Save original env vars
+        originalEnv = process.env.NODE_ENV;
+        originalSamplingRate = process.env.PII_REDACT_SAMPLING_RATE;
+
+        // Spy on console.log to capture telemetry output
+        consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      });
+
+      afterEach(() => {
+        // Restore original env vars
+        if (originalEnv !== undefined) {
+          process.env.NODE_ENV = originalEnv;
+        } else {
+          delete process.env.NODE_ENV;
+        }
+
+        if (originalSamplingRate !== undefined) {
+          process.env.PII_REDACT_SAMPLING_RATE = originalSamplingRate;
+        } else {
+          delete process.env.PII_REDACT_SAMPLING_RATE;
+        }
+
+        // Restore console.log
+        consoleLogSpy.mockRestore();
+      });
+
+      it('should NOT emit telemetry in development environment', () => {
+        // Arrange
+        process.env.NODE_ENV = 'development';
+        process.env.PII_REDACT_SAMPLING_RATE = '1.0'; // 100% sampling
+        const freshSanitizer = new PiiSanitizer();
+
+        // Act - sanitize auth secret field multiple times
+        for (let i = 0; i < 10; i++) {
+          freshSanitizer.sanitize({ tokenId: DUMMY_SECRET, amount: 100 });
+        }
+
+        // Assert - no telemetry emitted in development
+        expect(consoleLogSpy).not.toHaveBeenCalled();
+      });
+
+      it('should NOT emit telemetry in test environment', () => {
+        // Arrange
+        process.env.NODE_ENV = 'test';
+        process.env.PII_REDACT_SAMPLING_RATE = '1.0'; // 100% sampling
+        const freshSanitizer = new PiiSanitizer();
+
+        // Act - sanitize auth secret field
+        freshSanitizer.sanitize({ passwordFile: DUMMY_SECRET, amount: 100 });
+
+        // Assert - no telemetry emitted in test
+        expect(consoleLogSpy).not.toHaveBeenCalled();
+      });
+
+      it('should emit telemetry in production with 100% sampling rate', () => {
+        // Arrange
+        process.env.NODE_ENV = 'production';
+        process.env.PII_REDACT_SAMPLING_RATE = '1.0'; // 100% sampling
+        const freshSanitizer = new PiiSanitizer();
+
+        // Act - sanitize auth secret field
+        freshSanitizer.sanitize({ tokenId: DUMMY_SECRET, amount: 100 });
+
+        // Assert - telemetry emitted exactly once
+        expect(consoleLogSpy).toHaveBeenCalledTimes(1);
+
+        // Verify telemetry structure
+        const telemetryCall = consoleLogSpy.mock.calls[0][0];
+        const telemetryData = JSON.parse(telemetryCall);
+
+        expect(telemetryData).toEqual({
+          event: 'PII_REDACTION',
+          category: 'auth_secret',
+          fieldName: 'tokenId',
+        });
+
+        // CRITICAL: Verify no field values are logged
+        expect(telemetryCall).not.toContain(DUMMY_SECRET);
+        expect(telemetryData).not.toHaveProperty('fieldValue');
+        expect(telemetryData).not.toHaveProperty('value');
+      });
+
+      it('should respect default 1% sampling rate when not configured', () => {
+        // Arrange
+        process.env.NODE_ENV = 'production';
+        delete process.env.PII_REDACT_SAMPLING_RATE; // Use default 1%
+        const freshSanitizer = new PiiSanitizer();
+
+        // Act - sanitize auth secret fields with DIFFERENT field names (avoid cache)
+        // Use versioned field names (apiKey1, apiKey2, ..., apiKey1000) to bypass cache
+        const iterations = 1000;
+        for (let i = 0; i < iterations; i++) {
+          freshSanitizer.sanitize({ [`apiKey${i}`]: DUMMY_SECRET, amount: 100 });
+        }
+
+        // Assert - roughly 1% sampling (allow some variance)
+        // Expected: ~10 samples (1% of 1000)
+        // Acceptable range: 0-30 samples (allow for randomness)
+        const sampleCount = consoleLogSpy.mock.calls.length;
+        expect(sampleCount).toBeGreaterThanOrEqual(0);
+        expect(sampleCount).toBeLessThan(30); // Very lenient upper bound for CI stability
+      });
+
+      it('should emit telemetry for different auth secret fields', () => {
+        // Arrange
+        process.env.NODE_ENV = 'production';
+        process.env.PII_REDACT_SAMPLING_RATE = '1.0'; // 100% sampling
+        const freshSanitizer = new PiiSanitizer();
+
+        // Act - sanitize various auth secret fields
+        freshSanitizer.sanitize({ password: DUMMY_SECRET });
+        freshSanitizer.sanitize({ apiKeyFilename: DUMMY_SECRET });
+        freshSanitizer.sanitize({ secretManagerConfig: DUMMY_SECRET });
+
+        // Assert - 3 telemetry events emitted
+        expect(consoleLogSpy).toHaveBeenCalledTimes(3);
+
+        // Verify each telemetry event has correct fieldName
+        const fieldNames = consoleLogSpy.mock.calls.map((call: any) => {
+          const data = JSON.parse(call[0]);
+          return data.fieldName;
+        });
+
+        expect(fieldNames).toContain('password');
+        expect(fieldNames).toContain('apiKeyFilename');
+        expect(fieldNames).toContain('secretManagerConfig');
+
+        // Verify all have correct category
+        consoleLogSpy.mock.calls.forEach((call: any) => {
+          const data = JSON.parse(call[0]);
+          expect(data.category).toBe('auth_secret');
+          expect(data.event).toBe('PII_REDACTION');
+        });
+      });
+
+      it('should NOT emit telemetry for regular PII fields (only auth secrets)', () => {
+        // Arrange
+        process.env.NODE_ENV = 'production';
+        process.env.PII_REDACT_SAMPLING_RATE = '1.0'; // 100% sampling
+        const freshSanitizer = new PiiSanitizer();
+
+        // Act - sanitize regular PII fields (not auth secrets)
+        freshSanitizer.sanitize({ email: 'user@example.com' });
+        freshSanitizer.sanitize({ userName: 'johndoe' });
+        freshSanitizer.sanitize({ clientIp: '192.168.1.1' });
+        freshSanitizer.sanitize({ userSSN: '123-45-6789' });
+
+        // Assert - NO telemetry emitted (only auth secrets trigger telemetry)
+        expect(consoleLogSpy).not.toHaveBeenCalled();
+      });
+
+      it('should handle custom sampling rates correctly', () => {
+        // Arrange
+        process.env.NODE_ENV = 'production';
+        process.env.PII_REDACT_SAMPLING_RATE = '0.5'; // 50% sampling
+        const freshSanitizer = new PiiSanitizer();
+
+        // Act - sanitize auth secret fields with DIFFERENT field names (avoid cache)
+        // Use versioned field names (token1, token2, ..., token100) to bypass cache
+        const iterations = 100;
+        for (let i = 0; i < iterations; i++) {
+          freshSanitizer.sanitize({ [`token${i}`]: DUMMY_SECRET, amount: 100 });
+        }
+
+        // Assert - roughly 50% sampling (allow variance)
+        // Expected: ~50 samples (50% of 100)
+        // Acceptable range: 30-70 samples (allow for randomness)
+        const sampleCount = consoleLogSpy.mock.calls.length;
+        expect(sampleCount).toBeGreaterThan(30);
+        expect(sampleCount).toBeLessThan(70);
+      });
+
+      it('should never log field values in telemetry (privacy guarantee)', () => {
+        // Arrange
+        process.env.NODE_ENV = 'production';
+        process.env.PII_REDACT_SAMPLING_RATE = '1.0'; // 100% sampling
+        const freshSanitizer = new PiiSanitizer();
+
+        const secretValue = 'super-secret-token-12345';
+        const secretKey = 'my-api-key-67890';
+
+        // Act - sanitize with actual secret values
+        freshSanitizer.sanitize({ password: secretValue });
+        freshSanitizer.sanitize({ apiKey: secretKey });
+
+        // Assert - no telemetry contains actual secret values
+        consoleLogSpy.mock.calls.forEach((call: any) => {
+          const telemetryString = call[0];
+          expect(telemetryString).not.toContain(secretValue);
+          expect(telemetryString).not.toContain(secretKey);
+
+          const telemetryData = JSON.parse(telemetryString);
+          expect(telemetryData).not.toHaveProperty('fieldValue');
+          expect(telemetryData).not.toHaveProperty('value');
+          expect(telemetryData).toHaveProperty('fieldName'); // Only fieldName, never value
+        });
+      });
+    });
   });
 
   /**
