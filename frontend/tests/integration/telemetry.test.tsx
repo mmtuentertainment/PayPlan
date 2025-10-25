@@ -490,7 +490,8 @@ describe('Telemetry - No Content Leakage', () => {
     expect(event.delimiter).toBe('semicolon');
 
     // Ensure it's an enum, not a raw character
-    const validDelimiters = ['comma', 'semicolon', 'tab', 'pipe', 'other'];
+    // Issue #29: Simplified to match actually supported delimiters (MVP only supports comma)
+    const validDelimiters = ['comma', 'semicolon', 'other'];
     expect(validDelimiters).toContain(event.delimiter);
   });
 });

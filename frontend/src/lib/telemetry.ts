@@ -19,7 +19,9 @@ export type ConsentState = "opt_in" | "opt_out" | "unset";
 
 export type RowBucket = "1-10" | "11-100" | "101-1000" | ">1000";
 export type SizeBucket = "≤100KB" | "≤250KB" | "≤500KB" | "≤1MB" | ">1MB";
-export type DelimiterType = "comma" | "semicolon" | "tab" | "pipe" | "other";
+// Issue #29: Simplified to match actually supported delimiters (MVP only supports comma)
+// Removed unsupported delimiters: "tab", "pipe"
+export type DelimiterType = "comma" | "semicolon" | "other";
 
 export interface CsvErrorInput {
   phase: "size" | "rows" | "delimiter" | "parse" | "date_format" | "date_real" | "currency";
