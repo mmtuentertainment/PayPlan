@@ -8,9 +8,13 @@
 
 // Use require for CommonJS interop (backend uses .js files)
 const { PiiSanitizer } = require('../../src/lib/security/PiiSanitizer');
+const { performance } = require('perf_hooks'); // Node.js performance API for cross-platform compatibility
 
 // Import type for type safety
 import type { PiiSanitizer as PiiSanitizerType } from '../../src/lib/security/PiiSanitizer';
+
+// Dummy value for security scanner hygiene - tests field name detection, not value validation
+const DUMMY_SECRET = 'REDACTED_TEST_VALUE';
 
 /**
  * Test Helper Functions
@@ -479,31 +483,31 @@ describe('PiiSanitizer', () => {
   describe('US2: Authentication Secret Detection', () => {
     describe('standalone authentication secret fields', () => {
       it('T032: should sanitize password field', () => {
-        expectFieldSanitized(sanitizer, 'password', 'P@ssw0rd123');
+        expectFieldSanitized(sanitizer, 'password', DUMMY_SECRET);
       });
 
       it('T033: should sanitize passwd field', () => {
-        expectFieldSanitized(sanitizer, 'passwd', 'secret123');
+        expectFieldSanitized(sanitizer, 'passwd', DUMMY_SECRET);
       });
 
       it('T034: should sanitize token field', () => {
-        expectFieldSanitized(sanitizer, 'token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
+        expectFieldSanitized(sanitizer, 'token', DUMMY_SECRET);
       });
 
       it('T035: should sanitize apiKey field', () => {
-        expectFieldSanitized(sanitizer, 'apiKey', 'sk_live_1234567890');
+        expectFieldSanitized(sanitizer, 'apiKey', DUMMY_SECRET);
       });
 
       it('T036: should sanitize api_key field', () => {
-        expectFieldSanitized(sanitizer, 'api_key', 'sk_live_1234567890');
+        expectFieldSanitized(sanitizer, 'api_key', DUMMY_SECRET);
       });
 
       it('T037: should sanitize secret field', () => {
-        expectFieldSanitized(sanitizer, 'secret', 'my-secret-value');
+        expectFieldSanitized(sanitizer, 'secret', DUMMY_SECRET);
       });
 
       it('T038: should sanitize auth field', () => {
-        expectFieldSanitized(sanitizer, 'auth', 'Basic dXNlcjpwYXNz');
+        expectFieldSanitized(sanitizer, 'auth', DUMMY_SECRET);
       });
 
       it('T039: should sanitize credential field', () => {
@@ -515,55 +519,55 @@ describe('PiiSanitizer', () => {
       });
 
       it('T041: should sanitize authorization field', () => {
-        expectFieldSanitized(sanitizer, 'authorization', 'Bearer token123');
+        expectFieldSanitized(sanitizer, 'authorization', DUMMY_SECRET);
       });
     });
 
     describe('camelCase authentication secret fields', () => {
       it('T042: should sanitize userPassword field (camelCase)', () => {
-        expectFieldSanitized(sanitizer, 'userPassword', 'P@ssw0rd123');
+        expectFieldSanitized(sanitizer, 'userPassword', DUMMY_SECRET);
       });
 
       it('T043: should sanitize user_password field (snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'user_password', 'P@ssw0rd123');
+        expectFieldSanitized(sanitizer, 'user_password', DUMMY_SECRET);
       });
 
       it('T044: should sanitize accessToken field (camelCase)', () => {
-        expectFieldSanitized(sanitizer, 'accessToken', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
+        expectFieldSanitized(sanitizer, 'accessToken', DUMMY_SECRET);
       });
 
       it('T045: should sanitize access_token field (snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'access_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
+        expectFieldSanitized(sanitizer, 'access_token', DUMMY_SECRET);
       });
 
       it('T046: should sanitize secretKey field (camelCase)', () => {
-        expectFieldSanitized(sanitizer, 'secretKey', 'sk_live_1234567890');
+        expectFieldSanitized(sanitizer, 'secretKey', DUMMY_SECRET);
       });
 
       it('T047: should sanitize secret_key field (snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'secret_key', 'sk_live_1234567890');
+        expectFieldSanitized(sanitizer, 'secret_key', DUMMY_SECRET);
       });
 
       it('T048: should sanitize clientSecret field (camelCase)', () => {
-        expectFieldSanitized(sanitizer, 'clientSecret', 'cs_live_1234567890');
+        expectFieldSanitized(sanitizer, 'clientSecret', DUMMY_SECRET);
       });
 
       it('T049: should sanitize client_secret field (snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'client_secret', 'cs_live_1234567890');
+        expectFieldSanitized(sanitizer, 'client_secret', DUMMY_SECRET);
       });
     });
 
     describe('case-insensitive authentication secret matching', () => {
       it('T050: should sanitize PASSWORD (uppercase)', () => {
-        expectFieldSanitized(sanitizer, 'PASSWORD', 'P@ssw0rd123');
+        expectFieldSanitized(sanitizer, 'PASSWORD', DUMMY_SECRET);
       });
 
       it('T051: should sanitize Token (capitalized)', () => {
-        expectFieldSanitized(sanitizer, 'Token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
+        expectFieldSanitized(sanitizer, 'Token', DUMMY_SECRET);
       });
 
       it('T052: should sanitize API_KEY (uppercase snake_case)', () => {
-        expectFieldSanitized(sanitizer, 'API_KEY', 'sk_live_1234567890');
+        expectFieldSanitized(sanitizer, 'API_KEY', DUMMY_SECRET);
       });
     });
 
@@ -583,6 +587,68 @@ describe('PiiSanitizer', () => {
       it('T056: should sanitize passwordFile (auth secret precedence)', () => {
         // CodeRabbit fix: Use generic filename instead of system-specific /etc/passwd
         expectFieldSanitized(sanitizer, 'passwordFile', 'passwords.txt');
+      });
+    });
+
+    describe('US2.5: False positives prevented by removing over-aggressive api/key patterns', () => {
+      // CodeRabbit Round 3, Issue 1: Verify that standalone 'api' and 'key' patterns were removed
+      // to prevent false positives while compound patterns like 'apikey', 'accesskey' still work
+
+      it('should NOT sanitize apiVersion field (api prefix, but not auth secret)', () => {
+        expectFieldPreserved(sanitizer, 'apiVersion', 'v2.1.0');
+      });
+
+      it('should NOT sanitize apiEndpoint field (api prefix, but not auth secret)', () => {
+        expectFieldPreserved(sanitizer, 'apiEndpoint', '/api/v1/users');
+      });
+
+      it('should NOT sanitize apiUrl field (api prefix, but not auth secret)', () => {
+        expectFieldPreserved(sanitizer, 'apiUrl', 'https://api.example.com');
+      });
+
+      it('should NOT sanitize apiResponse field (api prefix, but not auth secret)', () => {
+        expectFieldPreserved(sanitizer, 'apiResponse', '{ "status": "ok" }');
+      });
+
+      it('should NOT sanitize keyboard field (key prefix, but not auth secret)', () => {
+        expectFieldPreserved(sanitizer, 'keyboard', 'US-QWERTY');
+      });
+
+      it('should NOT sanitize keyCode field (key prefix, but not auth secret)', () => {
+        expectFieldPreserved(sanitizer, 'keyCode', '13');
+      });
+
+      it('should NOT sanitize primaryKey field (key suffix, but not auth secret)', () => {
+        expectFieldPreserved(sanitizer, 'primaryKey', 'id');
+      });
+
+      it('should NOT sanitize foreignKey field (key suffix, but not auth secret)', () => {
+        expectFieldPreserved(sanitizer, 'foreignKey', 'user_id');
+      });
+
+      it('should NOT sanitize keyValue field (key prefix, but not auth secret)', () => {
+        expectFieldPreserved(sanitizer, 'keyValue', 'pair-123');
+      });
+
+      // Verify compound patterns still work
+      it('should STILL sanitize apiKey field (compound auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'apiKey', DUMMY_SECRET);
+      });
+
+      it('should STILL sanitize api_key field (compound auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'api_key', DUMMY_SECRET);
+      });
+
+      it('should STILL sanitize accessKey field (compound auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'accessKey', DUMMY_SECRET);
+      });
+
+      it('should STILL sanitize access_key field (compound auth secret, snake_case)', () => {
+        expectFieldSanitized(sanitizer, 'access_key', DUMMY_SECRET);
+      });
+
+      it('should STILL sanitize secretKey field (compound auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'secretKey', DUMMY_SECRET);
       });
     });
   });

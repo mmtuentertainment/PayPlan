@@ -42,8 +42,9 @@ class PiiSanitizer {
       'token',         // Access tokens, refresh tokens, JWT tokens
       'bearer',        // Bearer tokens (CodeRabbit: OAuth 2.0 pattern)
       'apikey',        // API keys as single word (matches 'apiKey', 'APIKEY')
-      'api',           // API prefix for snake_case (matches 'api_key', 'API_KEY', 'apiToken')
-      'key',           // Key suffix for compounds (matches 'secretKey', 'secret_key', 'accessKey')
+      'api_key',       // API keys in snake_case (matches 'api_key', 'API_KEY')
+      'accesskey',     // Access keys (matches 'accessKey', 'ACCESS_KEY')
+      'access_key',    // Access keys in snake_case (matches 'access_key', 'ACCESS_KEY')
       'secret',        // Generic secrets, client secrets, secret keys
       'auth',          // Auth tokens, auth headers
       'credential',    // Single credential field
