@@ -244,6 +244,22 @@ window.__telemetryDebug = false;
 }
 ```
 
+**Sampling Determinism Note (Issue #28):**
+
+Usage events (`csv_usage`) are sampled at ≤10% using **deterministic sampling** based on browser characteristics:
+- Sampling key includes: truncated User Agent (50 chars), screen dimensions, and event buckets
+- **Why deterministic?** Ensures fair representation of all user segments (mobile/desktop, different browsers)
+- **Privacy trade-off:** Creates semi-stable, session-scoped fingerprint (see data-model.md Section 5.2 for details)
+- **Mitigation:** Opt-in only, DNT override, no persistent storage, UA truncated for reduced entropy
+
+To test sampling behavior:
+```javascript
+// Same user/browser should see same sampling decision across page reloads
+window.__telemetryDebug = true;
+// Upload 10 valid CSVs → observe ≤1-2 usage events (≤10% sampling)
+// Trigger 10 errors → observe 10 error events (100% sampling)
+```
+
 ---
 
 ## Rollback Instructions

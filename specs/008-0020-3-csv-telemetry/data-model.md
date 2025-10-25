@@ -446,6 +446,58 @@ function getOrCreateSessionSeed(): string {
 
 ---
 
+### 5.2 Sampling Key Privacy Trade-off (Issue #28)
+
+**Context:** The deterministic sampling uses browser characteristics to generate a semi-stable sampling key.
+
+#### What Data is Hashed?
+
+```typescript
+function getSamplingKey(event: CsvUsageInput): string {
+  return [
+    navigator.userAgent.substring(0, 50), // Truncated UA
+    screen.width,                         // Screen dimensions
+    screen.height,
+    event.row_bucket,                     // Usage pattern
+    event.size_bucket,
+  ].join("|");
+}
+```
+
+#### Privacy Implications
+
+**Semi-Stable Fingerprint:**
+- Creates a session-scoped identifier based on stable browser characteristics
+- NOT cross-session tracking: No persistent storage, resets on browser restart
+- No linkability: Cannot correlate with other sites or services
+- Truncated data: UA limited to 50 chars to reduce entropy
+
+**Trade-off Analysis:**
+
+| Aspect | Deterministic Sampling | Fully Random Sampling |
+|--------|----------------------|---------------------|
+| **Fairness** | ✅ Equal representation of all user segments | ❌ Biased toward power users (many imports) |
+| **Consistency** | ✅ Same sampling decision across page reloads | ❌ Different each time |
+| **Privacy** | ⚠️ Creates semi-stable fingerprint | ✅ No fingerprinting |
+| **Statistical Validity** | ✅ Unbiased sampling | ❌ Over-represents heavy users |
+
+**Why Deterministic?**
+- Fair representation: Ensures all user segments (mobile/desktop, different browsers) are sampled equally
+- Prevents bias: Random per-event sampling would over-represent users with many imports
+- Consistent UX: Same user sees same sampling decision within a session
+
+**Mitigation Strategies:**
+- ✅ Opt-in only: Users explicitly consent via banner
+- ✅ DNT override: Honors Do Not Track header
+- ✅ No network transmission: Client-only (no actual data sent in MVP)
+- ✅ Truncated UA: Limited to 50 chars to reduce entropy
+- ✅ Session-scoped: No persistent storage across browser restarts
+
+**Alternative Considered:**
+Fully random sampling per event was rejected because it would bias the dataset toward power users who import many CSVs.
+
+---
+
 ## 6. Privacy Guarantees
 
 ### 6.1 DNT Detection

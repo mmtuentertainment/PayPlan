@@ -163,6 +163,33 @@ function djb2Hash(str: string): number {
 
 /**
  * Deterministic sampling key based on stable browser characteristics
+ *
+ * Issue #28: Privacy Trade-off Documentation
+ *
+ * WHY DETERMINISTIC SAMPLING?
+ * - Fair representation: Ensures all user segments (device types, usage patterns) are sampled equally
+ * - Prevents bias: Random per-event sampling would over-represent long sessions
+ * - Consistent UX: Same user sees same sampling decision across page reloads (within session)
+ *
+ * WHAT DATA IS HASHED?
+ * - Truncated User Agent (first 50 chars): Browser/OS family (e.g., "Chrome 120 on Windows")
+ * - Screen dimensions (width × height): Device class (mobile/tablet/desktop)
+ * - Event buckets (row count, file size): Usage pattern
+ *
+ * PRIVACY IMPLICATIONS:
+ * - Semi-stable fingerprint: Creates a session-scoped identifier
+ * - NOT cross-session tracking: No persistent storage, resets on browser restart
+ * - No linkability: Cannot correlate with other sites or services
+ * - Truncated data: UA limited to 50 chars to reduce entropy
+ *
+ * ALTERNATIVE CONSIDERED:
+ * - Fully random sampling per event: Would bias toward power users with many imports
+ * - Trade-off: Slight fingerprinting risk vs. statistical validity
+ *
+ * MITIGATION:
+ * - Opt-in only: Users explicitly consent via banner
+ * - DNT override: Honors Do Not Track header
+ * - No network transmission: Client-only (no actual data sent in MVP)
  */
 function getSamplingKey(event: CsvUsageInput): string {
   if (typeof navigator === "undefined" || typeof screen === "undefined") {

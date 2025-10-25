@@ -51,6 +51,41 @@ Adds **opt-in, privacy-safe, client-only telemetry** to the CSV Import page with
 - ❌ Exact row counts or file sizes (only bucketed)
 - ❌ Free-text error messages (only enum codes)
 
+### Sampling Key Privacy Trade-off (Issue #28)
+
+**Context:** The deterministic sampling creates a semi-stable fingerprint based on browser characteristics.
+
+**What is Hashed:**
+- Truncated User Agent (first 50 chars): Browser/OS family (e.g., "Chrome 120 on Windows")
+- Screen dimensions (width × height): Device class (mobile/tablet/desktop)
+- Event buckets (row count, file size): Usage pattern
+
+**Privacy Implications:**
+- ⚠️ **Semi-stable fingerprint**: Creates a session-scoped identifier
+- ✅ **NOT cross-session tracking**: No persistent storage, resets on browser restart
+- ✅ **No linkability**: Cannot correlate with other sites or services
+- ✅ **Truncated data**: UA limited to 50 chars to reduce entropy
+
+**Why Deterministic Sampling?**
+- Fair representation: Ensures all user segments (device types, usage patterns) are sampled equally
+- Prevents bias: Random per-event sampling would over-represent users with many imports
+- Consistent UX: Same user sees same sampling decision across page reloads (within session)
+
+**Alternative Considered:**
+Fully random sampling per event was rejected because it would bias the dataset toward power users who import many CSVs.
+
+**Mitigation:**
+- ✅ Opt-in only: Users explicitly consent via banner
+- ✅ DNT override: Honors Do Not Track header
+- ✅ No network transmission: Client-only (no actual data sent in MVP)
+- ✅ Session-scoped: No persistent storage across browser restarts
+
+**Trade-off Summary:**
+We accept slight fingerprinting risk in exchange for statistical validity of telemetry data. Users who are privacy-conscious can:
+1. Enable Do Not Track (DNT=1) → telemetry completely disabled
+2. Click "Decline" on banner → telemetry completely disabled
+3. Clear browser data on exit → sampling key resets
+
 ---
 
 ## Before/After Behavior
