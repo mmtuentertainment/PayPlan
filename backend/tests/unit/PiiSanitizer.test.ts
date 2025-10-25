@@ -651,6 +651,54 @@ describe('PiiSanitizer', () => {
         expectFieldSanitized(sanitizer, 'secretKey', DUMMY_SECRET);
       });
     });
+
+    describe('Versioned field support (CodeRabbit Round 2, Issue 9)', () => {
+      // Explicit tests for versioned field detection with optional numeric suffixes
+      // Regex pattern: (?:[0-9]+)? allows trailing digits on all patterns
+
+      // Regular PII patterns with numeric suffixes
+      it('should sanitize email1 (versioned PII field)', () => {
+        expectFieldSanitized(sanitizer, 'email1', 'user@example.com');
+      });
+
+      it('should sanitize email2 (versioned PII field)', () => {
+        expectFieldSanitized(sanitizer, 'email2', 'backup@example.com');
+      });
+
+      it('should sanitize name_2 (versioned snake_case PII)', () => {
+        expectFieldSanitized(sanitizer, 'name_2', 'John Doe');
+      });
+
+      it('should sanitize phone999 (versioned PII with large number)', () => {
+        expectFieldSanitized(sanitizer, 'phone999', '555-1234');
+      });
+
+      // Authentication secret patterns with numeric suffixes
+      it('should sanitize password1 (versioned auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'password1', DUMMY_SECRET);
+      });
+
+      it('should sanitize token_2 (versioned snake_case auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'token_2', DUMMY_SECRET);
+      });
+
+      it('should sanitize apiKey3 (versioned camelCase auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'apiKey3', DUMMY_SECRET);
+      });
+
+      it('should sanitize API_KEY_123 (versioned uppercase snake_case auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'API_KEY_123', DUMMY_SECRET);
+      });
+
+      // Compound fields with versioned auth secrets
+      it('should sanitize userPassword1 (compound versioned auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'userPassword1', DUMMY_SECRET);
+      });
+
+      it('should sanitize access_token_2 (compound versioned snake_case auth secret)', () => {
+        expectFieldSanitized(sanitizer, 'access_token_2', DUMMY_SECRET);
+      });
+    });
   });
 
   /**

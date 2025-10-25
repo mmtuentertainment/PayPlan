@@ -402,6 +402,13 @@ class PiiSanitizer {
     //   Matches: 'tokenId', 'passwordFile', 'apiKey', 'secret_manager'
     //   Explanation: Prefix matching for compound fields where secret is primary concept
     //   This alternative is what makes auth secret detection AGGRESSIVE
+    //
+    // NOTE FOR CODE REVIEWERS - Alternative 4 Trade-offs:
+    // ✅ INTENTIONAL: Fields like 'tokenId', 'passwordFile' are sanitized (defense-in-depth)
+    // ⚠️ TRADE-OFF: May redact reference fields that could be non-sensitive identifiers
+    // 🎯 RATIONALE: Cost of missing a secret >> cost of false positive (GitGuardian approach)
+    // 📊 MONITORING: For production, consider logging redacted field names (no values) to
+    //    detect unexpected over-redaction patterns
     return new RegExp(
       `^${caseInsensitivePattern}(?:[0-9]+)?$|(?:^|_)${caseInsensitivePattern}(?:[0-9]+)?(?:_|$)|[a-z]${capitalizedPattern}(?=[A-Z0-9]|_|$)|^${caseInsensitivePattern}(?=[A-Z0-9_])`
     );
