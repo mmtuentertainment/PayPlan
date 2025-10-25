@@ -25,6 +25,7 @@ export function TelemetryConsentBanner() {
   const shouldShow = !isDNT() && getConsent() === "unset";
   const [visible, setVisible] = useState(shouldShow);
   const [announcementText, setAnnouncementText] = useState<string>("");
+  const [consentStateAnnouncement, setConsentStateAnnouncement] = useState<string>("");
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -59,13 +60,13 @@ export function TelemetryConsentBanner() {
   }, [dismissBanner]);
 
   const handleAllow = useCallback(() => {
-    setAnnouncementText("Anonymous analytics enabled");
+    setConsentStateAnnouncement("Anonymous analytics enabled");
     setConsent("opt_in");
     dismissBanner();
   }, [dismissBanner]);
 
   const handleDecline = useCallback(() => {
-    setAnnouncementText("Analytics disabled");
+    setConsentStateAnnouncement("Analytics disabled");
     setConsent("opt_out");
     dismissBanner();
   }, [dismissBanner]);
@@ -292,6 +293,7 @@ export function TelemetryConsentBanner() {
           </button>
         </div>
       </div>
+      {/* Countdown and auto-dismiss announcements */}
       <div
         role="status"
         aria-live="polite"
@@ -299,6 +301,15 @@ export function TelemetryConsentBanner() {
         className="sr-only"
       >
         {announcementText}
+      </div>
+      {/* Consent state change announcements (Issue #30: WCAG 2.1 AA 10/10 compliance) */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {consentStateAnnouncement}
       </div>
     </div>
   );
