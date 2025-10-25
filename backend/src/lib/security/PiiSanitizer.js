@@ -308,7 +308,19 @@ class PiiSanitizer {
       .join('');
 
     // CodeRabbit fix (Issue 9): Support versioned fields with optional numeric suffix
-    // Examples: email1, name_2, userName3, email_backup_1
+    //
+    // Regex breakdown (3 alternatives joined with |):
+    // Alternative 1: ^pattern(?:[0-9]+)?$
+    //   Matches: 'email', 'email1', 'name2', 'ssn999'
+    //   Explanation: Exact match with optional trailing digits
+    //
+    // Alternative 2: (?:^|_)pattern(?:[0-9]+)?(?:_|$)
+    //   Matches: 'user_email', 'email_2', '_name', 'address_'
+    //   Explanation: snake_case with underscores before/after, optional digits
+    //
+    // Alternative 3: [a-z]pattern(?=[A-Z0-9]|_|$)
+    //   Matches: 'userName', 'userEmail1', 'bankAccount'
+    //   Explanation: camelCase suffix (lowercase letter + Capitalized pattern)
     return new RegExp(
       `^${caseInsensitivePattern}(?:[0-9]+)?$|(?:^|_)${caseInsensitivePattern}(?:[0-9]+)?(?:_|$)|[a-z]${capitalizedPattern}(?=[A-Z0-9]|_|$)`
     );
@@ -356,9 +368,25 @@ class PiiSanitizer {
       .map(char => /[a-z]/.test(char) ? `[${char}${char.toUpperCase()}]` : char)
       .join('');
 
-    // 4 alternatives: exact, snake_case, camelCase suffix, AND camelCase/snake_case prefix
     // CodeRabbit fix (Issue 9): Support versioned auth fields with optional numeric suffix
-    // Examples: token1, password_2, API_KEY_3, accessToken123
+    //
+    // Regex breakdown (4 alternatives joined with |):
+    // Alternative 1: ^pattern(?:[0-9]+)?$
+    //   Matches: 'token', 'token1', 'password2', 'apiKey3'
+    //   Explanation: Exact match with optional trailing digits
+    //
+    // Alternative 2: (?:^|_)pattern(?:[0-9]+)?(?:_|$)
+    //   Matches: 'access_token', 'API_KEY_2', '_password', 'token_'
+    //   Explanation: snake_case with underscores before/after, optional digits
+    //
+    // Alternative 3: [a-z]Pattern(?=[A-Z0-9]|_|$)
+    //   Matches: 'accessToken', 'userPassword', 'apiSecret'
+    //   Explanation: camelCase suffix (lowercase letter + Capitalized pattern)
+    //
+    // Alternative 4 (AGGRESSIVE): ^pattern(?=[A-Z0-9_])
+    //   Matches: 'tokenId', 'passwordFile', 'apiKey', 'secret_manager'
+    //   Explanation: Prefix matching for compound fields where secret is primary concept
+    //   This alternative is what makes auth secret detection AGGRESSIVE
     return new RegExp(
       `^${caseInsensitivePattern}(?:[0-9]+)?$|(?:^|_)${caseInsensitivePattern}(?:[0-9]+)?(?:_|$)|[a-z]${capitalizedPattern}(?=[A-Z0-9]|_|$)|^${caseInsensitivePattern}(?=[A-Z0-9_])`
     );
