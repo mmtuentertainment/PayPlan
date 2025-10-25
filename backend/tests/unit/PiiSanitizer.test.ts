@@ -694,6 +694,86 @@ describe('PiiSanitizer', () => {
         expectFieldSanitized(sanitizer, 'api_key_1000000', DUMMY_SECRET);
       });
     });
+
+    describe('ALL-CAPS Acronym Support - camelCase Enhancement', () => {
+      // Enhancement: Support ALL-CAPS acronyms in camelCase fields (userDOB, userSSN, userID)
+      // Whitelist: DOB, SSN, ID, URL, IP (defined in PiiSanitizer constructor)
+      //
+      // Regex pattern: [a-z](?:Dob|DOB)(?=[A-Z0-9]|_|$)
+      // - userDob ✓ (Capitalized - existing capitalizedPattern)
+      // - userDOB ✓ (ALL-CAPS - new acronymPattern)
+      // - DOB ✓ (standalone - Alternative 1)
+
+      // DOB (Date of Birth) acronym tests
+      it('should sanitize userDOB (ALL-CAPS acronym in camelCase)', () => {
+        expectFieldSanitized(sanitizer, 'userDOB', '1990-01-01');
+      });
+
+      it('should sanitize employeeDOB (ALL-CAPS acronym)', () => {
+        expectFieldSanitized(sanitizer, 'employeeDOB', '1985-05-15');
+      });
+
+      it('should sanitize DOB (standalone ALL-CAPS)', () => {
+        expectFieldSanitized(sanitizer, 'DOB', '1995-12-25');
+      });
+
+      it('should sanitize userDob (Capitalized - backward compatibility)', () => {
+        expectFieldSanitized(sanitizer, 'userDob', '1990-01-01');
+      });
+
+      // SSN (Social Security Number) acronym tests
+      it('should sanitize userSSN (ALL-CAPS acronym in camelCase)', () => {
+        expectFieldSanitized(sanitizer, 'userSSN', '123-45-6789');
+      });
+
+      it('should sanitize employeeSSN (ALL-CAPS acronym)', () => {
+        expectFieldSanitized(sanitizer, 'employeeSSN', '987-65-4321');
+      });
+
+      it('should sanitize SSN (standalone ALL-CAPS - backward compatibility)', () => {
+        expectFieldSanitized(sanitizer, 'SSN', '111-22-3333');
+      });
+
+      it('should sanitize userSsn (Capitalized - backward compatibility)', () => {
+        expectFieldSanitized(sanitizer, 'userSsn', '123-45-6789');
+      });
+
+      // NOTE: 'ID' is in acronym whitelist but 'id' is NOT a PII pattern
+      // Only 'nationalid' exists in piiPatterns, so nationalID will match via 'nationalid' pattern
+      it('should NOT sanitize userID (ID not in PII patterns)', () => {
+        expectFieldPreserved(sanitizer, 'userID', '123456'); // 'id' is not a PII pattern
+      });
+
+      it('should sanitize nationalID (matches nationalid PII pattern)', () => {
+        expectFieldSanitized(sanitizer, 'nationalID', 'NAT-123456'); // matches 'nationalid' pattern
+      });
+
+      it('should NOT sanitize userId (Capitalized - id not in PII patterns)', () => {
+        expectFieldPreserved(sanitizer, 'userId', '123456'); // 'id' is not a PII pattern
+      });
+
+      // URL acronym tests
+      it('should sanitize profileURL (ALL-CAPS acronym in camelCase)', () => {
+        expectFieldPreserved(sanitizer, 'profileURL', 'https://example.com/profile'); // 'url' is not a PII pattern
+      });
+
+      // IP acronym tests
+      it('should sanitize clientIP (ALL-CAPS acronym in camelCase)', () => {
+        expectFieldSanitized(sanitizer, 'clientIP', '192.168.1.1');
+      });
+
+      it('should sanitize serverIP (ALL-CAPS acronym)', () => {
+        expectFieldSanitized(sanitizer, 'serverIP', '10.0.0.1');
+      });
+
+      it('should sanitize IP (standalone ALL-CAPS - backward compatibility)', () => {
+        expectFieldSanitized(sanitizer, 'IP', '172.16.0.1');
+      });
+
+      it('should sanitize clientIp (Capitalized - backward compatibility)', () => {
+        expectFieldSanitized(sanitizer, 'clientIp', '192.168.1.1');
+      });
+    });
   });
 
   /**

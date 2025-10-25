@@ -27,6 +27,23 @@
 class PiiSanitizer {
   constructor() {
     /**
+     * ALL-CAPS acronym whitelist for camelCase pattern matching.
+     * Feature 019: Enhancement - Support ALL-CAPS acronyms in camelCase fields
+     *
+     * Handles fields like userDOB, userSSN, userID, userURL where the PII acronym
+     * is in ALL-CAPS rather than Capitalized (userName vs userDOB).
+     *
+     * Pattern matching: [a-z](?:Dob|DOB)(?=[A-Z0-9]|_|$)
+     * - userDob ✓ (Capitalized - already matched by existing regex)
+     * - userDOB ✓ (ALL-CAPS - matched by new acronym branch)
+     * - DOB ✓ (standalone - matched by Alternative 1)
+     *
+     * Keep this list small and focused on common PII acronyms.
+     * Project-specific acronyms: DOB, SSN, ID, URL, IP
+     */
+    this.allCapsAcronyms = ['DOB', 'SSN', 'ID', 'URL', 'IP'];
+
+    /**
      * Authentication secret patterns (HIGHEST PRIORITY - Feature 019, US2, Task T057)
      *
      * These use AGGRESSIVE matching strategy (GitGuardian approach):
@@ -289,11 +306,12 @@ class PiiSanitizer {
    * Creates a CONSERVATIVE word boundary regex for regular PII patterns.
    * Feature 019: Task T027 - Word boundary regex helper function
    * CodeRabbit fix (Issue 9): Support versioned fields (email1, email_2)
+   * Enhancement: Support ALL-CAPS acronyms (userDOB, userSSN, userID)
    *
-   * Strategy (3 alternatives):
+   * Strategy (3 alternatives + optional acronym branch):
    * 1. Exact match: pattern alone or with numeric suffix (e.g., 'name', 'email1')
    * 2. snake_case: _pattern, pattern_, _pattern_ or with numeric suffix (e.g., 'user_name', 'email_2')
-   * 3. camelCase suffix: lowercase+Pattern (e.g., 'userName', 'bankAccount')
+   * 3. camelCase suffix: lowercase+Pattern OR lowercase+ACRONYM (e.g., 'userName', 'userDOB', 'userSSN')
    *
    * Does NOT match compound prefix fields like accountId, cardType to avoid false positives.
    *
@@ -301,7 +319,7 @@ class PiiSanitizer {
    * The inline regex is intentionally NOT extracted to named constants because:
    * 1. The pattern interpolation (${caseInsensitivePattern}) requires runtime composition
    * 2. Extracting would require passing these variables around, reducing readability
-   * 3. The inline comments (lines 312-323) already document each alternative clearly
+   * 3. The inline comments (lines 340-365) already document each alternative clearly
    * 4. ReDoS tests (5 new tests) verify no performance issues with pathological inputs
    */
   createWordBoundaryRegex(pattern) {
@@ -328,22 +346,43 @@ class PiiSanitizer {
       .map(char => /[a-z]/.test(char) ? `[${char}${char.toUpperCase()}]` : char)
       .join('');
 
+    /**
+     * Build acronym pattern for ALL-CAPS variants (e.g., DOB, SSN, ID, URL).
+     * Only include if pattern matches one of the whitelisted acronyms.
+     *
+     * Example: pattern='dob' → uppercasePattern='DOB' → matches whitelist → acronymPattern='DOB'
+     * Usage in regex: [a-z](?:Dob|DOB)(?=[A-Z0-9]|_|$)
+     * - userDob ✓ (Capitalized - existing capitalizedPattern)
+     * - userDOB ✓ (ALL-CAPS - new acronymPattern)
+     */
+    const uppercasePattern = escapedPattern.toUpperCase();
+    const acronymPattern = this.allCapsAcronyms.includes(uppercasePattern)
+      ? uppercasePattern
+      : null;
+
     // CodeRabbit fix (Issue 9): Support versioned fields with optional numeric suffix
+    // Enhancement: Support ALL-CAPS acronyms for patterns matching whitelist
     //
     // Regex breakdown (3 alternatives joined with |):
     // Alternative 1: ^pattern(?:[0-9]+)?$
-    //   Matches: 'email', 'email1', 'name2', 'ssn999'
+    //   Matches: 'email', 'email1', 'name2', 'ssn999', 'DOB', 'SSN'
     //   Explanation: Exact match with optional trailing digits
     //
     // Alternative 2: (?:^|_)pattern(?:[0-9]+)?(?:_|$)
     //   Matches: 'user_email', 'email_2', '_name', 'address_'
     //   Explanation: snake_case with underscores before/after, optional digits
     //
-    // Alternative 3: [a-z]pattern(?=[A-Z0-9]|_|$)
-    //   Matches: 'userName', 'userEmail1', 'bankAccount'
-    //   Explanation: camelCase suffix (lowercase letter + Capitalized pattern)
+    // Alternative 3: [a-z](?:Pattern|ACRONYM)(?=[A-Z0-9]|_|$)
+    //   Matches: 'userName', 'userEmail1', 'bankAccount', 'userDOB', 'userSSN', 'userID'
+    //   Explanation: camelCase suffix with Capitalized pattern OR ALL-CAPS acronym
+    //   If acronymPattern is null (not in whitelist), fallback to capitalizedPattern only
+
+    const camelCaseAlternative = acronymPattern
+      ? `[a-z](?:${capitalizedPattern}|${acronymPattern})(?=[A-Z0-9]|_|$)`
+      : `[a-z]${capitalizedPattern}(?=[A-Z0-9]|_|$)`;
+
     return new RegExp(
-      `^${caseInsensitivePattern}(?:[0-9]+)?$|(?:^|_)${caseInsensitivePattern}(?:[0-9]+)?(?:_|$)|[a-z]${capitalizedPattern}(?=[A-Z0-9]|_|$)`
+      `^${caseInsensitivePattern}(?:[0-9]+)?$|(?:^|_)${caseInsensitivePattern}(?:[0-9]+)?(?:_|$)|${camelCaseAlternative}`
     );
   }
 
