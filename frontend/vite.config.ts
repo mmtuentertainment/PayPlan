@@ -58,15 +58,17 @@ export default defineConfig({
           const normalizedId = id.replace(/\\/g, '/');
 
           if (normalizedId.includes('/node_modules/')) {
-            // Group 1: React Core (~400KB gzipped) - MUST LOAD FIRST
+            // Group 1: React Core + React-dependent Libraries (~500KB gzipped)
             // Rationale: React/ReactDOM/Router share release cycles, update rarely
             // Impact: ~6 month cache stability based on React 19 LTS schedule
-            // CRITICAL: This chunk must be imported before all other chunks
+            // CRITICAL: All React-dependent libraries must be in this chunk to avoid race conditions
+            // lucide-react MUST be bundled with React because it uses React.forwardRef at module initialization
             if (
               /\/node_modules\/react\//.test(normalizedId) ||
               /\/node_modules\/react-dom\//.test(normalizedId) ||
               /\/node_modules\/react-router/.test(normalizedId) ||
-              /\/node_modules\/scheduler\//.test(normalizedId)
+              /\/node_modules\/scheduler\//.test(normalizedId) ||
+              /\/node_modules\/lucide-react\//.test(normalizedId)
             ) {
               return 'vendor-react';
             }
@@ -74,17 +76,15 @@ export default defineConfig({
             // Group 2: UI Framework (~300KB gzipped)
             // Rationale: Radix UI updates independently, large but stable
             // Impact: ~3 month cache stability based on Radix release cadence
-            // Depends on: vendor-react
+            // Safe: Radix UI uses React lazily (not at module init)
             if (/\/node_modules\/@radix-ui\//.test(normalizedId)) {
               return 'vendor-ui';
             }
 
             // Group 3: Large Stable Libraries (~200KB gzipped)
-            // Rationale: Icons/swagger are large, update infrequently
+            // Rationale: Swagger/ramda are large, update infrequently, don't depend on React
             // Impact: ~12 month cache stability
-            // Depends on: vendor-react (lucide-react uses React)
             if (
-              /\/node_modules\/lucide-react\//.test(normalizedId) ||
               /\/node_modules\/swagger/.test(normalizedId) ||
               /\/node_modules\/@swagger-api\//.test(normalizedId) ||
               /\/node_modules\/ramda\//.test(normalizedId)
