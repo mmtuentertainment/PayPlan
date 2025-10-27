@@ -1,14 +1,29 @@
-# PayPlan Constitution
-**The immutable principles and mandatory features that define PayPlan as a market-competitive, privacy-first personal finance app**
+# PayPlan Constitution v1.1
+
+**The immutable principles and mandatory features that define PayPlan as a market-competitive, privacy-first BNPL debt management app**
+
+---
+
+## Document Purpose
+
+This constitution serves as the **single source of truth** for all development decisions on PayPlan. It defines:
+
+1. **Immutable Principles** - Core values that cannot be changed
+2. **Mandatory Features** - Features required for market competitiveness  
+3. **Phased Requirements** - How quality standards evolve with product maturity
+4. **Development Workflow** - How to use Spec-Kit with Claude Code
+5. **Tooling Integration** - How Linear, CodeRabbit, and Claude Code Bot work together
+
+**For Claude Code**: Read this constitution before every feature implementation. It defines what you MUST do, what you MUST NOT do, and how to make decisions when requirements conflict.
 
 ---
 
 ## Current Phase Status
 
-**Current Phase**: Phase 1 (Pre-MVP, 0-100 users)
-**Current Focus**: Ship Tier 0 + Tier 1 features (Weeks 1-12)
-**Testing Requirements**: Manual testing only (features must work)
-**Spec-Kit Requirements**: Tier 1 (spec.md only for medium features)
+**Current Phase**: Phase 1 (Pre-MVP, 0-100 users)  
+**Current Focus**: Ship Tier 0 + Tier 1 features (Weeks 1-12)  
+**Testing Requirements**: Manual testing only (features must work)  
+**Spec-Kit Requirements**: Tier 1 (spec.md only for medium features)  
 **Performance Requirements**: None (optimize if users complain)
 
 **Phase 1 Priorities (REQUIRED)**:
@@ -334,6 +349,360 @@ tests/
 
 ---
 
+## Spec-Kit Workflow Integration
+
+### Decision Tree: When to Use Spec-Kit
+
+**Tier 0: Simple Features (<3 days, trivial changes)**
+
+**Examples**:
+- UI tweaks (button colors, spacing adjustments)
+- Bug fixes (fix broken validation, fix display issue)
+- Minor enhancements (add tooltip, improve error message)
+- Small refactors (rename variable, extract utility function)
+
+**Workflow**:
+1. Create GitHub issue with:
+   - User story (As a [user], I want [feature], so that [benefit])
+   - Acceptance criteria (1-3 bullet points)
+   - Screenshots/mockups (if UI change)
+2. Implement directly (no spec.md, no plan.md, no tasks.md)
+3. Manual testing (verify acceptance criteria met)
+4. Commit and merge
+
+**Skip**: Spec.md, plan.md, tasks.md, analyze  
+**Time Saved**: 2-4 hours per feature
+
+---
+
+**Tier 1: Medium Features (3-7 days, moderate complexity)**
+
+**Examples**:
+- Spending categories (new data model + UI)
+- Goal tracking (CRUD + progress visualization)
+- Budget creation (form + validation + storage)
+- Recurring detection (algorithm + UI display)
+
+**Workflow**:
+1. **Specification Phase**:
+   - Use `/speckit.specify` to create spec.md
+   - Define user stories, requirements, success criteria
+   - Review with stakeholders (if applicable)
+2. **Implementation Phase**:
+   - Implement directly from spec (skip plan.md and tasks.md)
+   - Manual testing + accessibility testing
+3. **Optional**: Use `/speckit.clarify` if ambiguities arise
+
+**Skip**: Plan.md, tasks.md, analyze (too heavy for this complexity)  
+**Time Saved**: 4-8 hours per feature
+
+---
+
+**Tier 2: Complex Features (7-14 days, high complexity)**
+
+**Examples**:
+- Bank sync (Plaid integration, OAuth, sync logic)
+- AI categorization (ML model, training, inference)
+- Multi-user collaboration (real-time sync, permissions, conflict resolution)
+- Investment tracking (brokerage integration, portfolio calculations)
+
+**Workflow** (Full Spec-Kit):
+1. **Constitution Phase**: Use `/speckit.constitution` to review principles
+2. **Specification Phase**: Use `/speckit.specify` to create spec.md
+3. **Clarification Phase**: Use `/speckit.clarify` to resolve ambiguities
+4. **Planning Phase**: Use `/speckit.plan` to generate plan.md
+5. **Task Breakdown Phase**: Use `/speckit.tasks` to generate tasks.md
+6. **Implementation Phase**: Use `/speckit.implement` to execute tasks.md
+7. **Analysis Phase**: Use `/speckit.analyze` for cross-artifact consistency
+
+**Use All Tools**: Full Spec-Kit ceremony justified for this complexity
+
+---
+
+**Decision Summary**:
+- **<3 days + straightforward** → Tier 0 (GitHub issue only)
+- **3-7 days + moderate complexity** → Tier 1 (spec.md only)
+- **7-14 days + high complexity** → Tier 2 (full Spec-Kit)
+- **>14 days** → Break into smaller features (violates Principle VII: Simplicity)
+
+---
+
+## Definition of Done (By Phase)
+
+### Phase 1 (Current): Pre-MVP Definition of Done
+
+A feature is "done" when:
+
+1. ✅ **Functional**: Feature works as described in spec/issue
+2. ✅ **Manual Testing**: Tested manually, acceptance criteria met
+3. ✅ **Accessibility**: Screen reader tested, keyboard navigation works
+4. ✅ **Privacy**: No PII leaks, localStorage-first
+5. ✅ **Error Handling**: User-friendly error messages
+6. ✅ **Responsive**: Works on mobile, tablet, desktop
+7. ✅ **Documented**: README updated (if needed)
+
+**NOT required in Phase 1**:
+- ❌ Automated tests
+- ❌ Code coverage metrics
+- ❌ Performance benchmarks
+- ❌ Full Spec-Kit documentation
+
+---
+
+### Phase 2: Early Adoption Definition of Done
+
+A feature is "done" when:
+
+1. ✅ All Phase 1 criteria met
+2. ✅ **Critical Path Tests**: Core flows have automated tests
+3. ✅ **40% Coverage**: Business logic tested
+4. ✅ **CI/CD**: Tests pass in pipeline
+5. ✅ **Regression Tests**: Bug fixes have tests
+
+---
+
+### Phase 3: Growth Definition of Done
+
+A feature is "done" when:
+
+1. ✅ All Phase 2 criteria met
+2. ✅ **TDD**: Tests written before code
+3. ✅ **80% Coverage**: New code fully tested
+4. ✅ **Full Test Suite**: Unit + integration + accessibility
+5. ✅ **Performance**: Meets Phase 3 targets
+
+---
+
+### Phase 4: Scale Definition of Done
+
+A feature is "done" when:
+
+1. ✅ All Phase 3 criteria met
+2. ✅ **90% Coverage**: Critical paths fully tested
+3. ✅ **Security**: Penetration tested
+4. ✅ **Performance**: Meets Phase 4 targets
+5. ✅ **Monitoring**: Instrumented with Sentry + Web Vitals
+
+---
+
+## Conflict Resolution Hierarchy
+
+When principles conflict, resolve using this hierarchy:
+
+### Level 1: IMMUTABLE Principles (Highest Priority)
+
+1. **Privacy-First** (Principle I)
+2. **Accessibility-First** (Principle II)
+3. **Free Core** (Principle III)
+
+**Example Conflict**:
+- "Should we add analytics to track user behavior?"
+- **Resolution**: NO. Privacy-First (IMMUTABLE) > Product insights
+
+---
+
+### Level 2: Phase Requirements
+
+4. **Current Phase Requirements** (Phase 1: Ship fast, manual testing)
+
+**Example Conflict**:
+- "Should we write automated tests for this feature?"
+- **Resolution**: NO (Phase 1). Manual testing sufficient. Defer to Phase 2.
+
+---
+
+### Level 3: Product Principles
+
+5. **Visual-First** (Principle IV)
+6. **Mobile-First** (Principle V)
+7. **Simplicity/YAGNI** (Principle VII)
+
+**Example Conflict**:
+- "Should we add a complex dashboard with 20 widgets?"
+- **Resolution**: NO. Simplicity (Principle VII) > Feature richness. Start with 6 widgets.
+
+---
+
+### Level 4: Quality Principles (Phased)
+
+8. **Quality-First** (Principle VI, phased by user count)
+
+**Example Conflict**:
+- "Should we optimize this chart rendering?"
+- **Resolution**: DEPENDS. Phase 1: Only if users complain. Phase 3: Yes, proactively.
+
+---
+
+## Tooling Integration
+
+### Linear Integration (Project Management)
+
+**Purpose**: Track features, bugs, and tasks in Linear
+
+**Workflow**:
+1. Every Spec-Kit spec creates a Linear issue
+2. Linear issue links to spec file in GitHub
+3. Spec updates sync to Linear (manual for now)
+4. Linear tracks progress (To Do → In Progress → Done)
+
+**Linear Issue Template**:
+```markdown
+**Feature**: [Spec Title]
+**Spec**: [Link to specs/XXX-feature-name/spec.md]
+**Tier**: [0, 1, or 2]
+**Phase**: [1, 2, 3, or 4]
+**User Story**: [Primary user story from spec]
+**Acceptance Criteria**: [From spec]
+```
+
+**Labels**:
+- `tier-0` (simple), `tier-1` (medium), `tier-2` (complex)
+- `phase-1` (pre-MVP), `phase-2` (early adoption), etc.
+- `feature`, `bug`, `refactor`, `docs`
+
+---
+
+### CodeRabbit Integration (Code Review)
+
+**Purpose**: Automated code review enforcing constitutional principles
+
+**Configuration**: See `.coderabbit.yaml` for full config
+
+**Constitutional Checks**:
+1. **IMMUTABLE Principles**:
+   - Privacy: No user data collection without consent
+   - Accessibility: WCAG 2.1 AA compliance (color contrast, keyboard nav, ARIA)
+   - Free Core: All Tier 0 features must be free
+
+2. **Phase 1 Requirements**:
+   - Manual testing only (no automated tests required)
+   - Ship fast (2-week sprints)
+   - Simple solutions (YAGNI principle)
+   - User features > Infrastructure
+
+3. **Code Quality**:
+   - TypeScript strict mode
+   - No console.log in production
+   - Error handling for all async operations
+   - Descriptive variable names
+
+4. **BNPL Focus**:
+   - All features must serve BNPL debt management use case
+   - No feature creep outside roadmap
+
+**Rejection Criteria**:
+- ❌ Violates IMMUTABLE principles
+- ❌ Adds infrastructure without user feature
+- ❌ Introduces automated tests (Phase 1)
+- ❌ Adds dependencies without justification
+
+**Approval Criteria**:
+- ✅ Implements roadmap feature
+- ✅ Follows Phase 1 principles
+- ✅ Maintains accessibility
+- ✅ Includes manual testing notes
+
+---
+
+### Claude Code Bot Integration (GitHub Actions)
+
+**Purpose**: Automated spec implementation via GitHub Actions
+
+**Workflow**:
+1. Create spec with `/speckit.specify`
+2. Create PR with spec file (title: "Spec: Feature Name")
+3. Claude Code Bot triggers on PR
+4. Bot reads spec.md and implements code
+5. Bot creates implementation PR (title: "Implement: Feature Name")
+6. CodeRabbit reviews implementation
+7. Merge if CodeRabbit approves
+
+**GitHub Action** (`.github/workflows/claude-code-bot.yml`):
+- Triggers on PR with `specs/**/spec.md` changes
+- Reads constitution + spec
+- Implements feature following Phase 1 requirements
+- Creates implementation PR
+- Links back to spec PR
+
+---
+
+## Claude Code Prompt Templates
+
+**Note**: Actual prompt templates are in `.claude/commands/*.md`. This section provides guidance on how to use them.
+
+### Thinking Modes (By Feature Complexity)
+
+**Simple Features (Tier 0)**:
+- Use default thinking mode
+- Quick implementation, minimal planning
+
+**Medium Features (Tier 1)**:
+- Use `think` mode for specification
+- Consider edge cases, accessibility
+
+**Complex Features (Tier 2)**:
+- Use `think hard` mode for planning
+- Evaluate multiple approaches
+- Consider security, performance, scalability
+
+**Critical Features** (authentication, payments, data migration):
+- Use `think harder` or `ultrathink` mode
+- Exhaustive analysis of risks
+- Multiple validation passes
+
+---
+
+### Subagent Usage
+
+**When to use subagents**:
+- Verification of complex logic
+- Security review of authentication code
+- Accessibility audit of new UI components
+- Performance analysis of data processing
+
+**How to invoke**:
+```
+/subagent verify [component] against [criteria]
+```
+
+**Example**:
+```
+/subagent verify spending-categories accessibility against WCAG 2.1 AA
+```
+
+---
+
+### Visual Iteration (UI Features)
+
+**For UI-heavy features**:
+1. Generate initial implementation
+2. Take screenshot
+3. Analyze screenshot for:
+   - Visual hierarchy
+   - Color contrast (accessibility)
+   - Touch target sizes (mobile)
+   - Responsive layout
+4. Iterate based on visual analysis
+5. Repeat until acceptance criteria met
+
+---
+
+### Git/GitHub Integration
+
+**Claude Code handles 90%+ of git operations**:
+- Branch creation (automatic via Spec-Kit)
+- Commits (descriptive messages)
+- Push to remote
+- PR creation
+- PR updates based on review
+
+**Human handles**:
+- PR approval
+- Merge decisions
+- Conflict resolution (if complex)
+
+---
+
 ## Mandatory Features (Market Competitiveness)
 
 **The Constitution mandates these features to ensure PayPlan is market-competitive with YNAB, Monarch, PocketGuard, and Copilot.**
@@ -494,7 +863,11 @@ tests/
 - Testing Library (React component tests)
 - axe-core (accessibility tests)
 
-**Validation & Data**:
+**Build & Deploy**:
+- Vite 6.1.9 (build tool)
+- Vercel (hosting)
+
+**Libraries**:
 - Zod 4.1.11 (schema validation)
 - PapaParse 5.5.3 (CSV parsing)
 - uuid 13.0.0 (unique IDs)
@@ -665,87 +1038,7 @@ tests/
 
 ---
 
-## Development Workflow
-
-### Spec-Kit Workflow (PHASED BY FEATURE COMPLEXITY)
-
-**Principle**: Use the right tool for the job. Not every feature needs full Spec-Kit ceremony.
-
----
-
-#### Tier 0: Simple Features (<3 days, trivial changes) **← MOST PHASE 1 WORK**
-
-**Examples**:
-- UI tweaks (button colors, spacing adjustments)
-- Bug fixes (fix broken validation, fix display issue)
-- Minor enhancements (add tooltip, improve error message)
-- Small refactors (rename variable, extract utility function)
-
-**Workflow**:
-1. Create GitHub issue with:
-   - User story (As a [user], I want [feature], so that [benefit])
-   - Acceptance criteria (1-3 bullet points)
-   - Screenshots/mockups (if UI change)
-2. Implement directly (no spec.md, no plan.md, no tasks.md)
-3. Manual testing (verify acceptance criteria met)
-4. Commit and merge
-
-**Skip**: Spec.md, plan.md, tasks.md, analyze
-**Time Saved**: 2-4 hours per feature
-
----
-
-#### Tier 1: Medium Features (3-7 days, moderate complexity)
-
-**Examples**:
-- Spending categories (new data model + UI)
-- Goal tracking (CRUD + progress visualization)
-- Budget creation (form + validation + storage)
-- Recurring detection (algorithm + UI display)
-
-**Workflow**:
-1. **Specification Phase**:
-   - Use `/speckit.specify` to create spec.md
-   - Define user stories, requirements, success criteria
-   - Review with stakeholders (if applicable)
-2. **Implementation Phase**:
-   - Implement directly from spec (skip plan.md and tasks.md)
-   - Manual testing + accessibility testing
-3. **Optional**: Use `/speckit.clarify` if ambiguities arise
-
-**Skip**: Plan.md, tasks.md, analyze (too heavy for this complexity)
-**Time Saved**: 4-8 hours per feature
-
----
-
-#### Tier 2: Complex Features (7-14 days, high complexity)
-
-**Examples**:
-- Bank sync (Plaid integration, OAuth, sync logic)
-- AI categorization (ML model, training, inference)
-- Multi-user collaboration (real-time sync, permissions, conflict resolution)
-- Investment tracking (brokerage integration, portfolio calculations)
-
-**Workflow** (Full Spec-Kit):
-1. **Constitution Phase**: Use `/speckit.constitution` to review principles
-2. **Specification Phase**: Use `/speckit.specify` to create spec.md
-3. **Clarification Phase**: Use `/speckit.clarify` to resolve ambiguities
-4. **Planning Phase**: Use `/speckit.plan` to generate plan.md
-5. **Task Breakdown Phase**: Use `/speckit.tasks` to generate tasks.md
-6. **Implementation Phase**: Use `/speckit.implement` to execute tasks.md
-7. **Analysis Phase**: Use `/speckit.analyze` for cross-artifact consistency
-
-**Use All Tools**: Full Spec-Kit ceremony justified for this complexity
-
----
-
-**Decision Tree**:
-- **<3 days + straightforward** → Tier 0 (GitHub issue only)
-- **3-7 days + moderate complexity** → Tier 1 (spec.md only)
-- **7-14 days + high complexity** → Tier 2 (full Spec-Kit)
-- **>14 days** → Break into smaller features (violates Principle VII: Simplicity)
-
-### Git Workflow
+## Git Workflow
 
 **Branch Naming**:
 - Feature branches: `feature/XXX-feature-name` (e.g., `feature/020-spending-categories`)
@@ -768,15 +1061,13 @@ tests/
 
 ## Quality Gates
 
-### Pre-Merge Checklist
+### Pre-Merge Checklist (Phase 1)
 
-- [ ] All unit tests passing (80%+ coverage)
-- [ ] All integration tests passing
-- [ ] All accessibility tests passing (axe-core, manual)
+- [ ] Feature works as described in spec/issue
+- [ ] Manual testing completed
 - [ ] Screen reader tested (NVDA or VoiceOver)
 - [ ] Keyboard navigation tested
 - [ ] Mobile responsive tested (iPhone, Android)
-- [ ] Performance benchmarks met
 - [ ] PII sanitization verified (if handling sensitive data)
 - [ ] Constitution compliance verified
 - [ ] CLAUDE.md updated (if tech stack changed)
@@ -909,13 +1200,11 @@ tests/
 
 ---
 
-**Version**: 2.0.0 | **Ratified**: 2025-10-25 | **Last Amended**: 2025-10-26
+**Version**: 1.1 | **Ratified**: 2025-10-27 | **Last Amended**: 2025-10-27
 
 **Version History**:
-- **v2.0.0 (2025-10-26)**: MAJOR CHANGE - Replaced Test-First Development (Principle VI) with Quality-First Development (Phased). Added phased approach to testing, performance, and Spec-Kit workflow. Softened code standards to guidelines. Added Current Phase Status indicator.
-- **v1.2.0 (2025-10-26)**: Integrated market intelligence throughout constitution (BNPL crisis stats, competitor failures, gamification data, AI market growth)
-- **v1.1.0 (2025-10-26)**: Added Market Intelligence appendix
-- **v1.0.0 (2025-10-25)**: Initial ratification
+- **v1.1 (2025-10-27)**: MAJOR UPDATE - Added Spec-Kit workflow integration, Definition of Done by phase, Conflict Resolution Hierarchy, Tooling Integration (Linear, CodeRabbit, Claude Code Bot), Claude Code prompt guidance (thinking modes, subagents, visual iteration), and filled all 12 identified gaps for Claude Code optimization.
+- **v1.0 (2025-10-26)**: Initial ratification based on market research and competitor analysis.
 
 ---
 
@@ -945,6 +1234,7 @@ tests/
 - **Accessibility-First**: WCAG 2.1 AA compliance
 - **Free Core**: BNPL features always free
 - **Visual-First**: Charts for everything
-- **Test-First**: TDD mandatory
+- **Quality-First** (Phased): Testing rigor scales with product maturity
 
 **This Constitution ensures PayPlan becomes a comprehensive, market-competitive personal finance app while maintaining its unique privacy-first, BNPL-focused identity.**
+
