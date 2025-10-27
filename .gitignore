@@ -34,3 +34,8 @@ audit-report.json
 
 # Claude Code local skills (user-specific, not shared)
 .claude/skills/
+
+# Log files
+logs/
+*.log
+*.log.gz
