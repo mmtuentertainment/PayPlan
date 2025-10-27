@@ -39,3 +39,17 @@ audit-report.json
 logs/
 *.log
 *.log.gz
+
+# Testing artifacts
+day8-*.txt
+
+# Build artifacts
+frontend.htm
+
+# Windows metadata
+*Zone.Identifier
+
+# Log files
+logs/
+*.log
+*.log.gz
