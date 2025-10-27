@@ -133,12 +133,13 @@ export const affirmParser: BNPLParser = {
 
 function extractAffirmMerchant(content: string): string | null {
   const patterns = [
-    // Pattern 1: "Your loan for $600.00 at Best Buy"
-    /(?:purchase|loan)\s+(?:of|for)\s+\$[\d,]+(?:\.\d{2})?\s+at\s+([A-Z][A-Za-z0-9\s&'.,-]+?)(?:\s+has|\s+|\.|\n)/i,
-    // Pattern 2: "purchase of $X at Merchant" (original pattern)
-    /(?:purchase|loan)\s+(?:of|from)\s+\$[\d,]+(?:\.\d{2})?\s+at\s+([A-Z][A-Za-z0-9\s&'.,-]+?)(?:\s+|\.|\n)/i,
-    // Pattern 3: "financed through Merchant" or "shopping at Merchant"
-    /(?:financed through|shopping at)\s+([A-Z][A-Za-z0-9\s&'.,-]+?)(?:\s+for|\s+\$|\.)/i,
+    // Pattern 1: "Your loan for $600.00 at Best Buy has been confirmed"
+    // Use greedy match with specific boundaries (has|for) to capture multi-word merchants
+    /(?:purchase|loan)\s+(?:of|for)\s+\$[\d,]+(?:\.\d{2})?\s+(?:at|from|with)\s+([A-Za-z0-9][A-Za-z0-9\s&'.,-]+?)\s+(?:has|for|been)/i,
+    // Pattern 2: "Your loan for $600.00 at Best Buy." (ending with period)
+    /(?:purchase|loan)\s+(?:of|for)\s+\$[\d,]+(?:\.\d{2})?\s+(?:at|from|with)\s+([A-Za-z0-9][A-Za-z0-9\s&'.,-]+?)\./i,
+    // Pattern 3: "financed through Best Buy" or "shopping at Best Buy"
+    /(?:financed through|shopping at)\s+([A-Za-z0-9][A-Za-z0-9\s&'.,-]+?)(?:\s+for|\s+has|\.)/i,
   ];
 
   for (const pattern of patterns) {
