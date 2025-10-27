@@ -101,19 +101,6 @@ export function BNPLParser() {
     });
   };
 
-  // Format provider name
-  const formatProvider = (provider: string): string => {
-    const providers: Record<string, string> = {
-      klarna: 'Klarna',
-      affirm: 'Affirm',
-      afterpay: 'Afterpay',
-      sezzle: 'Sezzle',
-      zip: 'Zip',
-      'paypal-credit': 'PayPal Credit',
-    };
-    return providers[provider] || provider;
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">

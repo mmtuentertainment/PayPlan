@@ -56,19 +56,6 @@ export function PaymentSchedulePreview({
     });
   };
 
-  // Format provider name for display
-  const formatProvider = (provider: string): string => {
-    const providers: Record<string, string> = {
-      klarna: 'Klarna',
-      affirm: 'Affirm',
-      afterpay: 'Afterpay',
-      sezzle: 'Sezzle',
-      zip: 'Zip',
-      'paypal-credit': 'PayPal Credit',
-    };
-    return providers[provider] || provider;
-  };
-
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Modern Header Card */}
