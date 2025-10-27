@@ -30,78 +30,8 @@ export default defineConfig({
     },
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          /**
-           * Vendor Chunking Strategy (2025 Best Practices)
-           *
-           * Goals:
-           * 1. Cache stability: Group libraries by update frequency
-           * 2. Critical path optimization: Keep payment/business logic together
-           * 3. Parallel loading: Balance chunk sizes for HTTP/2 multiplexing
-           * 4. Dependency ordering: Ensure React loads before libraries that depend on it
-           *
-           * Strategy:
-           * - React ecosystem (stable, rarely updated): separate chunk (MUST LOAD FIRST)
-           * - UI framework (moderate updates): separate chunk (depends on React)
-           * - Payment/business libraries (frequent updates): bundle with app code
-           * - Large stable libraries: separate chunk for size optimization (depends on React)
-           *
-           * Rationale for payment libraries bundling:
-           * - zod, uuid, papaparse change frequently with business logic
-           * - Keeping them in main vendor ensures atomic deployments
-           * - Avoids cache invalidation cascades during feature development
-           */
-
-          // Normalize path for robust matching across platforms (Windows/Unix)
-          const normalizedId = id.replace(/\\/g, '/');
-
-          if (normalizedId.includes('/node_modules/')) {
-            // Group 1: React Core + React-dependent Libraries (~500KB gzipped)
-            // Rationale: React/ReactDOM/Router share release cycles, update rarely
-            // Impact: ~6 month cache stability based on React 19 LTS schedule
-            // CRITICAL: All React-dependent libraries must be in this chunk to avoid race conditions
-            // lucide-react MUST be bundled with React because it uses React.forwardRef at module initialization
-            if (
-              /\/node_modules\/react\//.test(normalizedId) ||
-              /\/node_modules\/react-dom\//.test(normalizedId) ||
-              /\/node_modules\/react-router/.test(normalizedId) ||
-              /\/node_modules\/scheduler\//.test(normalizedId) ||
-              /\/node_modules\/lucide-react\//.test(normalizedId)
-            ) {
-              return 'vendor-react';
-            }
-
-            // Group 2: UI Framework (~300KB gzipped)
-            // Rationale: Radix UI updates independently, large but stable
-            // Impact: ~3 month cache stability based on Radix release cadence
-            // Safe: Radix UI uses React lazily (not at module init)
-            if (/\/node_modules\/@radix-ui\//.test(normalizedId)) {
-              return 'vendor-ui';
-            }
-
-            // Group 3: Large Stable Libraries (~200KB gzipped)
-            // Rationale: Swagger/ramda are large, update infrequently, don't depend on React
-            // Impact: ~12 month cache stability
-            if (
-              /\/node_modules\/swagger/.test(normalizedId) ||
-              /\/node_modules\/@swagger-api\//.test(normalizedId) ||
-              /\/node_modules\/ramda\//.test(normalizedId)
-            ) {
-              return 'vendor-large';
-            }
-
-            // Everything else: Small utilities + Payment/Business Libraries (~50KB gzipped)
-            // Includes: zod, uuid, papaparse, date-fns (bundled with app for atomic deployments)
-            // Rationale: Payment libraries change with business logic - bundling ensures
-            // cache invalidation happens atomically with app code changes
-            // Falls through to main vendor chunk
-            return 'vendor';
-          }
-        },
-      },
-    },
+    // Let Vite handle chunking automatically
+    // Vite's automatic chunking respects dependency order and avoids race conditions
   },
   test: {
     globals: true,
