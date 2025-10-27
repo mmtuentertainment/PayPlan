@@ -105,7 +105,7 @@ Your Affirm purchase of $500.00 at Best Buy
 6 monthly payments of $83.33
 First payment: November 1, 2025
 APR: 0%"
-        className="min-h-[400px] font-mono text-sm"
+        className="min-h-[400px] font-mono text-sm bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg transition-all duration-200"
         aria-label="Paste BNPL purchase confirmation email"
         disabled={isParsing}
       />
