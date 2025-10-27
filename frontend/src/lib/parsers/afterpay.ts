@@ -100,7 +100,10 @@ function extractTotalAmount(content: string): number | null {
 
 function extractInstallments(content: string): BNPLInstallment[] | null {
   const installments: BNPLInstallment[] = [];
-  const pattern = /Payment\s+(\d+):\s*\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\s+(?:on|due)\s+([A-Za-z]+\s+\d{1,2}(?:,?\s+\d{4})?)/gi;
+  // Updated pattern to handle both:
+  // - "Payment 1: $40.00 (paid at checkout on October 28, 2025)"
+  // - "Payment 2: $40.00 due November 11, 2025"
+  const pattern = /Payment\s+(\d+):\s*\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\s+(?:\(paid at checkout )?(?:on|due)\s+([A-Za-z]+\s+\d{1,2}(?:,?\s+\d{4})?)/gi;
   let match;
 
   while ((match = pattern.exec(content)) !== null) {

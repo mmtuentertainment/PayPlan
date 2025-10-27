@@ -133,7 +133,11 @@ export const affirmParser: BNPLParser = {
 
 function extractAffirmMerchant(content: string): string | null {
   const patterns = [
+    // Pattern 1: "Your loan for $600.00 at Best Buy"
+    /(?:purchase|loan)\s+(?:of|for)\s+\$[\d,]+(?:\.\d{2})?\s+at\s+([A-Z][A-Za-z0-9\s&'.,-]+?)(?:\s+has|\s+|\.|\n)/i,
+    // Pattern 2: "purchase of $X at Merchant" (original pattern)
     /(?:purchase|loan)\s+(?:of|from)\s+\$[\d,]+(?:\.\d{2})?\s+at\s+([A-Z][A-Za-z0-9\s&'.,-]+?)(?:\s+|\.|\n)/i,
+    // Pattern 3: "financed through Merchant" or "shopping at Merchant"
     /(?:financed through|shopping at)\s+([A-Z][A-Za-z0-9\s&'.,-]+?)(?:\s+for|\s+\$|\.)/i,
   ];
 
@@ -149,7 +153,9 @@ function extractAffirmMerchant(content: string): string | null {
 
 function extractAffirmTotalAmount(content: string): number | null {
   const patterns = [
-    /(?:purchase|loan)\s+of\s+\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
+    // Pattern 1: "loan for $600.00" or "purchase of $X"
+    /(?:purchase|loan)\s+(?:of|for)\s+\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
+    // Pattern 2: "Total amount: $630.00"
     /Total(?:\s+amount)?:\s*\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
   ];
 
@@ -175,7 +181,28 @@ function extractAffirmInstallments(
     apr = parseFloat(aprMatch[1]);
   }
 
-  // Extract monthly payment info: "6 monthly payments of $83.33"
+  // Try to extract individual payment lines: "Payment 1: $52.50 due December 1, 2025"
+  const paymentPattern = /Payment\s+(\d+):\s+\$\s*([\d,]+\.?\d*)\s+due\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})/gi;
+  const matches = Array.from(content.matchAll(paymentPattern));
+
+  if (matches.length > 0) {
+    const installments: BNPLInstallment[] = matches.map((match) => {
+      const number = parseInt(match[1], 10);
+      const amount = parseFloat(match[2].replace(/,/g, ''));
+      const dateStr = match[3];
+      const dueDate = extractDate(dateStr);
+
+      return {
+        installmentNumber: number,
+        amount,
+        dueDate: dueDate || new Date().toISOString().split('T')[0], // Fallback
+      };
+    });
+
+    return { installments, apr };
+  }
+
+  // Fallback: Extract monthly payment info: "6 monthly payments of $83.33"
   const monthlyMatch = content.match(
     /(\d+)\s+monthly\s+payments?\s+of\s+\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i
   );
