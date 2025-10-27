@@ -9,6 +9,7 @@ import type { PreferenceCategoryType, UserPreference } from './lib/preferences/t
 const Docs = lazy(() => import('./pages/Docs'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Demo = lazy(() => import('./pages/Demo'));
+const BNPLParser = lazy(() => import('./pages/BNPLParser').then(m => ({ default: m.BNPLParser })));
 import { PreferenceSettings } from './components/preferences/PreferenceSettings';
 import { ToastNotification } from './components/preferences/ToastNotification';
 import { ErrorTest } from './components/ErrorTest';
@@ -191,6 +192,7 @@ function AppContent({
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/demo" element={<Demo />} />
             <Route path="/import" element={<Import />} />
+          <Route path={ROUTES.BNPL_PARSER} element={<BNPLParser />} />
           <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
           <Route path={ROUTES.ARCHIVE_DETAIL_PATTERN} element={<ArchiveDetailView />} />
           <Route

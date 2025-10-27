@@ -4,6 +4,7 @@
  * Features:
  * - 016-build-a-payment-archive (Archives routes)
  * - 017-navigation-system (Settings route)
+ * - 020-bnpl-email-parser (BNPL parser route)
  *
  * Centralized route constants to prevent string duplication
  * and enable easier refactoring.
@@ -31,4 +32,7 @@ export const ROUTES = {
 
   /** User preferences settings page (Feature 017) */
   SETTINGS: '/settings/preferences',
+
+  /** BNPL Email Parser page (Feature 020) */
+  BNPL_PARSER: '/bnpl',
 } as const;
