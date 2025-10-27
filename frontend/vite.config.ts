@@ -40,12 +40,13 @@ export default defineConfig({
            * 1. Cache stability: Group libraries by update frequency
            * 2. Critical path optimization: Keep payment/business logic together
            * 3. Parallel loading: Balance chunk sizes for HTTP/2 multiplexing
+           * 4. Dependency ordering: Ensure React loads before libraries that depend on it
            *
            * Strategy:
-           * - React ecosystem (stable, rarely updated): separate chunk
-           * - UI framework (moderate updates): separate chunk
+           * - React ecosystem (stable, rarely updated): separate chunk (MUST LOAD FIRST)
+           * - UI framework (moderate updates): separate chunk (depends on React)
            * - Payment/business libraries (frequent updates): bundle with app code
-           * - Large stable libraries: separate chunk for size optimization
+           * - Large stable libraries: separate chunk for size optimization (depends on React)
            *
            * Rationale for payment libraries bundling:
            * - zod, uuid, papaparse change frequently with business logic
@@ -57,13 +58,15 @@ export default defineConfig({
           const normalizedId = id.replace(/\\/g, '/');
 
           if (normalizedId.includes('/node_modules/')) {
-            // Group 1: React Core (~400KB gzipped)
+            // Group 1: React Core (~400KB gzipped) - MUST LOAD FIRST
             // Rationale: React/ReactDOM/Router share release cycles, update rarely
             // Impact: ~6 month cache stability based on React 19 LTS schedule
+            // CRITICAL: This chunk must be imported before all other chunks
             if (
               /\/node_modules\/react\//.test(normalizedId) ||
               /\/node_modules\/react-dom\//.test(normalizedId) ||
-              /\/node_modules\/react-router/.test(normalizedId)
+              /\/node_modules\/react-router/.test(normalizedId) ||
+              /\/node_modules\/scheduler\//.test(normalizedId)
             ) {
               return 'vendor-react';
             }
@@ -71,6 +74,7 @@ export default defineConfig({
             // Group 2: UI Framework (~300KB gzipped)
             // Rationale: Radix UI updates independently, large but stable
             // Impact: ~3 month cache stability based on Radix release cadence
+            // Depends on: vendor-react
             if (/\/node_modules\/@radix-ui\//.test(normalizedId)) {
               return 'vendor-ui';
             }
@@ -78,6 +82,7 @@ export default defineConfig({
             // Group 3: Large Stable Libraries (~200KB gzipped)
             // Rationale: Icons/swagger are large, update infrequently
             // Impact: ~12 month cache stability
+            // Depends on: vendor-react (lucide-react uses React)
             if (
               /\/node_modules\/lucide-react\//.test(normalizedId) ||
               /\/node_modules\/swagger/.test(normalizedId) ||
