@@ -1,0 +1,193 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2025-10-28T22:00:00Z",
+  "currentPhase": "Phase 1: Pre-MVP (Weeks 1-9)",
+  "currentEpic": "MMT-69: Budgeting App MVP",
+  "currentIssue": "MMT-61",
+  "completedIssues": [
+    "MMT-49",
+    "MMT-50",
+    "MMT-51",
+    "MMT-52",
+    "MMT-53",
+    "MMT-54"
+  ],
+  "inProgressIssues": [
+    "MMT-61"
+  ],
+  "nextIssues": [
+    "MMT-62",
+    "MMT-63",
+    "MMT-64",
+    "MMT-65",
+    "MMT-66",
+    "MMT-67"
+  ],
+  "recentDecisions": [
+    {
+      "date": "2025-10-28",
+      "decision": "Pivot to budgeting app with BNPL tracking",
+      "rationale": "Compete with YNAB/Monarch/PocketGuard, use BNPL as unique differentiator",
+      "documentedIn": "memory/constitution_v1.1_TEMP.md"
+    },
+    {
+      "date": "2025-10-28",
+      "decision": "Use Recharts for all charts",
+      "rationale": "WCAG 2.1 AA compliance, React integration, accessibility built-in",
+      "documentedIn": "memory/constitution_v1.1_TEMP.md (lines 708-797)"
+    },
+    {
+      "date": "2025-10-28",
+      "decision": "localStorage-first data architecture",
+      "rationale": "Privacy-first, no backend required, aligns with constitution",
+      "documentedIn": "memory/constitution_v1.1_TEMP.md (lines 800-1000+)"
+    },
+    {
+      "date": "2025-10-28",
+      "decision": "6-9 week realistic timeline for MVP",
+      "rationale": "Spec-driven development requires time for specs, safer than 3-4 weeks",
+      "documentedIn": "PAYPLAN_REALISTIC_ROADMAP.md"
+    },
+    {
+      "date": "2025-10-28",
+      "decision": "HIL → Manus → Claude Code workflow",
+      "rationale": "Human provides direction, Manus engineers specs/prompts, Claude Code implements",
+      "documentedIn": "HIL_WORKFLOW_EXECUTION_PLAN.md"
+    },
+    {
+      "date": "2025-10-28",
+      "decision": "Use Spec-Kit templates for all specs",
+      "rationale": "Industry-standard methodology, ensures consistency, Claude Code compatible",
+      "documentedIn": "specs/061-spending-categories-budgets/"
+    },
+    {
+      "date": "2025-10-28",
+      "decision": "Manual specs creation (Manus) vs automated (/speckit.specify)",
+      "rationale": "Both valid - Manus creates specs for control, Claude Code can use /speckit.implement",
+      "documentedIn": ".claude/commands/speckit.*.md"
+    }
+  ],
+  "pendingActions": [
+    {
+      "action": "Update README.md to reflect budgeting app positioning",
+      "priority": "HIGH",
+      "estimatedTime": "30 minutes",
+      "blockedBy": null,
+      "status": "TODO"
+    },
+    {
+      "action": "Install Recharts dependency",
+      "priority": "HIGH",
+      "estimatedTime": "15 minutes",
+      "blockedBy": null,
+      "status": "TODO"
+    },
+    {
+      "action": "Review frontend code for BNPL-only assumptions",
+      "priority": "MEDIUM",
+      "estimatedTime": "1-2 hours",
+      "blockedBy": null,
+      "status": "TODO"
+    },
+    {
+      "action": "Hand off MMT-61 to Claude Code for implementation",
+      "priority": "HIGH",
+      "estimatedTime": "3-5 days (Claude Code)",
+      "blockedBy": null,
+      "status": "READY"
+    }
+  ],
+  "context": {
+    "repositoryUrl": "https://github.com/mmtuentertainment/PayPlan",
+    "linearTeam": "MMT",
+    "linearWorkspace": "mmtu-entertainment",
+    "constitutionFile": "memory/constitution_v1.1_TEMP.md",
+    "specDirectory": "specs/",
+    "claudeConfigDirectory": ".claude/",
+    "sessionHandoffFile": "memory/SESSION_HANDOFF.md",
+    "specKitRepo": "/home/ubuntu/spec-kit",
+    "claudeCodeRepo": "/home/ubuntu/claude-code"
+  },
+  "workflow": {
+    "type": "HIL → Manus → Claude Code",
+    "roles": {
+      "HIL": "Human In The Loop - Natural language injector, decision maker",
+      "Manus": "AI Project Manager - Spec engineer, prompt engineer, session continuity",
+      "ClaudeCode": "Agentic Coder - Implements features from specs"
+    },
+    "process": [
+      "1. HIL provides natural language direction",
+      "2. Manus reads session state + constitution",
+      "3. Manus creates Spec-Kit compliant specs",
+      "4. Manus engineers Claude Code prompt",
+      "5. HIL gives prompt to Claude Code",
+      "6. Claude Code implements feature",
+      "7. HIL reviews and merges",
+      "8. Manus updates session state"
+    ],
+    "specKitCommands": {
+      "/speckit.specify": "Create spec.md from natural language (Claude Code or Manus)",
+      "/speckit.plan": "Create plan.md + data-model.md (Claude Code or Manus)",
+      "/speckit.tasks": "Create tasks.md from specs (Claude Code or Manus)",
+      "/speckit.implement": "Execute tasks.md (Claude Code only)",
+      "/speckit.clarify": "Resolve NEEDS CLARIFICATION markers",
+      "/speckit.checklist": "Validate against quality checklist",
+      "/speckit.analyze": "Analyze feature complexity",
+      "/speckit.constitution": "Check constitution alignment"
+    }
+  },
+  "mmt61Progress": {
+    "specCreated": true,
+    "planCreated": true,
+    "dataModelCreated": true,
+    "tasksCreated": true,
+    "checklistCreated": true,
+    "promptCreated": true,
+    "implementation": "READY_FOR_HANDOFF",
+    "files": [
+      "specs/061-spending-categories-budgets/spec.md",
+      "specs/061-spending-categories-budgets/plan.md",
+      "specs/061-spending-categories-budgets/data-model.md",
+      "specs/061-spending-categories-budgets/tasks.md",
+      "specs/061-spending-categories-budgets/checklist.md",
+      ".claude/prompts/implement-mmt-61.md"
+    ]
+  },
+  "researchCompleted": [
+    {
+      "topic": "Budgeting App UX Best Practices",
+      "date": "2025-10-28",
+      "findings": "YNAB too complex, users want visual-first, <5 min onboarding",
+      "documentedIn": "PHASE1_RESEARCH_FINDINGS.md"
+    },
+    {
+      "topic": "Accessibility for Financial Apps",
+      "date": "2025-10-28",
+      "findings": "WCAG 2.1 AA requires 3:1 chart contrast, dual encodings, ARIA labels",
+      "documentedIn": "PHASE1_RESEARCH_FINDINGS.md"
+    },
+    {
+      "topic": "localStorage Performance & Limits",
+      "date": "2025-10-28",
+      "findings": "5-10 MB limit, debounce writes, memoize reads, warn at 80%",
+      "documentedIn": "PHASE1_RESEARCH_FINDINGS.md"
+    }
+  ],
+  "optimizationStatus": {
+    "targetPercentage": 100,
+    "currentPercentage": 100,
+    "completedTasks": [
+      "Read Spec-Kit methodology",
+      "Read PayPlan Spec-Kit commands",
+      "Create session state system",
+      "Create MMT-61 spec.md",
+      "Create MMT-61 plan.md",
+      "Create MMT-61 data-model.md",
+      "Create MMT-61 tasks.md",
+      "Create MMT-61 checklist.md",
+      "Create Claude Code prompt template"
+    ],
+    "readyForHandoff": true
+  }
+}
+
