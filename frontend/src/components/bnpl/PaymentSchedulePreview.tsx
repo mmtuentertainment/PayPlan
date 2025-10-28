@@ -57,7 +57,19 @@ export function PaymentSchedulePreview({
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in-up">
+      {/* Success Message */}
+      <div className="animate-fade-in bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm">
+        <div className="flex items-center">
+          <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          <p className="text-green-800 font-medium">
+            Payment schedule extracted successfully!
+          </p>
+        </div>
+      </div>
+
       {/* Modern Header Card */}
       <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm">
         <div className="flex items-start justify-between gap-4 mb-4">
@@ -74,52 +86,52 @@ export function PaymentSchedulePreview({
 
       {/* Editable Fields - Modern Card */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5 hover:shadow-md transition-shadow duration-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Purchase Details
-        </h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Purchase Details</h3>
 
-        <div>
-          <label htmlFor="merchant-input" className="block text-sm font-medium text-gray-700 mb-2">
-            Merchant Name
-          </label>
-          <Input
-            id="merchant-input"
-            value={merchant}
-            onChange={(e) => setMerchant(e.target.value)}
-            placeholder="e.g., Target, Best Buy"
-            aria-label="Merchant name (editable)"
-            disabled={isSaving}
-            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="total-amount-input" className="block text-sm font-medium text-gray-700 mb-2">
-            Total Amount
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-              $
-            </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="merchant-input" className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              Merchant Name
+            </label>
             <Input
-              id="total-amount-input"
-              type="number"
-              step="0.01"
-              min="0"
-              value={totalAmount}
-              onChange={(e) => setTotalAmount(e.target.value)}
-              placeholder="0.00"
-              aria-label="Total purchase amount (editable)"
+              id="merchant-input"
+              value={merchant}
+              onChange={(e) => setMerchant(e.target.value)}
+              placeholder="e.g., Target, Best Buy"
+              aria-label="Merchant name (editable)"
               disabled={isSaving}
-              className="pl-7 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+              className="text-base font-semibold text-gray-900 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
             />
+          </div>
+
+          <div>
+            <label htmlFor="total-amount-input" className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              Total Amount
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-xl">
+                $
+              </span>
+              <Input
+                id="total-amount-input"
+                type="number"
+                step="0.01"
+                min="0"
+                value={totalAmount}
+                onChange={(e) => setTotalAmount(e.target.value)}
+                placeholder="0.00"
+                aria-label="Total purchase amount (editable)"
+                disabled={isSaving}
+                className="pl-8 text-2xl font-bold text-gray-900 tabular-nums rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Payment Schedule - Modern Table */}
+      {/* Payment Schedule - Desktop Table & Mobile Cards */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="px-6 py-4 border-b-2 border-gray-200 bg-gray-100">
           <h3 className="text-lg font-semibold text-gray-900">
             Payment Schedule
             <span className="ml-2 text-sm font-normal text-gray-600">
@@ -128,42 +140,68 @@ export function PaymentSchedulePreview({
           </h3>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View (hidden on mobile) */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-100 border-b-2 border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Payment #
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  #
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Due Date
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-100">
+            <tbody>
               {schedule.installments.map((installment, index) => (
                 <tr
                   key={installment.installmentNumber}
-                  className={`hover:bg-gray-50 transition-colors duration-150 ${
-                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  }`}
+                  className={`
+                    ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+                    hover:bg-blue-50
+                    transition-colors duration-150
+                    border-b border-gray-100
+                  `}
                 >
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                  <td className="px-4 py-3 text-sm text-gray-900 font-medium">
                     {installment.installmentNumber}
                   </td>
-                  <td className="px-6 py-4 text-base font-semibold text-gray-900">
+                  <td className="px-4 py-3 text-sm text-gray-900 font-semibold tabular-nums">
                     ${installment.amount.toFixed(2)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
+                  <td className="px-4 py-3 text-sm text-gray-600">
                     {formatDate(installment.dueDate)}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View (shown only on mobile) */}
+        <div className="block sm:hidden p-4 space-y-3">
+          {schedule.installments.map((installment, index) => (
+            <div
+              key={installment.installmentNumber}
+              className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Payment {installment.installmentNumber}
+                </span>
+                <span className="text-lg font-bold text-gray-900 tabular-nums">
+                  ${installment.amount.toFixed(2)}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Due: {formatDate(installment.dueDate)}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -189,24 +227,24 @@ export function PaymentSchedulePreview({
       )}
 
       {/* Summary Card */}
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Summary</h3>
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 shadow-sm">
+        <h3 className="text-sm font-semibold text-blue-900 uppercase tracking-wide mb-4">Summary</h3>
         <div className="space-y-3">
-          <div className="flex justify-between items-center py-2 border-b border-gray-200">
-            <span className="text-sm text-gray-700 font-medium">Total Purchase:</span>
-            <span className="text-lg font-bold text-gray-900">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-blue-700">Total Purchase:</span>
+            <span className="text-2xl font-bold text-blue-900 tabular-nums">
               ${schedule.totalAmount.toFixed(2)}
             </span>
           </div>
-          <div className="flex justify-between items-center py-2 border-b border-gray-200">
-            <span className="text-sm text-gray-700 font-medium">Number of Payments:</span>
-            <span className="text-base font-semibold text-gray-900">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-blue-700">Number of Payments:</span>
+            <span className="text-base font-semibold text-blue-900">
               {schedule.installmentCount}
             </span>
           </div>
-          <div className="flex justify-between items-center py-2">
-            <span className="text-sm text-gray-700 font-medium">Payment Amount:</span>
-            <span className="text-base font-semibold text-gray-900">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-blue-700">Payment Amount:</span>
+            <span className="text-base font-semibold text-blue-900 tabular-nums">
               ${(schedule.totalAmount / schedule.installmentCount).toFixed(2)} each
             </span>
           </div>

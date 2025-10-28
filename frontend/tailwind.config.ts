@@ -2,7 +2,7 @@ import type { Config } from 'tailwindcss'
 import { FADE_IN_DURATION } from './src/constants/animations'
 
 export default {
-  darkMode: ["class"],
+  darkMode: "class",
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -20,6 +20,16 @@ export default {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        'fade-in-up': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(10px)'
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)'
+          }
+        },
         'slide-down': {
           '0%': { opacity: '0', transform: 'translateY(-10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
@@ -27,6 +37,7 @@ export default {
       },
       animation: {
         'fade-in': `fade-in ${FADE_IN_DURATION}ms ease-out`,
+        'fade-in-up': 'fade-in-up 400ms ease-out',
         'slide-down': 'slide-down 300ms ease-out',
       },
     }
