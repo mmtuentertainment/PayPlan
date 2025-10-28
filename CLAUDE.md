@@ -104,16 +104,32 @@ HIL (Human) → Manus (AI PM) → Claude Code (You) → Bot Reviews → HIL Appr
 
 **What is PayPlan?**
 
-PayPlan is a privacy-first BNPL (Buy Now, Pay Later) debt management app targeting 18-35 year-olds living paycheck-to-paycheck with 3-5 active BNPL loans (Klarna, Affirm, Afterpay, etc.). PayPlan solves the BNPL debt crisis where 33% of users lose track of payments and 24% make late payments.
+PayPlan is a **privacy-first budgeting app** designed to help **low-income earners escape the BNPL trap** (or use BNPL strategically if beneficial). We provide comprehensive budgeting tools with **BNPL tracking as a unique differentiator**.
+
+**The Pivot** (October 2025):
+- **Was**: BNPL debt management app (BNPL-focused)
+- **Now**: Budgeting app with BNPL tracking (budgeting-focused)
+- **Reason**: Direct BNPL API integration impossible; must build robust budgeting engine first
+- **Strategy**: Leverage user-controlled data (emails, CSVs) while building best-in-class budgeting features
+
+**Target Users**:
+- Low-income earners (18-35 year-olds) living paycheck-to-paycheck
+- Users with 3-5 active BNPL loans (Klarna, Affirm, Afterpay)
+- People who need simple, fast, automated budgeting (not YNAB power users)
+- 60% of Gen Z uses BNPL = 30 million potential users
 
 **Unique Value Propositions**:
 1. **Privacy-First**: localStorage-only, no auth required (vs. competitors requiring bank sync)
-2. **BNPL-Specific**: Email parser for 6 BNPL providers, risk detection for late fees
-3. **Free Core**: All debt management features free forever (vs. YNAB $109/year)
+2. **BNPL Tracking**: Email parser for 6 BNPL providers, risk detection, debt payoff calculator (unique differentiator)
+3. **Free Core**: All budgeting features free forever (vs. YNAB $109/year)
 4. **Visual-First**: Charts and gamification (vs. YNAB's spreadsheet complexity)
 5. **Accessibility-First**: WCAG 2.1 AA from day one
+6. **Automation-First**: No manual data entry (vs. YNAB's manual envelope system)
 
-**Target Market**: 60% of Gen Z uses BNPL = 30 million users
+**Competitive Positioning**:
+- **vs. YNAB**: Simpler (<5 min onboarding vs 30 min), visual-first, free core, BNPL tracking
+- **vs. Monarch/PocketGuard**: Privacy-first (no bank sync required), BNPL differentiator
+- **vs. BNPL apps**: Full budgeting engine (not just payment tracking)
 
 ---
 
@@ -193,52 +209,34 @@ PayPlan/
 
 ## Development Workflow
 
-### Spec-Kit Decision Tree
+### Spec-Kit Workflow (Full SDD)
 
-**Use this to decide which Spec-Kit tier to use**:
+**IMPORTANT**: We use **full Spec-Kit workflow for ALL features** (no tiers, no shortcuts).
 
-#### Tier 0: Simple Features (<3 days)
+**Rationale**: Specifications are source of truth, code is disposable. Complete specs ensure:
+- Constitutional compliance (privacy, accessibility, performance)
+- Quality gates (bot reviews, HIL approval)
+- Permanent documentation (code changes, specs don't)
+- Manus → Claude Code handoff clarity
 
-**Examples**: UI tweaks, bug fixes, minor enhancements
+**Full Workflow** (for every feature):
+1. **Manus** runs `/speckit.specify` → creates `spec.md`
+2. **Manus** runs `/speckit.clarify` → resolves ambiguities with deep research
+3. **Manus** runs `/speckit.plan` → creates `plan.md`, `data-model.md`, `research.md`
+4. **Manus** runs `/speckit.tasks` → creates `tasks.md`, `checklist.md`
+5. **Manus** creates implementation prompt → `.claude/prompts/implement-[feature].md`
+6. **Claude Code (you)** runs `/speckit.implement` → generates code from specs
+7. **Claude Code** creates PR → bot review loop → HIL approval → merge
 
-**Workflow**:
-1. Create GitHub issue (user story + acceptance criteria)
-2. Implement directly (no spec.md)
-3. Manual testing
-4. Commit and merge
+**You receive** (from Manus):
+- Complete specifications in `specs/[number]-[feature-name]/`
+- Implementation prompt in `.claude/prompts/implement-[feature].md`
+- All context needed for implementation
 
-**Skip**: spec.md, plan.md, tasks.md
-
----
-
-#### Tier 1: Medium Features (3-7 days) **← MOST COMMON**
-
-**Examples**: Spending categories, goal tracking, budget creation
-
-**Workflow**:
-1. Use `/speckit.specify` to create spec.md
-2. Implement directly from spec (skip plan.md and tasks.md)
-3. Manual testing + accessibility testing
-4. Commit and merge
-
-**Skip**: plan.md, tasks.md (too heavy for this complexity)
-
----
-
-#### Tier 2: Complex Features (7-14 days)
-
-**Examples**: Bank sync, AI categorization, multi-user collaboration
-
-**Workflow** (Full Spec-Kit):
-1. `/speckit.constitution` - Review principles
-2. `/speckit.specify` - Create spec.md
-3. `/speckit.clarify` - Resolve ambiguities
-4. `/speckit.plan` - Generate plan.md
-5. `/speckit.tasks` - Generate tasks.md
-6. `/speckit.implement` - Execute tasks.md
-7. `/speckit.analyze` - Verify consistency
-
-**Use All Tools**: Full ceremony justified for this complexity
+**You do NOT**:
+- Skip spec files (all are required)
+- Create specs yourself (Manus does this)
+- Make architectural decisions (defined in specs)
 
 ---
 
@@ -462,66 +460,96 @@ After you create a PR, an automated bot review loop begins. **You MUST iterate u
 
 ---
 
-## Mandatory Features (Roadmap)
+## Mandatory Features (Post-Pivot Roadmap)
 
-### Tier 0: MVP Requirements (Weeks 1-6)
+**Epic**: MMT-60 - Budgeting App MVP
 
-1. **Spending Categories** (Weeks 1-2)
+**Strategy**: Build core budgeting features first, then enhance with BNPL differentiators.
+
+---
+
+### Phase 1: P0 Features (Weeks 1-4) - Core Budgeting
+
+**Goal**: Achieve competitive parity with YNAB, Monarch, PocketGuard
+
+1. **MMT-61: Spending Categories & Budget Creation** (Week 1)
    - Pre-defined + custom categories
+   - Monthly budget limits per category
+   - Rollover support
+   - Budget alerts (approaching/exceeded)
    - Pie chart visualization
-   - Transaction assignment
+   - **Status**: Spec complete, ready for implementation
 
-2. **Budget Creation & Tracking** (Weeks 3-4)
-   - Monthly limits per category
-   - Progress bars
-   - Alerts when approaching limits
+2. **MMT-62: Manual Transaction Entry & Editing** (Week 1-2)
+   - Quick-add form (<15s entry time)
+   - Transaction editing/deletion
+   - Search and filter
+   - Zod validation
+   - **Status**: Next to spec
 
-3. **Dashboard with Charts** (Weeks 5-6)
+3. **MMT-63: Dashboard with Charts** (Week 2-3)
    - Net worth graph
    - Spending by category (pie chart)
    - Income vs. expenses (bar chart)
    - Recent transactions widget
    - Upcoming bills widget
    - Goal progress widget
+   - BNPL payment schedule widget
+   - **Status**: Pending spec
 
-4. **Goal Tracking** (Weeks 5-6)
-   - Create savings goals
+4. **MMT-64: Goal Tracking** (Week 3)
+   - Create/edit savings goals
    - Progress bars with percentages
+   - Target dates
    - Goal completion celebrations
+   - **Status**: Pending spec
 
 ---
 
-### Tier 1: Competitive Parity (Weeks 7-12)
+### Phase 2: P1 Features (Weeks 5-8) - Enhanced Functionality
 
-5. **Recurring Transaction Detection** (Weeks 7-8)
-   - Auto-detect subscriptions
+**Goal**: Add analytics, automation, and BNPL differentiators
+
+5. **MMT-65: Recurring Bill Management** (Week 5)
+   - Recurring transaction generator
+   - Pattern detection (auto-detect subscriptions)
    - BNPL installment detection
    - Price change alerts
+   - **Status**: Pending spec
 
-6. **Bill Reminders & Alerts** (Weeks 9-10)
-   - Upcoming bill notifications (7d, 3d, 1d)
-   - Overdue payment warnings
-   - Low balance alerts
+6. **MMT-66: Budget Analytics & Insights** (Week 6)
+   - Monthly summaries
+   - Overspending alerts
+   - Trend analysis (3, 6, 12 months)
+   - Export reports (PDF, CSV)
+   - **Status**: Pending spec
 
-7. **Cash Flow Reports** (Week 11)
-   - Monthly income vs. expenses
-   - Spending trends (3, 6, 12 months)
-   - Exportable reports (PDF, CSV)
-
-8. **Debt Payoff Calculator** (Week 12)
-   - Snowball method
-   - Avalanche method
-   - Interest savings calculator
-   - Payoff timeline projections
+7. **MMT-67: Enhanced BNPL Debt Tracking** (Week 7-8)
+   - Total BNPL debt calculation
+   - Payment calendar view
+   - APR warnings (if available)
+   - Risk alerts (late payment likelihood)
+   - Debt payoff calculator (snowball/avalanche)
+   - **Status**: Pending spec
 
 ---
 
-### Tier 2: Differentiation (Weeks 13-24, Optional Premium)
+### Phase 3: Premium Features (Weeks 9-16) - Differentiation
 
-9. **Bank Account Sync** (Premium)
-10. **AI-Powered Categorization** (Premium)
-11. **Investment Tracking** (Premium)
-12. **Multi-User Collaboration** (Premium)
+8. **Bank Account Sync** (Premium, Plaid integration)
+9. **AI-Powered Categorization** (Premium, OpenAI API)
+10. **Investment Tracking** (Premium)
+11. **Multi-User Collaboration** (Premium, requires auth)
+
+---
+
+### Current Focus
+
+**Active**: MMT-61 (Spending Categories & Budgets) - Spec complete, awaiting Claude Code implementation
+
+**Next**: MMT-62 (Manual Transaction Entry) - Manus will create spec
+
+**Timeline**: 14-21 days for P0 features (aggressive but achievable with full Spec-Kit workflow)
 
 ---
 
