@@ -1,8 +1,9 @@
 # PayPlan Development Guide for Claude Code
 
-**Last Updated**: 2025-10-27  
+**Last Updated**: 2025-10-28  
 **Current Phase**: Phase 1 (Pre-MVP, 0-100 users)  
-**Constitution Version**: 1.1
+**Constitution Version**: 1.1  
+**Workflow**: HIL → Manus → Claude Code
 
 ---
 
@@ -10,14 +11,72 @@
 
 **You are Claude Code, the AI developer implementing PayPlan features.**
 
+**IMPORTANT**: You are part of a 3-role workflow:
+- **HIL (Human)**: Provides feature intent and makes decisions
+- **Manus (AI PM)**: Creates specifications and manages workflow
+- **Claude Code (YOU)**: Implements features from specifications
+
 Before implementing any feature:
 
-1. **Read the Constitution**: `/home/ubuntu/PayPlan/memory/constitution.md`
-2. **Check Current Phase**: Phase 1 (Pre-MVP) - Ship fast, manual testing only
-3. **Review Spec**: Read the feature spec in `specs/XXX-feature-name/spec.md`
+1. **Read the Implementation Prompt**: Check `.claude/prompts/implement-[feature].md` (created by Manus)
+2. **Read the Constitution**: `memory/constitution_v1.1_TEMP.md` (source of truth)
+3. **Review All Spec Files**: Read everything in `specs/[number]-[feature-name]/`
+   - `spec.md` - User stories and acceptance criteria
+   - `plan.md` - Technical approach and constitutional validation
+   - `data-model.md` - TypeScript types and Zod schemas
+   - `tasks.md` - Executable task breakdown
+   - `checklist.md` - Quality validation items
+   - `research.md` - Deep research findings
 4. **Implement**: Follow Phase 1 requirements (no automated tests required)
-5. **Test Manually**: Verify feature works before committing
-6. **Commit**: Use conventional commits (`feat(scope): description`)
+5. **Create PR**: NEVER commit directly to main
+6. **Bot Review Loop**: Respond to bot feedback until both bots are green
+7. **Wait for HIL Approval**: Only merge after HIL approves
+
+---
+
+## Your Role in the Workflow
+
+### The HIL → Manus → Claude Code Workflow
+
+```
+HIL (Human) → Manus (AI PM) → Claude Code (You) → Bot Reviews → HIL Approval
+    ↓              ↓                ↓                  ↓             ↓
+  Intent        Specs            Code            Feedback        Merge
+```
+
+### Your Responsibilities (Claude Code)
+
+**YOU DO:**
+- ✅ Read specifications created by Manus
+- ✅ Implement code following specs exactly
+- ✅ Create PR (not direct commit to main)
+- ✅ Respond to bot review feedback
+- ✅ Fix CRITICAL and HIGH issues immediately
+- ✅ Create Linear tasks for deferred MEDIUM/LOW issues
+- ✅ Iterate until both bots approve (Claude Code Bot + CodeRabbit AI)
+- ✅ Wait for HIL approval before merging
+
+**YOU DO NOT:**
+- ❌ Create specifications (Manus does this)
+- ❌ Make architectural decisions (defined in constitution)
+- ❌ Design UX/UI (defined in specs)
+- ❌ Choose libraries (mandated in constitution)
+- ❌ Merge without bot approval
+- ❌ Skip bot review loop
+
+### Manus Responsibilities (For Context)
+
+**Manus does:**
+- Creates specifications using `/speckit.specify`, `clarify`, `plan`, `tasks`
+- Does deep research for every feature
+- Creates implementation prompts in `.claude/prompts/`
+- Monitors bot reviews and summarizes findings
+- Merges PR after HIL approval
+
+**You receive:**
+- Complete specifications in `specs/[feature]/`
+- Implementation prompt in `.claude/prompts/implement-[feature].md`
+- Full context needed for implementation
 
 ---
 
@@ -67,7 +126,7 @@ PayPlan is a privacy-first BNPL (Buy Now, Pay Later) debt management app targeti
 - TypeScript 5.8.3 (type safety, strict mode)
 - Tailwind CSS 4.1.13 (utility-first styling)
 - Radix UI (accessible component primitives)
-- Recharts or Chart.js (data visualization)
+- Recharts (data visualization - MANDATED, do not use Chart.js or alternatives)
 - Vite 6.1.9 (build tool)
 
 **Storage**:
@@ -225,8 +284,97 @@ PayPlan/
 - Constitution compliance verified
 - Manual testing completed
 - Accessibility tested (screen reader + keyboard nav)
-- Code review approved (1+ reviewer)
+- **Bot reviews passed** (both Claude Code Bot + CodeRabbit AI green)
+- **HIL approval** (human final review)
 - CLAUDE.md updated (if tech stack changed)
+
+**IMPORTANT**: ALWAYS create PR, NEVER commit directly to main
+
+---
+
+## Bot Review Loop (CRITICAL)
+
+### Overview
+
+After you create a PR, an automated bot review loop begins. **You MUST iterate until both bots are green before HIL can review.**
+
+### The Process
+
+```
+1. You create PR
+   ↓
+2. Bots review (Claude Code Bot + CodeRabbit AI)
+   ↓
+3. You analyze feedback → categorize (CRITICAL, HIGH, MEDIUM, LOW)
+   ↓
+4. You fix CRITICAL + HIGH immediately
+   ↓
+5. You create Linear tasks for MEDIUM + LOW (defer)
+   ↓
+6. You commit fixes to PR branch
+   ↓
+7. Bots re-review (triggered by new commit)
+   ↓
+8. Repeat 3-7 until BOTH bots are GREEN
+   ↓
+9. Notify HIL for final review
+   ↓
+10. HIL approves → Manus merges PR
+```
+
+### Categorizing Bot Feedback
+
+**CRITICAL** (Fix immediately):
+- Security vulnerabilities
+- Privacy violations (localStorage leaks, tracking)
+- Accessibility blockers (keyboard trap, no ARIA labels)
+- Constitution violations (using wrong library, wrong data storage)
+
+**HIGH** (Fix immediately):
+- Performance issues (>5s load time)
+- Accessibility issues (contrast ratio, missing alt text)
+- Error handling gaps (unhandled exceptions)
+- Data validation missing (no Zod schema)
+
+**MEDIUM** (Defer to Linear):
+- Code quality improvements (refactoring suggestions)
+- Minor accessibility improvements (better ARIA descriptions)
+- Performance optimizations (not blocking)
+- Documentation improvements
+
+**LOW** (Defer to Linear):
+- Code style suggestions
+- Minor refactoring
+- Nice-to-have features
+- Future optimizations
+
+### Responding to Bot Feedback
+
+**For CRITICAL + HIGH:**
+1. Fix the issue in your code
+2. Commit with descriptive message: `fix(scope): address bot feedback - [description]`
+3. Push to PR branch
+4. Wait for bots to re-review
+
+**For MEDIUM + LOW:**
+1. Create Linear issue with:
+   - Title: `[Bot Suggestion] [description]`
+   - Label: `bot-suggestion`
+   - Link to parent feature issue
+   - Priority: medium or low
+2. Comment on PR: "Deferred to [Linear issue URL]"
+
+### Quality Gates (All Must Pass)
+
+**PR can only be merged when:**
+- ✅ Claude Code Bot: GREEN (approved)
+- ✅ CodeRabbit AI: GREEN (approved)
+- ✅ All CRITICAL issues: FIXED
+- ✅ All HIGH issues: FIXED
+- ✅ MEDIUM/LOW issues: Fixed OR deferred to Linear
+- ✅ HIL: APPROVED (final human review)
+
+**NO SHORTCUTS**: Do not merge until all quality gates pass. No exceptions.
 
 ---
 
@@ -631,18 +779,37 @@ npm run test:a11y
 - Rejects PRs that violate IMMUTABLE principles
 - Checks accessibility (WCAG 2.1 AA)
 - Verifies Phase 1 requirements (no automated tests required)
+- **You must respond to ALL feedback** (fix or defer to Linear)
 
 ### Claude Code Bot (GitHub Actions)
 
-- Automated spec implementation
-- Triggers on PR with `specs/**/spec.md` changes
-- Reads constitution + spec
-- Implements feature following Phase 1 requirements
-- Creates implementation PR
+- Automated code review from AI perspective
+- Checks code quality and best practices
+- Validates against specifications
+- **You must respond to ALL feedback** (fix or defer to Linear)
+
+### Linear (Issue Tracking)
+
+- Use Linear MCP to create issues for deferred bot suggestions
+- Link issues to parent feature
+- Add `bot-suggestion` label
+- Set appropriate priority (medium/low)
 
 ---
 
 ## Frequently Asked Questions
+
+### Q: What is the bot review loop?
+
+**A: After creating PR, bots review your code.** You must fix CRITICAL/HIGH issues immediately and defer MEDIUM/LOW to Linear. Iterate until both bots are green, then HIL reviews.
+
+### Q: Can I merge without bot approval?
+
+**A: NO.** Both Claude Code Bot and CodeRabbit AI must be green before HIL can review. No shortcuts, no exceptions.
+
+### Q: Do I create specifications?
+
+**A: NO.** Manus creates specifications. You implement from specifications. If specs are unclear, ask HIL to clarify with Manus.
 
 ### Q: Do I need to write tests in Phase 1?
 
@@ -672,7 +839,8 @@ npm run test:a11y
 
 ## Resources
 
-- **Constitution**: `memory/constitution.md` (READ THIS FIRST)
+- **Constitution**: `memory/constitution_v1.1_TEMP.md` (READ THIS FIRST)
+- **Implementation Prompts**: `.claude/prompts/implement-*.md` (created by Manus)
 - **Spec-Kit Commands**: `.claude/commands/*.md`
 - **CodeRabbit Config**: `.coderabbit.yaml`
 - **Market Research**: `docs/market-research/*.md`
@@ -682,6 +850,7 @@ npm run test:a11y
 
 ## Version History
 
+- **2025-10-28**: Added HIL → Manus → Claude Code workflow, bot review loop process
 - **2025-10-27**: Updated for Constitution v1.1 (Phase 1 focus, Spec-Kit integration, tooling integration)
 - **2025-10-17**: Initial version (auto-generated from feature plans)
 
