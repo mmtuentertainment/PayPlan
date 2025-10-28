@@ -79,7 +79,7 @@ Questions? Visit klarna.com/support
         </Button>
       </div>
 
-      <div className="rounded-lg border border-gray-200 p-4 bg-blue-50">
+      <div className="rounded-lg border border-blue-200 p-4 bg-blue-50">
         <p className="text-sm text-gray-700">
           <strong>Supported providers:</strong> Klarna, Affirm, Afterpay, Sezzle,
           Zip, PayPal Credit
