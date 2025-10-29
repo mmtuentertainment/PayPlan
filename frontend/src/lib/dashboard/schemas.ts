@@ -35,7 +35,7 @@ export const MonthDataSchema = z.object({
  */
 export const IncomeExpensesChartDataSchema = z.object({
   months: z.array(MonthDataSchema).min(1).max(12),
-  maxValue: z.number().positive(),
+  maxValue: z.number().nonnegative(), // Allow 0 for empty state
 });
 
 export type IncomeExpensesChartData = z.infer<typeof IncomeExpensesChartDataSchema>;

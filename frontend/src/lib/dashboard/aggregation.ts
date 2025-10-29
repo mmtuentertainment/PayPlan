@@ -39,13 +39,20 @@ export function aggregateSpendingByCategory(
   transactions: Transaction[],
   categories: Category[]
 ): SpendingChartData[] {
-  // Get current month in YYYY-MM format
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  // Validate inputs
+  if (!Array.isArray(transactions) || !Array.isArray(categories)) {
+    console.error('aggregateSpendingByCategory: Invalid input - transactions and categories must be arrays');
+    return [];
+  }
 
-  // Filter to current month expenses (positive amounts per Transaction interface)
-  const expensesThisMonth = transactions.filter(
-    (t) => t.amount > 0 && t.date.startsWith(currentMonth)
-  );
+  try {
+    // Get current month in YYYY-MM format
+    const currentMonth = new Date().toISOString().slice(0, 7);
+
+    // Filter to current month expenses (positive amounts per Transaction interface)
+    const expensesThisMonth = transactions.filter(
+      (t) => t.amount > 0 && t.date.startsWith(currentMonth)
+    );
 
   // Calculate total spending
   const totalSpending = expensesThisMonth.reduce(
@@ -86,6 +93,10 @@ export function aggregateSpendingByCategory(
       percentage: (amount / totalSpending) * 100,
     };
   });
+  } catch (error) {
+    console.error('Error in aggregateSpendingByCategory:', error);
+    return [];
+  }
 }
 
 /**
@@ -100,8 +111,15 @@ export function aggregateSpendingByCategory(
 export function aggregateIncomeExpenses(
   transactions: Transaction[]
 ): IncomeExpensesChartData {
-  const months: MonthData[] = [];
-  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Validate inputs
+  if (!Array.isArray(transactions)) {
+    console.error('aggregateIncomeExpenses: Invalid input - transactions must be an array');
+    return { months: [], maxValue: 0 };
+  }
+
+  try {
+    const months: MonthData[] = [];
+    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   // Generate last 6 months
   for (let i = 5; i >= 0; i--) {
@@ -139,6 +157,10 @@ export function aggregateIncomeExpenses(
   );
 
   return { months, maxValue };
+  } catch (error) {
+    console.error('Error in aggregateIncomeExpenses:', error);
+    return { months: [], maxValue: 0 };
+  }
 }
 
 /**
@@ -181,8 +203,15 @@ export function getUpcomingBills(
   transactions: Transaction[],
   categories: Category[]
 ): UpcomingBill[] {
-  // Group transactions by description + amount (expenses only)
-  const transactionGroups = transactions.reduce((acc, t) => {
+  // Validate inputs
+  if (!Array.isArray(transactions) || !Array.isArray(categories)) {
+    console.error('getUpcomingBills: Invalid input - transactions and categories must be arrays');
+    return [];
+  }
+
+  try {
+    // Group transactions by description + amount (expenses only)
+    const transactionGroups = transactions.reduce((acc, t) => {
     if (t.amount <= 0) return acc; // Only expenses (positive amounts)
 
     const key = `${t.description}|${t.amount}`;
@@ -246,6 +275,10 @@ export function getUpcomingBills(
   return recurringBills.sort((a, b) =>
     new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
   );
+  } catch (error) {
+    console.error('Error in getUpcomingBills:', error);
+    return [];
+  }
 }
 
 /**
