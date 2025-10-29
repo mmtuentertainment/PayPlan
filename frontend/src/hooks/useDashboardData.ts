@@ -75,8 +75,6 @@ export function useDashboardData(): DashboardData {
   // Read localStorage once (these calls are already optimized in storage.ts)
   const categories = readCategories();
   const transactions = readTransactions();
-  // budgets will be used in Chunk 3 for budget-related widgets
-  // const budgets = readBudgets();
   const goals = readGoals() as Array<{
     id: string;
     name: string;
