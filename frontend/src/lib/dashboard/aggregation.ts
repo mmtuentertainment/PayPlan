@@ -177,9 +177,20 @@ export function getRecentTransactions(
   transactions: Transaction[],
   limit: number = 5
 ): Transaction[] {
-  return [...transactions]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, limit);
+  // Validate inputs
+  if (!Array.isArray(transactions)) {
+    console.error('getRecentTransactions: Invalid input - transactions must be an array');
+    return [];
+  }
+
+  try {
+    return [...transactions]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, limit);
+  } catch (error) {
+    console.error('Error in getRecentTransactions:', error);
+    return [];
+  }
 }
 
 /**
@@ -299,9 +310,13 @@ export function getUpcomingBills(
  * 3. Calculate days remaining until target date
  */
 export function getGoalProgress(goals: Goal[]): GoalProgress[] {
-  if (!goals || goals.length === 0) return [];
+  // Validate inputs
+  if (!Array.isArray(goals) || goals.length === 0) {
+    return [];
+  }
 
-  return goals.map((goal) => {
+  try {
+    return goals.map((goal) => {
     const percentage = goal.targetAmount > 0
       ? (goal.currentAmount / goal.targetAmount) * 100
       : 0;
@@ -342,4 +357,8 @@ export function getGoalProgress(goals: Goal[]): GoalProgress[] {
       status,
     };
   });
+  } catch (error) {
+    console.error('Error in getGoalProgress:', error);
+    return [];
+  }
 }
