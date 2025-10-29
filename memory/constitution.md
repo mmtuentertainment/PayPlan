@@ -689,6 +689,49 @@ When principles conflict, resolve using this hierarchy:
 
 ### Git/GitHub Integration
 
+**Mandatory Workflow** (IMMUTABLE):
+
+1. **NEVER push directly to `main`** - All changes MUST go through PRs
+2. **Create feature branch** - Use naming convention: `feature/XXX-feature-name` or `fix/XXX-bug-name`
+3. **Create PR before merging** - All features require PR review, even in Phase 1
+4. **Link Linear issue** - PR description MUST link to Linear issue (e.g., "Closes MMT-61")
+5. **Wait for CI/CD** - PRs MUST pass all checks before merging
+6. **Get approval** - At least one approval required (human or CodeRabbit)
+7. **Squash and merge** - Keep `main` history clean
+
+**Branch Naming Convention**:
+- Features: `feature/XXX-short-description` (e.g., `feature/061-spending-categories`)
+- Bugs: `fix/XXX-short-description` (e.g., `fix/076-budget-progress-crash`)
+- Docs: `docs/XXX-short-description` (e.g., `docs/061-retrospective`)
+- Chores: `chore/XXX-short-description` (e.g., `chore/update-dependencies`)
+
+**PR Title Convention**:
+- Features: `feat(scope): description` (e.g., `feat(budgets): add budget progress tracking`)
+- Bugs: `fix(scope): description` (e.g., `fix(storage): prevent infinite loop in useLocalStorage`)
+- Docs: `docs(scope): description` (e.g., `docs(readme): update feature list`)
+- Chores: `chore(scope): description` (e.g., `chore(deps): update React to 19.1.1`)
+
+**PR Description Template**:
+```markdown
+## Description
+[Brief description of changes]
+
+## Linear Issue
+Closes [MMT-XXX](link)
+
+## Changes
+- [ ] Change 1
+- [ ] Change 2
+
+## Testing
+- [ ] Manual testing completed
+- [ ] Accessibility tested (keyboard + screen reader)
+- [ ] Mobile tested
+
+## Screenshots
+[If UI changes]
+```
+
 **Claude Code handles 90%+ of git operations**:
 - Branch creation (automatic via Spec-Kit)
 - Commits (descriptive messages)
