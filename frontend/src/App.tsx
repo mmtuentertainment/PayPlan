@@ -10,6 +10,9 @@ const Docs = lazy(() => import('./pages/Docs'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Demo = lazy(() => import('./pages/Demo'));
 const BNPLParser = lazy(() => import('./pages/BNPLParser').then(m => ({ default: m.BNPLParser })));
+const Categories = lazy(() => import('./pages/Categories'));
+const Budgets = lazy(() => import('./pages/Budgets'));
+const Transactions = lazy(() => import('./pages/Transactions'));
 import { PreferenceSettings } from './components/preferences/PreferenceSettings';
 import { ToastNotification } from './components/preferences/ToastNotification';
 import { ErrorTest } from './components/ErrorTest';
@@ -193,6 +196,9 @@ function AppContent({
             <Route path="/demo" element={<Demo />} />
             <Route path="/import" element={<Import />} />
           <Route path={ROUTES.BNPL_PARSER} element={<BNPLParser />} />
+          <Route path={ROUTES.CATEGORIES} element={<Categories />} />
+          <Route path={ROUTES.BUDGETS} element={<Budgets />} />
+          <Route path={ROUTES.TRANSACTIONS} element={<Transactions />} />
           <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
           <Route path={ROUTES.ARCHIVE_DETAIL_PATTERN} element={<ArchiveDetailView />} />
           <Route

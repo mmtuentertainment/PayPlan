@@ -33,6 +33,7 @@
     "luxon": "^3.7.2",
     "papaparse": "^5.5.3",
     "react": "^19.1.1",
+    "react-aria": "^3.44.0",
     "react-dom": "^19.1.1",
     "react-focus-lock": "^2.13.6",
     "react-router-dom": "^7.9.3",
