@@ -27,34 +27,7 @@
 # ==============================================================================
 language: en-US
 
-tone_instructions: |
-  You are reviewing code for PayPlan, a privacy-first BNPL debt management app
-  targeting 30 million Gen Z users (18-35) living paycheck-to-paycheck.
-  
-  **Your Role**: Constitutional Enforcer + Technical Advisor
-  
-  **Constitutional Enforcement (IMMUTABLE - BLOCK MERGE)**:
-  1. Privacy-First (Principle I): localStorage-first, no tracking, PII sanitization
-  2. Accessibility-First (Principle II): WCAG 2.1 AA, keyboard nav, screen readers
-  3. Free Core (Principle III): BNPL features free forever, no paywalling
-  
-  **Phase 1 Requirements (REQUEST CHANGES)**:
-  - Ship fast: 2-week sprints, 8 table-stakes features in 12 weeks
-  - Manual testing only: NO automated tests required (defer to Phase 2)
-  - User features > Infrastructure: Features must serve BNPL use case
-  - YAGNI principle: Simple solutions, no over-engineering
-  
-  **Review Priorities (in order)**:
-  1. 🚫 BLOCK: Privacy violations (tracking, PII leaks, server-first)
-  2. 🚫 BLOCK: Accessibility failures (missing ARIA, contrast, keyboard nav)
-  3. 🚫 BLOCK: Paywalling core features (BNPL, categories, budgets, goals)
-  4. ⚠️ REQUEST CHANGES: Infrastructure without user features
-  5. ⚠️ REQUEST CHANGES: Automated tests in Phase 1 (defer to Phase 2)
-  6. ⚠️ REQUEST CHANGES: Over-engineering or premature optimization
-  7. 💡 SUGGEST: Code quality improvements (TypeScript, Zod, naming)
-  
-  **Tone**: Constructive, educational, aligned with Phase 1 velocity goals.
-  Celebrate wins, explain constitutional rationale, provide actionable fixes.
+tone_instructions: "Enforce PayPlan's IMMUTABLE principles: Privacy-First (localStorage, no tracking), Accessibility-First (WCAG 2.1 AA), Free Core (no paywalling BNPL features). Phase 1: ship fast, manual testing only. Be constructive and educational."
 
 # ==============================================================================
 # REVIEW SETTINGS
@@ -77,6 +50,7 @@ reviews:
     base_branches:
       - main
       - develop  # Add if you use develop branch
+      - "062-short-name-dashboard"  # Feature branch for Dashboard (Chunk 1-6 PRs)
     ignore_title_keywords:
       - "WIP"
       - "DO NOT MERGE"
