@@ -14,6 +14,18 @@ import type { UpcomingBill } from '@/types/bill';
 import type { GoalProgress } from '@/types/goal';
 
 /**
+ * Sanitizes error for logging (removes PII)
+ * @privacy Strips sensitive data before logging
+ */
+function sanitizeError(error: unknown): string {
+  if (error instanceof Error) {
+    // Only log error name and message (no stack trace which may contain PII)
+    return `${error.name}: ${error.message}`;
+  }
+  return 'Unknown error';
+}
+
+/**
  * Goal interface (may not exist in all installations)
  */
 interface Goal {
@@ -94,7 +106,7 @@ export function aggregateSpendingByCategory(
     };
   });
   } catch (error) {
-    console.error('Error in aggregateSpendingByCategory:', error);
+    console.error('Error in aggregateSpendingByCategory:', sanitizeError(error));
     return [];
   }
 }
@@ -158,7 +170,7 @@ export function aggregateIncomeExpenses(
 
   return { months, maxValue };
   } catch (error) {
-    console.error('Error in aggregateIncomeExpenses:', error);
+    console.error('Error in aggregateIncomeExpenses:', sanitizeError(error));
     return { months: [], maxValue: 0 };
   }
 }
@@ -188,7 +200,7 @@ export function getRecentTransactions(
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, limit);
   } catch (error) {
-    console.error('Error in getRecentTransactions:', error);
+    console.error('Error in getRecentTransactions:', sanitizeError(error));
     return [];
   }
 }
@@ -287,7 +299,7 @@ export function getUpcomingBills(
     new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
   );
   } catch (error) {
-    console.error('Error in getUpcomingBills:', error);
+    console.error('Error in getUpcomingBills:', sanitizeError(error));
     return [];
   }
 }
@@ -358,7 +370,7 @@ export function getGoalProgress(goals: Goal[]): GoalProgress[] {
     };
   });
   } catch (error) {
-    console.error('Error in getGoalProgress:', error);
+    console.error('Error in getGoalProgress:', sanitizeError(error));
     return [];
   }
 }
