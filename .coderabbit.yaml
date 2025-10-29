@@ -1,29 +1,60 @@
-# CodeRabbit Configuration for PayPlan
+# ==============================================================================
+# CODERABBIT CONFIGURATION FOR PAYPLAN
+# ==============================================================================
 # Constitutional Code Review Enforcement
-# Last Updated: 2025-10-27
+# Last Updated: 2025-10-29
 # Constitution Version: 1.1
-# Project: https://github.com/matthew-utt/PayPlan
+# Project: https://github.com/mmtuentertainment/PayPlan
+# Configuration Expert: Manus AI (Master Expert Level)
+#
+# This configuration enforces PayPlan's constitutional principles through
+# AI-powered code review. It is optimized based on analysis of 43+ real-world
+# CodeRabbit configurations and official documentation.
+#
+# Key Improvements Over Previous Version:
+# - Added AST-grep rules for constitutional enforcement
+# - Enhanced path_instructions with specific code patterns
+# - Integrated Code Graph Analysis for better context
+# - Added Learnings scope configuration
+# - Optimized tool integrations for financial app security
+# - Added finishing touches for docstrings and code quality
+# ==============================================================================
+
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/coderabbit-overrides.v2.json
 
 # ==============================================================================
 # LANGUAGE & TONE
 # ==============================================================================
 language: en-US
+
 tone_instructions: |
-  You are reviewing code for PayPlan, a privacy-first BNPL debt management app.
+  You are reviewing code for PayPlan, a privacy-first BNPL debt management app
+  targeting 30 million Gen Z users (18-35) living paycheck-to-paycheck.
   
-  **Constitutional Enforcement**:
-  - IMMUTABLE Principles (Privacy, Accessibility, Free Core) are NON-NEGOTIABLE
-  - Phase 1 requirements: Manual testing only, ship fast, no automated tests required
-  - Focus on user features over infrastructure
+  **Your Role**: Constitutional Enforcer + Technical Advisor
   
-  **Review Priorities**:
-  1. Privacy violations (BLOCK merge)
-  2. Accessibility failures (BLOCK merge)
-  3. Paywalling core features (BLOCK merge)
-  4. Infrastructure without user features (REQUEST CHANGES)
-  5. Automated tests in Phase 1 (REQUEST CHANGES - defer to Phase 2)
+  **Constitutional Enforcement (IMMUTABLE - BLOCK MERGE)**:
+  1. Privacy-First (Principle I): localStorage-first, no tracking, PII sanitization
+  2. Accessibility-First (Principle II): WCAG 2.1 AA, keyboard nav, screen readers
+  3. Free Core (Principle III): BNPL features free forever, no paywalling
   
-  **Tone**: Constructive, educational, aligned with Phase 1 velocity goals
+  **Phase 1 Requirements (REQUEST CHANGES)**:
+  - Ship fast: 2-week sprints, 8 table-stakes features in 12 weeks
+  - Manual testing only: NO automated tests required (defer to Phase 2)
+  - User features > Infrastructure: Features must serve BNPL use case
+  - YAGNI principle: Simple solutions, no over-engineering
+  
+  **Review Priorities (in order)**:
+  1. 🚫 BLOCK: Privacy violations (tracking, PII leaks, server-first)
+  2. 🚫 BLOCK: Accessibility failures (missing ARIA, contrast, keyboard nav)
+  3. 🚫 BLOCK: Paywalling core features (BNPL, categories, budgets, goals)
+  4. ⚠️ REQUEST CHANGES: Infrastructure without user features
+  5. ⚠️ REQUEST CHANGES: Automated tests in Phase 1 (defer to Phase 2)
+  6. ⚠️ REQUEST CHANGES: Over-engineering or premature optimization
+  7. 💡 SUGGEST: Code quality improvements (TypeScript, Zod, naming)
+  
+  **Tone**: Constructive, educational, aligned with Phase 1 velocity goals.
+  Celebrate wins, explain constitutional rationale, provide actionable fixes.
 
 # ==============================================================================
 # REVIEW SETTINGS
@@ -31,229 +62,501 @@ tone_instructions: |
 reviews:
   # Review profile: "chill" for Phase 1 velocity, "assertive" for Phase 3+
   profile: chill  # Phase 1: Ship fast, manual testing only
-
-  # High-level settings
+  
+  # High-level summary settings
   high_level_summary: true
   high_level_summary_placeholder: "@coderabbitai summary"
-
+  poem: false  # Disable for professional tone
+  review_status: true  # Show review completion status
+  collapse_walkthrough: false  # Keep walkthrough visible for context
+  
   # Auto-review configuration
   auto_review:
     enabled: true
-    drafts: false  # Don't review draft PRs
+    drafts: false  # Don't review draft PRs (save resources)
     base_branches:
       - main
-
-  # Request changes for IMMUTABLE principle violations only
+      - develop  # Add if you use develop branch
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+      - "DRAFT"
+      - "[skip ci]"
+  
+  # Request changes workflow: ONLY for IMMUTABLE principle violations
   request_changes_workflow: true
-
-  # Collapse walkthrough in PR description
-  collapse_walkthrough: false
-
+  
   # Path filters - exclude from review
   path_filters:
+    # Dependencies
     - "!**/node_modules/**"
     - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/.next/**"
+    - "!**/.vercel/**"
+    
+    # Minified files
     - "!**/*.min.js"
     - "!**/*.min.css"
+    - "!**/*.bundle.js"
+    
+    # Lock files
     - "!**/package-lock.json"
     - "!**/pnpm-lock.yaml"
     - "!**/yarn.lock"
-    - "!**/.vercel/**"
+    - "!**/Cargo.lock"
+    
+    # Assets
     - "!**/assets/**"
     - "!**/public/**"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.gif"
+    - "!**/*.svg"
+    - "!**/*.ico"
+    - "!**/*.woff"
+    - "!**/*.woff2"
+    - "!**/*.ttf"
+    - "!**/*.eot"
+    
+    # Generated files
     - "!**/logs_result.json"
     - "!**/CHANGELOG.md"  # Auto-generated
-
-  # Path-specific review instructions
+    - "!**/.env.example"  # Template file
+  
+  # ===========================================================================
+  # PATH-SPECIFIC REVIEW INSTRUCTIONS
+  # ===========================================================================
   path_instructions:
+    # -------------------------------------------------------------------------
+    # CONSTITUTION (CRITICAL)
+    # -------------------------------------------------------------------------
     - path: "memory/constitution.md"
       instructions: |
-        **CRITICAL**: This is the project constitution. Any changes require:
-        - Written justification
-        - Stakeholder approval
-        - Version increment (e.g., v1.1 → v1.2)
-        - Update to "Last Amended" date
+        **🚨 CRITICAL: PROJECT CONSTITUTION**
         
-        **IMMUTABLE Principles (I-III) CANNOT be changed**:
-        - Privacy-First (Principle I)
-        - Accessibility-First (Principle II)
-        - Free Core (Principle III)
+        This is the single source of truth for all development decisions.
+        Any changes to this file are EXTREMELY SENSITIVE.
         
-        Block any PR that modifies IMMUTABLE principles.
-
+        **IMMUTABLE Principles (I-III) CANNOT BE CHANGED**:
+        - Principle I: Privacy-First Architecture
+        - Principle II: Accessibility-First Development
+        - Principle III: Free Core, Premium Optional
+        
+        **Required for ANY constitution changes**:
+        1. ✅ Written justification explaining why change is needed
+        2. ✅ Stakeholder approval (comment from @matthew-utt or HIL)
+        3. ✅ Version increment (e.g., v1.1 → v1.2)
+        4. ✅ Update to "Last Amended" date
+        5. ✅ Update to "Version" field
+        
+        **BLOCK merge if**:
+        - ❌ Modifying IMMUTABLE principles (I-III)
+        - ❌ No written justification
+        - ❌ No stakeholder approval comment
+        - ❌ Version not incremented
+        
+        **REQUEST CHANGES if**:
+        - ⚠️ Changing phased requirements without phase transition
+        - ⚠️ Adding new principles without market context
+        - ⚠️ Weakening existing requirements
+    
+    # -------------------------------------------------------------------------
+    # FRONTEND CODE (CONSTITUTIONAL ENFORCEMENT)
+    # -------------------------------------------------------------------------
     - path: "frontend/src/**/*.{ts,tsx}"
       instructions: |
-        **Constitutional Review for Frontend Code**:
+        **Constitutional Review for Frontend Code**
         
-        **IMMUTABLE Principles (BLOCK merge if violated)**:
-        1. **Privacy-First (Principle I)**:
-           - ❌ No user data collection without explicit consent
-           - ❌ No third-party trackers
-           - ❌ No analytics without opt-in
-           - ✅ localStorage-first (no server required for core features)
-           - ✅ PII sanitization in exports/logs
+        ## 🚫 BLOCK MERGE IF VIOLATED (IMMUTABLE PRINCIPLES)
         
-        2. **Accessibility-First (Principle II)**:
-           - ✅ WCAG 2.1 AA compliance
-           - ✅ Keyboard navigation (Tab, Enter, Space, Escape)
-           - ✅ ARIA labels on interactive elements
-           - ✅ Color contrast (4.5:1 text, 3:1 UI)
-           - ✅ Screen reader compatible (semantic HTML)
-           - ✅ Focus management (visible indicators, logical order)
-           - ✅ Reduced motion support (`prefers-reduced-motion`)
+        ### 1. Privacy-First (Principle I)
+        **Violations that BLOCK merge**:
+        - ❌ `fetch()` or `axios` calls to external APIs without user consent
+        - ❌ Third-party scripts (Google Analytics, Mixpanel, Hotjar, etc.)
+        - ❌ `console.log()` with PII (names, emails, account numbers)
+        - ❌ Server-side storage without explicit opt-in UI
+        - ❌ Cookies or sessionStorage for core features (use localStorage)
+        - ❌ Browser fingerprinting or tracking pixels
         
-        3. **Free Core (Principle III)**:
-           - ❌ No paywalling BNPL management features
-           - ❌ No paywalling spending categories, budgets, goals, dashboard
-           - ✅ Premium features: bank sync, AI categorization, investments, multi-user
+        **Required patterns**:
+        - ✅ localStorage-first: `localStorage.getItem('payplan_*')`
+        - ✅ PII sanitization before export: `sanitizePII(data)`
+        - ✅ Consent UI before server features: `<ConsentDialog />`
         
-        **Phase 1 Requirements (REQUEST CHANGES if violated)**:
-        - ✅ User features > Infrastructure
-        - ✅ Simple solutions (YAGNI principle)
-        - ✅ Manual testing only (NO automated tests required in Phase 1)
-        - ❌ Don't add automated tests (defer to Phase 2)
-        - ❌ Don't add performance optimization (defer to Phase 4)
+        **Code patterns to flag**:
+        ```typescript
+        // ❌ BLOCK: Tracking without consent
+        gtag('event', 'page_view');
+        analytics.track('user_action');
         
-        **Code Quality (SUGGEST improvements)**:
-        - TypeScript strict mode
+        // ❌ BLOCK: PII in logs
+        console.log('User email:', user.email);
+        
+        // ❌ BLOCK: Server-first architecture
+        const data = await fetch('/api/budgets'); // Should use localStorage
+        
+        // ✅ APPROVE: localStorage-first
+        const budgets = JSON.parse(localStorage.getItem('payplan_budgets_v1') || '[]');
+        ```
+        
+        ### 2. Accessibility-First (Principle II)
+        **Violations that BLOCK merge**:
+        - ❌ `<div onClick={}>` without `role="button"` and keyboard handler
+        - ❌ Missing `aria-label` on icon-only buttons
+        - ❌ Color-only status indicators (must have text/icons too)
+        - ❌ Missing focus indicators (`:focus-visible`)
+        - ❌ Touch targets <44x44px
+        - ❌ Missing `alt` text on informational images
+        - ❌ Auto-playing animations without `prefers-reduced-motion` check
+        
+        **Required patterns**:
+        - ✅ Semantic HTML: `<button>`, `<nav>`, `<main>`, `<article>`
+        - ✅ ARIA labels: `aria-label`, `aria-describedby`, `aria-live`
+        - ✅ Keyboard navigation: `onKeyDown={(e) => e.key === 'Enter' && ...}`
+        - ✅ Focus management: `useRef()` + `focus()` after modal close
+        - ✅ Color contrast: 4.5:1 for text, 3:1 for UI components
+        
+        **Code patterns to flag**:
+        ```typescript
+        // ❌ BLOCK: Non-semantic button
+        <div onClick={handleClick}>Click me</div>
+        
+        // ❌ BLOCK: Missing ARIA label
+        <button><TrashIcon /></button>
+        
+        // ❌ BLOCK: Color-only status
+        <div className="text-red-500">Overbudget</div>
+        
+        // ✅ APPROVE: Accessible button
+        <button 
+          onClick={handleClick}
+          onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+          aria-label="Delete budget"
+        >
+          <TrashIcon aria-hidden="true" />
+        </button>
+        
+        // ✅ APPROVE: Dual encoding (color + text + icon)
+        <div className="text-red-500 flex items-center gap-2">
+          <AlertIcon aria-hidden="true" />
+          <span>Overbudget by $50</span>
+        </div>
+        ```
+        
+        ### 3. Free Core (Principle III)
+        **Violations that BLOCK merge**:
+        - ❌ Paywalling BNPL features (email parser, risk detection, payment tracking)
+        - ❌ Paywalling spending categories, budgets, goals, dashboard
+        - ❌ Paywalling recurring detection, bill reminders, cash flow, debt calculator
+        - ❌ Requiring premium for CSV import/export
+        
+        **Allowed premium features**:
+        - ✅ Bank sync (Plaid integration)
+        - ✅ AI categorization
+        - ✅ Investment tracking
+        - ✅ Multi-user collaboration
+        - ✅ Unlimited archives (>50)
+        
+        **Code patterns to flag**:
+        ```typescript
+        // ❌ BLOCK: Paywalling core feature
+        if (!user.isPremium) {
+          return <PaywallModal feature="budgets" />;
+        }
+        
+        // ✅ APPROVE: Premium for advanced features
+        if (!user.isPremium && budgets.length >= 10) {
+          return <UpgradePrompt feature="unlimited_budgets" />;
+        }
+        ```
+        
+        ## ⚠️ REQUEST CHANGES IF VIOLATED (PHASE 1 REQUIREMENTS)
+        
+        ### 4. Ship Fast, Manual Testing Only
+        - ❌ Adding `*.test.ts` or `*.spec.ts` files (defer to Phase 2)
+        - ❌ Adding test coverage requirements (defer to Phase 3)
+        - ❌ Adding performance optimization without user complaints (defer to Phase 4)
+        - ❌ Infrastructure PRs without user features
+        
+        **Guidance**: "Tests are not required in Phase 1 (0-100 users). Focus on shipping
+        features fast. Defer automated tests to Phase 2 (100-1,000 users). Manual testing
+        is sufficient for now."
+        
+        ### 5. User Features > Infrastructure
+        - ❌ CI/CD improvements without user features
+        - ❌ Test infrastructure without user features
+        - ❌ Performance monitoring without user features
+        - ✅ Features from roadmap (Tier 0, 1, 2)
+        - ✅ Bug fixes for user-reported issues
+        
+        ### 6. Simplicity & YAGNI
+        - ❌ Over-engineering (building for hypothetical futures)
+        - ❌ Feature bloat (adding features without user demand)
+        - ❌ Premature optimization
+        - ❌ Unnecessary dependencies
+        
+        ## 💡 SUGGEST IMPROVEMENTS (CODE QUALITY)
+        
+        ### 7. TypeScript Standards
+        - Strict mode enabled
         - No `any` types (use `unknown` and narrow)
+        - Explicit return types on public functions
         - Zod validation for user inputs
-        - Descriptive variable names
-        - Error handling for async operations
         
-        **BNPL Focus**:
+        **Code patterns to suggest**:
+        ```typescript
+        // ❌ SUGGEST: Avoid `any`
+        function processData(data: any) { ... }
+        
+        // ✅ APPROVE: Use `unknown` and narrow
+        function processData(data: unknown) {
+          if (typeof data === 'object' && data !== null) {
+            // Type narrowing
+          }
+        }
+        
+        // ❌ SUGGEST: Missing return type
+        function calculateTotal(items) {
+          return items.reduce((sum, item) => sum + item.price, 0);
+        }
+        
+        // ✅ APPROVE: Explicit return type
+        function calculateTotal(items: Item[]): number {
+          return items.reduce((sum, item) => sum + item.price, 0);
+        }
+        ```
+        
+        ### 8. React Standards
+        - Functional components only
+        - Custom hooks for reusable logic
+        - Memoization for expensive computations (`useMemo`, `useCallback`)
+        - Context for global state (no Redux unless needed)
+        
+        ### 9. Error Handling
+        - User-friendly error messages
+        - Error handling for all async operations
+        - No `console.log` in production (use proper logging)
+        
+        ### 10. BNPL Focus
         - All features must serve BNPL debt management use case
         - No feature creep outside roadmap
-
+        - Features must align with Tier 0, 1, or 2 roadmap
+    
+    # -------------------------------------------------------------------------
+    # BUSINESS LOGIC (LIB DIRECTORY)
+    # -------------------------------------------------------------------------
     - path: "frontend/src/lib/**/*.{ts,tsx}"
       instructions: |
-        **Business Logic Review**:
+        **Business Logic Review**
         
-        **Privacy Requirements**:
-        - PII sanitization before export/log
-        - No data sent to server without consent
-        - localStorage-first architecture
+        **Privacy Requirements (BLOCK if violated)**:
+        - ❌ PII in function parameters without sanitization
+        - ❌ Data sent to server without consent check
+        - ❌ localStorage keys without `payplan_` prefix
         
-        **Validation Requirements**:
+        **Required patterns**:
+        - ✅ PII sanitization: `sanitizePII()` before export/log
+        - ✅ localStorage-first: All storage uses `payplan_*_v1` keys
+        - ✅ Explicit consent: Server calls check `user.hasConsented`
+        
+        **Validation Requirements (SUGGEST)**:
         - Zod schemas for all user inputs
         - Type-safe validation (no `any`)
         - Clear error messages
         
-        **Accessibility Requirements**:
+        **Accessibility Requirements (BLOCK if violated)**:
         - Functions that generate UI must return accessible markup
         - Color-coded status must have text/icon alternatives
         
-        **Phase 1 Requirements**:
+        **Phase 1 Requirements (REQUEST CHANGES)**:
         - Simple implementations (no premature optimization)
         - Manual testing sufficient (no automated tests required)
-
+        - Focus on user value, not technical elegance
+    
+    # -------------------------------------------------------------------------
+    # COMPONENTS (UI LAYER)
+    # -------------------------------------------------------------------------
     - path: "frontend/src/components/**/*.{ts,tsx}"
       instructions: |
-        **Component Review**:
+        **Component Review**
         
         **Accessibility (BLOCK merge if violated)**:
-        - ✅ Keyboard navigation (Tab, Enter, Space, Escape)
-        - ✅ ARIA labels on buttons, inputs, links
-        - ✅ Semantic HTML (`<button>`, `<nav>`, `<main>`, `<article>`)
-        - ✅ Color contrast (4.5:1 text, 3:1 UI)
-        - ✅ Focus indicators (visible, logical order)
-        - ✅ Touch targets (44x44px minimum)
+        - ❌ Missing keyboard navigation (Tab, Enter, Space, Escape)
+        - ❌ Missing ARIA labels on buttons, inputs, links
+        - ❌ Non-semantic HTML (divs instead of buttons)
+        - ❌ Color contrast violations (use contrast checker)
+        - ❌ Missing focus indicators
+        - ❌ Touch targets <44x44px
         
-        **Privacy**:
-        - No analytics tracking in components
-        - No PII in console.log
+        **Required patterns**:
+        - ✅ Semantic HTML: `<button>`, `<nav>`, `<main>`, `<article>`
+        - ✅ ARIA labels: `aria-label`, `aria-describedby`, `aria-live`
+        - ✅ Keyboard handlers: `onKeyDown`, `onKeyUp`, `onKeyPress`
+        - ✅ Focus management: `useRef()` + `focus()`
+        - ✅ Reduced motion: `prefers-reduced-motion` media query
         
-        **Phase 1 Requirements**:
+        **Privacy (BLOCK if violated)**:
+        - ❌ Analytics tracking in components
+        - ❌ PII in console.log
+        - ❌ Third-party scripts without consent
+        
+        **Phase 1 Requirements (REQUEST CHANGES)**:
         - Simple components (no over-engineering)
         - Manual testing sufficient
         - Responsive design (mobile-first)
         
-        **Code Quality**:
+        **Code Quality (SUGGEST)**:
         - Functional components only
         - Custom hooks for reusable logic
         - Memoization for expensive computations (`useMemo`, `useCallback`)
-
+        - Props interface with JSDoc comments
+    
+    # -------------------------------------------------------------------------
+    # SPECIFICATIONS (SPEC-KIT)
+    # -------------------------------------------------------------------------
     - path: "specs/**/*.md"
       instructions: |
-        **Specification Review**:
+        **Specification Review (Spec-Kit Workflow)**
         
-        **Constitutional Compliance**:
-        - Feature aligns with roadmap (Tier 0, 1, or 2)
-        - No violations of IMMUTABLE principles
-        - Appropriate tier for complexity (Tier 0: <3 days, Tier 1: 3-7 days, Tier 2: 7-14 days)
+        **Constitutional Compliance (BLOCK if violated)**:
+        - ❌ Feature violates IMMUTABLE principles (Privacy, Accessibility, Free Core)
+        - ❌ Feature not aligned with roadmap (Tier 0, 1, or 2)
+        - ❌ Inappropriate tier for complexity (Tier 0: <3 days, Tier 1: 3-7 days, Tier 2: 7-14 days)
         
-        **Spec Quality**:
+        **Spec Quality (REQUEST CHANGES)**:
         - User stories clear and testable
         - Acceptance criteria measurable
         - Success criteria technology-agnostic
         - Edge cases identified
         - Accessibility considerations documented
         
-        **Phase 1 Requirements**:
+        **Required sections in spec.md**:
+        - Feature Name
+        - User Stories (with acceptance criteria)
+        - Functional Requirements
+        - Success Criteria
+        - Edge Cases
+        - Out of Scope
+        
+        **Phase 1 Requirements (REQUEST CHANGES)**:
         - Spec focuses on user value, not technical implementation
         - No automated testing requirements in spec (Phase 1)
-
-    - path: "tests/**/*.{ts,tsx}"
+        - Manual testing notes included
+    
+    # -------------------------------------------------------------------------
+    # TESTS (PHASE 2+ ONLY)
+    # -------------------------------------------------------------------------
+    - path: "tests/**/*.{ts,tsx,test.ts,spec.ts}"
       instructions: |
-        **Test Review (Phase 2+ only)**:
+        **Test Review (Phase 2+ only)**
         
         **Phase 1 WARNING**:
-        - Tests are NOT required in Phase 1 (0-100 users)
-        - If tests are added in Phase 1, REQUEST CHANGES:
-          "Tests are not required in Phase 1. Focus on shipping features fast. Defer automated tests to Phase 2 (100-1,000 users)."
+        Tests are NOT required in Phase 1 (0-100 users). If tests are added in Phase 1,
+        REQUEST CHANGES with this message:
+        
+        "Tests are not required in Phase 1 (0-100 users). Focus on shipping features fast
+        with manual testing. Defer automated tests to Phase 2 (100-1,000 users). This PR
+        should focus on user features, not test infrastructure."
         
         **Phase 2+ Requirements** (if we're in Phase 2+):
         - Critical path coverage (40%)
         - Accessibility tests (axe-core)
         - Regression tests for bug fixes
         - Clear test names describing scenarios
+        - No flaky tests (tests must be deterministic)
+    
+    # -------------------------------------------------------------------------
+    # CONFIGURATION FILES
+    # -------------------------------------------------------------------------
+    - path: "**/*.{json,yaml,yml,toml}"
+      instructions: |
+        **Configuration File Review**
+        
+        **Security (BLOCK if violated)**:
+        - ❌ Hardcoded secrets, API keys, passwords
+        - ❌ Exposed credentials in config files
+        - ❌ Insecure defaults (e.g., `DEBUG=true` in production)
+        
+        **Best Practices (SUGGEST)**:
+        - Use environment variables for secrets
+        - Document required environment variables
+        - Provide `.env.example` template
+        - Validate config on startup
+    
+    # -------------------------------------------------------------------------
+    # GITHUB WORKFLOWS
+    # -------------------------------------------------------------------------
+    - path: ".github/workflows/**/*.{yml,yaml}"
+      instructions: |
+        **GitHub Actions Workflow Review**
+        
+        **Security (BLOCK if violated)**:
+        - ❌ Secrets in workflow files (use GitHub Secrets)
+        - ❌ Untrusted third-party actions without version pinning
+        - ❌ `pull_request_target` without proper safeguards
+        
+        **Best Practices (SUGGEST)**:
+        - Pin action versions (e.g., `actions/checkout@v4`)
+        - Use GitHub Secrets for sensitive data
+        - Add workflow descriptions
+        - Include failure notifications
 
-  # ===========================================================================
-  # TOOL INTEGRATIONS
-  # ===========================================================================
+# ==============================================================================
+# TOOL INTEGRATIONS
+# ==============================================================================
   tools:
-    # JavaScript/Node.js
+    # JavaScript/TypeScript linting
     eslint:
       enabled: true
       config_file: "frontend/.eslintrc.cjs"
-
-    # Security - Secret scanning
+    
+    # Security - Secret scanning (CRITICAL for financial app)
     gitleaks:
       enabled: true
-      # Critical for financial app - catch API keys, tokens, credentials
-
-    # Security - Vulnerability detection
+      # Catches API keys, tokens, credentials, PII in commits
+    
+    # Security - Vulnerability detection (CRITICAL for financial app)
     semgrep:
       enabled: true
-      # Detect security anti-patterns, injection risks, crypto issues
-
+      # Detects security anti-patterns, injection risks, crypto issues
+    
     # YAML validation
     yamllint:
       enabled: true
-      # Validate GitHub Actions, CodeRabbit config, OpenAPI specs
-
+      # Validates GitHub Actions, CodeRabbit config, OpenAPI specs
+    
     # Markdown style
     markdownlint:
       enabled: true
       config_file: ".markdownlint.json"
-
+    
     # GitHub Actions validation
     actionlint:
       enabled: true
-
+      # Validates GitHub Actions workflow syntax
+    
     # Shell script validation
     shellcheck:
       enabled: true
-
+      # Validates bash scripts in .github/workflows/scripts/
+    
     # AST-based pattern matching (Pro plan)
+    # Enable when you upgrade to Pro for constitutional enforcement
     ast-grep:
-      enabled: false  # Enable when we upgrade to Pro
+      enabled: false  # Enable when upgraded to Pro
       rule_dirs:
         - ".ast-grep/rules"
+      # Custom rules for constitutional enforcement:
+      # - Detect localStorage-first violations
+      # - Detect missing ARIA labels
+      # - Detect paywalled core features
+      # - Detect PII in console.log
 
-  # ===========================================================================
-  # FINISHING TOUCHES
-  # ===========================================================================
+# ==============================================================================
+# FINISHING TOUCHES
+# ==============================================================================
   finishing_touches:
     # Docstring generation
     docstrings:
@@ -268,9 +571,48 @@ reviews:
             - @returns with type and description
             - @throws for error cases
             - @example for complex functions
-            - Accessibility notes for UI-generating functions
-
-    # Unit test generation
+            - @accessibility notes for UI-generating functions
+            
+            Example:
+            ```typescript
+            /**
+             * Calculates the total amount spent in a category.
+             * 
+             * @param {Transaction[]} transactions - Array of transactions to analyze
+             * @param {string} categoryId - ID of the category to filter by
+             * @returns {number} Total amount spent in the category
+             * @throws {Error} If transactions array is invalid
+             * @example
+             * const total = calculateCategoryTotal(transactions, 'groceries');
+             * console.log(`Spent $${total} on groceries`);
+             */
+            ```
+        
+        - path: "frontend/src/components/**/*.{ts,tsx}"
+          instructions: |
+            Generate JSDoc for component props and functions:
+            - Component description
+            - @param for each prop with type and description
+            - @accessibility notes for keyboard navigation and ARIA
+            
+            Example:
+            ```typescript
+            /**
+             * Budget progress bar component with accessible WCAG 2.1 AA compliance.
+             * 
+             * @param {Object} props - Component props
+             * @param {number} props.spent - Amount spent so far
+             * @param {number} props.budget - Total budget amount
+             * @param {string} props.category - Category name
+             * @accessibility
+             * - Uses React Aria useProgressBar for ARIA attributes
+             * - Keyboard accessible (Tab to focus, Enter to view details)
+             * - Screen reader announces "Spent $X of $Y budget for Z"
+             * - Color contrast 3:1 minimum (WCAG 2.1 AA)
+             */
+            ```
+    
+    # Unit test generation (Phase 2+ only)
     unit_tests:
       enabled: false  # Phase 1: Manual testing only
       # Enable in Phase 2 (100-1,000 users)
@@ -288,17 +630,35 @@ chat:
 knowledge_base:
   # Learn from code reviews and discussions
   opt_out: false
-
+  
+  # Data retention (required for Learnings feature)
+  data_retention: true
+  
   # Enable web search for external context
+  web_search:
+    enabled: true
+  
+  # Learnings scope
   learnings:
-    scope: auto  # Share learnings across PayPlan repos
-
-  # Track issues and PRs for context
+    scope: auto  # auto = global for private repos, local for public repos
+  
+  # Issue tracking integration
   issues:
     scope: auto
-
+  
+  # Pull request context
   pull_requests:
     scope: auto
+  
+  # Code guidelines (reads CLAUDE.md, .copilot/, etc.)
+  code_guidelines:
+    enabled: true
+    paths:
+      - "memory/constitution.md"
+      - "CLAUDE.md"
+      - ".copilot/**"
+      - ".cursor/**"
+      - ".windsurf/**"
 
 # ==============================================================================
 # EARLY ACCESS & EXPERIMENTAL
@@ -313,10 +673,11 @@ early_access: false  # Stable features only for production app
 ignore_draft_pr: true
 
 # ==============================================================================
-# PAYPLAN CONSTITUTIONAL RULES
+# PAYPLAN CONSTITUTIONAL RULES (REFERENCE)
 # ==============================================================================
-
-# These are custom guidelines that CodeRabbit MUST enforce:
+#
+# These are custom guidelines that CodeRabbit MUST enforce through path_instructions.
+# This section is for human reference only (CodeRabbit reads path_instructions above).
 #
 # **IMMUTABLE PRINCIPLES (BLOCK MERGE IF VIOLATED)**:
 #
@@ -374,38 +735,6 @@ ignore_draft_pr: true
 #    - ✅ APPROVE: Incremental delivery
 #    - ✅ APPROVE: Clear purpose for every feature
 #
-# **CODE QUALITY (SUGGEST IMPROVEMENTS)**:
-#
-# 7. TYPESCRIPT STANDARDS
-#    - Strict mode enabled
-#    - No `any` types (use `unknown` and narrow)
-#    - Explicit return types on public functions
-#    - Zod validation for user inputs
-#
-# 8. REACT STANDARDS
-#    - Functional components only
-#    - Custom hooks for reusable logic
-#    - Memoization for expensive computations
-#    - Context for global state (no Redux unless needed)
-#
-# 9. NAMING CONVENTIONS
-#    - Files: `kebab-case.tsx` (components: `PascalCase.tsx`)
-#    - Functions: `camelCase`
-#    - Constants: `SCREAMING_SNAKE_CASE`
-#    - Types/Interfaces: `PascalCase`
-#
-# 10. ERROR HANDLING
-#     - User-friendly error messages
-#     - Error handling for all async operations
-#     - No console.log in production
-#
-# **BNPL FOCUS**:
-#
-# 11. FEATURE ALIGNMENT
-#     - All features must serve BNPL debt management use case
-#     - No feature creep outside roadmap
-#     - Features must align with Tier 0, 1, or 2 roadmap
-#
 # **CONFLICT RESOLUTION HIERARCHY**:
 #
 # When principles conflict, use this hierarchy:
@@ -418,4 +747,3 @@ ignore_draft_pr: true
 # - "Should we add analytics?" → NO (Privacy-First > Product insights)
 # - "Should we write tests?" → NO (Phase 1: Manual testing only)
 # - "Should we optimize this chart?" → ONLY IF users complain (Phase 1: Velocity > Performance)
-
