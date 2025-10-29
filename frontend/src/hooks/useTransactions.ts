@@ -4,12 +4,14 @@
  * Feature: 061-spending-categories-budgets
  * User Story: US4 - Assign Transactions to Categories
  *
- * React hook for managing transactions with localStorage persistence.
+ * React hook for managing transactions with real-time localStorage synchronization.
+ * Uses useSyncExternalStore for automatic cross-tab sync.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '@/types/transaction';
 import { TransactionStorageService } from '@/lib/transactions/TransactionStorageService';
+import { useLocalStorage } from './useLocalStorage';
 
 export interface UseTransactionsResult {
   transactions: Transaction[];
@@ -21,74 +23,109 @@ export interface UseTransactionsResult {
   refreshTransactions: () => void;
 }
 
+interface TransactionStorage {
+  version: string;
+  transactions: Transaction[];
+  lastModified: string;
+}
+
+const STORAGE_KEY = 'payplan_transactions_v1';
+const INITIAL_STORAGE: TransactionStorage = {
+  version: '1.0.0',
+  transactions: [],
+  lastModified: new Date().toISOString(),
+};
+
 export function useTransactions(): UseTransactionsResult {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [service] = useState(() => new TransactionStorageService());
 
-  const loadTransactions = useCallback(() => {
-    const result = service.loadTransactions();
-    if (result.success) {
-      setTransactions(result.data);
-      setError(null);
-    } else {
-      setError(result.error);
-    }
-    setLoading(false);
-  }, [service]);
+  // Use useLocalStorage for automatic sync across tabs
+  const { value: storageData, setValue: setStorageData } = useLocalStorage<TransactionStorage>(
+    STORAGE_KEY,
+    INITIAL_STORAGE
+  );
+
+  // Extract transactions from storage data
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    loadTransactions();
-  }, [loadTransactions]);
+    setTransactions(storageData.transactions || []);
+    setLoading(false);
+  }, [storageData]);
 
   const createTransaction = useCallback(
     async (input: CreateTransactionInput): Promise<Transaction | null> => {
       const result = service.createTransaction(input);
       if (result.success) {
-        setTransactions((prev) => [...prev, result.data]);
+        // Trigger cross-tab sync by updating storage
+        const updatedStorage: TransactionStorage = {
+          version: storageData.version,
+          transactions: [...storageData.transactions, result.data],
+          lastModified: new Date().toISOString(),
+        };
+        setStorageData(updatedStorage);
+        setError(null);
         return result.data;
       } else {
         setError(result.error);
         return null;
       }
     },
-    [service]
+    [service, storageData, setStorageData]
   );
 
   const updateTransaction = useCallback(
     async (id: string, input: UpdateTransactionInput): Promise<Transaction | null> => {
       const result = service.updateTransaction(id, input);
       if (result.success) {
-        setTransactions((prev) =>
-          prev.map((txn) => (txn.id === id ? result.data : txn))
-        );
+        // Trigger cross-tab sync by updating storage
+        const updatedStorage: TransactionStorage = {
+          version: storageData.version,
+          transactions: storageData.transactions.map((txn) =>
+            txn.id === id ? result.data : txn
+          ),
+          lastModified: new Date().toISOString(),
+        };
+        setStorageData(updatedStorage);
+        setError(null);
         return result.data;
       } else {
         setError(result.error);
         return null;
       }
     },
-    [service]
+    [service, storageData, setStorageData]
   );
 
   const deleteTransaction = useCallback(
     async (id: string): Promise<boolean> => {
       const result = service.deleteTransaction(id);
       if (result.success) {
-        setTransactions((prev) => prev.filter((txn) => txn.id !== id));
+        // Trigger cross-tab sync by updating storage
+        const updatedStorage: TransactionStorage = {
+          version: storageData.version,
+          transactions: storageData.transactions.filter((txn) => txn.id !== id),
+          lastModified: new Date().toISOString(),
+        };
+        setStorageData(updatedStorage);
+        setError(null);
         return true;
       } else {
         setError(result.error);
         return false;
       }
     },
-    [service]
+    [service, storageData, setStorageData]
   );
 
   const refreshTransactions = useCallback(() => {
-    loadTransactions();
-  }, [loadTransactions]);
+    // With useLocalStorage, refreshing is automatic - just reset loading state
+    setLoading(true);
+    setTransactions(storageData.transactions || []);
+    setLoading(false);
+  }, [storageData]);
 
   return {
     transactions,

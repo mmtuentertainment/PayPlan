@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { type Budget, type CreateBudgetInput } from '@/types/budget';
 import { useCategories } from '@/hooks/useCategories';
 import { useBudgets } from '@/hooks/useBudgets';
+import { useTransactions } from '@/hooks/useTransactions';
 import { useBudgetProgress } from '@/hooks/useBudgetProgress';
 import { BudgetList } from '@/components/budgets/BudgetList';
 import { BudgetForm } from '@/components/budgets/BudgetForm';
@@ -44,10 +45,9 @@ import { formatCurrency } from '@/lib/budgets/calculations';
 export function Budgets() {
   const { categories, loading: categoriesLoading, error: categoriesError } = useCategories();
   const { budgets, loading: budgetsLoading, error: budgetsError, createBudget, updateBudget, deleteBudget } = useBudgets();
+  const { transactions, loading: transactionsLoading } = useTransactions();
 
-  // Calculate progress for all budgets
-  // TODO: Replace empty transactions array with actual transactions when feature is implemented
-  const transactions: any[] = [];
+  // Calculate progress for all budgets with real-time transaction data
   const { progressItems, summary } = useBudgetProgress(budgets, transactions);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -101,7 +101,7 @@ export function Budgets() {
   // Calculate summary stats
   // Summary already calculated in hook
 
-  const loading = categoriesLoading || budgetsLoading;
+  const loading = categoriesLoading || budgetsLoading || transactionsLoading;
   const error = categoriesError || budgetsError;
 
   if (loading) {
