@@ -22,7 +22,7 @@
  * }
  */
 
-import { useSyncExternalStore, useCallback } from 'react';
+import { useSyncExternalStore, useCallback, useRef } from 'react';
 
 export interface UseLocalStorageResult<T> {
   /** Current value from localStorage */
@@ -47,6 +47,12 @@ export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): UseLocalStorageResult<T> {
+  // Cache to prevent infinite loops (getSnapshot must return same object if data unchanged)
+  const cache = useRef<{ stringValue: string | null; parsedValue: T | null }>({
+    stringValue: null,
+    parsedValue: null,
+  });
+
   /**
    * Subscribe to localStorage changes.
    * This function is called by useSyncExternalStore to set up the subscription.
@@ -78,6 +84,9 @@ export function useLocalStorage<T>(
    * Get the current snapshot of data from localStorage.
    * This function is called by useSyncExternalStore to read the current value.
    *
+   * CRITICAL: Must return the same object reference if the data hasn't changed.
+   * Otherwise, React will detect a change on every call and trigger infinite re-renders.
+   *
    * Called on:
    * - Initial render
    * - After storage events
@@ -86,7 +95,15 @@ export function useLocalStorage<T>(
   const getSnapshot = useCallback((): T => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+
+      // Only parse if the string value actually changed
+      // This prevents infinite loops by returning the same object reference
+      if (item !== cache.current.stringValue) {
+        cache.current.stringValue = item;
+        cache.current.parsedValue = item ? JSON.parse(item) : initialValue;
+      }
+
+      return cache.current.parsedValue as T;
     } catch (error) {
       console.error(`[useLocalStorage] Error reading key "${key}":`, error);
       return initialValue;
