@@ -184,7 +184,7 @@ export function PaymentSchedulePreview({
 
         {/* Mobile Card View (shown only on mobile) */}
         <div className="block sm:hidden p-4 space-y-3">
-          {schedule.installments.map((installment, index) => (
+          {schedule.installments.map((installment) => (
             <div
               key={installment.installmentNumber}
               className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
