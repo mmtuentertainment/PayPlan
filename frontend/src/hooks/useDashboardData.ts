@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import { readCategories, readTransactions, readBudgets, readGoals } from '@/lib/dashboard/storage';
+import { readCategories, readTransactions, readGoals } from '@/lib/dashboard/storage';
 import {
   aggregateSpendingByCategory,
   aggregateIncomeExpenses,
@@ -75,7 +75,8 @@ export function useDashboardData(): DashboardData {
   // Read localStorage once (these calls are already optimized in storage.ts)
   const categories = readCategories();
   const transactions = readTransactions();
-  const budgets = readBudgets();
+  // budgets will be used in Chunk 3 for budget-related widgets
+  // const budgets = readBudgets();
   const goals = readGoals() as Array<{
     id: string;
     name: string;
