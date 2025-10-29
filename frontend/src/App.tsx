@@ -10,6 +10,7 @@ const Docs = lazy(() => import('./pages/Docs'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Demo = lazy(() => import('./pages/Demo'));
 const BNPLParser = lazy(() => import('./pages/BNPLParser').then(m => ({ default: m.BNPLParser })));
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const Categories = lazy(() => import('./pages/Categories'));
 const Budgets = lazy(() => import('./pages/Budgets'));
 const Transactions = lazy(() => import('./pages/Transactions'));
@@ -190,7 +191,8 @@ function AppContent({
             }
           >
             <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/bnpl-home" element={<Home />} />
             <Route path="/docs" element={<Docs />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/demo" element={<Demo />} />
