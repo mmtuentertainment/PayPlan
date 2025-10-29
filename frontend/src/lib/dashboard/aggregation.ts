@@ -274,8 +274,9 @@ export function getUpcomingBills(
     const lastOccurrence = recentOccurrences[recentOccurrences.length - 1];
     const nextDueDate = new Date(new Date(lastOccurrence.date).getTime() + avgInterval);
 
-    // Only include if due within next 7 days
-    if (nextDueDate >= today && nextDueDate <= nextWeek) {
+    // Include if due within next 7 days (or overdue)
+    // Note: Removes lower bound to allow overdue bills (isOverdue flag can now be true)
+    if (nextDueDate <= nextWeek) {
       const category = categories.find((c) => c.id === lastOccurrence.categoryId);
       const daysUntilDue = Math.floor((nextDueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
