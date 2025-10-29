@@ -15,22 +15,44 @@ import { MobileMenu } from './MobileMenu';
 
 /**
  * Default navigation items for the application
+ * Updated for Budget App pivot (2025-10-29)
  */
 const DEFAULT_NAV_ITEMS: NavigationItem[] = [
   {
-    id: 'home',
-    label: 'Home',
+    id: 'dashboard',
+    label: 'Dashboard',
     to: ROUTES.HOME,
+    ariaLabel: 'View budget dashboard',
+  },
+  {
+    id: 'categories',
+    label: 'Categories',
+    to: ROUTES.CATEGORIES,
+    ariaLabel: 'Manage spending categories',
+  },
+  {
+    id: 'budgets',
+    label: 'Budgets',
+    to: ROUTES.BUDGETS,
+    ariaLabel: 'View and manage budgets',
+  },
+  {
+    id: 'transactions',
+    label: 'Transactions',
+    to: ROUTES.TRANSACTIONS,
+    ariaLabel: 'View and add transactions',
   },
   {
     id: 'archives',
     label: 'Archives',
     to: ROUTES.ARCHIVES,
+    ariaLabel: 'View archived budgets',
   },
   {
     id: 'settings',
     label: 'Settings',
     to: ROUTES.SETTINGS,
+    ariaLabel: 'Manage app settings',
   },
 ];
 
