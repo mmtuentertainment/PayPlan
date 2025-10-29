@@ -114,7 +114,7 @@ export function BudgetForm({
     // Validate with Zod
     const validation = validateCreateBudgetInput(input);
     if (!validation.success) {
-      setError(validation.error.errors[0]?.message || 'Invalid input');
+      setError(validation.error.issues[0]?.message || 'Invalid input');
       return;
     }
 

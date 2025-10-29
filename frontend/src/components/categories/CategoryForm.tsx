@@ -70,7 +70,7 @@ const ICON_OPTIONS = [
 export function CategoryForm({ open, onOpenChange, onSubmit, category, mode }: CategoryFormProps) {
   const [name, setName] = useState('');
   const [iconName, setIconName] = useState('shopping-cart');
-  const [color, setColor] = useState(DEFAULT_COLORS[0].value);
+  const [color, setColor] = useState<string>(DEFAULT_COLORS[0].value);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -110,7 +110,7 @@ export function CategoryForm({ open, onOpenChange, onSubmit, category, mode }: C
     // Validate with Zod
     const validation = validateCreateCategoryInput(input);
     if (!validation.success) {
-      setError(validation.error.errors[0]?.message || 'Invalid input');
+      setError(validation.error.issues[0]?.message || 'Invalid input');
       return;
     }
 
@@ -130,9 +130,7 @@ export function CategoryForm({ open, onOpenChange, onSubmit, category, mode }: C
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join('');
-  const PreviewIcon = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[
-    previewIconName
-  ] || Icons.HelpCircle;
+  const PreviewIcon = (Icons as any)[previewIconName] as React.ComponentType<{ className?: string; style?: React.CSSProperties; 'aria-hidden'?: string }> || Icons.HelpCircle;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -109,7 +109,7 @@ export function useCategories(): UseCategoriesResult {
    * Update an existing category.
    */
   const updateCategory = useCallback(
-    async (id: string, input: UpdateCategoryInput): Promise<Category | null> {
+    async (id: string, input: UpdateCategoryInput) => {
       setError(null);
 
       const result = service.updateCategory(id, input);

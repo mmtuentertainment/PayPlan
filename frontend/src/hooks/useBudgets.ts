@@ -115,7 +115,7 @@ export function useBudgets(): UseBudgetsResult {
    * Update an existing budget.
    */
   const updateBudget = useCallback(
-    async (id: string, input: UpdateBudgetInput): Promise<Budget | null> {
+    async (id: string, input: UpdateBudgetInput) => {
       setError(null);
 
       const result = service.updateBudget(id, input);

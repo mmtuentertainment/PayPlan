@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { type Budget, type CreateBudgetInput } from '@/types/budget';
 import { useCategories } from '@/hooks/useCategories';
 import { useBudgets } from '@/hooks/useBudgets';
-import { useBudgetProgressBatch } from '@/hooks/useBudgetProgress';
+import { useBudgetProgress } from '@/hooks/useBudgetProgress';
 import { BudgetList } from '@/components/budgets/BudgetList';
 import { BudgetForm } from '@/components/budgets/BudgetForm';
 import {
@@ -35,7 +35,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { Plus, AlertCircle, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
-import { formatCurrency, calculateBudgetSummary } from '@/lib/budgets/calculations';
+import { formatCurrency } from '@/lib/budgets/calculations';
 
 /**
  * Budgets page component.
@@ -48,7 +48,7 @@ export function Budgets() {
   // Calculate progress for all budgets
   // TODO: Replace empty transactions array with actual transactions when feature is implemented
   const transactions: any[] = [];
-  const progressData = useBudgetProgressBatch(budgets, transactions);
+  const { progressItems, summary } = useBudgetProgress(budgets, transactions);
 
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -99,7 +99,7 @@ export function Budgets() {
   };
 
   // Calculate summary stats
-  const summary = calculateBudgetSummary(progressData);
+  // Summary already calculated in hook
 
   const loading = categoriesLoading || budgetsLoading;
   const error = categoriesError || budgetsError;
@@ -200,7 +200,7 @@ export function Budgets() {
       {/* Budget List */}
       <BudgetList
         budgets={budgets}
-        progressData={progressData}
+        progressData={progressItems}
         categories={categories}
         onEdit={handleEdit}
         onDelete={handleDeleteClick}

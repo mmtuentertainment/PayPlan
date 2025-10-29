@@ -101,14 +101,14 @@ export function BudgetCard({
   const StatusIcon = config.icon;
 
   // Get category icon
-  let CategoryIcon = Icons.HelpCircle;
+  let CategoryIcon: any = Icons.HelpCircle;
   if (category) {
     const iconName = category.iconName
       .split('-')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join('');
     CategoryIcon =
-      (Icons as Record<string, React.ComponentType<{ className?: string }>>)[iconName] ||
+      (Icons as any)[iconName] ||
       Icons.HelpCircle;
   }
 

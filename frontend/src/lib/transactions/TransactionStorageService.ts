@@ -14,7 +14,6 @@ import type {
   TransactionResult,
 } from '@/types/transaction';
 import {
-  validateTransaction,
   validateCreateTransactionInput,
   validateUpdateTransactionInput,
 } from './schemas';

@@ -95,7 +95,7 @@ export function TransactionForm({
 
     const validation = validateCreateTransactionInput(input);
     if (!validation.success) {
-      setError(validation.error.errors[0]?.message || 'Invalid input');
+      setError(validation.error.issues[0]?.message || 'Invalid input');
       return;
     }
 

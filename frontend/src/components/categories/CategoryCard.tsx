@@ -60,9 +60,7 @@ export function CategoryCard({
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join('');
 
-  const IconComponent = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[
-    iconName
-  ];
+  const IconComponent = (Icons as any)[iconName] as React.ComponentType<{ className?: string; style?: React.CSSProperties; 'aria-hidden'?: string }>;
 
   return (
     <Card

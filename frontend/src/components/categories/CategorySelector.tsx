@@ -135,9 +135,7 @@ function CategoryIcon({ iconName, color }: { iconName: string; color: string }) 
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join('');
 
-  const IconComponent = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[
-    pascalCaseName
-  ] || Icons.HelpCircle;
+  const IconComponent = (Icons as any)[pascalCaseName] as React.ComponentType<{ className?: string; style?: React.CSSProperties; 'aria-hidden'?: string }> || Icons.HelpCircle;
 
   return (
     <div
