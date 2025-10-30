@@ -155,22 +155,38 @@ Final PR: 062-short-name-dashboard → main → Merge (after HIL approval)
 
 ---
 
-### Chunk 3: Income vs Expenses Chart (5 tasks, ~10K tokens)
-**File**: [chunk-3-income.md](./chunk-3-income.md)
-**Branch**: `062-dashboard-chunk3-income`
-**Tasks**: T022-T026
-**Estimated Time**: 1 hour
+### ✅ Chunk 3: Income vs Expenses Chart (COMPLETED)
+**File**: ~~chunk-3-income.md~~ (removed - implementation complete)
+**Branch**: `062-dashboard-chunk3-income` (merged to feature branch)
+**PR**: [#60](https://github.com/mmtuentertainment/PayPlan/pull/60) - MERGED 2025-10-30
+**Tasks**: T022-T026 (5 tasks)
+**Actual Time**: 2 hours (including TypeScript fixes)
 **Dependencies**: Chunk 1 complete
 
-**What it does:**
-- Builds bar chart component with Recharts
-- Implements monthly income/expense comparison
-- Adds net income calculation
-- Handles empty states
+**What was delivered:**
+- ✅ IncomeExpensesChart component with Recharts BarChart
+- ✅ Monthly income vs expenses visualization (last 6 months)
+- ✅ Custom tooltip showing income, expenses, and net income
+- ✅ Surplus/deficit indicator with color coding (green/red/gray)
+- ✅ IncomeExpensesChartWidget wrapper with empty state
+- ✅ ARIA labels and hidden table for screen readers (WCAG 2.1 AA)
+- ✅ React.memo optimization for performance
 
 **Key Files Created:**
-- `frontend/src/components/dashboard/IncomeExpensesChart.tsx`
-- `frontend/src/components/dashboard/IncomeExpensesChartWidget.tsx`
+- `frontend/src/components/dashboard/IncomeExpensesChart.tsx` (142 lines)
+- `frontend/src/components/dashboard/IncomeExpensesChartWidget.tsx` (74 lines)
+
+**Issues Fixed During Review:**
+- CRITICAL: TypeScript strict mode errors (type-only imports, explicit interfaces)
+- 3 MEDIUM/LOW issues evaluated and deferred (per Phase 1 YAGNI principle)
+
+**Manual Testing:**
+- ✅ All 7 test scenarios passed (see MANUAL-TEST-REPORT-CHUNK3.md)
+- ✅ WCAG 2.1 AA accessibility compliant
+- ✅ Responsive design verified (mobile/tablet/desktop)
+- ✅ No console errors or warnings
+
+**Status**: ✅ COMPLETE - All files merged to feature branch
 
 ---
 
