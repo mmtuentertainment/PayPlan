@@ -7,19 +7,63 @@
  * Uses useMemo to prevent unnecessary recalculations on re-renders.
  */
 
-import { useMemo } from 'react';
-import { readCategories, readTransactions, readGoals } from '@/lib/dashboard/storage';
+import { useMemo } from "react";
+import {
+  readCategories,
+  readTransactions,
+  readGoals,
+} from "@/lib/dashboard/storage";
 import {
   aggregateSpendingByCategory,
   aggregateIncomeExpenses,
   getRecentTransactions,
   getUpcomingBills,
   getGoalProgress,
-} from '@/lib/dashboard/aggregation';
-import type { SpendingChartData, IncomeExpensesChartData } from '@/types/chart-data';
-import type { Transaction } from '@/types/transaction';
-import type { UpcomingBill } from '@/types/bill';
-import type { GoalProgress } from '@/types/goal';
+} from "@/lib/dashboard/aggregation";
+import type {
+  SpendingChartData,
+  IncomeExpensesChartData,
+} from "@/types/chart-data";
+import type { Transaction } from "@/types/transaction";
+import type { UpcomingBill } from "@/types/bill";
+import type { GoalProgress } from "@/types/goal";
+
+/**
+ * Goal data structure (from localStorage)
+ * This is separate from GoalProgress which is the computed view
+ */
+interface GoalData {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: string | null;
+  createdAt: string;
+}
+
+/**
+ * Type guard to safely narrow unknown[] to GoalData[]
+ * @param obj - Unknown object from localStorage
+ * @returns true if obj matches GoalData structure
+ */
+function isGoalData(obj: unknown): obj is GoalData {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    "id" in obj &&
+    typeof obj.id === "string" &&
+    "name" in obj &&
+    typeof obj.name === "string" &&
+    "targetAmount" in obj &&
+    typeof obj.targetAmount === "number" &&
+    "currentAmount" in obj &&
+    typeof obj.currentAmount === "number" &&
+    "targetDate" in obj &&
+    (obj.targetDate === null || typeof obj.targetDate === "string") &&
+    "createdAt" in obj &&
+    typeof obj.createdAt === "string"
+  );
+}
 
 /**
  * Dashboard data return type
@@ -75,41 +119,35 @@ export function useDashboardData(): DashboardData {
   // Read localStorage once (these calls are already optimized in storage.ts)
   const categories = readCategories();
   const transactions = readTransactions();
-  // budgets will be used in Chunk 3 for budget-related widgets
-  // const budgets = readBudgets();
-  const goals = readGoals() as Array<{
-    id: string;
-    name: string;
-    targetAmount: number;
-    currentAmount: number;
-    targetDate: string | null;
-    createdAt: string;
-  }>;
+  const rawGoals = readGoals();
+
+  // Safely narrow goals type with type guard (filter out invalid entries)
+  const goals: GoalData[] = rawGoals.filter(isGoalData);
 
   // Memoize aggregation results to prevent recalculation on every render
   const spendingChartData = useMemo<SpendingChartData[]>(
     () => aggregateSpendingByCategory(transactions, categories),
-    [transactions, categories]
+    [transactions, categories],
   );
 
   const incomeExpensesData = useMemo<IncomeExpensesChartData>(
     () => aggregateIncomeExpenses(transactions),
-    [transactions]
+    [transactions],
   );
 
   const recentTransactions = useMemo<Transaction[]>(
     () => getRecentTransactions(transactions, 5),
-    [transactions]
+    [transactions],
   );
 
   const upcomingBills = useMemo<UpcomingBill[]>(
     () => getUpcomingBills(transactions, categories),
-    [transactions, categories]
+    [transactions, categories],
   );
 
   const goalProgress = useMemo<GoalProgress[]>(
     () => getGoalProgress(goals),
-    [goals]
+    [goals],
   );
 
   return {

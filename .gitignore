@@ -53,3 +53,6 @@ frontend.htm
 logs/
 *.log
 *.log.gz
+
+# Research documentation (temporary, generated during planning)
+specs/*/research-docs/

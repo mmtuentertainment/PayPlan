@@ -9,6 +9,12 @@ import type { Transaction } from '@/types/transaction';
 import type { Budget } from '@/types/budget';
 import type { StreakData } from '@/types/gamification';
 
+// Canonical Zod schemas imported from domain modules (ADR 002)
+import { categorySchema as CategorySchema } from '@/lib/categories/schemas';
+import { transactionSchema as TransactionSchema } from '@/lib/transactions/schemas';
+import { budgetSchema as BudgetSchema } from '@/lib/budgets/schemas';
+import { StreakDataSchema } from '@/lib/dashboard/schemas';
+
 /**
  * localStorage keys used by dashboard (read-only)
  */
@@ -55,6 +61,10 @@ interface GamificationStorage {
 
 /**
  * Read categories from localStorage
+ *
+ * @returns Validated array of categories, or empty array if invalid/missing
+ * @privacy Read-only operation, no data written
+ * @validation Uses Zod to validate localStorage data integrity
  */
 export function readCategories(): Category[] {
   try {
@@ -62,15 +72,33 @@ export function readCategories(): Category[] {
     if (!data) return [];
 
     const parsed: CategoryStorage = JSON.parse(data);
-    return parsed.categories || [];
+    const categories = parsed.categories || [];
+
+    // Validate each category with Zod
+    const validatedCategories = categories.filter((cat) => {
+      const result = CategorySchema.safeParse(cat);
+      if (!result.success) {
+        // Privacy-safe logging: Do not log ZodError (contains raw localStorage data)
+        console.warn('Invalid category found in localStorage');
+        return false;
+      }
+      return true;
+    });
+
+    return validatedCategories;
   } catch (error) {
-    console.error('Error reading categories from localStorage:', error);
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading categories from localStorage');
     return [];
   }
 }
 
 /**
  * Read transactions from localStorage
+ *
+ * @returns Validated array of transactions, or empty array if invalid/missing
+ * @privacy Read-only operation, no data written
+ * @validation Uses Zod to validate localStorage data integrity
  */
 export function readTransactions(): Transaction[] {
   try {
@@ -78,15 +106,33 @@ export function readTransactions(): Transaction[] {
     if (!data) return [];
 
     const parsed: TransactionStorage = JSON.parse(data);
-    return parsed.transactions || [];
+    const transactions = parsed.transactions || [];
+
+    // Validate each transaction with Zod
+    const validatedTransactions = transactions.filter((txn) => {
+      const result = TransactionSchema.safeParse(txn);
+      if (!result.success) {
+        // Privacy-safe logging: Do not log ZodError (contains raw localStorage data)
+        console.warn('Invalid transaction found in localStorage');
+        return false;
+      }
+      return true;
+    });
+
+    return validatedTransactions;
   } catch (error) {
-    console.error('Error reading transactions from localStorage:', error);
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading transactions from localStorage');
     return [];
   }
 }
 
 /**
  * Read budgets from localStorage
+ *
+ * @returns Validated array of budgets, or empty array if invalid/missing
+ * @privacy Read-only operation, no data written
+ * @validation Uses Zod to validate localStorage data integrity
  */
 export function readBudgets(): Budget[] {
   try {
@@ -94,9 +140,23 @@ export function readBudgets(): Budget[] {
     if (!data) return [];
 
     const parsed: BudgetStorage = JSON.parse(data);
-    return parsed.budgets || [];
+    const budgets = parsed.budgets || [];
+
+    // Validate each budget with Zod
+    const validatedBudgets = budgets.filter((budget) => {
+      const result = BudgetSchema.safeParse(budget);
+      if (!result.success) {
+        // Privacy-safe logging: Do not log ZodError (contains raw localStorage data)
+        console.warn('Invalid budget found in localStorage');
+        return false;
+      }
+      return true;
+    });
+
+    return validatedBudgets;
   } catch (error) {
-    console.error('Error reading budgets from localStorage:', error);
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading budgets from localStorage');
     return [];
   }
 }
@@ -119,6 +179,19 @@ export function readGoals(): unknown[] {
 
 /**
  * Read streak data from localStorage
+ *
+ * @returns Validated StreakData object, or null if not found/invalid
+ * @privacy Read-only operation, no data written
+ * @validation Uses Zod to validate localStorage data integrity
+ *
+ * @remarks
+ * Returns `null` instead of empty array `[]` because streak data is a single object,
+ * not a collection. Returning `null` allows consumers to distinguish between:
+ * - `null`: Gamification feature not initialized or data corrupted
+ * - `StreakData`: Valid streak data exists (even if currentStreak = 0)
+ *
+ * This design follows the "Null Object Pattern" for optional singleton data,
+ * whereas collections (categories, transactions) return empty arrays.
  */
 export function readStreakData(): StreakData | null {
   try {
@@ -126,37 +199,38 @@ export function readStreakData(): StreakData | null {
     if (!data) return null;
 
     const parsed: GamificationStorage = JSON.parse(data);
-    return parsed.streak || null;
+    const streak = parsed.streak;
+
+    if (!streak) return null;
+
+    // Validate streak data with Zod
+    const result = StreakDataSchema.safeParse(streak);
+    if (!result.success) {
+      // Privacy-safe logging: Do not log ZodError (contains raw localStorage data)
+      console.warn('Invalid streak data found in localStorage');
+      return null;
+    }
+
+    return result.data as StreakData;
   } catch (error) {
-    console.error('Error reading streak data from localStorage:', error);
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading streak data from localStorage');
     return null;
   }
 }
 
 /**
- * Write streak data to localStorage
+ * NOTE: writeStreakData() was removed from Chunk 1 per bot review feedback.
+ *
+ * Reason: Chunk 1 is the Foundation & Data Layer and should be READ-ONLY.
+ * Write operations violate the stated design principle of "privacy-first,
+ * read-only localStorage access" for the foundation layer.
+ *
+ * Write operations will be added in Chunk 5 (Gamification Widget) where
+ * they are actually needed.
+ *
+ * See: https://github.com/mmtuentertainment/PayPlan/pull/43#issuecomment-3463866463
  */
-export function writeStreakData(streak: StreakData): void {
-  try {
-    const existing = localStorage.getItem(STORAGE_KEYS.GAMIFICATION);
-    let data: GamificationStorage;
-
-    if (existing) {
-      data = JSON.parse(existing);
-      data.streak = streak;
-    } else {
-      data = {
-        version: '1.0',
-        streak,
-        achievements: [],
-      };
-    }
-
-    localStorage.setItem(STORAGE_KEYS.GAMIFICATION, JSON.stringify(data));
-  } catch (error) {
-    console.error('Error writing streak data to localStorage:', error);
-  }
-}
 
 /**
  * Check if goals feature is available
