@@ -15,6 +15,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { SpendingChartWidget } from '@/components/dashboard/SpendingChartWidget';
+import { IncomeExpensesChartWidget } from '@/components/dashboard/IncomeExpensesChartWidget';
 import { ROUTES } from '@/routes';
 
 /**
@@ -58,19 +59,8 @@ export const Dashboard: React.FC = () => {
           {/* Widget 1: Spending Chart (P0) - Implemented in Chunk 2 */}
           <SpendingChartWidget data={spendingChartData} onAddTransaction={handleAddTransaction} />
 
-          {/* Widget 2: Income vs Expenses (P0) - Coming in Chunk 3 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="income-expenses-heading"
-          >
-            <h2 id="income-expenses-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Income vs. Expenses
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Bar chart coming in Chunk 3<br />
-              Data ready: {incomeExpensesData.months.length} months
-            </p>
-          </section>
+          {/* Widget 2: Income vs Expenses (P0) - Implemented in Chunk 3 */}
+          <IncomeExpensesChartWidget data={incomeExpensesData} />
 
           {/* Widget 3: Recent Transactions (P1) - Coming in Chunk 4 */}
           <section
