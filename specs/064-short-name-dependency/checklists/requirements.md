@@ -43,7 +43,7 @@
 
 ### Requirement Completeness Review
 - ✅ **No clarification markers**: 0 [NEEDS CLARIFICATION] markers in the spec
-- ✅ **Testable requirements**: All 15 FRs are testable (e.g., FR-002: "remove ics@3.8.1" can be verified with `grep "ics" package.json`)
+- ✅ **Testable requirements**: All 15 FRs are testable (e.g., FR-002 revised: "validate ics@3.8.1 usage" can be verified with `grep "ics" package.json`)
 - ✅ **Measurable success criteria**: All 10 SCs are measurable (e.g., SC-001: "completes in under 60 seconds", SC-003: "100% route availability")
 - ✅ **Technology-agnostic SCs**: Success criteria focus on outcomes (install time, build success, route availability) not implementation (no mention of webpack, vite, typescript in SCs)
 - ✅ **Acceptance scenarios defined**: 20+ Given/When/Then scenarios across 4 user stories
@@ -53,7 +53,7 @@
 
 ### Feature Readiness Review
 - ✅ **FRs have acceptance criteria**: Each of the 15 FRs maps to user story acceptance scenarios (e.g., FR-002 → US1 scenario 1)
-- ✅ **User scenarios cover primary flows**: 4 user stories (P1, P2, P1, P3) cover all critical flows: dependency removal, documentation update, validation, BNPL preservation
+- ✅ **User scenarios cover primary flows**: 4 user stories (P1, P2, P1, P3) cover all critical flows: dependency validation, documentation update, system health validation, BNPL preservation
 - ✅ **Measurable outcomes align**: 10 success criteria provide clear metrics for feature completion
 - ✅ **No implementation leaks**: Spec maintains appropriate abstraction level (npm commands mentioned in validation steps are acceptable for developer-facing feature)
 
