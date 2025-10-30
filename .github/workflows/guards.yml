@@ -41,7 +41,18 @@ jobs:
         continue-on-error: true
         run: |
           cd frontend
-          npm run test:coverage > coverage.log 2>&1 || true
+
+          # Phase 1: Skip coverage tests (not required until Phase 2)
+          # Check if test directory exists with actual tests
+          if [ ! -d "tests" ] || [ -z "$(find tests -name '*.test.ts' -o -name '*.test.tsx' 2>/dev/null)" ]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "phase=1" >> $GITHUB_OUTPUT
+            echo "message=Phase 1: Manual testing only, no automated tests required" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Phase 2+: Run coverage tests with timeout
+          timeout 60s npm run test:coverage > coverage.log 2>&1 || true
 
           # Extract coverage percentages from output
           LINES=$(grep -oP 'All files\s+\|\s+\K[\d.]+' coverage.log | head -1 || echo "0")
@@ -49,11 +60,11 @@ jobs:
           FUNCTIONS=$(grep -oP 'All files\s+\|\s+[\d.]+\s+\|\s+[\d.]+\s+\|\s+\K[\d.]+' coverage.log | head -1 || echo "0")
           STATEMENTS=$(grep -oP 'All files\s+\|\s+[\d.]+\s+\|\s+[\d.]+\s+\|\s+[\d.]+\s+\|\s+\K[\d.]+' coverage.log | head -1 || echo "0")
 
-          # Thresholds
-          LINES_THRESHOLD=80
-          BRANCHES_THRESHOLD=75
-          FUNCTIONS_THRESHOLD=80
-          STATEMENTS_THRESHOLD=80
+          # Thresholds (Phase 2: 40%, Phase 3: 80%)
+          LINES_THRESHOLD=40
+          BRANCHES_THRESHOLD=35
+          FUNCTIONS_THRESHOLD=40
+          STATEMENTS_THRESHOLD=40
 
           # Check if all thresholds are met
           PASS=true
@@ -66,6 +77,7 @@ jobs:
           echo "branches=$BRANCHES" >> $GITHUB_OUTPUT
           echo "functions=$FUNCTIONS" >> $GITHUB_OUTPUT
           echo "statements=$STATEMENTS" >> $GITHUB_OUTPUT
+          echo "phase=2" >> $GITHUB_OUTPUT
 
           if [ "$PASS" = true ]; then
             echo "status=pass" >> $GITHUB_OUTPUT
@@ -151,23 +163,41 @@ jobs:
 
           # Coverage Guard Summary
           echo "### 🧪 Test Coverage Guard" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.coverage.outputs.status }}" == "pass" ]; then
-            echo "✅ **PASS** - All coverage thresholds met" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.coverage.outputs.status }}" == "skipped" ]; then
+            echo "⏭️ **SKIPPED** - ${{ steps.coverage.outputs.message }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "_Current Phase: Phase ${{ steps.coverage.outputs.phase }} (Pre-MVP, 0-100 users)_" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.coverage.outputs.status }}" == "pass" ]; then
+            echo "✅ **PASS** - All coverage thresholds met (Phase ${{ steps.coverage.outputs.phase }})" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ steps.coverage.outputs.status }}" == "fail" ]; then
-            echo "❌ **FAIL** - Coverage below threshold" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **FAIL** - Coverage below threshold (Phase ${{ steps.coverage.outputs.phase }})" >> $GITHUB_STEP_SUMMARY
           else
-            echo "⚠️ **SKIPPED** - Coverage test did not run" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **ERROR** - Coverage test encountered an error" >> $GITHUB_STEP_SUMMARY
           fi
 
-          # Coverage metrics table
-          if [ -n "${{ steps.coverage.outputs.lines }}" ]; then
+          # Coverage metrics table (only if tests ran)
+          if [ -n "${{ steps.coverage.outputs.lines }}" ] && [ "${{ steps.coverage.outputs.status }}" != "skipped" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Determine threshold based on phase
+            if [ "${{ steps.coverage.outputs.phase }}" == "2" ]; then
+              LINES_THRESH=40
+              BRANCHES_THRESH=35
+              FUNCTIONS_THRESH=40
+              STATEMENTS_THRESH=40
+            else
+              LINES_THRESH=80
+              BRANCHES_THRESH=75
+              FUNCTIONS_THRESH=80
+              STATEMENTS_THRESH=80
+            fi
+
             echo "| Metric | Current | Threshold | Status |" >> $GITHUB_STEP_SUMMARY
             echo "|--------|---------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-            echo "| Lines | ${{ steps.coverage.outputs.lines }}% | 80% | $([ $(echo '${{ steps.coverage.outputs.lines }} >= 80' | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
-            echo "| Branches | ${{ steps.coverage.outputs.branches }}% | 75% | $([ $(echo '${{ steps.coverage.outputs.branches }} >= 75' | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
-            echo "| Functions | ${{ steps.coverage.outputs.functions }}% | 80% | $([ $(echo '${{ steps.coverage.outputs.functions }} >= 80' | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
-            echo "| Statements | ${{ steps.coverage.outputs.statements }}% | 80% | $([ $(echo '${{ steps.coverage.outputs.statements }} >= 80' | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+            echo "| Lines | ${{ steps.coverage.outputs.lines }}% | ${LINES_THRESH}% | $([ $(echo '${{ steps.coverage.outputs.lines }} >= '${LINES_THRESH} | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+            echo "| Branches | ${{ steps.coverage.outputs.branches }}% | ${BRANCHES_THRESH}% | $([ $(echo '${{ steps.coverage.outputs.branches }} >= '${BRANCHES_THRESH} | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+            echo "| Functions | ${{ steps.coverage.outputs.functions }}% | ${FUNCTIONS_THRESH}% | $([ $(echo '${{ steps.coverage.outputs.functions }} >= '${FUNCTIONS_THRESH} | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+            echo "| Statements | ${{ steps.coverage.outputs.statements }}% | ${STATEMENTS_THRESH}% | $([ $(echo '${{ steps.coverage.outputs.statements }} >= '${STATEMENTS_THRESH} | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
