@@ -1,6 +1,6 @@
 # PayPlan Development Guide for Claude Code
 
-**Last Updated**: 2025-10-28  
+**Last Updated**: 2025-10-30  
 **Current Phase**: Phase 1 (Pre-MVP, 0-100 users)  
 **Constitution Version**: 1.1  
 **Workflow**: HIL → Manus → Claude Code
@@ -262,6 +262,42 @@ PayPlan/
 
 ---
 
+### Architecture Decision Records (ADRs)
+
+**When to Create an ADR**:
+
+Create an Architecture Decision Record for:
+- ✅ **Major refactors** (type system changes, validation strategy changes)
+- ✅ **Architectural patterns** (interface-first vs schema-first)
+- ✅ **Technology choices** (library selection, framework decisions)
+- ✅ **Cross-cutting concerns** (error handling, date arithmetic)
+- ✅ **Breaking changes** (API changes, storage format changes)
+
+**ADR Process**:
+
+1. **Identify the decision**: Recognize that you're making an architectural choice
+2. **Document the context**: What problem led to this decision?
+3. **Record the decision**: What did we decide to do?
+4. **Explain the rationale**: Why this approach over alternatives?
+5. **Note consequences**: What are the positive, negative, and neutral outcomes?
+
+**ADR Location**: `docs/architecture/decisions/`
+
+**ADR Template**: See [docs/architecture/decisions/README.md](docs/architecture/decisions/README.md)
+
+**Examples**:
+- [ADR 001: Interface-First Type Strategy](docs/architecture/decisions/001-interface-first-type-strategy.md) - TypeScript interfaces vs z.infer types
+- [ADR 002: Canonical Zod Schema Locations](docs/architecture/decisions/002-canonical-zod-schema-locations.md) - Single source of truth for schemas
+- [ADR 003: Date Arithmetic - setMonth() Boundary Handling](docs/architecture/decisions/003-date-arithmetic-setmonth-boundary-handling.md) - JavaScript Date.setMonth() bug handling
+
+**Best Practices**:
+- ADRs are **immutable** - once accepted, they document historical decisions
+- If a decision changes, create a new ADR that supersedes the old one
+- Link ADRs to related PRs, commits, and features
+- Keep ADRs concise but comprehensive (context + decision + rationale + consequences)
+
+---
+
 ### Git Workflow
 
 **Branch Naming**:
@@ -285,6 +321,7 @@ PayPlan/
 - **Bot reviews passed** (both Claude Code Bot + CodeRabbit AI green)
 - **HIL approval** (human final review)
 - CLAUDE.md updated (if tech stack changed)
+- **ADRs created** (if major architectural decisions were made)
 
 **IMPORTANT**: ALWAYS create PR, NEVER commit directly to main
 
@@ -878,6 +915,7 @@ npm run test:a11y
 
 ## Version History
 
+- **2025-10-30**: Added Architecture Decision Records (ADR) process documentation
 - **2025-10-28**: Added HIL → Manus → Claude Code workflow, bot review loop process
 - **2025-10-27**: Updated for Constitution v1.1 (Phase 1 focus, Spec-Kit integration, tooling integration)
 - **2025-10-17**: Initial version (auto-generated from feature plans)
