@@ -256,18 +256,18 @@ npm test
 ## 🏗️ Tech Stack & Architecture
 
 **Frontend:**
-- React 19 + TypeScript
-- Vite 7
-- Tailwind CSS 4
+- React 19.1.1 + TypeScript 5.8.3
+- Vite 7.1.7
+- Tailwind CSS 4.1.13
 - shadcn/ui (Radix primitives)
-- Zod validation
-- PapaParse (CSV parsing)
-- Recharts (data visualization)
+- Zod 4.1.11 (validation)
+- PapaParse 5.5.3 (CSV parsing)
+- Recharts 3.3.0 (data visualization)
 
 **Backend:**
 - Vercel Serverless Functions (Node 20)
-- Luxon (timezone handling)
-- ICS generation
+- Luxon 3.7.2 (timezone handling)
+- ICS 3.8.1 (calendar generation)
 
 **Code Organization:**
 - **`frontend/src/`** - Active budget app features (categories, budgets, transactions, dashboard)
