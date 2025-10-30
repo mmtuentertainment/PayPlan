@@ -1,32 +1,41 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect, useState, lazy, Suspense } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
-import Home from './pages/Home';
-import Import from './pages/Import';
-import type { PreferenceCategoryType, UserPreference } from './lib/preferences/types';
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect, useState, lazy, Suspense } from "react";
+import type { Dispatch, SetStateAction } from "react";
+import Home from "./pages/Home";
+import Import from "./pages/Import";
+import type {
+  PreferenceCategoryType,
+  UserPreference,
+} from "./lib/preferences/types";
 
 // Lazy load heavy/infrequently used pages to reduce main bundle size
-const Docs = lazy(() => import('./pages/Docs'));
-const Privacy = lazy(() => import('./pages/Privacy'));
-const Demo = lazy(() => import('./pages/Demo'));
-const BNPLParser = lazy(() => import('./archive/bnpl/pages/BNPLParser').then(m => ({ default: m.BNPLParser })));
-const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
-const Categories = lazy(() => import('./pages/Categories'));
-const Budgets = lazy(() => import('./pages/Budgets'));
-const Transactions = lazy(() => import('./pages/Transactions'));
-import { PreferenceSettings } from './components/preferences/PreferenceSettings';
-import { ToastNotification } from './components/preferences/ToastNotification';
-import { ErrorTest } from './components/ErrorTest';
-import { usePreferences } from './hooks/usePreferences';
-import { RESTORATION_TARGET_MS } from './lib/preferences/constants';
-import { validatePreferenceUpdate } from './lib/preferences/schemas';
-import { ZodError } from 'zod';
-import { ArchiveListPage } from './pages/ArchiveListPage';
-import { ArchiveDetailView } from './pages/ArchiveDetailView';
-import { ROUTES } from './routes';
-import { NavigationHeader } from './components/navigation/NavigationHeader';
-import Breadcrumbs from './components/navigation/Breadcrumbs';
-import ErrorBoundary from './components/ErrorBoundary';
+const Docs = lazy(() => import("./pages/Docs"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Demo = lazy(() => import("./pages/Demo"));
+const BNPLParser = lazy(() =>
+  import("./archive/bnpl/pages/BNPLParser").then((m) => ({
+    default: m.BNPLParser,
+  })),
+);
+const Dashboard = lazy(() =>
+  import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })),
+);
+const Categories = lazy(() => import("./pages/Categories"));
+const Budgets = lazy(() => import("./pages/Budgets"));
+const Transactions = lazy(() => import("./pages/Transactions"));
+import { PreferenceSettings } from "./components/preferences/PreferenceSettings";
+import { ToastNotification } from "./components/preferences/ToastNotification";
+import { ErrorTest } from "./components/ErrorTest";
+import { usePreferences } from "./hooks/usePreferences";
+import { RESTORATION_TARGET_MS } from "./lib/preferences/constants";
+import { validatePreferenceUpdate } from "./lib/preferences/schemas";
+import { ZodError } from "zod";
+import { ArchiveListPage } from "./pages/ArchiveListPage";
+import { ArchiveDetailView } from "./pages/ArchiveDetailView";
+import { ROUTES } from "./routes";
+import { NavigationHeader } from "./components/navigation/NavigationHeader";
+import Breadcrumbs from "./components/navigation/Breadcrumbs";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   // Initialize preferences hook at app level
@@ -41,17 +50,19 @@ function App() {
   // Toast state management
   const [toast, setToast] = useState<{
     message: string;
-    type: 'success' | 'error';
+    type: "success" | "error";
   } | null>(null);
 
   // Performance monitoring (T034: NFR-001 - <100ms restoration)
   useEffect(() => {
-    const perfMark = performance.getEntriesByName('preferences-restore-complete');
+    const perfMark = performance.getEntriesByName(
+      "preferences-restore-complete",
+    );
     if (perfMark.length > 0 && import.meta.env.DEV) {
       const duration = perfMark[0].duration || 0;
       if (duration > RESTORATION_TARGET_MS) {
         console.warn(
-          `⚠️ Preference restoration slow: ${duration.toFixed(2)}ms (target: <${RESTORATION_TARGET_MS}ms)`
+          `⚠️ Preference restoration slow: ${duration.toFixed(2)}ms (target: <${RESTORATION_TARGET_MS}ms)`,
         );
       } else {
         console.log(`✅ Preferences restored in ${duration.toFixed(2)}ms`);
@@ -64,7 +75,7 @@ function App() {
     if (statusMessage) {
       setToast({
         message: statusMessage,
-        type: error ? 'error' : 'success',
+        type: error ? "error" : "success",
       });
     }
   }, [statusMessage, error]);
@@ -74,7 +85,7 @@ function App() {
     if (error && !statusMessage) {
       setToast({
         message: error.message,
-        type: 'error',
+        type: "error",
       });
     }
   }, [error, statusMessage]);
@@ -95,7 +106,7 @@ function App() {
 // Toast type for notification state
 interface Toast {
   message: string;
-  type: 'success' | 'error';
+  type: "success" | "error";
 }
 
 // AppContent props interface
@@ -104,7 +115,7 @@ interface AppContentProps {
   updatePreference: (
     category: PreferenceCategoryType,
     value: unknown,
-    optInStatus?: boolean
+    optInStatus?: boolean,
   ) => void;
   resetPreferences: (category?: PreferenceCategoryType) => void;
   toast: Toast | null;
@@ -124,15 +135,19 @@ function AppContent({
   // T045: Performance logging for route navigation (SC-007: <200ms target)
   useEffect(() => {
     // Mark navigation start
-    performance.mark('navigation-start');
+    performance.mark("navigation-start");
 
     // Schedule measurement after next paint
     requestAnimationFrame(() => {
-      performance.mark('navigation-end');
+      performance.mark("navigation-end");
 
       try {
-        performance.measure('route-navigation', 'navigation-start', 'navigation-end');
-        const measure = performance.getEntriesByName('route-navigation').pop();
+        performance.measure(
+          "route-navigation",
+          "navigation-start",
+          "navigation-end",
+        );
+        const measure = performance.getEntriesByName("route-navigation").pop();
 
         if (measure && import.meta.env.DEV) {
           const duration = measure.duration;
@@ -140,23 +155,23 @@ function AppContent({
 
           if (duration > TARGET_MS) {
             console.warn(
-              `⚠️ [Feature 018] Route navigation slow: ${duration.toFixed(2)}ms (target: <${TARGET_MS}ms) to ${location.pathname}`
+              `⚠️ [Feature 018] Route navigation slow: ${duration.toFixed(2)}ms (target: <${TARGET_MS}ms) to ${location.pathname}`,
             );
           } else {
             console.log(
-              `✅ [Feature 018] Route navigation: ${duration.toFixed(2)}ms to ${location.pathname}`
+              `✅ [Feature 018] Route navigation: ${duration.toFixed(2)}ms to ${location.pathname}`,
             );
           }
         }
 
         // Clean up marks
-        performance.clearMarks('navigation-start');
-        performance.clearMarks('navigation-end');
-        performance.clearMeasures('route-navigation');
+        performance.clearMarks("navigation-start");
+        performance.clearMarks("navigation-end");
+        performance.clearMeasures("route-navigation");
       } catch (err) {
         // Log error only in development (CodeRabbit: prevent silent failures)
         if (import.meta.env.DEV) {
-          console.debug('Performance API error:', err);
+          console.debug("Performance API error:", err);
         }
       }
     });
@@ -191,83 +206,114 @@ function AppContent({
             }
           >
             <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/bnpl-home" element={<Home />} />
-            <Route path="/docs" element={<Docs />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/demo" element={<Demo />} />
-            <Route path="/import" element={<Import />} />
-          <Route path={ROUTES.BNPL_PARSER} element={<BNPLParser />} />
-          <Route path={ROUTES.CATEGORIES} element={<Categories />} />
-          <Route path={ROUTES.BUDGETS} element={<Budgets />} />
-          <Route path={ROUTES.TRANSACTIONS} element={<Transactions />} />
-          <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
-          <Route path={ROUTES.ARCHIVE_DETAIL_PATTERN} element={<ArchiveDetailView />} />
-          <Route
-            path={ROUTES.SETTINGS}
-            element={
-            <PreferenceSettings
-              preferences={{
-                version: '1.0.0',
-                preferences,
-                totalSize: 0, // Will be calculated by service
-                lastModified: new Date().toISOString(),
-              }}
-              onSave={(category, value, optIn) => {
-                try {
-                  // Validate inputs before calling updatePreference
-                  const validated = validatePreferenceUpdate({ category, value, optIn });
-                  updatePreference(validated.category, validated.value, validated.optIn);
-                } catch (err) {
-                  if (err instanceof ZodError) {
-                    // Only log detailed validation errors in development (prevent PII leaks)
-                    if (import.meta.env.DEV) {
-                      console.error('Preference validation failed:', err.issues);
-                    }
-                    setToast({
-                      message: `Invalid preference value: ${err.issues[0]?.message || 'Unknown error'}`,
-                      type: 'error',
-                    });
-                  } else if (err instanceof Error) {
-                    // Only log unexpected errors in development (prevent PII leaks)
-                    if (import.meta.env.DEV) {
-                      console.error('Unexpected error during preference save:', err);
-                    }
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/bnpl-home" element={<Home />} />
+              <Route path="/docs" element={<Docs />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/demo" element={<Demo />} />
+              <Route path="/import" element={<Import />} />
+              <Route path={ROUTES.BNPL_PARSER} element={<BNPLParser />} />
+              <Route path={ROUTES.CATEGORIES} element={<Categories />} />
+              <Route path={ROUTES.BUDGETS} element={<Budgets />} />
+              <Route path={ROUTES.TRANSACTIONS} element={<Transactions />} />
+              <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
+              <Route
+                path={ROUTES.ARCHIVE_DETAIL_PATTERN}
+                element={<ArchiveDetailView />}
+              />
+              <Route
+                path={ROUTES.SETTINGS}
+                element={
+                  <PreferenceSettings
+                    preferences={{
+                      version: "1.0.0",
+                      preferences,
+                      totalSize: 0, // Will be calculated by service
+                      lastModified: new Date().toISOString(),
+                    }}
+                    onSave={(category, value, optIn) => {
+                      try {
+                        // Validate inputs before calling updatePreference
+                        const validated = validatePreferenceUpdate({
+                          category,
+                          value,
+                          optIn,
+                        });
+                        updatePreference(
+                          validated.category,
+                          validated.value,
+                          validated.optIn,
+                        );
+                      } catch (err) {
+                        if (err instanceof ZodError) {
+                          // Only log detailed validation errors in development (prevent PII leaks)
+                          if (import.meta.env.DEV) {
+                            console.error(
+                              "Preference validation failed:",
+                              err.issues,
+                            );
+                          }
+                          setToast({
+                            message: `Invalid preference value: ${err.issues[0]?.message || "Unknown error"}`,
+                            type: "error",
+                          });
+                        } else if (err instanceof Error) {
+                          // Only log unexpected errors in development (prevent PII leaks)
+                          if (import.meta.env.DEV) {
+                            console.error(
+                              "Unexpected error during preference save:",
+                              err,
+                            );
+                          }
 
-                    // Provide specific error messages for common failure modes (P1: Claude review)
-                    let errorMessage = 'Failed to save preference. Please try again.';
+                          // Provide specific error messages for common failure modes (P1: Claude review)
+                          let errorMessage =
+                            "Failed to save preference. Please try again.";
 
-                    // Storage quota exceeded
-                    if (err.name === 'QuotaExceededError' || err.message.includes('quota')) {
-                      errorMessage = 'Storage quota exceeded. Please clear some browser data and try again.';
-                    }
-                    // Network errors (if preferences ever sync)
-                    else if (err.message.includes('network') || err.message.includes('fetch')) {
-                      errorMessage = 'Network error. Please check your connection and try again.';
-                    }
-                    // localStorage disabled/unavailable
-                    else if (err.message.includes('localStorage') || err.message.includes('storage')) {
-                      errorMessage = 'Browser storage is disabled. Please enable cookies/storage and try again.';
-                    }
+                          // Storage quota exceeded
+                          if (
+                            err.name === "QuotaExceededError" ||
+                            err.message.includes("quota")
+                          ) {
+                            errorMessage =
+                              "Storage quota exceeded. Please clear some browser data and try again.";
+                          }
+                          // Network errors (if preferences ever sync)
+                          else if (
+                            err.message.includes("network") ||
+                            err.message.includes("fetch")
+                          ) {
+                            errorMessage =
+                              "Network error. Please check your connection and try again.";
+                          }
+                          // localStorage disabled/unavailable
+                          else if (
+                            err.message.includes("localStorage") ||
+                            err.message.includes("storage")
+                          ) {
+                            errorMessage =
+                              "Browser storage is disabled. Please enable cookies/storage and try again.";
+                          }
 
-                    setToast({
-                      message: errorMessage,
-                      type: 'error',
-                    });
-                  } else {
-                    // Non-Error thrown (shouldn't happen, but handle gracefully)
-                    setToast({
-                      message: 'An unexpected error occurred. Please try again.',
-                      type: 'error',
-                    });
-                  }
+                          setToast({
+                            message: errorMessage,
+                            type: "error",
+                          });
+                        } else {
+                          // Non-Error thrown (shouldn't happen, but handle gracefully)
+                          setToast({
+                            message:
+                              "An unexpected error occurred. Please try again.",
+                            type: "error",
+                          });
+                        }
+                      }
+                    }}
+                    onResetAll={() => resetPreferences()}
+                  />
                 }
-              }}
-              onResetAll={() => resetPreferences()}
-            />
-          }
-        />
-          </Routes>
+              />
+            </Routes>
           </Suspense>
         </ErrorBoundary>
       </main>

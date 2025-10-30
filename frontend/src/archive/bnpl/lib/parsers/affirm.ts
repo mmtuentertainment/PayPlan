@@ -11,31 +11,31 @@
  * Market Share: ~30% of BNPL users
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import type {
   BNPLParser,
   BNPLParseResult,
   BNPLPaymentSchedule,
   BNPLInstallment,
-} from '../../types/bnpl';
-import { BNPLErrorType } from '../../types/bnpl';
+} from "../../types/bnpl";
+import { BNPLErrorType } from "../../types/bnpl";
 import {
   stripHtmlTags,
   extractAmount,
   extractDate,
   validatePaymentSchedule,
   createUserFriendlyError,
-} from '../bnpl-parser';
+} from "../bnpl-parser";
 
 export const affirmParser: BNPLParser = {
-  provider: 'affirm',
+  provider: "affirm",
 
   canParse(emailContent: string): boolean {
     const content = stripHtmlTags(emailContent).toLowerCase();
     return (
-      content.includes('affirm') ||
-      content.includes('your affirm purchase') ||
-      content.includes('affirm loan')
+      content.includes("affirm") ||
+      content.includes("your affirm purchase") ||
+      content.includes("affirm loan")
     );
   },
 
@@ -49,11 +49,11 @@ export const affirmParser: BNPLParser = {
           success: false,
           error: createUserFriendlyError({
             type: BNPLErrorType.MISSING_DATA,
-            message: 'Could not find merchant name in Affirm email',
+            message: "Could not find merchant name in Affirm email",
             suggestion:
-              'Please make sure you pasted the full purchase confirmation email.',
+              "Please make sure you pasted the full purchase confirmation email.",
           }).message,
-          detectedProvider: 'affirm',
+          detectedProvider: "affirm",
         };
       }
 
@@ -63,11 +63,11 @@ export const affirmParser: BNPLParser = {
           success: false,
           error: createUserFriendlyError({
             type: BNPLErrorType.MISSING_DATA,
-            message: 'Could not find total purchase amount in Affirm email',
+            message: "Could not find total purchase amount in Affirm email",
             suggestion:
-              'Please make sure you pasted the full purchase confirmation email.',
+              "Please make sure you pasted the full purchase confirmation email.",
           }).message,
-          detectedProvider: 'affirm',
+          detectedProvider: "affirm",
         };
       }
 
@@ -77,17 +77,17 @@ export const affirmParser: BNPLParser = {
           success: false,
           error: createUserFriendlyError({
             type: BNPLErrorType.MISSING_DATA,
-            message: 'Could not find payment schedule in Affirm email',
+            message: "Could not find payment schedule in Affirm email",
             suggestion:
-              'Please make sure you pasted the full purchase confirmation email with payment dates.',
+              "Please make sure you pasted the full purchase confirmation email with payment dates.",
           }).message,
-          detectedProvider: 'affirm',
+          detectedProvider: "affirm",
         };
       }
 
       const schedule: BNPLPaymentSchedule = {
         id: uuidv4(),
-        provider: 'affirm',
+        provider: "affirm",
         merchant,
         totalAmount,
         installmentCount: installmentInfo.installments.length,
@@ -103,29 +103,29 @@ export const affirmParser: BNPLParser = {
           success: false,
           error: createUserFriendlyError({
             type: BNPLErrorType.INVALID_FORMAT,
-            message: 'Extracted data is invalid',
-            suggestion: `Validation errors: ${validation.errors.join(', ')}`,
+            message: "Extracted data is invalid",
+            suggestion: `Validation errors: ${validation.errors.join(", ")}`,
           }).message,
-          detectedProvider: 'affirm',
+          detectedProvider: "affirm",
         };
       }
 
       return {
         success: true,
         schedule,
-        detectedProvider: 'affirm',
+        detectedProvider: "affirm",
       };
     } catch (error) {
-      console.error('Affirm parser error:', error);
+      console.error("Affirm parser error:", error);
       return {
         success: false,
         error: createUserFriendlyError({
           type: BNPLErrorType.INVALID_FORMAT,
-          message: 'Failed to parse Affirm email',
+          message: "Failed to parse Affirm email",
           suggestion:
-            'Please make sure you pasted a purchase confirmation email.',
+            "Please make sure you pasted a purchase confirmation email.",
         }).message,
-        detectedProvider: 'affirm',
+        detectedProvider: "affirm",
       };
     }
   },
@@ -209,7 +209,7 @@ function extractAffirmTotalAmount(content: string): number | null {
  */
 function extractAffirmInstallments(
   content: string,
-  _totalAmount: number
+  _totalAmount: number,
 ): { installments: BNPLInstallment[]; apr?: number } | null {
   // Extract APR if present
   let apr: number | undefined;
@@ -219,20 +219,21 @@ function extractAffirmInstallments(
   }
 
   // Try to extract individual payment lines: "Payment 1: $52.50 due December 1, 2025"
-  const paymentPattern = /Payment\s+(\d+):\s+\$\s*([\d,]+\.?\d*)\s+due\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})/gi;
+  const paymentPattern =
+    /Payment\s+(\d+):\s+\$\s*([\d,]+\.?\d*)\s+due\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})/gi;
   const matches = Array.from(content.matchAll(paymentPattern));
 
   if (matches.length > 0) {
     const installments: BNPLInstallment[] = matches.map((match) => {
       const number = parseInt(match[1], 10);
-      const amount = parseFloat(match[2].replace(/,/g, ''));
+      const amount = parseFloat(match[2].replace(/,/g, ""));
       const dateStr = match[3];
       const dueDate = extractDate(dateStr);
 
       return {
         installmentNumber: number,
         amount,
-        dueDate: dueDate || new Date().toISOString().split('T')[0], // Fallback
+        dueDate: dueDate || new Date().toISOString().split("T")[0], // Fallback
       };
     });
 
@@ -241,16 +242,16 @@ function extractAffirmInstallments(
 
   // Fallback: Extract monthly payment info: "6 monthly payments of $83.33"
   const monthlyMatch = content.match(
-    /(\d+)\s+monthly\s+payments?\s+of\s+\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i
+    /(\d+)\s+monthly\s+payments?\s+of\s+\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
   );
 
   if (monthlyMatch) {
     const monthCount = parseInt(monthlyMatch[1], 10);
-    const monthlyAmount = parseFloat(monthlyMatch[2].replace(/,/g, ''));
+    const monthlyAmount = parseFloat(monthlyMatch[2].replace(/,/g, ""));
 
     // Extract first payment date
     const firstPaymentMatch = content.match(
-      /(?:First|1st)\s+payment:\s+([A-Za-z]+\s+\d{1,2}(?:,?\s+\d{4})?)/i
+      /(?:First|1st)\s+payment:\s+([A-Za-z]+\s+\d{1,2}(?:,?\s+\d{4})?)/i,
     );
     const firstPaymentDate = firstPaymentMatch
       ? extractDate(firstPaymentMatch[1])
@@ -271,7 +272,7 @@ function extractAffirmInstallments(
       installments.push({
         installmentNumber: i + 1,
         amount: monthlyAmount,
-        dueDate: dueDate.toISOString().split('T')[0],
+        dueDate: dueDate.toISOString().split("T")[0],
       });
     }
 

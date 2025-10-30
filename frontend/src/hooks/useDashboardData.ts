@@ -7,19 +7,26 @@
  * Uses useMemo to prevent unnecessary recalculations on re-renders.
  */
 
-import { useMemo } from 'react';
-import { readCategories, readTransactions, readGoals } from '@/lib/dashboard/storage';
+import { useMemo } from "react";
+import {
+  readCategories,
+  readTransactions,
+  readGoals,
+} from "@/lib/dashboard/storage";
 import {
   aggregateSpendingByCategory,
   aggregateIncomeExpenses,
   getRecentTransactions,
   getUpcomingBills,
   getGoalProgress,
-} from '@/lib/dashboard/aggregation';
-import type { SpendingChartData, IncomeExpensesChartData } from '@/types/chart-data';
-import type { Transaction } from '@/types/transaction';
-import type { UpcomingBill } from '@/types/bill';
-import type { GoalProgress } from '@/types/goal';
+} from "@/lib/dashboard/aggregation";
+import type {
+  SpendingChartData,
+  IncomeExpensesChartData,
+} from "@/types/chart-data";
+import type { Transaction } from "@/types/transaction";
+import type { UpcomingBill } from "@/types/bill";
+import type { GoalProgress } from "@/types/goal";
 
 /**
  * Dashboard data return type
@@ -87,27 +94,27 @@ export function useDashboardData(): DashboardData {
   // Memoize aggregation results to prevent recalculation on every render
   const spendingChartData = useMemo<SpendingChartData[]>(
     () => aggregateSpendingByCategory(transactions, categories),
-    [transactions, categories]
+    [transactions, categories],
   );
 
   const incomeExpensesData = useMemo<IncomeExpensesChartData>(
     () => aggregateIncomeExpenses(transactions),
-    [transactions]
+    [transactions],
   );
 
   const recentTransactions = useMemo<Transaction[]>(
     () => getRecentTransactions(transactions, 5),
-    [transactions]
+    [transactions],
   );
 
   const upcomingBills = useMemo<UpcomingBill[]>(
     () => getUpcomingBills(transactions, categories),
-    [transactions, categories]
+    [transactions, categories],
   );
 
   const goalProgress = useMemo<GoalProgress[]>(
     () => getGoalProgress(goals),
-    [goals]
+    [goals],
   );
 
   return {
