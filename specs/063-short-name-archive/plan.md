@@ -197,6 +197,38 @@ Not applicable (no API changes, structural refactor only)
 
 ---
 
+## Phase 2: Implementation ✅ **COMPLETE**
+
+**Status**: Feature 063 implemented, merged to main, deployed.
+
+**PR**: #55 - Archive BNPL Code
+**Branch**: `063-short-name-archive`
+**Commits**: 31 total (22 original + 9 bot review compliance)
+**Merged**: 2025-10-30 (commit `06a3e65`)
+
+**Implementation Summary**:
+- ✅ Archived 60 BNPL files to `frontend/src/archive/bnpl/`
+- ✅ Fixed Date.setMonth() boundary bug (Affirm parser)
+- ✅ Eliminated type duplication (ADR 001: Interface-First Type Strategy)
+- ✅ Fixed schema duplication (ADR 002: Canonical Zod Schema Locations)
+- ✅ Created 3 comprehensive ADRs (1,016 lines documentation)
+- ✅ Fixed code quality issues (magic numbers, duplicate code, markdown formatting)
+- ✅ Updated CLAUDE.md with ADR process
+- ✅ TypeScript compilation: 0 errors
+- ✅ All CodeRabbit issues: FIXED
+- ✅ HIL approved and merged to main
+
+**Key Achievements**:
+1. **Code Organization**: All BNPL code moved to archive/ with preserved git history
+2. **Architecture Documentation**: 3 ADRs documenting major refactoring decisions
+3. **Code Quality**: Comprehensive bot review compliance (100% issues addressed)
+4. **Zero Regressions**: All routes (/bnpl, /demo, /import) work identically
+5. **Constitutional Compliance**: Privacy, accessibility, Phase 1 requirements met
+
+### Proceed to Phase 3 (Dependency Cleanup)
+
+---
+
 ## Project Structure
 
 ### Documentation (this feature)
