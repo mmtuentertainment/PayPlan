@@ -131,6 +131,16 @@ export const affirmParser: BNPLParser = {
   },
 };
 
+/**
+ * Extracts merchant name from Affirm email content
+ *
+ * @param content - Stripped email content (HTML tags removed)
+ * @returns Merchant name or null if not found
+ *
+ * @example
+ * extractAffirmMerchant("Your loan for $600.00 at Best Buy has been confirmed")
+ * // Returns: "Best Buy"
+ */
 function extractAffirmMerchant(content: string): string | null {
   const patterns = [
     // Pattern 1: "Your loan for $600.00 at Best Buy has been confirmed"
@@ -152,6 +162,16 @@ function extractAffirmMerchant(content: string): string | null {
   return null;
 }
 
+/**
+ * Extracts total purchase amount from Affirm email content
+ *
+ * @param content - Stripped email content (HTML tags removed)
+ * @returns Total amount as number or null if not found
+ *
+ * @example
+ * extractAffirmTotalAmount("Your loan for $600.00 at Best Buy")
+ * // Returns: 600.00
+ */
 function extractAffirmTotalAmount(content: string): number | null {
   const patterns = [
     // Pattern 1: "loan for $600.00" or "purchase of $X"
@@ -171,6 +191,22 @@ function extractAffirmTotalAmount(content: string): number | null {
   return extractAmount(content);
 }
 
+/**
+ * Extracts payment installments from Affirm email content
+ *
+ * @param content - Stripped email content (HTML tags removed)
+ * @param _totalAmount - Total purchase amount (unused, kept for signature consistency)
+ * @returns Object containing installments array and optional APR, or null if parsing fails
+ *
+ * @remarks
+ * Tries two strategies:
+ * 1. Extract individual payment lines (e.g., "Payment 1: $52.50 due December 1, 2025")
+ * 2. Fallback: Extract monthly payment info (e.g., "6 monthly payments of $83.33")
+ *
+ * @example
+ * extractAffirmInstallments("Payment 1: $52.50 due December 1, 2025\nPayment 2: $52.50 due January 1, 2026", 600)
+ * // Returns: { installments: [{installmentNumber: 1, amount: 52.50, dueDate: "2025-12-01"}, ...], apr: undefined }
+ */
 function extractAffirmInstallments(
   content: string,
   _totalAmount: number
