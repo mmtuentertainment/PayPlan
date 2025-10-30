@@ -271,10 +271,23 @@ function extractAffirmInstallments(
     // Generate monthly installments
     const installments: BNPLInstallment[] = [];
     const baseDate = new Date(firstPaymentDate);
+    const originalDay = baseDate.getDate(); // Preserve the original payment day
 
     for (let i = 0; i < monthCount; i++) {
       const dueDate = new Date(baseDate);
+      // Fix for month boundary bug: Safely add months while preserving day-of-month
+      // Set to 1st, add months, then restore original day (clamped to month's max day)
+      dueDate.setDate(1);
       dueDate.setMonth(dueDate.getMonth() + i);
+
+      // Restore original day, clamping to last day of target month if needed
+      // e.g., Jan 31 + 1 month = Feb 28/29 (not Mar 2/3)
+      const lastDayOfMonth = new Date(
+        dueDate.getFullYear(),
+        dueDate.getMonth() + 1,
+        0,
+      ).getDate();
+      dueDate.setDate(Math.min(originalDay, lastDayOfMonth));
 
       installments.push({
         installmentNumber: i + 1,
