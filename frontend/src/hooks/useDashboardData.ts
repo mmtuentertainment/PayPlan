@@ -42,34 +42,16 @@ export interface DashboardData {
 }
 
 /**
- * Custom hook that aggregates all dashboard widget data from localStorage
- * Uses useMemo to prevent unnecessary recalculations
+ * Aggregate and memoize all data required by dashboard widgets from localStorage.
  *
- * @returns Object containing data for all 6 dashboard widgets
+ * Reads categories, transactions, budgets (reserved for future use), and goals, then returns precomputed values used by dashboard widgets.
  *
- * @performance All aggregations complete in <500ms total for 1,000 transactions
- * @privacy Read-only access to localStorage, no data written
- *
- * @example
- * ```tsx
- * function Dashboard() {
- *   const {
- *     spendingChartData,
- *     incomeExpensesData,
- *     recentTransactions,
- *     upcomingBills,
- *     goalProgress
- *   } = useDashboardData();
- *
- *   return (
- *     <div>
- *       <SpendingChart data={spendingChartData} />
- *       <IncomeExpensesChart data={incomeExpensesData} />
- *       {/ * ... other widgets * /}
- *     </div>
- *   );
- * }
- * ```
+ * @returns An object containing:
+ * - `spendingChartData` — spending breakdown by category for the spending pie chart.
+ * - `incomeExpensesData` — monthly income vs. expenses data for the income/expenses bar chart.
+ * - `recentTransactions` — the most recent five transactions.
+ * - `upcomingBills` — upcoming bills within the next seven days.
+ * - `goalProgress` — progress metrics for each savings/financial goal.
  */
 export function useDashboardData(): DashboardData {
   // Read localStorage once (these calls are already optimized in storage.ts)
