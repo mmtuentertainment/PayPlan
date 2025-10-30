@@ -14,7 +14,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  TooltipProps,
 } from 'recharts';
 import type { IncomeExpensesChartData } from '../../types/chart-data';
 
@@ -25,7 +24,21 @@ interface IncomeExpensesChartProps {
 /**
  * Custom tooltip for income/expenses breakdown
  */
-const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    dataKey: string;
+    value: number;
+    payload: {
+      month: string;
+      income: number;
+      expenses: number;
+      net: number;
+    };
+  }>;
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
   if (!active || !payload || payload.length === 0) {
     return null;
   }
@@ -33,17 +46,17 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload
   const month = payload[0]?.payload?.month;
   const income = payload.find((p) => p.dataKey === 'income')?.value || 0;
   const expenses = payload.find((p) => p.dataKey === 'expenses')?.value || 0;
-  const net = (income as number) - (expenses as number);
+  const net = income - expenses;
 
   return (
     <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-3">
       <p className="font-semibold text-gray-900 mb-2">{month}</p>
       <div className="space-y-1 text-sm">
         <p className="text-green-600">
-          Income: <span className="font-semibold">${(income as number).toFixed(2)}</span>
+          Income: <span className="font-semibold">${income.toFixed(2)}</span>
         </p>
         <p className="text-red-600">
-          Expenses: <span className="font-semibold">${(expenses as number).toFixed(2)}</span>
+          Expenses: <span className="font-semibold">${expenses.toFixed(2)}</span>
         </p>
         <p className={net >= 0 ? 'text-green-600' : 'text-red-600'}>
           Net: <span className="font-semibold">${net.toFixed(2)}</span>
