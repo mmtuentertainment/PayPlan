@@ -13,6 +13,7 @@ const BNPLParser = lazy(() => import('./pages/BNPLParser').then(m => ({ default:
 const Categories = lazy(() => import('./pages/Categories'));
 const Budgets = lazy(() => import('./pages/Budgets'));
 const Transactions = lazy(() => import('./pages/Transactions'));
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 import { PreferenceSettings } from './components/preferences/PreferenceSettings';
 import { ToastNotification } from './components/preferences/ToastNotification';
 import { ErrorTest } from './components/ErrorTest';
@@ -190,17 +191,25 @@ function AppContent({
             }
           >
             <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/docs" element={<Docs />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/demo" element={<Demo />} />
-            <Route path="/import" element={<Import />} />
-          <Route path={ROUTES.BNPL_PARSER} element={<BNPLParser />} />
+            {/* Default route: Budget Dashboard (Feature 062 - Phase 1 pivot) */}
+            <Route path="/" element={<Dashboard />} />
+
+            {/* BNPL routes (archived, still accessible) */}
+            <Route path="/bnpl-home" element={<Home />} />
+            <Route path={ROUTES.BNPL_PARSER} element={<BNPLParser />} />
+
+            {/* Budget app routes */}
           <Route path={ROUTES.CATEGORIES} element={<Categories />} />
           <Route path={ROUTES.BUDGETS} element={<Budgets />} />
           <Route path={ROUTES.TRANSACTIONS} element={<Transactions />} />
           <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
           <Route path={ROUTES.ARCHIVE_DETAIL_PATTERN} element={<ArchiveDetailView />} />
+
+          {/* System routes */}
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/demo" element={<Demo />} />
+            <Route path="/import" element={<Import />} />
           <Route
             path={ROUTES.SETTINGS}
             element={
