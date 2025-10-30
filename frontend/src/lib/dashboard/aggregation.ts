@@ -23,6 +23,20 @@ import { sanitizeError } from "@/lib/extraction/helpers/error-sanitizer";
  */
 const LOOKBACK_WINDOW_DAYS = 30; // Look back 30 days to detect recurring patterns
 const FORECAST_WINDOW_DAYS = 7; // Forecast bills due within next 7 days
+const DEFAULT_RECENT_TRANSACTIONS_LIMIT = 5; // Default number of recent transactions to show
+
+/**
+ * Default fallback category for uncategorized transactions
+ */
+const UNCATEGORIZED_CATEGORY = {
+  id: "uncategorized",
+  name: "Uncategorized",
+  iconName: "help-circle",
+  color: "#6b7280",
+  isDefault: false,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+} as const;
 
 /**
  * Goal interface (may not exist in all installations)
@@ -90,15 +104,8 @@ export function aggregateSpendingByCategory(
 
     // Map to chart data format
     return Object.entries(spendingByCategory).map(([categoryId, amount]) => {
-      const category = categories.find((c) => c.id === categoryId) || {
-        id: "uncategorized",
-        name: "Uncategorized",
-        iconName: "help-circle",
-        color: "#6b7280",
-        isDefault: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      const category =
+        categories.find((c) => c.id === categoryId) || UNCATEGORIZED_CATEGORY;
 
       return {
         categoryId,
@@ -212,7 +219,7 @@ export function aggregateIncomeExpenses(
  */
 export function getRecentTransactions(
   transactions: Transaction[],
-  limit: number = 5,
+  limit: number = DEFAULT_RECENT_TRANSACTIONS_LIMIT,
 ): Transaction[] {
   // Validate inputs
   if (!Array.isArray(transactions)) {
@@ -327,9 +334,9 @@ export function getUpcomingBills(
       // Include if due within next FORECAST_WINDOW_DAYS (or overdue)
       // Note: Removes lower bound to allow overdue bills (isOverdue flag can now be true)
       if (nextDueDate <= forecastDate) {
-        const category = categories.find(
-          (c) => c.id === lastOccurrence.categoryId,
-        );
+        const category =
+          categories.find((c) => c.id === lastOccurrence.categoryId) ||
+          UNCATEGORIZED_CATEGORY;
         const daysUntilDue = Math.floor(
           (nextDueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
         );
@@ -340,8 +347,8 @@ export function getUpcomingBills(
           amount: lastOccurrence.amount,
           dueDate: nextDueDate.toISOString(),
           categoryId: lastOccurrence.categoryId || null,
-          categoryName: category?.name || "Uncategorized",
-          categoryIcon: category?.iconName || "help-circle",
+          categoryName: category.name,
+          categoryIcon: category.iconName,
           isPaid: false,
           isOverdue: daysUntilDue < 0,
           daysUntilDue,
@@ -378,7 +385,7 @@ export function getUpcomingBills(
  */
 export function getGoalProgress(goals: Goal[]): GoalProgress[] {
   // Validate inputs
-  if (!Array.isArray(goals) || goals.length === 0) {
+  if (!Array.isArray(goals)) {
     return [];
   }
 
