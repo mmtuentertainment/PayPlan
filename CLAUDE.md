@@ -19,7 +19,7 @@
 Before implementing any feature:
 
 1. **Read the Implementation Prompt**: Check `.claude/prompts/implement-[feature].md` (created by Manus)
-2. **Read the Constitution**: `memory/constitution_v1.1_TEMP.md` (source of truth)
+2. **Read the Constitution**: `memory/constitution.md` (source of truth)
 3. **Review All Spec Files**: Read everything in `specs/[number]-[feature-name]/`
    - `spec.md` - User stories and acceptance criteria
    - `plan.md` - Technical approach and constitutional validation
@@ -904,7 +904,7 @@ npm run test:a11y
 
 ## Resources
 
-- **Constitution**: `memory/constitution_v1.1_TEMP.md` (READ THIS FIRST)
+- **Constitution**: `memory/constitution.md` (READ THIS FIRST)
 - **Implementation Prompts**: `.claude/prompts/implement-*.md` (created by Manus)
 - **Spec-Kit Commands**: `.claude/commands/*.md`
 - **CodeRabbit Config**: `.coderabbit.yaml`
@@ -922,7 +922,7 @@ npm run test:a11y
 
 ---
 
-**Remember**: You are building a privacy-first, BNPL-focused debt management app for 30 million Gen Z users living paycheck-to-paycheck. Ship features fast, maintain accessibility, and always prioritize user privacy. Read the constitution before every feature implementation.
+**Remember**: You are building a privacy-first budgeting app with BNPL tracking as a unique differentiator for 30 million Gen Z users living paycheck-to-paycheck. Ship features fast, maintain accessibility, and always prioritize user privacy. Read the constitution before every feature implementation.
 
 **Current Goal**: Ship 8 table-stakes features in 12 weeks to reach market competitiveness.
 
