@@ -18,6 +18,12 @@ import type { UpcomingBill } from "@/types/bill";
 import type { GoalProgress } from "@/types/goal";
 
 /**
+ * Time window constants for bill detection and forecasting
+ */
+const LOOKBACK_WINDOW_DAYS = 30; // Look back 30 days to detect recurring patterns
+const FORECAST_WINDOW_DAYS = 7; // Forecast bills due within next 7 days
+
+/**
  * Sanitizes error for logging (removes PII)
  * @privacy Strips sensitive data before logging
  */
@@ -235,21 +241,28 @@ export function getRecentTransactions(
 }
 
 /**
- * Detects recurring transactions and returns upcoming bills (next 7 days)
+ * Detects recurring transactions and returns upcoming bills (includes overdue)
  *
  * @param transactions - All transactions from localStorage
  * @param categories - All categories from localStorage
- * @returns Array of upcoming bills with due dates
+ * @returns Array of upcoming bills due within next FORECAST_WINDOW_DAYS (7 days) or overdue
  *
  * @performance Completes in <500ms for 1,000 transactions
  * @privacy Read-only, no data written to storage
  *
+ * @remarks
+ * This function returns bills that are:
+ * - Due within the next FORECAST_WINDOW_DAYS (7 days), OR
+ * - Overdue (past due date, indicated by isOverdue: true)
+ *
+ * The function intentionally includes overdue bills so users can see missed payments.
+ *
  * @algorithm
  * 1. Group transactions by description + amount (expenses only)
- * 2. Find patterns with 2+ occurrences in last 30 days
+ * 2. Find patterns with 2+ occurrences in last LOOKBACK_WINDOW_DAYS (30 days)
  * 3. Calculate average interval between occurrences
  * 4. Predict next occurrence based on last transaction + avg interval
- * 5. Filter to next 7 days only
+ * 5. Filter to next FORECAST_WINDOW_DAYS or overdue (no lower bound)
  */
 export function getUpcomingBills(
   transactions: Transaction[],
@@ -277,17 +290,21 @@ export function getUpcomingBills(
       {} as Record<string, Transaction[]>,
     );
 
-    // Find recurring patterns (2+ occurrences in last 30 days)
+    // Find recurring patterns (2+ occurrences in last LOOKBACK_WINDOW_DAYS)
     const today = new Date();
-    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const lookbackDate = new Date(
+      today.getTime() - LOOKBACK_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+    );
+    const forecastDate = new Date(
+      today.getTime() + FORECAST_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+    );
 
     const recurringBills: UpcomingBill[] = [];
 
     Object.values(transactionGroups).forEach((group) => {
-      // Filter to last 30 days
+      // Filter to last LOOKBACK_WINDOW_DAYS
       const recentOccurrences = group.filter(
-        (t) => new Date(t.date) >= thirtyDaysAgo,
+        (t) => new Date(t.date) >= lookbackDate,
       );
 
       // Must have 2+ occurrences to be considered recurring
@@ -315,9 +332,9 @@ export function getUpcomingBills(
         new Date(lastOccurrence.date).getTime() + avgInterval,
       );
 
-      // Include if due within next 7 days (or overdue)
+      // Include if due within next FORECAST_WINDOW_DAYS (or overdue)
       // Note: Removes lower bound to allow overdue bills (isOverdue flag can now be true)
-      if (nextDueDate <= nextWeek) {
+      if (nextDueDate <= forecastDate) {
         const category = categories.find(
           (c) => c.id === lastOccurrence.categoryId,
         );

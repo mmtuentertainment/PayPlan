@@ -4,10 +4,49 @@
  * Created: 2025-10-29
  */
 
+import { z } from 'zod';
 import type { Category } from '@/types/category';
 import type { Transaction } from '@/types/transaction';
 import type { Budget } from '@/types/budget';
 import type { StreakData } from '@/types/gamification';
+
+/**
+ * Zod schemas for runtime validation of localStorage data
+ */
+
+const CategorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  iconName: z.string(),
+  color: z.string(),
+  isDefault: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+const TransactionSchema = z.object({
+  id: z.string(),
+  amount: z.number(),
+  description: z.string(),
+  date: z.string(),
+  categoryId: z.string().optional(),
+  createdAt: z.string(),
+});
+
+const BudgetSchema = z.object({
+  id: z.string(),
+  categoryId: z.string(),
+  amount: z.number(),
+  period: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+const StreakDataSchema = z.object({
+  currentStreak: z.number().nonnegative(),
+  longestStreak: z.number().nonnegative(),
+  lastActivityDate: z.string(),
+});
 
 /**
  * localStorage keys used by dashboard (read-only)
@@ -55,6 +94,10 @@ interface GamificationStorage {
 
 /**
  * Read categories from localStorage
+ *
+ * @returns Validated array of categories, or empty array if invalid/missing
+ * @privacy Read-only operation, no data written
+ * @validation Uses Zod to validate localStorage data integrity
  */
 export function readCategories(): Category[] {
   try {
@@ -62,7 +105,19 @@ export function readCategories(): Category[] {
     if (!data) return [];
 
     const parsed: CategoryStorage = JSON.parse(data);
-    return parsed.categories || [];
+    const categories = parsed.categories || [];
+
+    // Validate each category with Zod
+    const validatedCategories = categories.filter((cat) => {
+      const result = CategorySchema.safeParse(cat);
+      if (!result.success) {
+        console.warn('Invalid category found in localStorage:', result.error);
+        return false;
+      }
+      return true;
+    });
+
+    return validatedCategories;
   } catch (error) {
     console.error('Error reading categories from localStorage:', error);
     return [];
@@ -71,6 +126,10 @@ export function readCategories(): Category[] {
 
 /**
  * Read transactions from localStorage
+ *
+ * @returns Validated array of transactions, or empty array if invalid/missing
+ * @privacy Read-only operation, no data written
+ * @validation Uses Zod to validate localStorage data integrity
  */
 export function readTransactions(): Transaction[] {
   try {
@@ -78,7 +137,19 @@ export function readTransactions(): Transaction[] {
     if (!data) return [];
 
     const parsed: TransactionStorage = JSON.parse(data);
-    return parsed.transactions || [];
+    const transactions = parsed.transactions || [];
+
+    // Validate each transaction with Zod
+    const validatedTransactions = transactions.filter((txn) => {
+      const result = TransactionSchema.safeParse(txn);
+      if (!result.success) {
+        console.warn('Invalid transaction found in localStorage:', result.error);
+        return false;
+      }
+      return true;
+    });
+
+    return validatedTransactions;
   } catch (error) {
     console.error('Error reading transactions from localStorage:', error);
     return [];
@@ -87,6 +158,10 @@ export function readTransactions(): Transaction[] {
 
 /**
  * Read budgets from localStorage
+ *
+ * @returns Validated array of budgets, or empty array if invalid/missing
+ * @privacy Read-only operation, no data written
+ * @validation Uses Zod to validate localStorage data integrity
  */
 export function readBudgets(): Budget[] {
   try {
@@ -94,7 +169,19 @@ export function readBudgets(): Budget[] {
     if (!data) return [];
 
     const parsed: BudgetStorage = JSON.parse(data);
-    return parsed.budgets || [];
+    const budgets = parsed.budgets || [];
+
+    // Validate each budget with Zod
+    const validatedBudgets = budgets.filter((budget) => {
+      const result = BudgetSchema.safeParse(budget);
+      if (!result.success) {
+        console.warn('Invalid budget found in localStorage:', result.error);
+        return false;
+      }
+      return true;
+    });
+
+    return validatedBudgets;
   } catch (error) {
     console.error('Error reading budgets from localStorage:', error);
     return [];
@@ -119,6 +206,19 @@ export function readGoals(): unknown[] {
 
 /**
  * Read streak data from localStorage
+ *
+ * @returns Validated StreakData object, or null if not found/invalid
+ * @privacy Read-only operation, no data written
+ * @validation Uses Zod to validate localStorage data integrity
+ *
+ * @remarks
+ * Returns `null` instead of empty array `[]` because streak data is a single object,
+ * not a collection. Returning `null` allows consumers to distinguish between:
+ * - `null`: Gamification feature not initialized or data corrupted
+ * - `StreakData`: Valid streak data exists (even if currentStreak = 0)
+ *
+ * This design follows the "Null Object Pattern" for optional singleton data,
+ * whereas collections (categories, transactions) return empty arrays.
  */
 export function readStreakData(): StreakData | null {
   try {
@@ -126,7 +226,18 @@ export function readStreakData(): StreakData | null {
     if (!data) return null;
 
     const parsed: GamificationStorage = JSON.parse(data);
-    return parsed.streak || null;
+    const streak = parsed.streak;
+
+    if (!streak) return null;
+
+    // Validate streak data with Zod
+    const result = StreakDataSchema.safeParse(streak);
+    if (!result.success) {
+      console.warn('Invalid streak data found in localStorage:', result.error);
+      return null;
+    }
+
+    return result.data as StreakData;
   } catch (error) {
     console.error('Error reading streak data from localStorage:', error);
     return null;
