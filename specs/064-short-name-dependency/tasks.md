@@ -215,11 +215,11 @@
 
 ### Tasks
 
-- [ ] T036 Stage changes: `git add README.md specs/063-short-name-archive/plan.md`
-- [ ] T037 Create git commit with Conventional Commits format and GitHub signatures in `README.md`
-- [ ] T038 Verify commit message follows format: `docs(readme): update to budget-first architecture (Feature 064)`
-- [ ] T039 Update `specs/063-short-name-archive/plan.md` to mark Phase 3 complete
-- [ ] T040 Verify git commit created successfully with `git log -1`
+- [X] T036 Stage changes: `git add README.md specs/063-short-name-archive/plan.md`
+- [X] T037 Create git commit with Conventional Commits format and GitHub signatures in `README.md`
+- [X] T038 Verify commit message follows format: `docs(readme): update to budget-first architecture (Feature 064)`
+- [X] T039 Update `specs/063-short-name-archive/plan.md` to mark Phase 3 complete
+- [X] T040 Verify git commit created successfully with `git log -1`
 
 **Commit Message Template**:
 ```
