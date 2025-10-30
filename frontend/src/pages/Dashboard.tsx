@@ -12,8 +12,10 @@
  */
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { SpendingChartWidget } from '@/components/dashboard/SpendingChartWidget';
+import { ROUTES } from '@/routes';
 
 /**
  * Dashboard Page Component
@@ -31,6 +33,7 @@ import { SpendingChartWidget } from '@/components/dashboard/SpendingChartWidget'
  * - Memoized aggregation functions prevent unnecessary recalculations
  */
 export const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const {
     spendingChartData,
     incomeExpensesData,
@@ -38,6 +41,10 @@ export const Dashboard: React.FC = () => {
     upcomingBills,
     goalProgress,
   } = useDashboardData();
+
+  const handleAddTransaction = () => {
+    navigate(ROUTES.TRANSACTIONS);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
@@ -49,7 +56,7 @@ export const Dashboard: React.FC = () => {
       <main>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Widget 1: Spending Chart (P0) - Implemented in Chunk 2 */}
-          <SpendingChartWidget data={spendingChartData} />
+          <SpendingChartWidget data={spendingChartData} onAddTransaction={handleAddTransaction} />
 
           {/* Widget 2: Income vs Expenses (P0) - Coming in Chunk 3 */}
           <section

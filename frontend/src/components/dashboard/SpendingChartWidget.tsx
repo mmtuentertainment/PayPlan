@@ -11,15 +11,17 @@ import type { SpendingChartData } from '../../types/chart-data';
 
 interface SpendingChartWidgetProps {
   data: SpendingChartData[];
+  onAddTransaction?: () => void;
 }
 
 /**
  * SpendingChartWidget - Widget wrapper for spending breakdown pie chart
  *
  * @param data - Array of spending data by category
+ * @param onAddTransaction - Optional callback to navigate to transaction entry
  * @returns Widget with chart or empty state
  */
-export const SpendingChartWidget: React.FC<SpendingChartWidgetProps> = ({ data }) => {
+export const SpendingChartWidget: React.FC<SpendingChartWidgetProps> = ({ data, onAddTransaction }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">Spending by Category</h2>
@@ -28,10 +30,7 @@ export const SpendingChartWidget: React.FC<SpendingChartWidgetProps> = ({ data }
           message="No spending data yet"
           action={{
             label: 'Add Transaction',
-            onClick: () => {
-              // TODO: Navigate to transaction entry page (Chunk 6)
-              console.log('Navigate to transaction entry');
-            },
+            onClick: onAddTransaction || (() => console.log('Navigate to transaction entry')),
           }}
           icon="📊"
         />
