@@ -158,6 +158,9 @@ export function aggregateIncomeExpenses(
     // Generate last 6 months
     for (let i = 5; i >= 0; i--) {
       const targetDate = new Date();
+      // Fix for month boundary bug: Set day to 1st before using setMonth()
+      // Without this, Jan 31 - 1 month = Mar 2/3 (Jan 31 -> Feb 31 -> Mar 2/3)
+      targetDate.setDate(1);
       targetDate.setMonth(targetDate.getMonth() - i);
       const targetMonth = targetDate.toISOString().slice(0, 7); // "2025-10"
 
