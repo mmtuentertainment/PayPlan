@@ -359,19 +359,21 @@ Track your spending, budgets, and goals. With BNPL tracking as a differentiator.
 
 **Contract 3: Git Commit Message**
 ```text
-Format: chore(deps): remove ics dependency used only by archived BNPL code
+Format: docs(readme): update to budget-first architecture (Feature 064)
 
 Body:
-- Remove ics@3.8.1 (used only by archived lib/ics-generator.js)
-- Preserve luxon, papaparse, recharts (actively used by budget app)
+- Validate dependency usage (all 4 dependencies actively used, no removal)
+- ics@3.8.1: actively used by Demo.tsx, Import.tsx (KEEP)
+- luxon@3.7.2, papaparse@5.5.3, recharts@3.3.0: actively used (KEEP)
 - Update README.md to reflect budget-first architecture
-- Mark Phase 3 complete in specs/063-short-name-archive/plan.md
+- Create specs/064-short-name-dependency/ with full specification artifacts
 
 Validation:
 - npm install: 0 errors
 - npm run build: 0 TypeScript errors
-- All 9 routes tested: 100% availability
+- All 11 routes tested: 100% availability
 - Browser console: 0 errors
+- All dependencies verified as actively used
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
