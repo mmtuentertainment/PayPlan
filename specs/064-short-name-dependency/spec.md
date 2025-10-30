@@ -2,8 +2,30 @@
 
 **Feature Branch**: `064-short-name-dependency`
 **Created**: 2025-10-30
-**Status**: Draft
+**Status**: ⚠️ **REVISED AFTER PHASE 0 RESEARCH**
 **Input**: User description: "Clean up BNPL-specific dependencies and update documentation to reflect budget-first architecture (Phase 3 of product pivot). This is a low-risk cleanup task following Phase 2 (Archive BNPL Code, PR #55 merged)."
+
+---
+
+## ⚠️ SCOPE REVISION (Post-Research)
+
+**Original Scope**: Remove `ics@3.8.1` dependency (assumed used only by archived code)
+
+**Research Finding** (see [research.md](research.md)): `ics@3.8.1` is **actively used** by:
+- `Demo.tsx` (line 5) - Calendar download functionality
+- `Import.tsx` (line 4) - CSV import with calendar export
+
+**Revised Scope**: Documentation update only
+- ✅ Validate all 4 dependencies are actively used (no removal)
+- ✅ Update README.md to budget-first architecture
+- ✅ Manual testing of all 11 routes (including Demo/Import `.ics` functionality)
+
+**Impacted Requirements**:
+- FR-002: Changed from "remove ics" to "validate ics usage"
+- SC-005: N/A (ics preserved, not removed)
+- SC-010: N/A (no dependency removed, no install time improvement)
+
+---
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -135,12 +157,12 @@ This feature does not introduce new data entities. It operates on existing entit
 - **SC-002**: `npm run build` exits with code 0 and reports 0 TypeScript errors
 - **SC-003**: All 9 application routes load successfully with no console errors (100% route availability)
 - **SC-004**: README.md clearly states PayPlan is a "budget-first app" in the first paragraph
-- **SC-005**: `ics` dependency is completely removed from `package.json` (verified by `grep "ics" frontend/package.json` returning no matches)
+- ~~**SC-005**: `ics` dependency is completely removed from `package.json`~~ **N/A** (ics preserved - actively used by Demo.tsx and Import.tsx for calendar downloads)
 - **SC-006**: Shared dependencies (`luxon`, `papaparse`, `recharts`) remain in `package.json` (verified by `npm ls luxon papaparse recharts`)
 - **SC-007**: Phase 3 tasks are completed within 1-2 hours (low complexity, low risk)
 - **SC-008**: Git commit is created with a clear message following Conventional Commits format
 - **SC-009**: Zero user-facing changes (BNPL features remain accessible and functional at `/bnpl`)
-- **SC-010**: Project install time reduces by 5-10% due to removal of unused dependency
+- ~~**SC-010**: Project install time reduces by 5-10% due to removal of unused dependency~~ **N/A** (no dependency removed, all dependencies actively used)
 
 ### Assumptions
 
