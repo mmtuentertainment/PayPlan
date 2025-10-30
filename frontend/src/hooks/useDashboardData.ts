@@ -76,8 +76,8 @@ export function useDashboardData(): DashboardData {
   const categories = readCategories();
   const transactions = readTransactions();
   // Note: budgets will be used in future chunks (e.g., budget progress widget)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _budgets = readBudgets();
+  // @ts-expect-error - budgets reserved for future use in budget progress widget
+  const budgets = readBudgets(); // eslint-disable-line @typescript-eslint/no-unused-vars
   const goals = readGoals() as Array<{
     id: string;
     name: string;
