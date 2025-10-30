@@ -4,6 +4,14 @@
 
 Track your spending, budgets, and goals with zero tracking and local-only storage. With BNPL payment tracking as a unique differentiator for managing Buy Now Pay Later loans across multiple providers.
 
+## 📍 Product Positioning
+
+**Primary**: Privacy-first budgeting app (competes with YNAB, Monarch, PocketGuard)
+**Differentiator**: BNPL payment tracking (unique feature no competitor has)
+**Target Users**: Low-income earners (18-35) managing paycheck-to-paycheck budgets
+
+PayPlan is **NOT** a BNPL-focused app. It's a comprehensive budgeting solution that **ALSO** helps users track Buy Now Pay Later payments across 6 providers (Klarna, Affirm, Afterpay, PayPal Pay in 4, Zip, Sezzle).
+
 ## 🚀 Quick Start
 
 **Budget Management:**

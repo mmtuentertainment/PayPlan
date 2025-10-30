@@ -922,7 +922,7 @@ npm run test:a11y
 
 ---
 
-**Remember**: You are building a privacy-first, BNPL-focused debt management app for 30 million Gen Z users living paycheck-to-paycheck. Ship features fast, maintain accessibility, and always prioritize user privacy. Read the constitution before every feature implementation.
+**Remember**: You are building a privacy-first budgeting app with BNPL tracking as a unique differentiator for 30 million Gen Z users living paycheck-to-paycheck. Ship features fast, maintain accessibility, and always prioritize user privacy. Read the constitution before every feature implementation.
 
 **Current Goal**: Ship 8 table-stakes features in 12 weeks to reach market competitiveness.
 
