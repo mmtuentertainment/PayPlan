@@ -77,13 +77,16 @@ export const SpendingChart = React.memo<SpendingChartProps>(({ data }) => {
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
-            data={data}
+            data={data as any}
             dataKey="amount"
             nameKey="categoryName"
             cx="50%"
             cy="50%"
             outerRadius={80}
-            label={(entry: SpendingChartData) => `${entry.percentage.toFixed(1)}%`}
+            label={(entry: any) => {
+              const spending = entry as SpendingChartData;
+              return `${spending.percentage.toFixed(1)}%`;
+            }}
             labelLine={false}
           >
             {data.map((entry, index) => (
