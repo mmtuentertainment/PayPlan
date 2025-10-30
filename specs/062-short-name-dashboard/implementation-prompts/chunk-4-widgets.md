@@ -48,6 +48,39 @@ gh pr create --base 062-short-name-dashboard --title "feat(dashboard): Chunk 4 -
 
 ---
 
+## TypeScript Patterns (From Chunks 1-3)
+
+**IMPORTANT**: Follow these TypeScript strict mode patterns to avoid compilation errors:
+
+### 1. Type-Only Imports
+Use `import type` for interfaces and types from external libraries:
+```typescript
+import type { Transaction } from '../../types/transaction';
+import type { UpcomingBill } from '../../types/bill';
+```
+
+### 2. React.memo for Performance
+All widget components should use `React.memo` to prevent unnecessary re-renders:
+```typescript
+export const MyWidget = React.memo<MyWidgetProps>(({ data }) => {
+  // ... component code
+});
+
+MyWidget.displayName = 'MyWidget'; // For debugging
+```
+
+**Why**: Widgets re-render when Dashboard updates. React.memo prevents wasteful re-renders.
+
+### 3. Explicit Return Types
+Always specify return types for functions:
+```typescript
+const getUrgencyBadge = (daysUntilDue: number): JSX.Element | null => {
+  // ...
+};
+```
+
+---
+
 ## Tasks Checklist
 
 ### Widget 1: Recent Transactions (US3)

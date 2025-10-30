@@ -59,6 +59,27 @@ gh pr create --base 062-short-name-dashboard --title "feat(dashboard): Chunk 5 -
 
 ---
 
+## TypeScript Patterns (From Chunks 1-3)
+
+**IMPORTANT**: Follow these patterns to avoid compilation errors:
+
+### React.memo for Performance
+Use React.memo for the widget component:
+```typescript
+export const GamificationWidget = React.memo<GamificationWidgetProps>(({ data }) => {
+  // ... component code
+});
+
+GamificationWidget.displayName = 'GamificationWidget';
+```
+
+### Type-Only Imports
+```typescript
+import type { GamificationData, StreakData } from '../../types/gamification';
+```
+
+---
+
 ## Tasks Checklist
 
 ### T041: Create GamificationWidget component [PARALLELIZABLE]
@@ -469,13 +490,42 @@ const gamificationData = getGamificationData();
 
 ## Validation
 
-### Manual Testing
+### Manual Testing Checklist
 
-1. **Test streak increment**: View dashboard 3 days in a row, verify streak = 3
-2. **Test streak reset**: Skip a day, view dashboard, verify streak = 1
-3. **Test insights**: Add spending patterns, verify insights display
-4. **Test wins**: Stay under budget, verify "recent win" displays
-5. **Test screen reader**: Verify streak and insights announced
+#### Functional Testing
+- [ ] View dashboard 3 days in a row → verify streak = 3
+- [ ] Skip a day, view dashboard → verify streak = 1 (resets correctly)
+- [ ] Longest streak updates when current streak exceeds it
+- [ ] Insights generate for weekend vs weekday spending patterns
+- [ ] Insights generate for month-over-month spending changes
+- [ ] Recent wins display when under budget this month
+- [ ] Recent wins display for large income transactions (>$1000)
+- [ ] Widget hides when streak = 0 (returns null)
+
+#### Accessibility Testing (WCAG 2.1 AA)
+- [ ] Screen reader announces streak count ("3-day streak")
+- [ ] Screen reader announces each insight message
+- [ ] Screen reader announces each recent win message
+- [ ] Keyboard navigation: Tab focuses on widget content
+- [ ] Color contrast meets 4.5:1 for all text
+- [ ] Emojis have descriptive context (not relying on emoji alone)
+
+#### Responsive Design Testing
+- [ ] Mobile (375px): Widget renders correctly, text readable
+- [ ] Tablet (768px): Widget renders correctly
+- [ ] Desktop (1920px): Widget renders correctly
+
+#### Console Testing
+- [ ] No TypeScript compilation errors: `cd frontend && npx tsc --noEmit`
+- [ ] No console errors or warnings on page load
+- [ ] localStorage persists gamification data correctly
+- [ ] Streak updates persist across page reloads
+
+#### Data Validation
+- [ ] Streak increments only once per day (multiple visits same day = same streak)
+- [ ] Date comparison works correctly (handles timezone properly)
+- [ ] Insights algorithm generates 1-2 relevant insights (not more)
+- [ ] Recent wins limited to 3 most recent (not all wins)
 
 ---
 
