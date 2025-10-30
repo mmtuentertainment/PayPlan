@@ -16,6 +16,9 @@ import { useNavigate } from 'react-router-dom';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { SpendingChartWidget } from '@/components/dashboard/SpendingChartWidget';
 import { IncomeExpensesChartWidget } from '@/components/dashboard/IncomeExpensesChartWidget';
+import { RecentTransactionsWidget } from '@/components/dashboard/RecentTransactionsWidget';
+import { UpcomingBillsWidget } from '@/components/dashboard/UpcomingBillsWidget';
+import { GoalProgressWidget } from '@/components/dashboard/GoalProgressWidget';
 import { ROUTES } from '@/routes';
 
 /**
@@ -62,47 +65,14 @@ export const Dashboard: React.FC = () => {
           {/* Widget 2: Income vs Expenses (P0) - Implemented in Chunk 3 */}
           <IncomeExpensesChartWidget data={incomeExpensesData} />
 
-          {/* Widget 3: Recent Transactions (P1) - Coming in Chunk 4 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="recent-transactions-heading"
-          >
-            <h2 id="recent-transactions-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Recent Transactions
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Transaction list coming in Chunk 4<br />
-              Data ready: {recentTransactions.length} transactions
-            </p>
-          </section>
+          {/* Widget 3: Recent Transactions (P1) - Implemented in Chunk 4 */}
+          <RecentTransactionsWidget transactions={recentTransactions} />
 
-          {/* Widget 4: Upcoming Bills (P1) - Coming in Chunk 4 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="upcoming-bills-heading"
-          >
-            <h2 id="upcoming-bills-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Upcoming Bills
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Bills list coming in Chunk 4<br />
-              Data ready: {upcomingBills.length} bills
-            </p>
-          </section>
+          {/* Widget 4: Upcoming Bills (P1) - Implemented in Chunk 4 */}
+          <UpcomingBillsWidget bills={upcomingBills} />
 
-          {/* Widget 5: Goal Progress (P1) - Coming in Chunk 4 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="goal-progress-heading"
-          >
-            <h2 id="goal-progress-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Goal Progress
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Progress bars coming in Chunk 4<br />
-              Data ready: {goalProgress.length} goals
-            </p>
-          </section>
+          {/* Widget 5: Goal Progress (P1) - Implemented in Chunk 4 */}
+          <GoalProgressWidget goals={goalProgress} />
 
           {/* Widget 6: Gamification (P2) - Coming in Chunk 5 */}
           <section
