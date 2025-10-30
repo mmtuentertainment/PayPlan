@@ -74,7 +74,7 @@ export const RecentTransactionsWidget = React.memo<RecentTransactionsWidgetProps
                       handleTransactionClick(transaction.id);
                     }
                   }}
-                  className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                  className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   tabIndex={0}
                   role="button"
                   aria-label={`View details for ${transaction.description}, ${display.displayAmount} on ${format(new Date(transaction.date), 'MMM d, yyyy')}`}

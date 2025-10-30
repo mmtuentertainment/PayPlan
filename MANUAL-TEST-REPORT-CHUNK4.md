@@ -412,17 +412,68 @@ aria-label={`${goal.goalName}: ${goal.percentage.toFixed(0)}% complete`}
 
 ---
 
+## Bot Review Response
+
+**Bot Reviews Received**: Claude Code Bot + CodeRabbit AI
+
+### Issues Found & Resolved
+
+**MEDIUM Issue 1: Missing focus indicator styling** ✅ FIXED
+- **Location**: RecentTransactionsWidget.tsx line 77
+- **Issue**: Transaction list items missing explicit focus ring for WCAG 2.1 AA
+- **Fix**: Added `focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`
+- **Commit**: Post-review fixes
+
+**MEDIUM Issue 2: Overdue bills missing visual badge** ✅ FIXED
+- **Location**: UpcomingBillsWidget.tsx lines 76-80
+- **Issue**: Overdue bills showed text but no visual urgency badge
+- **Fix**: Added red "Overdue" badge with ARIA label for overdue bills
+- **Commit**: Post-review fixes
+
+**MEDIUM Issue 3: Amount display inconsistency** ✅ FIXED
+- **Location**: UpcomingBillsWidget.tsx line 83 (now line 92)
+- **Issue**: `bill.amount` displayed as-is, but stored in cents (from Transaction.amount)
+- **Fix**: Changed to `${(bill.amount / 100).toFixed(2)}` to convert cents to dollars
+- **Commit**: Post-review fixes
+
+**LOW Issue 1: Routes not implemented yet** ⚠️ ACKNOWLEDGED
+- **Routes**: `/transactions/:id` and `/goals` do not exist in App.tsx
+- **Status**: Forward-compatible navigation - routes will be implemented in future features
+- **Action**: Documented, no fix needed (Phase 1 acceptable)
+
+**LOW Issue 2: Test data schema format** ✅ VERIFIED
+- **Issue**: Test data uses nested version structure
+- **Status**: Verified matches localStorage hook expectations
+- **Action**: No changes needed
+
+### Bot Review Summary
+
+| Issue | Priority | Status | Action |
+|-------|----------|--------|--------|
+| Focus indicator styling | MEDIUM | ✅ FIXED | Added explicit focus rings |
+| Overdue badge missing | MEDIUM | ✅ FIXED | Added red overdue badge |
+| Amount format cents→dollars | MEDIUM | ✅ FIXED | Converted cents to dollars |
+| Routes not implemented | LOW | ⚠️ NOTED | Forward-compatible, no fix |
+| Test data schema | LOW | ✅ VERIFIED | Schema matches hooks |
+
+**Overall**: 3/3 MEDIUM issues fixed, 2/2 LOW issues acknowledged/verified.
+
+---
+
 ## Conclusion
 
 **Chunk 4 implementation is complete and functional.** All 3 P1 widgets (Recent Transactions, Upcoming Bills, Goal Progress) render correctly with proper formatting, accessibility, and performance optimizations.
 
 The Upcoming Bills widget correctly displays an empty state due to test data limitations (bill detection requires longer intervals between transactions). This is expected behavior and does not indicate a bug in the widget implementation.
 
-**Ready for bot review and HIL approval.**
+**Bot review issues addressed**: All 3 MEDIUM priority issues fixed immediately. 2 LOW priority issues documented as acceptable for Phase 1.
+
+**Ready for HIL approval** ✅
 
 ---
 
 **Tester**: Claude Code
-**Test Method**: Puppeteer automated manual testing
+**Test Method**: Puppeteer automated manual testing + Bot review response
 **Date**: 2025-10-30
 **PR**: #61 - feat(dashboard): Chunk 4 - P1 Widgets (T027-T040)
+**Last Updated**: 2025-10-30 (post-bot review fixes)

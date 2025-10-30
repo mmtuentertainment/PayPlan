@@ -77,10 +77,19 @@ export const UpcomingBillsWidget = React.memo<UpcomingBillsWidgetProps>(({ bills
                       ? 'Overdue'
                       : `Due ${format(new Date(bill.dueDate), 'MMM d')}`}
                   </p>
-                  {!bill.isOverdue && getUrgencyBadge(bill.daysUntilDue)}
+                  {bill.isOverdue ? (
+                    <span
+                      className="px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded"
+                      aria-label="Overdue: Bill payment is late"
+                    >
+                      Overdue
+                    </span>
+                  ) : (
+                    getUrgencyBadge(bill.daysUntilDue)
+                  )}
                 </div>
               </div>
-              <p className="font-semibold text-gray-900">${bill.amount.toFixed(2)}</p>
+              <p className="font-semibold text-gray-900">${(bill.amount / 100).toFixed(2)}</p>
             </li>
           ))}
         </ul>
