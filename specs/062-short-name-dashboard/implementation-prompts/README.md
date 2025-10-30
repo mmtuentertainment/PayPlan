@@ -24,7 +24,7 @@ This folder contains **6 implementation prompt documents** designed to be read a
 
 ### High-Level Process
 
-```
+```text
 Feature Branch: 062-short-name-dashboard (base)
    ↓
 Chunk 1 → 062-dashboard-chunk1-foundation → PR #1 → Merge back

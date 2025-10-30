@@ -4,7 +4,8 @@
 This directory contains manual test results for archived features. These tests document the last validation state before archival.
 
 ## Status
-**Historical Documentation**
+
+Historical Documentation
 
 Test results in this directory are for historical reference only. Archived features remain functional but are not actively tested.
 

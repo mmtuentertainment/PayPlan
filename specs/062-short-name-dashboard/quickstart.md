@@ -43,7 +43,7 @@ No new dependencies required for Phase 1.
 
 Create the following file structure in `frontend/src/`:
 
-```
+```text
 frontend/src/
 ├── types/
 │   ├── dashboard.ts           # DashboardWidget types

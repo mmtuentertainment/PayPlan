@@ -113,9 +113,9 @@ This is a **structural refactor** (Phase 2 of 3-phase product pivot) that reloca
 **Compliance**:
 - ✅ **Simple approach**: Use `git mv` (standard tool), systematic import updates (no fancy scripts)
 - ✅ **YAGNI-aligned decisions**:
-   - README.md only (no INDEX.md) per clarification #3
-   - lib/shared/ only if circular deps found per clarification #2
-   - No generic archive tooling (YAGNI per out-of-scope #6)
+  - README.md only (no INDEX.md) per clarification #3
+  - lib/shared/ only if circular deps found per clarification #2
+  - No generic archive tooling (YAGNI per out-of-scope #6)
 - ✅ **<2 week scope**: Estimated 2-4 days for 60 files + documentation + testing
 - ✅ **Clear purpose**: Reflects product direction (budget-first), improves developer onboarding
 
@@ -153,9 +153,11 @@ This is a **structural refactor** (Phase 2 of 3-phase product pivot) that reloca
 - Follows YAGNI (simple approach, no over-engineering)
 - Complies with Phase 1 (manual testing only)
 
-**Violations**: None
+### Violations
 
-**Proceed to Phase 0 (Research)**
+None
+
+### Proceed to Phase 0 (Research)
 
 ---
 
@@ -187,9 +189,11 @@ This is a **structural refactor** (Phase 2 of 3-phase product pivot) that reloca
 - ✅ `data-model.md` - Complete file relocation mapping (60 files), import transformations, validation checklist
 - ✅ `quickstart.md` - Step-by-step implementation guide with 8 phases, git commands, validation procedures
 
-**Contracts**: Not applicable (no API changes, structural refactor only)
+### Contracts
 
-**Proceed to Phase 2 (Tasks)**
+Not applicable (no API changes, structural refactor only)
+
+### Proceed to Phase 2 (Tasks)
 
 ---
 
