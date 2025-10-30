@@ -1,19 +1,25 @@
-# PayPlan - BNPL Payment Manager
+# PayPlan - Privacy-First Budgeting App
 
 **Live Demo:** https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app
 
-Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified payment timeline, risk detection, and calendar export.
+Track your spending, budgets, and goals with zero tracking and local-only storage. With BNPL payment tracking as a unique differentiator for managing Buy Now Pay Later loans across multiple providers.
 
-## 🚀 Quick Start (Public Demo)
+## 🚀 Quick Start
 
-1. Visit https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app
-2. Click "Use Sample CSV" to load example data
-3. Adjust timezone and payday settings
-4. Click "Build Plan"
-5. Download your .ics calendar file
-6. Import to Google Calendar or Apple Calendar
+**Budget Management:**
+1. Visit the [live demo](https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app)
+2. Navigate to **Categories** to create spending categories
+3. Set **Budgets** for each category
+4. Track **Transactions** manually or import from CSV
+5. View your **Dashboard** with spending charts and insights
 
-**Complete flow: <60 seconds**
+**BNPL Tracking (Optional):**
+1. Navigate to `/bnpl` route
+2. Upload BNPL payment CSV or paste email reminders
+3. Download `.ics` calendar file
+4. Import to Google Calendar or Apple Calendar
+
+**Complete budget setup: <5 minutes**
 
 ## 🆕 What's New
 
@@ -38,17 +44,23 @@ Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified pay
 
 ## ✨ Features
 
+### Budget Management (Core Features)
+- **Spending Categories**: Create and manage custom spending categories with budgets
+- **Monthly Budgets**: Set budget limits per category with rollover support
+- **Transaction Tracking**: Manual entry and CSV import of transactions
+- **Dashboard with Charts**: Visual spending insights with pie charts and bar graphs
+- **Goal Tracking**: Set and track savings goals with progress bars
+- **Privacy-First**: All data stored in localStorage, zero server storage, no tracking
+
+### BNPL Differentiator (Optional)
 - **CSV Export (v0.1.7)**: Download processed payment schedules as CSV
   - ✅ RFC 4180 compliant (Excel, Google Sheets, LibreOffice compatible)
   - ✅ Round-trip compatible (export → re-import without data loss)
   - ✅ Timestamped filenames prevent overwrites
   - ✅ Includes risk analysis columns
-  - ✅ Performance warnings for 500+ records
-  - ✅ Client-side only (privacy-first)
 - **CSV Input (v0.1.6-a.2)**: Paste or upload payment data with strict validation
   - ✅ Currency validation: 3-letter ISO codes (USD, EUR, GBP) with normalization
-  - ✅ Clear button: Reset file/error/results with keyboard support (Enter/Space)
-  - ✅ Improved error messages with original invalid values
+  - ✅ Clear button: Reset file/error/results with keyboard support
 - **📧 Email Parser (v0.1.3-a)**: Paste payment reminder emails directly - no CSV needed
 - **Multi-Provider Support**: Klarna, Affirm, Afterpay, PayPal Pay in 4, Zip, Sezzle
 - **Risk Detection**:
@@ -57,7 +69,6 @@ Manage multiple Buy Now Pay Later (BNPL) loans across providers with unified pay
   - 🔔 WEEKEND_AUTOPAY: Weekend autopay delays
 - **Smart Prioritization**: Highest late fees first, smallest amounts to free cash
 - **Calendar Export**: .ics file with 24-hour reminders
-- **Privacy-First**: No data storage, in-memory processing only
 
 ## 📧 Inbox Paste (Email Parser) - v0.1.4-b
 
@@ -242,7 +253,7 @@ npm test
 # - Integration: 13 tests
 ```
 
-## 🏗️ Tech Stack
+## 🏗️ Tech Stack & Architecture
 
 **Frontend:**
 - React 19 + TypeScript
@@ -251,11 +262,17 @@ npm test
 - shadcn/ui (Radix primitives)
 - Zod validation
 - PapaParse (CSV parsing)
+- Recharts (data visualization)
 
 **Backend:**
 - Vercel Serverless Functions (Node 20)
 - Luxon (timezone handling)
 - ICS generation
+
+**Code Organization:**
+- **`frontend/src/`** - Active budget app features (categories, budgets, transactions, dashboard)
+- **`frontend/src/archive/bnpl/`** - Archived BNPL code (still accessible at `/bnpl` route)
+- **localStorage-first** - All user data stored client-side for privacy
 
 ## 🛡️ API Hardening (v0.1.1)
 
