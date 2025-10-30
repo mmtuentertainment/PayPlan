@@ -13,6 +13,7 @@
 
 import React from 'react';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { SpendingChartWidget } from '@/components/dashboard/SpendingChartWidget';
 
 /**
  * Dashboard Page Component
@@ -47,19 +48,8 @@ export const Dashboard: React.FC = () => {
 
       <main>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Widget 1: Spending Chart (P0) - Coming in Chunk 2 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="spending-chart-heading"
-          >
-            <h2 id="spending-chart-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Spending by Category
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Pie chart coming in Chunk 2<br />
-              Data ready: {spendingChartData.length} categories
-            </p>
-          </section>
+          {/* Widget 1: Spending Chart (P0) - Implemented in Chunk 2 */}
+          <SpendingChartWidget data={spendingChartData} />
 
           {/* Widget 2: Income vs Expenses (P0) - Coming in Chunk 3 */}
           <section
