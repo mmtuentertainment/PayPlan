@@ -51,7 +51,7 @@ export function useTransactions(): UseTransactionsResult {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    setTransactions(storageData.transactions || []);
+    setTransactions(storageData?.transactions || []);
     setLoading(false);
   }, [storageData]);
 
@@ -61,8 +61,8 @@ export function useTransactions(): UseTransactionsResult {
       if (result.success) {
         // Trigger cross-tab sync by updating storage
         const updatedStorage: TransactionStorage = {
-          version: storageData.version,
-          transactions: [...storageData.transactions, result.data],
+          version: storageData?.version || '1.0.0',
+          transactions: [...(storageData?.transactions || []), result.data],
           lastModified: new Date().toISOString(),
         };
         setStorageData(updatedStorage);
@@ -82,8 +82,8 @@ export function useTransactions(): UseTransactionsResult {
       if (result.success) {
         // Trigger cross-tab sync by updating storage
         const updatedStorage: TransactionStorage = {
-          version: storageData.version,
-          transactions: storageData.transactions.map((txn) =>
+          version: storageData?.version || '1.0.0',
+          transactions: (storageData?.transactions || []).map((txn) =>
             txn.id === id ? result.data : txn
           ),
           lastModified: new Date().toISOString(),
@@ -105,8 +105,8 @@ export function useTransactions(): UseTransactionsResult {
       if (result.success) {
         // Trigger cross-tab sync by updating storage
         const updatedStorage: TransactionStorage = {
-          version: storageData.version,
-          transactions: storageData.transactions.filter((txn) => txn.id !== id),
+          version: storageData?.version || '1.0.0',
+          transactions: (storageData?.transactions || []).filter((txn) => txn.id !== id),
           lastModified: new Date().toISOString(),
         };
         setStorageData(updatedStorage);
@@ -123,7 +123,7 @@ export function useTransactions(): UseTransactionsResult {
   const refreshTransactions = useCallback(() => {
     // With useLocalStorage, refreshing is automatic - just reset loading state
     setLoading(true);
-    setTransactions(storageData.transactions || []);
+    setTransactions(storageData?.transactions || []);
     setLoading(false);
   }, [storageData]);
 
