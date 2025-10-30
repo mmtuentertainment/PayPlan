@@ -116,7 +116,8 @@ export const affirmParser: BNPLParser = {
         detectedProvider: "affirm",
       };
     } catch (error) {
-      console.error("Affirm parser error:", error);
+      // Privacy-safe logging: Do not log error object (may contain email content with PII)
+      console.error("Affirm parser error");
       return {
         success: false,
         error: createUserFriendlyError({
@@ -233,9 +234,15 @@ function extractAffirmInstallments(
       return {
         installmentNumber: number,
         amount,
-        dueDate: dueDate || new Date().toISOString().split("T")[0], // Fallback
+        dueDate: dueDate || "", // Will be validated below
       };
     });
+
+    // Validate all installments have valid due dates
+    const hasInvalidDates = installments.some((inst) => !inst.dueDate);
+    if (hasInvalidDates) {
+      return null; // Fail parsing instead of using incorrect dates
+    }
 
     return { installments, apr };
   }

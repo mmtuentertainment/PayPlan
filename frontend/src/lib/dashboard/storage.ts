@@ -111,7 +111,8 @@ export function readCategories(): Category[] {
     const validatedCategories = categories.filter((cat) => {
       const result = CategorySchema.safeParse(cat);
       if (!result.success) {
-        console.warn('Invalid category found in localStorage:', result.error);
+        // Privacy-safe logging: Do not log ZodError (contains raw localStorage data)
+        console.warn('Invalid category found in localStorage');
         return false;
       }
       return true;
@@ -144,7 +145,8 @@ export function readTransactions(): Transaction[] {
     const validatedTransactions = transactions.filter((txn) => {
       const result = TransactionSchema.safeParse(txn);
       if (!result.success) {
-        console.warn('Invalid transaction found in localStorage:', result.error);
+        // Privacy-safe logging: Do not log ZodError (contains raw localStorage data)
+        console.warn('Invalid transaction found in localStorage');
         return false;
       }
       return true;
@@ -177,7 +179,8 @@ export function readBudgets(): Budget[] {
     const validatedBudgets = budgets.filter((budget) => {
       const result = BudgetSchema.safeParse(budget);
       if (!result.success) {
-        console.warn('Invalid budget found in localStorage:', result.error);
+        // Privacy-safe logging: Do not log ZodError (contains raw localStorage data)
+        console.warn('Invalid budget found in localStorage');
         return false;
       }
       return true;
@@ -236,7 +239,8 @@ export function readStreakData(): StreakData | null {
     // Validate streak data with Zod
     const result = StreakDataSchema.safeParse(streak);
     if (!result.success) {
-      console.warn('Invalid streak data found in localStorage:', result.error);
+      // Privacy-safe logging: Do not log ZodError (contains raw localStorage data)
+      console.warn('Invalid streak data found in localStorage');
       return null;
     }
 
