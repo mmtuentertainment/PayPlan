@@ -274,6 +274,18 @@ npm test
 - **`frontend/src/archive/bnpl/`** - Archived BNPL code (still accessible at `/bnpl` route)
 - **localStorage-first** - All user data stored client-side for privacy
 
+**Dependency Rationale:**
+
+All dependencies serve active functionality across both budget and BNPL features:
+
+- **ics@3.8.1** - Calendar generation for BNPL payment reminders (Demo.tsx, Import.tsx). Enables `.ics` export so users can add payment due dates to Google Calendar or Apple Calendar with 24-hour advance reminders. Critical for BNPL differentiator feature.
+- **luxon@3.7.2** - Timezone-aware date handling across the entire app. Used for budget period calculations, transaction timestamps, and BNPL due date processing. More reliable than native JavaScript Date for financial applications.
+- **papaparse@5.5.3** - CSV parsing for transaction imports and BNPL payment data uploads. Handles RFC 4180 compliance, edge cases (CRLF line endings, quoted fields), and bidirectional CSV export/import.
+- **recharts@3.3.0** - Data visualization library for dashboard charts (spending by category pie chart, income vs. expenses bar chart, goal progress). Constitutional mandate (CLAUDE.md Principle IV: Visual-First) - do not replace with alternatives.
+- **zod@4.1.11** - Runtime schema validation for all user inputs (transactions, budgets, categories, BNPL data). Prevents type errors, ensures data integrity, and provides user-friendly validation messages.
+
+**Note**: During Phase 3 cleanup research (Feature 064), `ics@3.8.1` was initially flagged for removal as "BNPL-only" but research revealed it's actively used by Demo.tsx and Import.tsx for calendar download functionality. All dependencies validated as essential - no removals performed. See [specs/064-short-name-dependency/research.md](specs/064-short-name-dependency/research.md) for details.
+
 ## 🛡️ API Hardening (v0.1.1)
 
 ### RFC 9457 Problem Details
