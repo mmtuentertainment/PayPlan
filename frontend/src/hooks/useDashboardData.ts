@@ -75,7 +75,9 @@ export function useDashboardData(): DashboardData {
   // Read localStorage once (these calls are already optimized in storage.ts)
   const categories = readCategories();
   const transactions = readTransactions();
-  const budgets = readBudgets();
+  // Note: budgets will be used in future chunks (e.g., budget progress widget)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _budgets = readBudgets();
   const goals = readGoals() as Array<{
     id: string;
     name: string;
