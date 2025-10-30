@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 /**
  * Spending chart data schema
+ * Type definition: @/types/chart-data (SpendingChartData interface)
  */
 export const SpendingChartDataSchema = z.object({
   categoryId: z.string().uuid().or(z.literal('uncategorized')),
@@ -17,8 +18,6 @@ export const SpendingChartDataSchema = z.object({
   amount: z.number().nonnegative(),
   percentage: z.number().min(0).max(100),
 });
-
-export type SpendingChartData = z.infer<typeof SpendingChartDataSchema>;
 
 /**
  * Month data schema (for income vs. expenses chart)
@@ -32,16 +31,16 @@ export const MonthDataSchema = z.object({
 
 /**
  * Income vs. expenses chart data schema
+ * Type definition: @/types/chart-data (IncomeExpensesChartData interface)
  */
 export const IncomeExpensesChartDataSchema = z.object({
   months: z.array(MonthDataSchema).min(1).max(12),
   maxValue: z.number().nonnegative(), // Allow 0 for empty state
 });
 
-export type IncomeExpensesChartData = z.infer<typeof IncomeExpensesChartDataSchema>;
-
 /**
  * Upcoming bill schema
+ * Type definition: @/types/bill (UpcomingBill interface)
  */
 export const UpcomingBillSchema = z.object({
   id: z.string().uuid(),
@@ -56,10 +55,9 @@ export const UpcomingBillSchema = z.object({
   daysUntilDue: z.number(),
 });
 
-export type UpcomingBill = z.infer<typeof UpcomingBillSchema>;
-
 /**
  * Goal progress schema
+ * Type definition: @/types/goal (GoalProgress interface)
  */
 export const GoalProgressSchema = z.object({
   goalId: z.string().uuid(),
@@ -72,10 +70,9 @@ export const GoalProgressSchema = z.object({
   status: z.enum(['on-track', 'at-risk', 'completed']),
 });
 
-export type GoalProgress = z.infer<typeof GoalProgressSchema>;
-
 /**
  * Streak data schema
+ * Type definition: @/types/gamification (StreakData interface)
  */
 export const StreakDataSchema = z.object({
   currentStreak: z.number().nonnegative(),
@@ -83,10 +80,9 @@ export const StreakDataSchema = z.object({
   lastActivityDate: z.string().datetime(),
 });
 
-export type StreakData = z.infer<typeof StreakDataSchema>;
-
 /**
  * Recent win schema
+ * Type definition: @/types/gamification (RecentWin interface)
  */
 export const RecentWinSchema = z.object({
   id: z.string().uuid(),
@@ -95,10 +91,9 @@ export const RecentWinSchema = z.object({
   icon: z.string().min(1).max(2), // Single emoji
 });
 
-export type RecentWin = z.infer<typeof RecentWinSchema>;
-
 /**
  * Personalized insight schema
+ * Type definition: @/types/gamification (PersonalizedInsight interface)
  */
 export const PersonalizedInsightSchema = z.object({
   id: z.string().uuid(),
@@ -108,15 +103,12 @@ export const PersonalizedInsightSchema = z.object({
   message: z.string().min(1).max(200),
 });
 
-export type PersonalizedInsight = z.infer<typeof PersonalizedInsightSchema>;
-
 /**
  * Gamification data schema
+ * Type definition: @/types/gamification (GamificationData interface)
  */
 export const GamificationDataSchema = z.object({
   streak: StreakDataSchema,
   recentWins: z.array(RecentWinSchema).max(3),
   insights: z.array(PersonalizedInsightSchema).max(3),
 });
-
-export type GamificationData = z.infer<typeof GamificationDataSchema>;

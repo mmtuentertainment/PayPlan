@@ -9,6 +9,7 @@ import type { Category } from '@/types/category';
 import type { Transaction } from '@/types/transaction';
 import type { Budget } from '@/types/budget';
 import type { StreakData } from '@/types/gamification';
+import { StreakDataSchema } from '@/lib/dashboard/schemas';
 
 /**
  * Zod schemas for runtime validation of localStorage data
@@ -42,11 +43,7 @@ const BudgetSchema = z.object({
   updatedAt: z.string(),
 });
 
-const StreakDataSchema = z.object({
-  currentStreak: z.number().nonnegative(),
-  longestStreak: z.number().nonnegative(),
-  lastActivityDate: z.string(),
-});
+// StreakDataSchema imported from @/lib/dashboard/schemas (canonical source with .datetime() validation)
 
 /**
  * localStorage keys used by dashboard (read-only)
