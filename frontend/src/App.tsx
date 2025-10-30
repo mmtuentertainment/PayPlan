@@ -9,7 +9,7 @@ import type { PreferenceCategoryType, UserPreference } from './lib/preferences/t
 const Docs = lazy(() => import('./pages/Docs'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Demo = lazy(() => import('./pages/Demo'));
-const BNPLParser = lazy(() => import('./pages/BNPLParser').then(m => ({ default: m.BNPLParser })));
+const BNPLParser = lazy(() => import('./archive/bnpl/pages/BNPLParser').then(m => ({ default: m.BNPLParser })));
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const Categories = lazy(() => import('./pages/Categories'));
 const Budgets = lazy(() => import('./pages/Budgets'));
