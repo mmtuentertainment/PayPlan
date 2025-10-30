@@ -16,24 +16,13 @@ import type {
 } from "@/types/chart-data";
 import type { UpcomingBill } from "@/types/bill";
 import type { GoalProgress } from "@/types/goal";
+import { sanitizeError } from "@/lib/extraction/helpers/error-sanitizer";
 
 /**
  * Time window constants for bill detection and forecasting
  */
 const LOOKBACK_WINDOW_DAYS = 30; // Look back 30 days to detect recurring patterns
 const FORECAST_WINDOW_DAYS = 7; // Forecast bills due within next 7 days
-
-/**
- * Sanitizes error for logging (removes PII)
- * @privacy Strips sensitive data before logging
- */
-function sanitizeError(error: unknown): string {
-  if (error instanceof Error) {
-    // Only log error name and message (no stack trace which may contain PII)
-    return `${error.name}: ${error.message}`;
-  }
-  return "Unknown error";
-}
 
 /**
  * Goal interface (may not exist in all installations)

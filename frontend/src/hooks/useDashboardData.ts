@@ -29,6 +29,43 @@ import type { UpcomingBill } from "@/types/bill";
 import type { GoalProgress } from "@/types/goal";
 
 /**
+ * Goal data structure (from localStorage)
+ * This is separate from GoalProgress which is the computed view
+ */
+interface GoalData {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: string | null;
+  createdAt: string;
+}
+
+/**
+ * Type guard to safely narrow unknown[] to GoalData[]
+ * @param obj - Unknown object from localStorage
+ * @returns true if obj matches GoalData structure
+ */
+function isGoalData(obj: unknown): obj is GoalData {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    "id" in obj &&
+    typeof obj.id === "string" &&
+    "name" in obj &&
+    typeof obj.name === "string" &&
+    "targetAmount" in obj &&
+    typeof obj.targetAmount === "number" &&
+    "currentAmount" in obj &&
+    typeof obj.currentAmount === "number" &&
+    "targetDate" in obj &&
+    (obj.targetDate === null || typeof obj.targetDate === "string") &&
+    "createdAt" in obj &&
+    typeof obj.createdAt === "string"
+  );
+}
+
+/**
  * Dashboard data return type
  */
 export interface DashboardData {
@@ -82,14 +119,10 @@ export function useDashboardData(): DashboardData {
   // Read localStorage once (these calls are already optimized in storage.ts)
   const categories = readCategories();
   const transactions = readTransactions();
-  const goals = readGoals() as Array<{
-    id: string;
-    name: string;
-    targetAmount: number;
-    currentAmount: number;
-    targetDate: string | null;
-    createdAt: string;
-  }>;
+  const rawGoals = readGoals();
+
+  // Safely narrow goals type with type guard (filter out invalid entries)
+  const goals: GoalData[] = rawGoals.filter(isGoalData);
 
   // Memoize aggregation results to prevent recalculation on every render
   const spendingChartData = useMemo<SpendingChartData[]>(

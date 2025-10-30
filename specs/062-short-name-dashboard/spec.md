@@ -257,7 +257,7 @@ The following features are explicitly OUT OF SCOPE for this initial implementati
 ## Dependencies
 
 ### External Dependencies
-- **Recharts** (2.15.0) - For accessible, responsive chart components (pie, bar, line)
+- **Recharts** (^3.3.0) - For accessible, responsive chart components (pie, bar, line)
 - **Zod** (4.1.11) - For data validation (if needed for dashboard configuration)
 - **Radix UI** - For accessible widget components (tooltips, popovers)
 - **React** (19.1.1) - For dashboard page and widget components

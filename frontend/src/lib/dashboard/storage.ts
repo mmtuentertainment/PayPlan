@@ -119,7 +119,8 @@ export function readCategories(): Category[] {
 
     return validatedCategories;
   } catch (error) {
-    console.error('Error reading categories from localStorage:', error);
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading categories from localStorage');
     return [];
   }
 }
@@ -151,7 +152,8 @@ export function readTransactions(): Transaction[] {
 
     return validatedTransactions;
   } catch (error) {
-    console.error('Error reading transactions from localStorage:', error);
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading transactions from localStorage');
     return [];
   }
 }
@@ -183,7 +185,8 @@ export function readBudgets(): Budget[] {
 
     return validatedBudgets;
   } catch (error) {
-    console.error('Error reading budgets from localStorage:', error);
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading budgets from localStorage');
     return [];
   }
 }
@@ -239,7 +242,8 @@ export function readStreakData(): StreakData | null {
 
     return result.data as StreakData;
   } catch (error) {
-    console.error('Error reading streak data from localStorage:', error);
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading streak data from localStorage');
     return null;
   }
 }
