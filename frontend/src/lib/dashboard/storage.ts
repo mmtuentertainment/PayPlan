@@ -4,46 +4,16 @@
  * Created: 2025-10-29
  */
 
-import { z } from 'zod';
 import type { Category } from '@/types/category';
 import type { Transaction } from '@/types/transaction';
 import type { Budget } from '@/types/budget';
 import type { StreakData } from '@/types/gamification';
+
+// Canonical Zod schemas imported from domain modules (ADR 002)
+import { categorySchema as CategorySchema } from '@/lib/categories/schemas';
+import { transactionSchema as TransactionSchema } from '@/lib/transactions/schemas';
+import { budgetSchema as BudgetSchema } from '@/lib/budgets/schemas';
 import { StreakDataSchema } from '@/lib/dashboard/schemas';
-
-/**
- * Zod schemas for runtime validation of localStorage data
- */
-
-const CategorySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  iconName: z.string(),
-  color: z.string(),
-  isDefault: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
-
-const TransactionSchema = z.object({
-  id: z.string(),
-  amount: z.number(),
-  description: z.string(),
-  date: z.string(),
-  categoryId: z.string().optional(),
-  createdAt: z.string(),
-});
-
-const BudgetSchema = z.object({
-  id: z.string(),
-  categoryId: z.string(),
-  amount: z.number(),
-  period: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
-
-// StreakDataSchema imported from @/lib/dashboard/schemas (canonical source with .datetime() validation)
 
 /**
  * localStorage keys used by dashboard (read-only)
