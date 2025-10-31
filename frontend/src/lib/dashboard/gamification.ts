@@ -39,6 +39,17 @@ const EXPENSE_FILTER = (amount: number): boolean => amount > 0;
 const INCOME_FILTER = (amount: number): boolean => amount < 0;
 
 /**
+ * Gamification Thresholds
+ *
+ * These constants define the sensitivity of insights and wins detection.
+ * Extracted from magic numbers to improve readability and maintainability.
+ */
+const INSIGHT_WEEKEND_THRESHOLD_PERCENT = 20; // Show weekend vs weekday insight if >20% difference
+const INSIGHT_MONTHLY_THRESHOLD_PERCENT = 10; // Show month-over-month insight if >10% difference
+const WIN_LARGE_INCOME_THRESHOLD_CENTS = 100000; // $1000 in cents - celebrate large income
+const WIN_RECENT_DAYS = 7; // Look for wins in last 7 days
+
+/**
  * Zod Validation Schemas
  *
  * Validates localStorage data to prevent runtime errors from corrupted data.
@@ -276,8 +287,7 @@ export function generateInsights(
 
   if (weekendSpending > 0 && weekdaySpending > 0) {
     const diff = ((weekendSpending - weekdaySpending) / weekdaySpending) * 100;
-    if (Math.abs(diff) > 20) {
-      // Only show if >20% difference
+    if (Math.abs(diff) > INSIGHT_WEEKEND_THRESHOLD_PERCENT) {
       insights.push({
         id: uuid(),
         type: diff > 0 ? 'negative' : 'positive',
@@ -305,8 +315,7 @@ export function generateInsights(
   if (lastMonthSpending > 0) {
     // Avoid divide by zero
     const diff = ((currentMonthSpending - lastMonthSpending) / lastMonthSpending) * 100;
-    if (Math.abs(diff) > 10) {
-      // Only show if >10% difference
+    if (Math.abs(diff) > INSIGHT_MONTHLY_THRESHOLD_PERCENT) {
       insights.push({
         id: uuid(),
         type: diff > 0 ? 'negative' : 'positive',
@@ -379,16 +388,15 @@ export function detectRecentWins(
     }
   });
 
-  // Win 2: Large income transaction (last 7 days)
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  // Win 2: Large income transaction (last WIN_RECENT_DAYS days)
+  const recentDaysAgo = Date.now() - WIN_RECENT_DAYS * 24 * 60 * 60 * 1000;
   const recentIncome = transactions
     .filter(
-      (t) => INCOME_FILTER(t.amount) && new Date(t.date).getTime() > sevenDaysAgo // Income only (negative amounts)
+      (t) => INCOME_FILTER(t.amount) && new Date(t.date).getTime() > recentDaysAgo // Income only (negative amounts)
     )
     .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))[0]; // Largest income (by absolute value)
 
-  if (recentIncome && Math.abs(recentIncome.amount) > 100000) {
-    // >$1000 (in cents)
+  if (recentIncome && Math.abs(recentIncome.amount) > WIN_LARGE_INCOME_THRESHOLD_CENTS) {
     const amountDollars = Math.abs(recentIncome.amount) / 100;
     wins.push({
       id: uuid(),

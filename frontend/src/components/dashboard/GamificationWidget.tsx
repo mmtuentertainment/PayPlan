@@ -27,9 +27,29 @@ interface GamificationWidgetProps {
 }
 
 export const GamificationWidget = React.memo<GamificationWidgetProps>(({ data }) => {
-  // Hide widget if no gamification data (Phase 1: simple approach)
+  // Show encouraging empty state for first-time users (MEDIUM-3 fix)
   if (!data || data.streak.currentStreak === 0) {
-    return null;
+    return (
+      <section
+        className="bg-white rounded-lg shadow-md p-6"
+        aria-labelledby="gamification-heading"
+      >
+        <h2 id="gamification-heading" className="text-xl font-semibold text-gray-900 mb-4">
+          Start Your Journey
+        </h2>
+        <div className="text-center py-8">
+          <span className="text-6xl block mb-4" role="img" aria-label="Rocket emoji">
+            🚀
+          </span>
+          <p className="text-gray-700 text-lg font-medium mb-2">
+            Welcome to PayPlan!
+          </p>
+          <p className="text-gray-600 text-sm">
+            Add your first transaction to start tracking your progress, earning insights, and celebrating wins!
+          </p>
+        </div>
+      </section>
+    );
   }
 
   return (
