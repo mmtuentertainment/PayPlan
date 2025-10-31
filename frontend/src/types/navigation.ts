@@ -90,7 +90,7 @@ export interface MobileMenuState {
 /**
  * Breadcrumb trail item
  *
- * @privacy DO NOT include sensitive BNPL data (account numbers, balances, transaction IDs, PII)
+ * @privacy DO NOT include sensitive financial data (account numbers, balances, transaction IDs, PII)
  */
 export interface BreadcrumbItem {
   /**

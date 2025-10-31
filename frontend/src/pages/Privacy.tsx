@@ -28,7 +28,7 @@ export default function Privacy() {
         <section>
           <h2 className="text-xl font-semibold mb-3">Third-Party Services</h2>
           <p className="text-muted-foreground">
-            PayPlan is hosted on Vercel. Your browser connects directly to our Vercel-hosted API. We do not integrate with BNPL provider APIs, banks, or any third-party data services.
+            PayPlan is hosted on Vercel. All data stays in your browser's localStorage. We do not integrate with banks or any third-party data services. No server-side storage required.
           </p>
         </section>
 

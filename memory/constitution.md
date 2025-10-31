@@ -1,6 +1,8 @@
-# PayPlan Constitution v1.1
+# PayPlan Constitution v1.2
 
-**The immutable principles and mandatory features that define PayPlan as a market-competitive, privacy-first BNPL debt management app**
+**The immutable principles and mandatory features that define PayPlan as a market-competitive, privacy-first budgeting app**
+
+**Last Updated**: 2025-10-31 (BNPL features removed, pure budget app pivot complete)
 
 ---
 
@@ -46,7 +48,7 @@ This constitution serves as the **single source of truth** for all development d
 
 **Principle**: User privacy is paramount and non-negotiable. PayPlan operates privacy-first with optional server features.
 
-**Market Context**: PayPlan targets 18-35 year-olds living paycheck-to-paycheck (67% of Americans) with 3-5 active BNPL loans. These users need financial tools without judgment, tracking, or data monetization. 60% of Gen Z (30M users) uses BNPL; 51% believe BNPL encourages debt. Privacy-first design builds trust with a demographic wary of financial surveillance.
+**Market Context**: PayPlan targets 18-35 year-olds living paycheck-to-paycheck (67% of Americans). These users need financial tools without judgment, tracking, or data monetization. 80% of Gen Z (40M users) uses budgeting apps. Privacy-first design builds trust with a demographic wary of financial surveillance and data breaches.
 
 **Requirements**:
 - **localStorage-First**: All core features MUST work with localStorage only (no server required)
@@ -57,7 +59,7 @@ This constitution serves as the **single source of truth** for all development d
 - **Zero Tracking by Default**: No analytics, telemetry, or tracking without explicit user consent
 
 **Prohibited**:
-- ❌ Requiring authentication for core BNPL management features
+- ❌ Requiring authentication for core budgeting features
 - ❌ Server-side storage without explicit opt-in
 - ❌ Selling user data to third parties
 - ❌ Invasive tracking or fingerprinting
@@ -93,25 +95,23 @@ This constitution serves as the **single source of truth** for all development d
 
 ### III. Free Core, Premium Optional (IMMUTABLE)
 
-**Principle**: BNPL debt management features must remain free forever; advanced features may be premium.
+**Principle**: All budgeting features must remain free forever; advanced features may be premium.
 
-**Market Context**: Mint died (Jan 2024) with 3.6M users but no revenue—free-only models are unsustainable. YNAB charges $109/year, which users call "crazy expensive for people trying to save money." PayPlan's target users earn $25k-$60k/year and can't afford premium-only apps. The freemium model (80% free, 20% premium at $49-74/year—50% cheaper than YNAB/Monarch) ensures sustainability while serving users who need free BNPL management most.
+**Market Context**: Mint died (Jan 2024) with 3.6M users but no revenue—free-only models are unsustainable. YNAB charges $109/year, which users call "crazy expensive for people trying to save money." PayPlan's target users earn $25k-$60k/year and can't afford premium-only apps. The freemium model (80% free, 20% premium at $49-74/year—50% cheaper than YNAB/Monarch) ensures sustainability while serving users who need free budgeting most.
 
 **Always Free (Core Features)**:
-1. ✅ BNPL email parser (all 6 providers: Klarna, Affirm, Afterpay, PayPal, Zip, Sezzle)
-2. ✅ Risk detection (COLLISION, CASH_CRUNCH, WEEKEND_AUTOPAY)
-3. ✅ CSV import and export
-4. ✅ Payment archives (localStorage, 50 limit)
-5. ✅ Calendar export (.ics)
-6. ✅ Payment status tracking
-7. ✅ User preferences
-8. ✅ Spending categories (basic set + custom)
-9. ✅ Budget creation and tracking (up to 10 budgets)
-10. ✅ Goal tracking (up to 5 goals)
-11. ✅ Dashboard with charts (spending, net worth, cash flow)
-12. ✅ Recurring transaction detection
-13. ✅ Bill reminders and alerts
-14. ✅ Debt payoff calculator
+1. ✅ Manual transaction entry and editing
+2. ✅ Spending categories (pre-defined + unlimited custom)
+3. ✅ Budget creation and tracking (unlimited budgets)
+4. ✅ Goal tracking (unlimited goals)
+5. ✅ Dashboard with charts (spending, income/expenses, goals, gamification)
+6. ✅ Recurring transaction detection
+7. ✅ Bill reminders and alerts
+8. ✅ CSV import and export
+9. ✅ Transaction archives (localStorage, 50 limit)
+10. ✅ Calendar export (.ics)
+11. ✅ User preferences
+12. ✅ Budget analytics and insights
 
 **May Be Premium (Optional Features)**:
 - ⚠️ Bank account sync (Plaid integration)
@@ -131,7 +131,7 @@ This constitution serves as the **single source of truth** for all development d
 - Clear value proposition (what premium unlocks)
 
 **Prohibited**:
-- ❌ Paywalling core BNPL management features
+- ❌ Paywalling core budgeting features
 - ❌ Bait-and-switch (making free features premium later)
 - ❌ Requiring premium for basic budgeting/categorization
 - ❌ Ads in free tier (compromises privacy)
@@ -586,8 +586,8 @@ When principles conflict, resolve using this hierarchy:
    - Error handling for all async operations
    - Descriptive variable names
 
-4. **BNPL Focus**:
-   - All features must serve BNPL debt management use case
+4. **Budget Focus**:
+   - All features must serve core budgeting use case
    - No feature creep outside roadmap
 
 **Rejection Criteria**:
@@ -808,8 +808,7 @@ Closes [MMT-XXX](link)
    - Alert on price changes ("Netflix increased from $15.99 to $17.99")
    - Quick view of all recurring charges
    - Pause/cancel reminders
-   - **BNPL Focus**: Auto-detect BNPL installments (Klarna, Affirm, Afterpay, etc.) and subscription creep (major user pain point)
-   - **Market Rationale**: 33% of BNPL users lose track of payments across multiple providers; subscription fatigue is a top complaint; total recurring cost visibility ("$347/month in subscriptions") helps users manage debt
+   - **Market Rationale**: Subscription fatigue is a top complaint among budget app users; total recurring cost visibility ("$347/month in subscriptions") helps users manage debt and reduce unnecessary spending
    - **Acceptance Criteria**: App detects 80% of recurring transactions automatically
 
 6. **Bill Reminders & Alerts**
@@ -818,8 +817,7 @@ Closes [MMT-XXX](link)
    - Low balance alerts
    - Budget exceeded notifications
    - Unusual spending alerts (anomaly detection)
-   - **BNPL Focus**: Proactive late fee prevention (7d/3d/1d reminders) for BNPL payments; fraud detection ("Did you authorize this?")
-   - **Market Rationale**: 24% of BNPL users make late payments (up from 18% in 2023); $35 late fees add up; solves Monarch's support crisis with automation; users fear late fees and credit score damage
+   - **Market Rationale**: Users need proactive late fee prevention (7d/3d/1d reminders); automation solves Monarch's support crisis; users living paycheck-to-paycheck fear late fees and credit score damage
    - **Acceptance Criteria**: User receives timely, actionable alerts
 
 7. **Cash Flow Reports**
@@ -838,8 +836,7 @@ Closes [MMT-XXX](link)
    - Payoff timeline projections
    - Extra payment impact modeling
    - Visual debt-free date countdown ("473 days until debt-free!")
-   - **BNPL Focus**: BNPL-specific version focusing on late fee savings rather than interest; visualize light at end of tunnel for users with 3-5 active BNPL loans
-   - **Market Rationale**: 40% of BNPL users regret purchases once full costs hit; PayPlan's target users need debt payoff calculator to see path out of BNPL debt; visual countdown motivates completion
+   - **Market Rationale**: Users need visual debt payoff tools to see path out of debt; visual countdown motivates completion; helps users living paycheck-to-paycheck plan debt freedom
    - **Acceptance Criteria**: User can model debt payoff strategies and see interest savings
 
 ---
@@ -1185,13 +1182,13 @@ Closes [MMT-XXX](link)
 | Investment Tracking | ❌ | ✅ | ❌ | ✅ | ⚠️ (Premium) |
 | Multi-User | ✅ | ✅ | ❌ | ❌ | ⚠️ (Premium) |
 | Privacy-First | ❌ | ❌ | ❌ | ❌ | ✅ (Unique) |
-| BNPL Focus | ❌ | ❌ | ❌ | ❌ | ✅ (Unique) |
+| Visual-First | ⚠️ | ⚠️ | ❌ | ❌ | ✅ (Unique) |
 | Free Core | ❌ | ❌ | ⚠️ | ❌ | ✅ (Unique) |
 
 **PayPlan's Unique Advantages** (Constitutional Mandates):
 - ✅ Privacy-first (localStorage, no auth required)
-- ✅ BNPL-specific (email parser, risk detection)
-- ✅ Free core features (no paywalling debt management)
+- ✅ Completely free (all budgeting features free forever)
+- ✅ Visual-first (charts, gamification, dashboards)
 - ✅ Accessibility-first (WCAG 2.1 AA from day one)
 
 ### Competitor Failure Analysis
@@ -1222,28 +1219,27 @@ Closes [MMT-XXX](link)
    - ❌ Community feels neglected
    - **PayPlan Lesson**: 2-week sprint cadence, ship features monthly, public roadmap
 
-### Target User Profile (BNPL Debt Crisis Demographics)
+### Target User Profile (Budget App Demographics)
 
 **Who PayPlan Serves**:
 - Age: 18-35 (Gen Z + Young Millennials)
 - Income: $25k-$60k/year
-- BNPL Loans: 3-5 active (Klarna, Affirm, Afterpay, etc.)
 - Emergency Fund: $0-$400 (can't cover unexpected expenses)
 - Living: Paycheck-to-paycheck (67% of Americans)
-- Market Size: 60% of Gen Z uses BNPL = 30 million users
+- Market Size: 80% of Gen Z uses budgeting apps = 40 million users
 
 **Pain Points PayPlan Solves**:
-1. Lost track of payment schedules (33% lose track across providers)
-2. Fear of late fees (24% make late payments, up from 18% in 2023)
-3. Credit score damage worry
-4. Subscription fatigue
-5. No savings cushion
-6. Low financial literacy
-7. Impulse spending (40% regret purchases once full costs hit)
+1. Complex budgeting tools (YNAB too complicated)
+2. Expensive subscription costs ($75-109/year)
+3. Privacy concerns (bank sync required by competitors)
+4. Fear of late fees and overdrafts
+5. Subscription fatigue
+6. No savings cushion
+7. Impulse spending and budget tracking difficulty
 
 ---
 
-**Version**: 1.1 | **Ratified**: 2025-10-27 | **Last Amended**: 2025-10-27
+**Version**: 1.2 | **Ratified**: 2025-10-27 | **Last Amended**: 2025-10-31 (BNPL pivot complete)
 
 **Version History**:
 - **v1.1 (2025-10-27)**: MAJOR UPDATE - Added Spec-Kit workflow integration, Definition of Done by phase, Conflict Resolution Hierarchy, Tooling Integration (Linear, CodeRabbit, Claude Code Bot), Claude Code prompt guidance (thinking modes, subagents, visual iteration), and filled all 12 identified gaps for Claude Code optimization.
@@ -1256,15 +1252,14 @@ Closes [MMT-XXX](link)
 **PayPlan MUST have these features to be market-competitive**:
 
 ### Always Free (Core)
-1. ✅ BNPL management (email parser, risk detection, CSV)
-2. ✅ Spending categories with charts
-3. ✅ Budget creation and tracking
-4. ✅ Goal tracking
-5. ✅ Dashboard with visualizations
-6. ✅ Recurring transaction detection
-7. ✅ Bill reminders & alerts
-8. ✅ Cash flow reports
-9. ✅ Debt payoff calculator
+1. ✅ Spending categories with charts
+2. ✅ Budget creation and tracking
+3. ✅ Goal tracking
+4. ✅ Dashboard with visualizations and gamification
+5. ✅ Recurring transaction detection
+6. ✅ Bill reminders & alerts
+7. ✅ Cash flow reports
+8. ✅ Debt payoff calculator
 
 ### May Be Premium (Optional)
 10. ⚠️ Bank sync (Plaid)
@@ -1275,9 +1270,9 @@ Closes [MMT-XXX](link)
 ### Immutable Principles
 - **Privacy-First**: localStorage default, no auth required
 - **Accessibility-First**: WCAG 2.1 AA compliance
-- **Free Core**: BNPL features always free
-- **Visual-First**: Charts for everything
+- **Free Core**: All budgeting features always free
+- **Visual-First**: Charts and gamification for everything
 - **Quality-First** (Phased): Testing rigor scales with product maturity
 
-**This Constitution ensures PayPlan becomes a comprehensive, market-competitive personal finance app while maintaining its unique privacy-first, BNPL-focused identity.**
+**This Constitution ensures PayPlan becomes a comprehensive, market-competitive budgeting app while maintaining its unique privacy-first, visual-first, and free-forever identity.**
 

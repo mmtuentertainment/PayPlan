@@ -1,411 +1,120 @@
 # PayPlan - Privacy-First Budgeting App
 
-**Live Demo:** https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app
+**Live Demo:** https://payplan-khaki.vercel.app
 
-Track your spending, budgets, and goals with zero tracking and local-only storage. With BNPL payment tracking as a unique differentiator for managing Buy Now Pay Later loans across multiple providers.
+Track your spending, budgets, and goals with zero tracking and local-only storage. Simple, visual, and completely free.
 
 ## 📍 Product Positioning
 
 **Primary**: Privacy-first budgeting app (competes with YNAB, Monarch, PocketGuard)
-**Differentiator**: BNPL payment tracking (unique feature no competitor has)
+**Differentiators**: Completely free, privacy-first (no bank sync), visual dashboards, gamification
 **Target Users**: Low-income earners (18-35) managing paycheck-to-paycheck budgets
 
-PayPlan is **NOT** a BNPL-focused app. It's a comprehensive budgeting solution that **ALSO** helps users track Buy Now Pay Later payments across 6 providers (Klarna, Affirm, Afterpay, PayPal Pay in 4, Zip, Sezzle).
+PayPlan is a comprehensive budgeting solution focused on visual insights and habit-building through gamification.
 
 ## 🚀 Quick Start
 
-**Budget Management:**
-1. Visit the [live demo](https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app)
+1. Visit the [live demo](https://payplan-khaki.vercel.app)
 2. Navigate to **Categories** to create spending categories
 3. Set **Budgets** for each category
 4. Track **Transactions** manually or import from CSV
 5. View your **Dashboard** with spending charts and insights
 
-**BNPL Tracking (Optional):**
-1. Navigate to `/bnpl` route
-2. Upload BNPL payment CSV or paste email reminders
-3. Download `.ics` calendar file
-4. Import to Google Calendar or Apple Calendar
-
 **Complete budget setup: <5 minutes**
-
-## 🆕 What's New
-
-### v0.1.6-a.2 (2025-10-09) - CSV Import Enhancements
-- **Strict currency validation**: 3-letter ISO 4217 codes (USD, EUR, GBP) with automatic normalization
-- **Clear button**: Explicit reset with keyboard support (Enter/Space keys)
-- **Better error messages**: Shows original invalid values for easier debugging
-- **19 tests**: Comprehensive coverage including CRLF, keyboard navigation, and accessibility
-- [Release notes](https://github.com/mmtuentertainment/PayPlan/releases/tag/v0.1.6-a.2) | [CHANGELOG](CHANGELOG.md#v016-a2---2025-10-09)
-
-### v0.1.6-a.1 (2025-10-09) - CSV Import Safety & A11y
-- **Production safeguards**: 1MB file limit, 1000 row limit, real calendar validation
-- **WCAG 2.2 compliance**: Label association, alert regions, table captions
-- **XSS protection**: Formula injection prevention via React auto-escaping
-- [CHANGELOG](CHANGELOG.md#v016-a1---2025-10-09)
-
-### v0.1.5-a.3 (2025-10-09) - Date Quick Fix & Undo
-- **Inline date correction**: Fix ambiguous dates (01/02/2026) with one click
-- **One-level undo**: Revert your last fix instantly
-- **Accessibility**: Full keyboard navigation, ARIA live regions
-- [CHANGELOG](CHANGELOG.md)
 
 ## ✨ Features
 
-### Budget Management (Core Features)
+### Core Features (All Free Forever)
 - **Spending Categories**: Create and manage custom spending categories with budgets
-- **Monthly Budgets**: Set budget limits per category with rollover support
+- **Monthly Budgets**: Set budget limits per category with prorated tracking
 - **Transaction Tracking**: Manual entry and CSV import of transactions
 - **Dashboard with Charts**: Visual spending insights with pie charts and bar graphs
 - **Goal Tracking**: Set and track savings goals with progress bars
+- **Gamification**: Streaks, personalized insights, and wins to build financial habits
 - **Privacy-First**: All data stored in localStorage, zero server storage, no tracking
+- **Accessibility-First**: WCAG 2.1 AA compliant from day one
 
-### BNPL Differentiator (Optional)
-- **CSV Export (v0.1.7)**: Download processed payment schedules as CSV
-  - ✅ RFC 4180 compliant (Excel, Google Sheets, LibreOffice compatible)
-  - ✅ Round-trip compatible (export → re-import without data loss)
-  - ✅ Timestamped filenames prevent overwrites
-  - ✅ Includes risk analysis columns
-- **CSV Input (v0.1.6-a.2)**: Paste or upload payment data with strict validation
-  - ✅ Currency validation: 3-letter ISO codes (USD, EUR, GBP) with normalization
-  - ✅ Clear button: Reset file/error/results with keyboard support
-- **📧 Email Parser (v0.1.3-a)**: Paste payment reminder emails directly - no CSV needed
-- **Multi-Provider Support**: Klarna, Affirm, Afterpay, PayPal Pay in 4, Zip, Sezzle
-- **Risk Detection**:
-  - ⚠️ COLLISION: Multiple payments same day
-  - 💰 CASH_CRUNCH: Heavy load near payday
-  - 🔔 WEEKEND_AUTOPAY: Weekend autopay delays
-- **Smart Prioritization**: Highest late fees first, smallest amounts to free cash
-- **Calendar Export**: .ics file with 24-hour reminders
+### Technical Features
+- **CSV Import/Export**: RFC 4180 compliant, round-trip compatible
+- **Prorated Budgets**: Accurate budget tracking by day of month
+- **Smart Insights**: 30-day recency filter, 50% month-progress threshold
+- **Loading States**: Accessible skeletons with screen reader support
+- **Error Handling**: PII-safe error logging, user-friendly messages
 
-## 📧 Inbox Paste (Email Parser) - v0.1.4-b
+## 🎯 Competitive Advantages
 
-Paste BNPL payment reminder emails directly - no CSV needed.
+| Feature | YNAB | Monarch | PocketGuard | PayPlan |
+|---------|------|---------|-------------|---------|
+| Price | $109/year | $100/year | $75/year | **FREE** |
+| Privacy | No | No | No | **Yes** |
+| Visual Dashboards | No | Yes | Yes | **Yes** |
+| Gamification | No | No | No | **Yes** |
+| Accessibility | Partial | Partial | No | **WCAG 2.1 AA** |
 
-### Supported Providers
-- ✅ Klarna
-- ✅ Affirm
-- ✅ Afterpay
-- ✅ PayPal Pay in 4
-- ✅ Zip (includes Quadpay)
-- ✅ Sezzle
+**PayPlan wins on**:
+- ✅ **Completely free** (vs $75-109/year)
+- ✅ **Privacy-first** (no bank sync required)
+- ✅ **Visual-first** (charts and gamification)
+- ✅ **Accessible** (WCAG 2.1 AA from day one)
 
-### How to Use
-1. Click "Emails" tab
-2. Paste email text (copy from your inbox)
-3. Review extracted payments in preview table
-4. Click "Build Plan"
+## 🏗️ Tech Stack
 
-### What Gets Extracted
-- Provider name (Klarna, Affirm)
-- Payment number (e.g., "2 of 4")
-- Due date (multiple formats supported)
-- Amount
-- Autopay status
-- Late fee (if mentioned)
+- **Frontend**: React 19, TypeScript 5.8, Tailwind CSS 4.1, Vite 6.1
+- **Charts**: Recharts (accessible, responsive)
+- **Validation**: Zod 4.1
+- **Storage**: localStorage (privacy-first)
+- **Deployment**: Vercel
+- **Accessibility**: Radix UI primitives
 
-### Supported Date Formats
-- ISO: `2025-10-06`
-- US: `10/6/2025` or `10/06/2025`
-- Long: `October 6, 2025` or `Oct 6, 2025`
-- Ordinals: `October 6th, 2025`
+## 📦 Project Structure
 
-### Locale & Financial Impact (v0.1.5-a)
-
-**Date Format Toggle:**
-- 🌍 **US (MM/DD/YYYY)** — default for US-based BNPL providers
-- 🌍 **EU (DD/MM/YYYY)** — opt-in for European date formats
-
-**⚠️ Important: Changing locale affects payment interpretation**
-
-Switching date format can alter how ambiguous dates are interpreted, which may **resequence payment due dates and affect payment ordering**:
-
-- **US mode (default):** `01/02/2026` → **January 2, 2026**
-- **EU mode:** `01/02/2026` → **February 1, 2026**
-
-**Example Impact:**
-If you have 3 payments extracted with US format and switch to EU:
-- Payment originally due Jan 2 becomes Feb 1
-- Payment originally due Feb 1 becomes Jan 2
-- **Payment order may reverse**, affecting which payment is due first
-
-**Re-extraction:** Using "Re-extract with new format" will discard any Quick Fixes you've applied and reprocess all emails with the selected locale.
-
-### Date Quick Fix & Undo (v0.1.5-a.3)
-
-When extraction produces low-confidence rows (< 0.6), an inline **Date Quick Fix** UI appears to let you correct the due date immediately:
-
-**Features:**
-- **Re-parse buttons:** Reinterpret ambiguous dates as US or EU format (e.g., `01/02/2026` → Jan 2 or Feb 1)
-- **Manual entry:** Type a specific yyyy-MM-dd date directly
-- **One-level Undo:** Revert your last fix if needed
-- **Instant feedback:** Confidence score updates immediately after fix
-- **Accessibility:** Full keyboard navigation, ARIA live regions for status messages
-
-**When it appears:**
-- Rows with confidence < 0.6 automatically show the Quick Fix UI
-- Common scenarios: ambiguous dates (`01/02/2026`), missing provider, or unclear autopay status
-
-**Example:**
-1. Extract email → Row shows confidence 0.55 (Low)
-2. Click "Re-parse EU" → Confidence jumps to 1.0 (High)
-3. Issues panel updates automatically
-4. Click "Undo" if you made a mistake → Original values restored
-
-### Privacy
-- ✅ Client-side only (zero network calls during extraction)
-- ✅ No data storage or tracking
-- ✅ Pasted text never sent to server until "Build Plan"
-
-### Limitations (Phase A)
-- US providers only (Klarna, Affirm)
-- Plain text emails work best
-- Extracts one installment per email
-- Additional providers (Afterpay, PayPal, Zip, Sezzle) coming in Phase B
-
-## 📋 CSV Format
-
-### Import Format
-
-Required headers (lowercase):
-```csv
-provider,installment_no,due_date,amount,currency,autopay,late_fee
-Klarna,1,2025-10-02,45.00,USD,true,7
-Afterpay,2,2025-10-09,32.50,USD,true,8
+```
+PayPlan/
+├── frontend/src/
+│   ├── components/      # React components
+│   ├── pages/           # Route pages (Dashboard, Categories, Budgets, etc.)
+│   ├── lib/             # Business logic
+│   ├── hooks/           # Custom React hooks
+│   └── types/           # TypeScript definitions
+├── specs/               # Feature specifications (Spec-Kit)
+├── memory/              # Constitution and project context
+├── docs/                # Architecture decisions and research
+└── .claude/             # Claude Code configuration
 ```
 
-### Export Format (v0.1.7)
+## 🔒 Privacy & Security
 
-After processing payments, download results as CSV with risk analysis:
+- **Zero Tracking**: No analytics, no telemetry, no third-party scripts
+- **localStorage Only**: All data stays on your device
+- **No Authentication**: No signup, no login, no email required
+- **PII Sanitization**: Error logs sanitize personal information
+- **Open Source**: Full transparency
 
-```csv
-provider,amount,currency,dueISO,autopay,risk_type,risk_severity,risk_message
-Klarna,45.00,USD,2025-10-02,true,COLLISION,HIGH,"Multiple payments same day"
-Afterpay,32.50,USD,2025-10-09,true,,,
-```
+## 📊 Current Status
 
-**Features**:
-- RFC 4180 compliant (opens in Excel, Google Sheets, LibreOffice)
-- Timestamped filenames: `payplan-export-2025-10-14-143052.csv`
-- Round-trip compatible (export → edit → re-import)
-- Share with family, import into finance tools
+**Phase**: Phase 1 (Pre-MVP, 0-100 users)
+**Version**: v0.2.0 (Dashboard complete)
+**Features Complete**:
+- ✅ Spending Categories & Budgets (Feature 061)
+- ✅ Dashboard with Charts (Feature 062)
+- ✅ Gamification (streaks, insights, wins)
+- ✅ Transaction Management
+- ✅ Goal Progress Tracking
 
-## 🔌 API Endpoint
+**Next Up**:
+- Manual Transaction Entry UI improvements
+- Recurring Bill Detection
+- Budget Analytics & Insights
 
-**POST** `/api/plan`
+## 🤝 Contributing
 
-```bash
-curl -X POST https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app/api/plan \
-  -H "Content-Type: application/json" \
-  -d '{
-    "items": [...],
-    "paycheckDates": ["2025-10-05", "2025-10-19", "2025-11-02"],
-    "minBuffer": 100,
-    "timeZone": "America/New_York"
-  }'
-```
-
-**Response:**
-```json
-{
-  "summary": "You have 3 BNPL payments totaling $165.50 due this week...",
-  "actionsThisWeek": ["Wednesday Oct 2: Pay Affirm $58.00..."],
-  "riskFlags": ["⚠️ COLLISION: 2 payments due on Oct 2"],
-  "ics": "QkVHSU46VkNBTEVOREFS...",
-  "normalized": [{"provider": "Klarna", "dueDate": "2025-10-02", "amount": 45.00}]
-}
-```
-
-## 🔐 Privacy
-
-- ✅ No data storage
-- ✅ In-memory processing only
-- ✅ No cookies or tracking
-- ✅ No authentication required
-- ✅ Data discarded after response
-
-## 📚 Documentation
-
-- **API Docs**: Coming soon at `/docs`
-- **Feature Spec**: [specs/bnpl-manager/feature-spec.md](specs/bnpl-manager/feature-spec.md)
-- **Data Model**: [specs/bnpl-manager/data-model.md](specs/bnpl-manager/data-model.md)
-- **OpenAPI Contract**: [specs/bnpl-manager/contracts/post-plan.yaml](specs/bnpl-manager/contracts/post-plan.yaml)
-
-## 🛠️ Local Development
-
-```bash
-# Install dependencies
-npm install
-cd frontend && npm install
-
-# Run API locally
-cd /home/matt/PROJECTS/PayPlan
-vercel dev
-
-# Run frontend locally
-cd frontend
-npm run dev
-# Visit http://localhost:5173
-```
-
-## 🧪 Testing
-
-```bash
-# Run unit tests
-npm test
-
-# Test results:
-# ✓ 42 tests passing
-# - Payday calculator: 14 tests
-# - Risk detector: 15 tests
-# - Integration: 13 tests
-```
-
-## 🏗️ Tech Stack & Architecture
-
-**Frontend:**
-- React 19.1.1 + TypeScript 5.8.3
-- Vite 7.1.7
-- Tailwind CSS 4.1.13
-- shadcn/ui (Radix primitives)
-- Zod 4.1.11 (validation)
-- PapaParse 5.5.3 (CSV parsing)
-- Recharts 3.3.0 (data visualization)
-
-**Backend:**
-- Vercel Serverless Functions (Node 20)
-- Luxon 3.7.2 (timezone handling)
-- ICS 3.8.1 (calendar generation)
-
-**Code Organization:**
-- **`frontend/src/`** - Active budget app features (categories, budgets, transactions, dashboard)
-- **`frontend/src/archive/bnpl/`** - Archived BNPL code (still accessible at `/bnpl` route)
-- **localStorage-first** - All user data stored client-side for privacy
-
-**Dependency Rationale:**
-
-All dependencies serve active functionality across both budget and BNPL features:
-
-- **ics@3.8.1** - Calendar generation for BNPL payment reminders (Demo.tsx, Import.tsx). Enables `.ics` export so users can add payment due dates to Google Calendar or Apple Calendar with 24-hour advance reminders. Critical for BNPL differentiator feature.
-- **luxon@3.7.2** - Timezone-aware date handling across the entire app. Used for budget period calculations, transaction timestamps, and BNPL due date processing. More reliable than native JavaScript Date for financial applications.
-- **papaparse@5.5.3** - CSV parsing for transaction imports and BNPL payment data uploads. Handles RFC 4180 compliance, edge cases (CRLF line endings, quoted fields), and bidirectional CSV export/import.
-- **recharts@3.3.0** - Data visualization library for dashboard charts (spending by category pie chart, income vs. expenses bar chart, goal progress). Constitutional mandate (CLAUDE.md Principle IV: Visual-First) - do not replace with alternatives.
-- **zod@4.1.11** - Runtime schema validation for all user inputs (transactions, budgets, categories, BNPL data). Prevents type errors, ensures data integrity, and provides user-friendly validation messages.
-
-**Note**: During Phase 3 cleanup research (Feature 064), `ics@3.8.1` was initially flagged for removal as "BNPL-only" but research revealed it's actively used by Demo.tsx and Import.tsx for calendar download functionality. All dependencies validated as essential - no removals performed. See [specs/064-short-name-dependency/research.md](specs/064-short-name-dependency/research.md) for details.
-
-## 🛡️ API Hardening (v0.1.1)
-
-### RFC 9457 Problem Details
-
-All error responses use [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457.html) format:
-
-```json
-{
-  "type": "https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app/problems/validation-error",
-  "title": "Validation Error",
-  "status": 400,
-  "detail": "items array is required and must contain at least 1 installment",
-  "instance": "/api/plan"
-}
-```
-
-**Problem Types:** [/problems/validation-error](/problems/validation-error), [/problems/method-not-allowed](/problems/method-not-allowed), [/problems/rate-limit-exceeded](/problems/rate-limit-exceeded), [/problems/idempotency-key-conflict](/problems/idempotency-key-conflict), [/problems/internal-error](/problems/internal-error)
-
-### Rate Limiting
-
-- **Limit:** 60 requests per hour per IP (sliding window)
-- **Headers** (on all responses):
-  - `X-RateLimit-Limit: 60`
-  - `X-RateLimit-Remaining: 45`
-  - `X-RateLimit-Reset: 1759255504` (Unix timestamp)
-- **On exceed:** 429 with `Retry-After: <seconds>` header
-
-### Idempotency
-
-Use `Idempotency-Key` header for safe retries (60-second cache):
-
-```bash
-curl -X POST https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app/api/plan \
-  -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
-  -H "Content-Type: application/json" \
-  -d @data.json
-```
-
-**Behavior:**
-- Same key + same body within 60s → Cached response (200) with `X-Idempotent-Replayed: true`
-- Same key + different body → 409 conflict
-- No key → Process normally
-
-## 🗓️ Business-Day Awareness (v0.1.2)
-
-PayPlan automatically shifts weekend and holiday payment dates to the next business day, eliminating false WEEKEND_AUTOPAY warnings and preventing payment processing delays.
-
-### Features
-
-- **Automatic Shifting**: Payments due on weekends/holidays moved to next business day
-- **US Federal Holidays**: Built-in 2025-2026 holiday calendar (New Year's, MLK Day, Presidents Day, Memorial Day, Independence Day, Labor Day, Columbus Day, Veterans Day, Thanksgiving, Christmas)
-- **Custom Skip Dates**: Add company closures or personal unavailable dates
-- **Shift Tracking**: View original vs. shifted dates in results table with "Shifted" badges
-- **Default ON**: businessDayMode=true, weekends-only mode available
-
-### UI Controls
-
-Toggle business-day mode in the frontend UI:
-
-1. **Business Day Mode**: Enable/disable automatic shifting (default: ON)
-2. **Holiday Calendar**: Choose "US" (Federal holidays) or "None" (weekends only)
-3. **Custom Skip Dates**: Add comma-separated dates in YYYY-MM-DD format (e.g., `2025-12-24, 2025-12-26`)
-
-### API Request
-
-```bash
-curl -X POST https://payplan-94kdjppuq-matthew-utts-projects-89452c41.vercel.app/api/plan \
-  -H "Content-Type: application/json" \
-  -d '{
-    "items": [...],
-    "paycheckDates": ["2025-10-05", "2025-10-19"],
-    "minBuffer": 100,
-    "timeZone": "America/New_York",
-    "businessDayMode": true,
-    "country": "US",
-    "customSkipDates": ["2025-12-24", "2025-12-26"]
-  }'
-```
-
-### API Response (v0.1.2)
-
-```json
-{
-  "summary": "You have 3 BNPL payments...",
-  "actionsThisWeek": ["Monday Oct 6: Pay Affirm $58.00 (shifted from Sat Oct 4)"],
-  "riskFlags": ["ℹ️ Payment shifted from 2025-10-04 (weekend) to 2025-10-06 (Monday)"],
-  "ics": "QkVHSU46VkNBTEVOREFS...",
-  "normalized": [{
-    "provider": "Klarna",
-    "dueDate": "2025-10-06",
-    "amount": 45.00,
-    "wasShifted": true,
-    "originalDueDate": "2025-10-04",
-    "shiftedDueDate": "2025-10-06",
-    "shiftReason": "WEEKEND"
-  }],
-  "movedDates": [{
-    "provider": "Klarna",
-    "installment_no": 1,
-    "originalDueDate": "2025-10-04",
-    "shiftedDueDate": "2025-10-06",
-    "reason": "WEEKEND"
-  }]
-}
-```
-
-## 📦 Versions
-
-- **v0.1.2** (Current) - Business-Day Awareness: Weekend/holiday shifting
-- **v0.1.1** - API Hardening: RFC 9457, rate limiting, idempotency
-- **v0.1.0** - Initial Public Release
+This project uses the Spec-Kit workflow with Claude Code for AI-assisted development. See [CLAUDE.md](CLAUDE.md) for development guidelines.
 
 ## 📄 License
 
-ISC
+MIT License - see [LICENSE](LICENSE) for details
+
+---
+
+**Built with privacy, accessibility, and user trust as core values.**
+**Constitution**: [memory/constitution.md](memory/constitution.md) v1.2

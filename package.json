@@ -1,7 +1,7 @@
 {
   "name": "payplan",
   "version": "0.1.2",
-  "description": "PayPlan - BNPL Payment Manager with Business-Day Awareness",
+  "description": "PayPlan - Privacy-First Budgeting App with Visual Dashboards and Gamification",
   "main": "index.js",
   "engines": {
     "node": "20.x"

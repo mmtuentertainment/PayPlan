@@ -10,7 +10,7 @@
 
 ## Context
 
-You are implementing the **Spending Categories & Budget Creation** feature for PayPlan, a privacy-first budgeting app targeting Gen Z users who use BNPL (Buy Now Pay Later). This is a **table-stakes feature** required for Pre-MVP Phase 1.
+You are implementing the **Spending Categories & Budget Creation** feature for PayPlan, a privacy-first budgeting app targeting Gen Z users living paycheck-to-paycheck. This is a **table-stakes feature** required for Pre-MVP Phase 1.
 
 **Your Role**: You are Claude Code, the AI developer. You will use the **7-phase feature-dev workflow** to implement this feature:
 1. Discovery
@@ -32,7 +32,7 @@ Before starting, read and internalize these files:
 **Critical Constitutional Principles**:
 - ✅ **Privacy-First**: localStorage-first, no auth required for core features
 - ✅ **Accessibility-First**: WCAG 2.1 AA compliance mandatory (use React Aria for progress bars)
-- ✅ **Free Core**: BNPL management features free forever
+- ✅ **Free Core**: All budgeting features free forever
 - ✅ **Visual-First**: Charts for everything (but use React Aria for progress bars, NOT Recharts)
 - ✅ **Manual Testing Only**: Phase 1 = no automated tests (per constitution)
 

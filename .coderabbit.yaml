@@ -27,7 +27,7 @@
 # ==============================================================================
 language: en-US
 
-tone_instructions: "Enforce PayPlan's IMMUTABLE principles: Privacy-First (localStorage, no tracking), Accessibility-First (WCAG 2.1 AA), Free Core (no paywalling BNPL features). Phase 1: ship fast, manual testing only. Be constructive and educational."
+tone_instructions: "Enforce PayPlan's IMMUTABLE principles: Privacy-First (localStorage, no tracking), Accessibility-First (WCAG 2.1 AA), Free Core (all budgeting features free forever). Phase 1: ship fast, manual testing only. Be constructive and educational."
 
 # ==============================================================================
 # REVIEW SETTINGS
@@ -221,10 +221,10 @@ reviews:
         
         ### 3. Free Core (Principle III)
         **Violations that BLOCK merge**:
-        - ❌ Paywalling BNPL features (email parser, risk detection, payment tracking)
-        - ❌ Paywalling spending categories, budgets, goals, dashboard
+        - ❌ Paywalling core budgeting features (categories, budgets, transactions, dashboard, goals)
         - ❌ Paywalling recurring detection, bill reminders, cash flow, debt calculator
         - ❌ Requiring premium for CSV import/export
+        - ❌ Requiring authentication for basic budgeting functionality
         
         **Allowed premium features**:
         - ✅ Bank sync (Plaid integration)
@@ -313,10 +313,10 @@ reviews:
         - Error handling for all async operations
         - No `console.log` in production (use proper logging)
         
-        ### 10. BNPL Focus
-        - All features must serve BNPL debt management use case
+        ### 10. Budget App Focus
+        - All features must serve core budgeting use case
         - No feature creep outside roadmap
-        - Features must align with Tier 0, 1, or 2 roadmap
+        - Features must align with Phase 1/2/3 roadmap
     
     # -------------------------------------------------------------------------
     # BUSINESS LOGIC (LIB DIRECTORY)
@@ -677,8 +677,7 @@ ignore_draft_pr: true
 #    - ✅ REQUIRE: Reduced motion support (`prefers-reduced-motion`)
 #
 # 3. FREE CORE (Principle III)
-#    - ❌ BLOCK: Paywalling BNPL management features
-#    - ❌ BLOCK: Paywalling spending categories, budgets, goals, dashboard
+#    - ❌ BLOCK: Paywalling core budgeting features (categories, budgets, transactions, dashboard, goals)
 #    - ❌ BLOCK: Paywalling recurring detection, bill reminders, cash flow, debt calculator
 #    - ✅ ALLOW: Premium features (bank sync, AI categorization, investments, multi-user)
 #

@@ -16,7 +16,6 @@ import type {
 } from "@/types/chart-data";
 import type { UpcomingBill } from "@/types/bill";
 import type { GoalProgress } from "@/types/goal";
-import { sanitizeError } from "@/lib/extraction/helpers/error-sanitizer";
 
 /**
  * Time window constants for bill detection and forecasting
@@ -119,7 +118,7 @@ export function aggregateSpendingByCategory(
   } catch (error) {
     console.error(
       "Error in aggregateSpendingByCategory:",
-      sanitizeError(error),
+      error instanceof Error ? error.message : 'Unknown error',
     );
     return [];
   }

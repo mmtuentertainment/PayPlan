@@ -1,8 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect, useState, lazy, Suspense } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import Home from "./pages/Home";
-import Import from "./pages/Import";
 import type {
   PreferenceCategoryType,
   UserPreference,
@@ -11,12 +9,6 @@ import type {
 // Lazy load heavy/infrequently used pages to reduce main bundle size
 const Docs = lazy(() => import("./pages/Docs"));
 const Privacy = lazy(() => import("./pages/Privacy"));
-const Demo = lazy(() => import("./pages/Demo"));
-const BNPLParser = lazy(() =>
-  import("./archive/bnpl/pages/BNPLParser").then((m) => ({
-    default: m.BNPLParser,
-  })),
-);
 const Dashboard = lazy(() =>
   import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })),
 );
@@ -207,12 +199,8 @@ function AppContent({
           >
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/bnpl-home" element={<Home />} />
               <Route path="/docs" element={<Docs />} />
               <Route path="/privacy" element={<Privacy />} />
-              <Route path="/demo" element={<Demo />} />
-              <Route path="/import" element={<Import />} />
-              <Route path={ROUTES.BNPL_PARSER} element={<BNPLParser />} />
               <Route path={ROUTES.CATEGORIES} element={<Categories />} />
               <Route path={ROUTES.BUDGETS} element={<Budgets />} />
               <Route path={ROUTES.TRANSACTIONS} element={<Transactions />} />

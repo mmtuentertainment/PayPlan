@@ -104,32 +104,32 @@ HIL (Human) → Manus (AI PM) → Claude Code (You) → Bot Reviews → HIL Appr
 
 **What is PayPlan?**
 
-PayPlan is a **privacy-first budgeting app** designed to help **low-income earners escape the BNPL trap** (or use BNPL strategically if beneficial). We provide comprehensive budgeting tools with **BNPL tracking as a unique differentiator**.
+PayPlan is a **privacy-first budgeting app** designed to help **low-income earners** build healthy financial habits and take control of their money. We provide comprehensive budgeting tools with visual dashboards, goal tracking, and gamification.
 
-**The Pivot** (October 2025):
-- **Was**: BNPL debt management app (BNPL-focused)
-- **Now**: Budgeting app with BNPL tracking (budgeting-focused)
-- **Reason**: Direct BNPL API integration impossible; must build robust budgeting engine first
-- **Strategy**: Leverage user-controlled data (emails, CSVs) while building best-in-class budgeting features
+**The Pivot** (October-November 2025):
+- **Was**: BNPL-focused debt management app
+- **Now**: Pure budgeting app (BNPL features removed Nov 2025)
+- **Reason**: Direct BNPL API integration impossible; pivot to core budgeting value
+- **Strategy**: Best-in-class budgeting features for 30M Gen Z users living paycheck-to-paycheck
 
 **Target Users**:
 - Low-income earners (18-35 year-olds) living paycheck-to-paycheck
-- Users with 3-5 active BNPL loans (Klarna, Affirm, Afterpay)
-- People who need simple, fast, automated budgeting (not YNAB power users)
-- 60% of Gen Z uses BNPL = 30 million potential users
+- People who need simple, fast, visual budgeting (not YNAB power users)
+- Users who want privacy-first finance tools (no bank sync required)
+- 80% of Gen Z uses budgeting apps = 40 million potential users
 
 **Unique Value Propositions**:
 1. **Privacy-First**: localStorage-only, no auth required (vs. competitors requiring bank sync)
-2. **BNPL Tracking**: Email parser for 6 BNPL providers, risk detection, debt payoff calculator (unique differentiator)
-3. **Free Core**: All budgeting features free forever (vs. YNAB $109/year)
-4. **Visual-First**: Charts and gamification (vs. YNAB's spreadsheet complexity)
-5. **Accessibility-First**: WCAG 2.1 AA from day one
-6. **Automation-First**: No manual data entry (vs. YNAB's manual envelope system)
+2. **Free Core**: All budgeting features free forever (vs. YNAB $109/year)
+3. **Visual-First**: Charts and gamification (vs. YNAB's spreadsheet complexity)
+4. **Accessibility-First**: WCAG 2.1 AA from day one
+5. **Automation-First**: Smart categorization, recurring bill detection
+6. **Gamification**: Streaks, insights, wins to build habits (vs. boring spreadsheets)
 
 **Competitive Positioning**:
-- **vs. YNAB**: Simpler (<5 min onboarding vs 30 min), visual-first, free core, BNPL tracking
-- **vs. Monarch/PocketGuard**: Privacy-first (no bank sync required), BNPL differentiator
-- **vs. BNPL apps**: Full budgeting engine (not just payment tracking)
+- **vs. YNAB**: Simpler (<5 min onboarding vs 30 min), visual-first, free core
+- **vs. Monarch/PocketGuard**: Privacy-first (no bank sync required), completely free
+- **vs. Mint**: Still works (Mint shut down), privacy-first, modern UX
 
 ---
 
@@ -451,7 +451,7 @@ After you create a PR, an automated bot review loop begins. **You MUST iterate u
    - ARIA labels on interactive elements
 
 3. **Free Core** (Principle III):
-   - All BNPL management features free forever
+   - All budgeting features free forever
    - Premium features: bank sync, AI categorization, investments, multi-user
 
 ### Product Principles
@@ -501,7 +501,7 @@ After you create a PR, an automated bot review loop begins. **You MUST iterate u
 
 **Epic**: MMT-60 - Budgeting App MVP
 
-**Strategy**: Build core budgeting features first, then enhance with BNPL differentiators.
+**Strategy**: Build best-in-class budgeting features with visual dashboards and gamification.
 
 ---
 
@@ -524,15 +524,14 @@ After you create a PR, an automated bot review loop begins. **You MUST iterate u
    - Zod validation
    - **Status**: Next to spec
 
-3. **MMT-63: Dashboard with Charts** (Week 2-3)
-   - Net worth graph
+3. **MMT-62: Dashboard with Charts** (Week 2-3)
    - Spending by category (pie chart)
    - Income vs. expenses (bar chart)
    - Recent transactions widget
    - Upcoming bills widget
    - Goal progress widget
-   - BNPL payment schedule widget
-   - **Status**: Pending spec
+   - Gamification widget (streaks, insights, wins)
+   - **Status**: COMPLETE (Chunk 6 in PR #63)
 
 4. **MMT-64: Goal Tracking** (Week 3)
    - Create/edit savings goals
@@ -545,28 +544,26 @@ After you create a PR, an automated bot review loop begins. **You MUST iterate u
 
 ### Phase 2: P1 Features (Weeks 5-8) - Enhanced Functionality
 
-**Goal**: Add analytics, automation, and BNPL differentiators
+**Goal**: Add analytics, automation, and smart features
 
-5. **MMT-65: Recurring Bill Management** (Week 5)
+5. **MMT-64: Goal Tracking** (Week 5)
+   - Create/edit savings goals
+   - Progress bars with percentages
+   - Target dates
+   - Goal completion celebrations
+   - **Status**: Pending spec
+
+6. **MMT-65: Recurring Bill Management** (Week 6)
    - Recurring transaction generator
    - Pattern detection (auto-detect subscriptions)
-   - BNPL installment detection
    - Price change alerts
    - **Status**: Pending spec
 
-6. **MMT-66: Budget Analytics & Insights** (Week 6)
+7. **MMT-66: Budget Analytics & Insights** (Week 7-8)
    - Monthly summaries
    - Overspending alerts
    - Trend analysis (3, 6, 12 months)
    - Export reports (PDF, CSV)
-   - **Status**: Pending spec
-
-7. **MMT-67: Enhanced BNPL Debt Tracking** (Week 7-8)
-   - Total BNPL debt calculation
-   - Payment calendar view
-   - APR warnings (if available)
-   - Risk alerts (late payment likelihood)
-   - Debt payoff calculator (snowball/avalanche)
    - **Status**: Pending spec
 
 ---
@@ -744,7 +741,7 @@ function SpendingChart({ transactions }: { transactions: Transaction[] }) {
 
 1. **localStorage-First**:
    - All core features work with localStorage only
-   - No server required for BNPL management
+   - No server required for budgeting features
    - 5MB storage limit (browser default)
 
 2. **PII Sanitization**:
@@ -922,7 +919,7 @@ npm run test:a11y
 
 ---
 
-**Remember**: You are building a privacy-first budgeting app with BNPL tracking as a unique differentiator for 30 million Gen Z users living paycheck-to-paycheck. Ship features fast, maintain accessibility, and always prioritize user privacy. Read the constitution before every feature implementation.
+**Remember**: You are building a privacy-first budgeting app for 40 million Gen Z users living paycheck-to-paycheck. Ship features fast, maintain accessibility, and always prioritize user privacy. Read the constitution before every feature implementation.
 
 **Current Goal**: Ship 8 table-stakes features in 12 weeks to reach market competitiveness.
 
