@@ -14,7 +14,35 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)'
       },
-      colors: {},
+      colors: {
+        gamification: {
+          streak: {
+            bg: '#fff7ed',      // orange-50
+            border: '#fed7aa',  // orange-200
+            text: '#ea580c',    // orange-600
+          },
+          positive: {
+            bg: '#f0fdf4',      // green-50
+            border: '#bbf7d0',  // green-200
+            text: '#16a34a',    // green-600
+          },
+          negative: {
+            bg: '#fef2f2',      // red-50
+            border: '#fecaca',  // red-200
+            text: '#dc2626',    // red-600
+          },
+          neutral: {
+            bg: '#f9fafb',      // gray-50
+            border: '#e5e7eb',  // gray-200
+            text: '#4b5563',    // gray-600
+          },
+          win: {
+            bg: '#eff6ff',      // blue-50
+            border: '#bfdbfe',  // blue-200
+            text: '#2563eb',    // blue-600
+          },
+        },
+      },
       keyframes: {
         'fade-in': {
           '0%': { opacity: '0' },
