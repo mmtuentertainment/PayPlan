@@ -13,6 +13,7 @@
  */
 
 import { v4 as uuid } from 'uuid';
+import { z } from 'zod';
 import type {
   StreakData,
   GamificationData,
@@ -24,6 +25,52 @@ import type { Budget } from '@/types/budget';
 import { readCategories } from './storage';
 
 const GAMIFICATION_STORAGE_KEY = 'payplan_gamification_v1';
+
+/**
+ * Transaction Amount Sign Convention Filters
+ *
+ * PayPlan uses the following convention:
+ * - EXPENSES: Positive amounts (e.g., $50.00 = 5000 cents)
+ * - INCOME: Negative amounts (e.g., -$1000.00 = -100000 cents)
+ *
+ * These filters make the convention explicit and prevent sign errors.
+ */
+const EXPENSE_FILTER = (amount: number): boolean => amount > 0;
+const INCOME_FILTER = (amount: number): boolean => amount < 0;
+
+/**
+ * Zod Validation Schemas
+ *
+ * Validates localStorage data to prevent runtime errors from corrupted data.
+ * Constitutional requirement: "Zod for validation: All user inputs validated with Zod schemas"
+ */
+
+const StreakDataSchema = z.object({
+  currentStreak: z.number().int().min(0),
+  longestStreak: z.number().int().min(0),
+  lastActivityDate: z.string().datetime(),
+});
+
+const RecentWinSchema = z.object({
+  id: z.string().uuid(),
+  message: z.string().min(1),
+  timestamp: z.string().datetime(),
+  icon: z.string().min(1),
+});
+
+const PersonalizedInsightSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(['positive', 'negative', 'neutral']),
+  category: z.string().min(1),
+  percentageChange: z.number(),
+  message: z.string().min(1),
+});
+
+const GamificationDataSchema = z.object({
+  streak: StreakDataSchema,
+  recentWins: z.array(RecentWinSchema).max(3),
+  insights: z.array(PersonalizedInsightSchema).max(3),
+});
 
 /**
  * Gets current streak data from localStorage
@@ -41,11 +88,19 @@ export function getStreakData(): StreakData {
       };
     }
     const parsed = JSON.parse(data);
-    return parsed.streak || {
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActivityDate: new Date().toISOString(),
-    };
+
+    // Validate with Zod schema (HIGH-1 fix)
+    const validation = StreakDataSchema.safeParse(parsed.streak);
+    if (!validation.success) {
+      console.error('[Gamification] Invalid streak data:', validation.error.message);
+      return {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActivityDate: new Date().toISOString(),
+      };
+    }
+
+    return validation.data;
   } catch (error) {
     // PII-safe error logging (Feature 019 pattern)
     if (error instanceof Error) {
@@ -72,13 +127,20 @@ export function getStreakData(): StreakData {
  * - Immediate feedback: Streak updates instantly on page load
  * - Long-term goal: Longest streak creates aspirational target
  *
+ * **Timezone Handling** (HIGH-2 fix):
+ * - Uses local timezone (not UTC) to prevent unfair streak breaks
+ * - Example: User in California logs in at 11 PM Oct 30 local time
+ *   - UTC would be Oct 31 → streak broken unfairly ❌
+ *   - Local time is Oct 30 → streak continues fairly ✅
+ *
  * @returns Updated streak data
  */
 export function updateStreakData(): StreakData {
   const currentStreak = getStreakData();
 
-  // Use ISO date strings for timezone-safe comparison
-  const today = new Date().toISOString().slice(0, 10); // "2025-10-30"
+  // Use local date (not UTC) to prevent timezone-related streak breaks (HIGH-2 fix)
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; // "2025-10-30" in local time
   const lastActivityDay = currentStreak.lastActivityDate.slice(0, 10);
 
   // Same day - no update (prevent gaming by multiple visits)
@@ -134,7 +196,21 @@ export function getGamificationData(): GamificationData {
         insights: [],
       };
     }
-    return JSON.parse(data) as GamificationData;
+
+    const parsed = JSON.parse(data);
+
+    // Validate with Zod schema (HIGH-1 fix)
+    const validation = GamificationDataSchema.safeParse(parsed);
+    if (!validation.success) {
+      console.error('[Gamification] Invalid gamification data:', validation.error.message);
+      return {
+        streak: getStreakData(),
+        recentWins: [],
+        insights: [],
+      };
+    }
+
+    return validation.data;
   } catch (error) {
     if (error instanceof Error) {
       console.error('[Gamification] Error reading data:', error.message);
@@ -187,14 +263,14 @@ export function generateInsights(
   const weekendSpending = transactions
     .filter((t) => {
       const day = new Date(t.date).getDay();
-      return (day === 0 || day === 6) && t.amount > 0; // Sunday or Saturday, expenses only
+      return (day === 0 || day === 6) && EXPENSE_FILTER(t.amount); // Sunday or Saturday, expenses only
     })
     .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
   const weekdaySpending = transactions
     .filter((t) => {
       const day = new Date(t.date).getDay();
-      return day >= 1 && day <= 5 && t.amount > 0; // Monday-Friday, expenses only
+      return day >= 1 && day <= 5 && EXPENSE_FILTER(t.amount); // Monday-Friday, expenses only
     })
     .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
@@ -219,11 +295,11 @@ export function generateInsights(
     .slice(0, 7); // "2025-09"
 
   const currentMonthSpending = transactions
-    .filter((t) => t.date.startsWith(currentMonth) && t.amount > 0)
+    .filter((t) => t.date.startsWith(currentMonth) && EXPENSE_FILTER(t.amount))
     .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
   const lastMonthSpending = transactions
-    .filter((t) => t.date.startsWith(lastMonth) && t.amount > 0)
+    .filter((t) => t.date.startsWith(lastMonth) && EXPENSE_FILTER(t.amount))
     .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
   if (lastMonthSpending > 0) {
@@ -279,7 +355,7 @@ export function detectRecentWins(
         (t) =>
           t.categoryId === budget.categoryId &&
           t.date.startsWith(currentMonth) &&
-          t.amount > 0 // Expenses only
+          EXPENSE_FILTER(t.amount) // Expenses only
       )
       .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
@@ -307,7 +383,7 @@ export function detectRecentWins(
   const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const recentIncome = transactions
     .filter(
-      (t) => t.amount < 0 && new Date(t.date).getTime() > sevenDaysAgo // Income only (negative amounts)
+      (t) => INCOME_FILTER(t.amount) && new Date(t.date).getTime() > sevenDaysAgo // Income only (negative amounts)
     )
     .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))[0]; // Largest income (by absolute value)
 

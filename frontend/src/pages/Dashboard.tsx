@@ -80,7 +80,7 @@ export const Dashboard: React.FC = () => {
     saveGamificationData(updatedData);
 
     return updatedData;
-  }, []); // Empty deps - only calculate once per page load
+  }, [recentTransactions, upcomingBills]); // Re-calculate when transaction/bill data changes
 
   const handleAddTransaction = () => {
     navigate(ROUTES.TRANSACTIONS);

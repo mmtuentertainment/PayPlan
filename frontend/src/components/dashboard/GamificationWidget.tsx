@@ -60,7 +60,7 @@ export const GamificationWidget = React.memo<GamificationWidgetProps>(({ data })
 
       {/* Insights Section - Progress Principle */}
       {data.insights.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" aria-live="polite" aria-atomic="true">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">
             Insights
           </h3>
@@ -94,7 +94,7 @@ export const GamificationWidget = React.memo<GamificationWidgetProps>(({ data })
 
       {/* Recent Wins Section - Positive Reinforcement */}
       {data.recentWins.length > 0 && (
-        <div>
+        <div aria-live="polite" aria-atomic="true">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">
             Recent Wins
           </h3>
