@@ -186,16 +186,16 @@ export function generateInsights(
   const weekendSpending = transactions
     .filter((t) => {
       const day = new Date(t.date).getDay();
-      return (day === 0 || day === 6) && t.amount < 0; // Sunday or Saturday, expenses only
+      return (day === 0 || day === 6) && t.amount > 0; // Sunday or Saturday, expenses only
     })
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
   const weekdaySpending = transactions
     .filter((t) => {
       const day = new Date(t.date).getDay();
-      return day >= 1 && day <= 5 && t.amount < 0; // Monday-Friday, expenses only
+      return day >= 1 && day <= 5 && t.amount > 0; // Monday-Friday, expenses only
     })
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
   if (weekendSpending > 0 && weekdaySpending > 0) {
     const diff = ((weekendSpending - weekdaySpending) / weekdaySpending) * 100;
@@ -218,12 +218,12 @@ export function generateInsights(
     .slice(0, 7); // "2025-09"
 
   const currentMonthSpending = transactions
-    .filter((t) => t.date.startsWith(currentMonth) && t.amount < 0)
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    .filter((t) => t.date.startsWith(currentMonth) && t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
   const lastMonthSpending = transactions
-    .filter((t) => t.date.startsWith(lastMonth) && t.amount < 0)
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    .filter((t) => t.date.startsWith(lastMonth) && t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
   if (lastMonthSpending > 0) {
     // Avoid divide by zero
@@ -275,9 +275,9 @@ export function detectRecentWins(
         (t) =>
           t.categoryId === budget.categoryId &&
           t.date.startsWith(currentMonth) &&
-          t.amount < 0 // Expenses only
+          t.amount > 0 // Expenses only
       )
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
 
     // Convert cents to dollars (Phase 1 pattern from Chunk 4)
     const spentDollars = spent / 100;
@@ -298,13 +298,13 @@ export function detectRecentWins(
   const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const recentIncome = transactions
     .filter(
-      (t) => t.amount > 0 && new Date(t.date).getTime() > sevenDaysAgo // Income only
+      (t) => t.amount < 0 && new Date(t.date).getTime() > sevenDaysAgo // Income only (negative amounts)
     )
-    .sort((a, b) => b.amount - a.amount)[0]; // Largest income
+    .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))[0]; // Largest income (by absolute value)
 
-  if (recentIncome && recentIncome.amount > 100000) {
+  if (recentIncome && Math.abs(recentIncome.amount) > 100000) {
     // >$1000 (in cents)
-    const amountDollars = recentIncome.amount / 100;
+    const amountDollars = Math.abs(recentIncome.amount) / 100;
     wins.push({
       id: uuid(),
       message: `💰 Nice! You earned $${amountDollars.toFixed(2)}`,
