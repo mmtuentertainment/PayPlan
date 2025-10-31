@@ -24,6 +24,11 @@ import React from 'react';
 
 export type SkeletonType = 'chart' | 'list' | 'progress' | 'gamification';
 
+// Memoized arrays to prevent recreation on every render
+const LIST_ITEMS = [1, 2, 3, 4, 5] as const;
+const PROGRESS_ITEMS = [1, 2, 3] as const;
+const INSIGHT_ITEMS = [1, 2] as const;
+
 interface LoadingSkeletonProps {
   type: SkeletonType;
   ariaLabel?: string;
@@ -63,7 +68,7 @@ export const LoadingSkeleton = React.memo<LoadingSkeletonProps>(({ type, ariaLab
         {/* Title placeholder */}
         <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
         {/* 5 list items (matches "Last 5 transactions") */}
-        {[1, 2, 3, 4, 5].map((i) => (
+        {LIST_ITEMS.map((i) => (
           <div key={i} className="flex items-center space-x-3">
             {/* List item placeholder (48px = h-12) */}
             <div className="h-12 bg-gray-200 rounded-lg flex-1"></div>
@@ -85,7 +90,7 @@ export const LoadingSkeleton = React.memo<LoadingSkeletonProps>(({ type, ariaLab
         {/* Title placeholder */}
         <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
         {/* 3 goal progress placeholders */}
-        {[1, 2, 3].map((i) => (
+        {PROGRESS_ITEMS.map((i) => (
           <div key={i}>
             {/* Goal name placeholder */}
             <div className="h-4 bg-gray-200 rounded mb-2 w-2/3"></div>
@@ -122,7 +127,7 @@ export const LoadingSkeleton = React.memo<LoadingSkeletonProps>(({ type, ariaLab
         </div>
 
         {/* Insights placeholder (2 items) */}
-        {[1, 2].map((i) => (
+        {INSIGHT_ITEMS.map((i) => (
           <div key={i} className="h-16 bg-gray-200 rounded-lg"></div>
         ))}
       </div>

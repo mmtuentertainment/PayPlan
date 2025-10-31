@@ -25,11 +25,11 @@ import { getGamificationData } from "@/lib/dashboard/gamification";
 import type {
   SpendingChartData,
   IncomeExpensesChartData,
-} from "../types/chart-data";
-import type { Transaction } from "../types/transaction";
-import type { UpcomingBill } from "../types/bill";
-import type { GoalProgress } from "../types/goal";
-import type { GamificationData } from "../types/gamification";
+} from "@/types/chart-data";
+import type { Transaction } from "@/types/transaction";
+import type { UpcomingBill } from "@/types/bill";
+import type { GoalProgress } from "@/types/goal";
+import type { GamificationData } from "@/types/gamification";
 
 /**
  * Goal data structure (from localStorage)
@@ -138,17 +138,12 @@ export function useDashboardData(): DashboardData {
   const goals: GoalData[] = rawGoals.filter(isGoalData);
 
   // Ensure minimum 100ms skeleton display to prevent jarring flash
-  // Tracks actual load time and adds delay only if needed (no artificial delay)
+  // Data loads synchronously in useState initializers above, so this is a fixed 100ms delay
+  // This prevents flash for users with fast devices/browsers (<100ms perceived load time)
   useEffect(() => {
-    const startTime = Date.now();
-
-    // Calculate minimum delay to show skeleton (prevents flash if data loads <100ms)
-    const elapsed = Date.now() - startTime;
-    const delay = Math.max(0, 100 - elapsed);
-
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, delay);
+    }, 100); // Minimum 100ms (UX research: <100ms feels instant, 100-300ms feels responsive)
 
     return () => clearTimeout(timer);
   }, []);

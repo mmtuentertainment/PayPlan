@@ -46,17 +46,43 @@ const INCOME_FILTER = (amount: number): boolean => amount < 0;
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24; // 86,400,000 ms = 1 day
 
 /**
- * Gamification Thresholds
+ * Gamification Configuration
  *
- * These constants define the sensitivity of insights and wins detection.
- * Extracted from magic numbers to improve readability and maintainability.
+ * These thresholds define the sensitivity of insights and wins detection.
+ * Extracted to a configuration object for future customization (Phase 2+).
+ *
+ * Phase 1: Hardcoded defaults based on behavioral research
+ * Phase 2+: Could be made user-configurable via settings
  */
-const INSIGHT_WEEKEND_THRESHOLD_PERCENT = 20; // Show weekend vs weekday insight if >20% difference
-const INSIGHT_MONTHLY_THRESHOLD_PERCENT = 10; // Show month-over-month insight if >10% difference
-const INSIGHT_RECENCY_DAYS = 30; // Show insights based on last 30 days (not all-time)
-const INSIGHT_MONTH_PROGRESS_THRESHOLD = 50; // Only show month-over-month insight after 50% of month
-const WIN_LARGE_INCOME_THRESHOLD_CENTS = 100000; // $1000 in cents - celebrate large income
-const WIN_RECENT_DAYS = 7; // Look for wins in last 7 days
+export const GAMIFICATION_CONFIG = {
+  /** Show weekend vs weekday insight if difference exceeds this percentage */
+  INSIGHT_WEEKEND_THRESHOLD_PERCENT: 20,
+
+  /** Show month-over-month insight if difference exceeds this percentage */
+  INSIGHT_MONTHLY_THRESHOLD_PERCENT: 10,
+
+  /** Use only last N days for insight calculations (prevents stale data) */
+  INSIGHT_RECENCY_DAYS: 30,
+
+  /** Only show month-over-month insight after this percentage of month elapsed */
+  INSIGHT_MONTH_PROGRESS_THRESHOLD: 50,
+
+  /** Celebrate income transactions above this amount (in cents) */
+  WIN_LARGE_INCOME_THRESHOLD_CENTS: 100000, // $1000
+
+  /** Look for wins in last N days */
+  WIN_RECENT_DAYS: 7,
+} as const;
+
+// Destructure for backward compatibility
+const {
+  INSIGHT_WEEKEND_THRESHOLD_PERCENT,
+  INSIGHT_MONTHLY_THRESHOLD_PERCENT,
+  INSIGHT_RECENCY_DAYS,
+  INSIGHT_MONTH_PROGRESS_THRESHOLD,
+  WIN_LARGE_INCOME_THRESHOLD_CENTS,
+  WIN_RECENT_DAYS,
+} = GAMIFICATION_CONFIG;
 
 /**
  * Zod Validation Schemas

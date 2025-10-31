@@ -1,0 +1,36 @@
+{
+  "preset": "web-application",
+  "thresholds": {
+    "cyclomaticComplexity": 10,
+    "functionLength": 50,
+    "fileLength": 500,
+    "nestingDepth": 4
+  },
+  "overrides": {
+    "test": {
+      "cyclomaticComplexity": 15,
+      "functionLength": 100,
+      "description": "Tests can be more complex (setup, multiple assertions)"
+    },
+    "types": {
+      "fileLength": 1000,
+      "description": "Type definition files can be longer"
+    }
+  },
+  "exclude": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "coverage/**",
+    "*.config.ts",
+    "*.config.js",
+    "vite.config.ts"
+  ],
+  "projectType": "react-web-app",
+  "notes": {
+    "philosophy": "PayPlan Phase 1 prioritizes shipping features fast with manual testing. Complexity monitoring helps maintain quality without slowing velocity.",
+    "phase1": "Manual testing only - use complexity monitoring to catch issues early",
+    "phase2": "Will add automated tests for critical paths (100-1,000 users)",
+    "phase3": "Will enforce 80% coverage with TDD (1,000-10,000 users)"
+  }
+}
