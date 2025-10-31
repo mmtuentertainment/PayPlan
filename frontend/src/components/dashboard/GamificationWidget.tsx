@@ -73,13 +73,13 @@ export const GamificationWidget = React.memo<GamificationWidgetProps>(({ data })
       </h2>
 
       {/* Streak Section - Loss Aversion Principle */}
-      <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+      <div className="mb-6 p-4 bg-gamification-streak-bg rounded-lg border border-gamification-streak-border">
         <div className="flex items-center gap-3">
           <span className="text-4xl" role="img" aria-label="Fire emoji indicating streak">
             🔥
           </span>
           <div>
-            <p className="text-3xl font-bold text-orange-600" aria-live="polite">
+            <p className="text-3xl font-bold text-gamification-streak-text" aria-live="polite">
               {data.streak.currentStreak}-day streak!
             </p>
             <p className="text-sm text-gray-600 mt-1">
@@ -101,10 +101,10 @@ export const GamificationWidget = React.memo<GamificationWidgetProps>(({ data })
                 key={insight.id}
                 className={`flex items-start gap-3 p-3 rounded-lg ${
                   insight.type === 'positive'
-                    ? 'bg-green-50 border border-green-200'
+                    ? 'bg-gamification-positive-bg border border-gamification-positive-border'
                     : insight.type === 'negative'
-                    ? 'bg-red-50 border border-red-200'
-                    : 'bg-gray-50 border border-gray-200'
+                    ? 'bg-gamification-negative-bg border border-gamification-negative-border'
+                    : 'bg-gamification-neutral-bg border border-gamification-neutral-border'
                 }`}
               >
                 <span
@@ -133,7 +133,7 @@ export const GamificationWidget = React.memo<GamificationWidgetProps>(({ data })
             {data.recentWins.map((win) => (
               <li
                 key={win.id}
-                className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200"
+                className="flex items-start gap-3 p-3 bg-gamification-win-bg rounded-lg border border-gamification-win-border"
               >
                 <span
                   className="text-2xl flex-shrink-0"
