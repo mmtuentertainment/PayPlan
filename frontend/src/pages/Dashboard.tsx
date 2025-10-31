@@ -63,12 +63,21 @@ export const Dashboard: React.FC = () => {
   // Generate gamification data (reads localStorage on each render, calculates when data changes)
   // NOTE: This intentionally reads inside the component body (not in useMemo) so React can
   // detect changes. The useMemo then uses a stable JSON key for comparison.
+  //
+  // TEST MODE: When VITE_GAMIFICATION_TEST_MODE=true, skip data regeneration and use
+  // localStorage data as-is. This allows manual testing of populated state without
+  // needing real transactions/budgets or multi-day usage.
   const gamificationData = useMemo(() => {
-    const transactions = readTransactions();
-    const budgets = readBudgets();
     const baseData = getGamificationData();
 
-    // Generate fresh insights and wins from current data
+    // Test mode: Return localStorage data without regeneration
+    if (import.meta.env.VITE_GAMIFICATION_TEST_MODE === 'true') {
+      return baseData;
+    }
+
+    // Production mode: Generate fresh insights and wins from current data
+    const transactions = readTransactions();
+    const budgets = readBudgets();
     const insights = generateInsights(transactions);
     const wins = detectRecentWins(transactions, budgets);
 
