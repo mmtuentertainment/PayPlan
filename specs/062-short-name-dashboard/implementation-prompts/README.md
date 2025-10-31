@@ -190,23 +190,41 @@ Final PR: 062-short-name-dashboard → main → Merge (after HIL approval)
 
 ---
 
-### Chunk 4: P1 Widgets (14 tasks, ~20K tokens)
-**File**: [chunk-4-widgets.md](./chunk-4-widgets.md)
-**Branch**: `062-dashboard-chunk4-widgets`
-**Tasks**: T027-T040
-**Estimated Time**: 2-3 hours
+### ✅ Chunk 4: P1 Widgets (COMPLETED)
+**File**: ~~chunk-4-widgets.md~~ (removed - implementation complete)
+**Branch**: `062-dashboard-chunk4-widgets` (merged to feature branch)
+**PR**: [#61](https://github.com/mmtuentertainment/PayPlan/pull/61) - MERGED 2025-10-30
+**Tasks**: T027-T040 (14 tasks)
+**Actual Time**: 2 hours (including bot review fixes)
 **Dependencies**: Chunk 1 complete
 
-**What it does:**
-- Builds Recent Transactions widget (last 5 transactions)
-- Builds Upcoming Bills widget (next 7 days)
-- Builds Goal Progress widget (active goals)
-- All widgets have empty states and accessibility
+**What was delivered:**
+- ✅ RecentTransactionsWidget component with date-fns formatting
+- ✅ UpcomingBillsWidget with urgency badges and overdue indicators
+- ✅ GoalProgressWidget with progress bars and status indicators
+- ✅ All widgets have empty states and full accessibility (WCAG 2.1 AA)
+- ✅ React.memo optimization for performance
+- ✅ Keyboard navigation and ARIA labels
 
 **Key Files Created:**
-- `frontend/src/components/dashboard/RecentTransactionsWidget.tsx`
-- `frontend/src/components/dashboard/UpcomingBillsWidget.tsx`
-- `frontend/src/components/dashboard/GoalProgressWidget.tsx`
+- `frontend/src/components/dashboard/RecentTransactionsWidget.tsx` (110 lines)
+- `frontend/src/components/dashboard/UpcomingBillsWidget.tsx` (101 lines)
+- `frontend/src/components/dashboard/GoalProgressWidget.tsx` (100 lines)
+- `frontend/public/inject-test-data-chunk4.html` (test data script)
+
+**Issues Fixed During Review:**
+- MEDIUM: Focus ring styling added to RecentTransactionsWidget
+- MEDIUM: Overdue badge added to UpcomingBillsWidget
+- MEDIUM: Amount display fixed (cents to dollars conversion)
+- 2 LOW issues evaluated and documented
+
+**Manual Testing:**
+- ✅ 8/9 test scenarios passed (see MANUAL-TEST-REPORT-CHUNK4.md)
+- ✅ WCAG 2.1 AA accessibility compliant
+- ✅ Responsive design verified (mobile/tablet/desktop)
+- ✅ No console errors or warnings
+
+**Status**: ✅ COMPLETE - All files merged to feature branch
 
 ---
 
