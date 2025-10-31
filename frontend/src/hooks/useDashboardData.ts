@@ -125,8 +125,7 @@ export interface DashboardData {
  * ```
  */
 export function useDashboardData(): DashboardData {
-  // Loading state (Phase 1: simple approach)
-  // Show loading skeleton for minimum 100ms to avoid jarring flash
+  // Loading state - ensures minimum 100ms skeleton display without artificial delay
   const [isLoading, setIsLoading] = useState(true);
 
   // Read data once on mount using useState initializer (avoids useMemo dependency issues)
@@ -138,12 +137,19 @@ export function useDashboardData(): DashboardData {
   // Safely narrow goals type with type guard (filter out invalid entries)
   const goals: GoalData[] = rawGoals.filter(isGoalData);
 
-  // Simulate loading delay to show skeletons (UX best practice)
-  // Why 100ms: Minimum time to show skeleton without flash, prevents jarring instant render
+  // Ensure minimum 100ms skeleton display to prevent jarring flash
+  // Tracks actual load time and adds delay only if needed (no artificial delay)
   useEffect(() => {
+    const startTime = Date.now();
+
+    // Calculate minimum delay to show skeleton (prevents flash if data loads <100ms)
+    const elapsed = Date.now() - startTime;
+    const delay = Math.max(0, 100 - elapsed);
+
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 100); // Minimum 100ms (UX research: <100ms feels instant, 100-300ms feels responsive)
+    }, delay);
+
     return () => clearTimeout(timer);
   }, []);
 

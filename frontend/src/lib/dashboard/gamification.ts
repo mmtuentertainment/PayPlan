@@ -54,6 +54,7 @@ const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24; // 86,400,000 ms = 1 day
 const INSIGHT_WEEKEND_THRESHOLD_PERCENT = 20; // Show weekend vs weekday insight if >20% difference
 const INSIGHT_MONTHLY_THRESHOLD_PERCENT = 10; // Show month-over-month insight if >10% difference
 const INSIGHT_RECENCY_DAYS = 30; // Show insights based on last 30 days (not all-time)
+const INSIGHT_MONTH_PROGRESS_THRESHOLD = 50; // Only show month-over-month insight after 50% of month
 const WIN_LARGE_INCOME_THRESHOLD_CENTS = 100000; // $1000 in cents - celebrate large income
 const WIN_RECENT_DAYS = 7; // Look for wins in last 7 days
 
@@ -322,19 +323,21 @@ export function generateInsights(
 
   // Insight 2: Month-over-month spending change
   // Fix 3 (Chunk 6): Only show after 50% of month to avoid invalid comparisons
-  const currentMonth = new Date().toISOString().slice(0, 7); // "2025-10"
-  const lastMonth = new Date(new Date().setMonth(new Date().getMonth() - 1))
+  const now = new Date();
+  const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    .toISOString()
+    .slice(0, 7); // "2025-10"
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     .toISOString()
     .slice(0, 7); // "2025-09"
 
   // Check if we're past halfway through current month
-  const now = new Date();
   const dayOfMonth = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const monthProgressPercent = (dayOfMonth / daysInMonth) * 100;
 
   // Only show insight if >50% through month (statistically valid comparison)
-  if (monthProgressPercent > 50) {
+  if (monthProgressPercent > INSIGHT_MONTH_PROGRESS_THRESHOLD) {
     const currentMonthSpending = transactions
       .filter((t) => t.date.startsWith(currentMonth) && EXPENSE_FILTER(t.amount))
       .reduce((sum, t) => sum + t.amount, 0);

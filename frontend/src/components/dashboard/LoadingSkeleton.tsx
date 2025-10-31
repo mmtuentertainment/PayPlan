@@ -129,8 +129,9 @@ export const LoadingSkeleton = React.memo<LoadingSkeletonProps>(({ type, ariaLab
     );
   }
 
-  // Fallback (should never happen)
-  return null;
+  // Exhaustive type check - catches missing skeleton types at compile-time
+  const _exhaustiveCheck: never = type;
+  throw new Error(`Unhandled skeleton type: ${_exhaustiveCheck}`);
 });
 
 LoadingSkeleton.displayName = 'LoadingSkeleton';
