@@ -11,9 +11,13 @@
   "trailingSlash": false,
   "public": false,
   "github": {
-    "enabled": true,
-    "silent": false,
-    "autoAlias": true
+    "enabled": false,
+    "silent": true,
+    "autoAlias": false,
+    "autoJobCancelation": false
+  },
+  "git": {
+    "deploymentEnabled": false
   },
   "rewrites": [
     {
