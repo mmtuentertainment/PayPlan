@@ -201,7 +201,7 @@ export function aggregateIncomeExpenses(
 
     return { months, maxValue };
   } catch (error) {
-    console.error("Error in aggregateIncomeExpenses:", sanitizeError(error));
+    console.error("Error in aggregateIncomeExpenses:", error instanceof Error ? error.message : "Unknown error");
     return { months: [], maxValue: 0 };
   }
 }
@@ -233,7 +233,7 @@ export function getRecentTransactions(
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, limit);
   } catch (error) {
-    console.error("Error in getRecentTransactions:", sanitizeError(error));
+    console.error("Error in getRecentTransactions:", error instanceof Error ? error.message : "Unknown error");
     return [];
   }
 }
@@ -360,7 +360,7 @@ export function getUpcomingBills(
       (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
     );
   } catch (error) {
-    console.error("Error in getUpcomingBills:", sanitizeError(error));
+    console.error("Error in getUpcomingBills:", error instanceof Error ? error.message : "Unknown error");
     return [];
   }
 }
@@ -438,7 +438,7 @@ export function getGoalProgress(goals: Goal[]): GoalProgress[] {
       };
     });
   } catch (error) {
-    console.error("Error in getGoalProgress:", sanitizeError(error));
+    console.error("Error in getGoalProgress:", error instanceof Error ? error.message : "Unknown error");
     return [];
   }
 }
