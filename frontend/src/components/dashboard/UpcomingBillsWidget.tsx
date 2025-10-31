@@ -30,7 +30,7 @@ export const UpcomingBillsWidget = React.memo<UpcomingBillsWidgetProps>(({ bills
    * - Due in 1-3 days: Yellow badge
    * - Due in 4-7 days: No badge
    */
-  const getUrgencyBadge = (daysUntilDue: number): JSX.Element | null => {
+  const getUrgencyBadge = (daysUntilDue: number): React.ReactElement | null => {
     if (daysUntilDue === 0) {
       return (
         <span

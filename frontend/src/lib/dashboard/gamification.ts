@@ -21,6 +21,7 @@ import type {
 } from '@/types/gamification';
 import type { Transaction } from '@/types/transaction';
 import type { Budget } from '@/types/budget';
+import { readCategories } from './storage';
 
 const GAMIFICATION_STORAGE_KEY = 'payplan_gamification_v1';
 
@@ -269,6 +270,9 @@ export function detectRecentWins(
   // Win 1: Under budget for any category
   const currentMonth = new Date().toISOString().slice(0, 7);
 
+  // Read categories to get category names
+  const categories = readCategories();
+
   budgets.forEach((budget) => {
     const spent = transactions
       .filter(
@@ -281,13 +285,18 @@ export function detectRecentWins(
 
     // Convert cents to dollars (Phase 1 pattern from Chunk 4)
     const spentDollars = spent / 100;
-    const budgetDollars = budget.monthlyLimit / 100;
+    const budgetDollars = budget.amount / 100; // ✅ FIX: Use budget.amount instead of monthlyLimit
 
     if (spentDollars < budgetDollars) {
       const remainingDollars = budgetDollars - spentDollars;
+
+      // ✅ FIX: Get category name from categories array
+      const category = categories.find((c) => c.id === budget.categoryId);
+      const categoryName = category?.name || 'Unknown';
+
       wins.push({
         id: uuid(),
-        message: `You're $${remainingDollars.toFixed(2)} under budget for ${budget.categoryName}! 💪`,
+        message: `You're $${remainingDollars.toFixed(2)} under budget for ${categoryName}! 💪`,
         timestamp: new Date().toISOString(),
         icon: '💪',
       });
