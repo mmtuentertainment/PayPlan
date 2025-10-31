@@ -25,11 +25,11 @@ import { getGamificationData } from "@/lib/dashboard/gamification";
 import type {
   SpendingChartData,
   IncomeExpensesChartData,
-} from "@/types/chart-data";
-import type { Transaction } from "@/types/transaction";
-import type { UpcomingBill } from "@/types/bill";
-import type { GoalProgress } from "@/types/goal";
-import type { GamificationData } from "@/types/gamification";
+} from "../types/chart-data";
+import type { Transaction } from "../types/transaction";
+import type { UpcomingBill } from "../types/bill";
+import type { GoalProgress } from "../types/goal";
+import type { GamificationData } from "../types/gamification";
 
 /**
  * Goal data structure (from localStorage)
