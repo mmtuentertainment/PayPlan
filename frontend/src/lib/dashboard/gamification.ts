@@ -39,6 +39,13 @@ const EXPENSE_FILTER = (amount: number): boolean => amount > 0;
 const INCOME_FILTER = (amount: number): boolean => amount < 0;
 
 /**
+ * Time Constants
+ *
+ * Standard time unit conversions for date calculations.
+ */
+const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24; // 86,400,000 ms = 1 day
+
+/**
  * Gamification Thresholds
  *
  * These constants define the sensitivity of insights and wins detection.
@@ -163,7 +170,7 @@ export function updateStreakData(): StreakData {
   const todayDate = new Date(today);
   const lastDate = new Date(lastActivityDay);
   const daysDiff = Math.floor(
-    (todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+    (todayDate.getTime() - lastDate.getTime()) / MILLISECONDS_PER_DAY
   );
 
   let newStreak: StreakData;
@@ -389,7 +396,7 @@ export function detectRecentWins(
   });
 
   // Win 2: Large income transaction (last WIN_RECENT_DAYS days)
-  const recentDaysAgo = Date.now() - WIN_RECENT_DAYS * 24 * 60 * 60 * 1000;
+  const recentDaysAgo = Date.now() - WIN_RECENT_DAYS * MILLISECONDS_PER_DAY;
   const recentIncome = transactions
     .filter(
       (t) => INCOME_FILTER(t.amount) && new Date(t.date).getTime() > recentDaysAgo // Income only (negative amounts)
