@@ -937,14 +937,14 @@ describe('detectRecentWins', () => {
 
 #### Manual Testing Checklist
 
-#### Test 1: Weekend/Weekday Insight (30-day filter)
+##### Test 1: Weekend/Weekday Insight (30-day filter)
 - [ ] Add transactions from 6 months ago (Apr 2025)
 - [ ] Add transactions from last 2 weeks (Oct 15-31)
 - [ ] Open dashboard
 - [ ] ✅ Verify weekend insight ONLY uses recent data
 - [ ] ✅ Verify old transactions ignored
 
-#### Test 2: Month-over-Month Insight (50% threshold)
+##### Test 2: Month-over-Month Insight (50% threshold)
 - [ ] Mock date to Oct 10 (32% through month)
 - [ ] Open dashboard
 - [ ] ✅ Verify month-over-month insight DOES NOT show
@@ -952,7 +952,7 @@ describe('detectRecentWins', () => {
 - [ ] Refresh dashboard
 - [ ] ✅ Verify month-over-month insight DOES show
 
-#### Test 3: Prorated Budget Wins
+##### Test 3: Prorated Budget Wins
 - [ ] Create $500 grocery budget for October
 - [ ] Mock date to Oct 5
 - [ ] Add $50 grocery transaction on Oct 1
@@ -964,7 +964,7 @@ describe('detectRecentWins', () => {
 - [ ] Refresh dashboard
 - [ ] ✅ Verify win DOES NOT show (over prorated pace)
 
-#### Test 4: Edge Cases
+##### Test 4: Edge Cases
 - [ ] Test on last day of month (100% progress)
 - [ ] Test with no transactions
 - [ ] Test with only income (no expenses)
@@ -1682,19 +1682,19 @@ Chunk 6 is DONE when:
 
 Based on PR #62 patterns, expect these comments:
 
-**1. "LoadingSkeleton should use relative import for types"**
+#### 1. "LoadingSkeleton should use relative import for types"
 - ✅ **Preempted**: Already using relative paths (no type imports)
 
-**2. "Missing aria-atomic on LoadingSkeleton"**
+#### 2. "Missing aria-atomic on LoadingSkeleton"
 - ✅ **Preempted**: Already added `aria-atomic="true"` (not needed for status role, but added for completeness)
 
-**3. "useDashboardData should avoid reading localStorage in dependency array"**
+#### 3. "useDashboardData should avoid reading localStorage in dependency array"
 - ✅ **Preempted**: Using useState with initializer function, not useMemo
 
-**4. "Consider extracting PII sanitization to utility function"**
+#### 4. "Consider extracting PII sanitization to utility function"
 - ✅ **Expected MEDIUM**: Defer to Linear (code quality, not blocking)
 
-**5. "Loading skeleton animation should respect prefers-reduced-motion"**
+#### 5. "Loading skeleton animation should respect prefers-reduced-motion"
 - ✅ **Expected MEDIUM**: Defer to Phase 2 (Tailwind's animate-pulse respects by default)
 
 ---

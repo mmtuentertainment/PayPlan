@@ -2,40 +2,53 @@
  * Dashboard Page
  * Feature: Dashboard with Charts (062-short-name-dashboard)
  * Created: 2025-10-29
+ * Updated: 2025-10-31 (Chunk 6: Added loading skeletons)
  *
  * Main landing page for PayPlan that provides an at-a-glance view
- * of financial health with 6 widgets: spending chart, income vs expenses,
- * recent transactions, upcoming bills, goal progress, and gamification.
+ * of financial health with 6 widgets.
  *
- * This is a scaffold created in Chunk 1 - actual widgets will be
- * implemented in Chunks 2-6.
+ * UPDATED IN CHUNK 6:
+ * - Added LoadingSkeleton for all 6 widgets
+ * - Loading state shows skeletons while data aggregates (100-500ms)
+ * - Improves perceived performance and UX
  */
 
 import React from 'react';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { LoadingSkeleton } from '@/components/dashboard/LoadingSkeleton';
+import { SpendingChartWidget } from '@/components/dashboard/SpendingChartWidget';
+import { IncomeExpensesChartWidget } from '@/components/dashboard/IncomeExpensesChartWidget';
+import { RecentTransactionsWidget } from '@/components/dashboard/RecentTransactionsWidget';
+import { UpcomingBillsWidget } from '@/components/dashboard/UpcomingBillsWidget';
+import { GoalProgressWidget } from '@/components/dashboard/GoalProgressWidget';
+import { GamificationWidget } from '@/components/dashboard/GamificationWidget';
 
 /**
  * Dashboard Page Component
  *
  * @component
- * @returns Dashboard page with 6 widget placeholders
+ * @returns Dashboard page with 6 widgets
  *
  * @accessibility
  * - Semantic HTML structure (header, main, sections)
  * - Proper heading hierarchy (h1, h2)
- * - ARIA labels will be added to widgets in Chunks 2-6
+ * - Loading skeletons announced to screen readers
+ * - All widgets WCAG 2.1 AA compliant
  *
  * @performance
  * - Data aggregation completes in <500ms for 1,000 transactions
  * - Memoized aggregation functions prevent unnecessary recalculations
+ * - Loading skeletons provide visual feedback during load
  */
 export const Dashboard: React.FC = () => {
   const {
+    isLoading,
     spendingChartData,
     incomeExpensesData,
     recentTransactions,
     upcomingBills,
     goalProgress,
+    gamificationData,
   } = useDashboardData();
 
   return (
@@ -47,88 +60,59 @@ export const Dashboard: React.FC = () => {
 
       <main>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Widget 1: Spending Chart (P0) - Coming in Chunk 2 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="spending-chart-heading"
-          >
-            <h2 id="spending-chart-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Spending by Category
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Pie chart coming in Chunk 2<br />
-              Data ready: {spendingChartData.length} categories
-            </p>
-          </section>
+          {/* Widget 1: Spending Chart (P0) - Chunk 2 */}
+          {isLoading ? (
+            <section className="bg-white rounded-lg shadow-md p-6" aria-labelledby="spending-chart-heading">
+              <LoadingSkeleton type="chart" ariaLabel="Loading spending by category chart" />
+            </section>
+          ) : (
+            <SpendingChartWidget data={spendingChartData} />
+          )}
 
-          {/* Widget 2: Income vs Expenses (P0) - Coming in Chunk 3 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="income-expenses-heading"
-          >
-            <h2 id="income-expenses-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Income vs. Expenses
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Bar chart coming in Chunk 3<br />
-              Data ready: {incomeExpensesData.months.length} months
-            </p>
-          </section>
+          {/* Widget 2: Income vs Expenses (P0) - Chunk 3 */}
+          {isLoading ? (
+            <section className="bg-white rounded-lg shadow-md p-6" aria-labelledby="income-expenses-heading">
+              <LoadingSkeleton type="chart" ariaLabel="Loading income vs expenses chart" />
+            </section>
+          ) : (
+            <IncomeExpensesChartWidget data={incomeExpensesData} />
+          )}
 
-          {/* Widget 3: Recent Transactions (P1) - Coming in Chunk 4 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="recent-transactions-heading"
-          >
-            <h2 id="recent-transactions-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Recent Transactions
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Transaction list coming in Chunk 4<br />
-              Data ready: {recentTransactions.length} transactions
-            </p>
-          </section>
+          {/* Widget 3: Recent Transactions (P1) - Chunk 4 */}
+          {isLoading ? (
+            <section className="bg-white rounded-lg shadow-md p-6" aria-labelledby="recent-transactions-heading">
+              <LoadingSkeleton type="list" ariaLabel="Loading recent transactions" />
+            </section>
+          ) : (
+            <RecentTransactionsWidget transactions={recentTransactions} />
+          )}
 
-          {/* Widget 4: Upcoming Bills (P1) - Coming in Chunk 4 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="upcoming-bills-heading"
-          >
-            <h2 id="upcoming-bills-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Upcoming Bills
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Bills list coming in Chunk 4<br />
-              Data ready: {upcomingBills.length} bills
-            </p>
-          </section>
+          {/* Widget 4: Upcoming Bills (P1) - Chunk 4 */}
+          {isLoading ? (
+            <section className="bg-white rounded-lg shadow-md p-6" aria-labelledby="upcoming-bills-heading">
+              <LoadingSkeleton type="list" ariaLabel="Loading upcoming bills" />
+            </section>
+          ) : (
+            <UpcomingBillsWidget bills={upcomingBills} />
+          )}
 
-          {/* Widget 5: Goal Progress (P1) - Coming in Chunk 4 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="goal-progress-heading"
-          >
-            <h2 id="goal-progress-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Goal Progress
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Progress bars coming in Chunk 4<br />
-              Data ready: {goalProgress.length} goals
-            </p>
-          </section>
+          {/* Widget 5: Goal Progress (P1) - Chunk 4 */}
+          {isLoading ? (
+            <section className="bg-white rounded-lg shadow-md p-6" aria-labelledby="goal-progress-heading">
+              <LoadingSkeleton type="progress" ariaLabel="Loading goal progress" />
+            </section>
+          ) : (
+            <GoalProgressWidget goals={goalProgress} />
+          )}
 
-          {/* Widget 6: Gamification (P2) - Coming in Chunk 5 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="gamification-heading"
-          >
-            <h2 id="gamification-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Gamification
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Streaks & insights coming in Chunk 5
-            </p>
-          </section>
+          {/* Widget 6: Gamification (P2) - Chunk 5 */}
+          {isLoading ? (
+            <section className="bg-white rounded-lg shadow-md p-6" aria-labelledby="gamification-heading">
+              <LoadingSkeleton type="gamification" ariaLabel="Loading gamification widget" />
+            </section>
+          ) : (
+            <GamificationWidget data={gamificationData} />
+          )}
         </div>
       </main>
     </div>

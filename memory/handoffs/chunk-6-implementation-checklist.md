@@ -156,7 +156,7 @@
 - [ ] Test 4: Prorated win under pace
 - [ ] Test 5: Prorated win over pace
 
-**Copy tests from spec lines 864-933**
+_Copy tests from spec lines 864-933_
 
 ---
 
