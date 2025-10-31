@@ -11,7 +11,7 @@
  * implemented in Chunks 2-6.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { SpendingChartWidget } from '@/components/dashboard/SpendingChartWidget';
@@ -19,6 +19,15 @@ import { IncomeExpensesChartWidget } from '@/components/dashboard/IncomeExpenses
 import { RecentTransactionsWidget } from '@/components/dashboard/RecentTransactionsWidget';
 import { UpcomingBillsWidget } from '@/components/dashboard/UpcomingBillsWidget';
 import { GoalProgressWidget } from '@/components/dashboard/GoalProgressWidget';
+import { GamificationWidget } from '@/components/dashboard/GamificationWidget';
+import {
+  updateStreakData,
+  getGamificationData,
+  generateInsights,
+  detectRecentWins,
+  saveGamificationData,
+} from '@/lib/dashboard/gamification';
+import { readTransactions, readBudgets } from '@/lib/dashboard/storage';
 import { ROUTES } from '@/routes';
 
 /**
@@ -45,6 +54,33 @@ export const Dashboard: React.FC = () => {
     upcomingBills,
     goalProgress,
   } = useDashboardData();
+
+  // Update streak on page load (Loss Aversion principle)
+  useEffect(() => {
+    updateStreakData();
+  }, []);
+
+  // Generate gamification data (memoized for performance)
+  const gamificationData = useMemo(() => {
+    const transactions = readTransactions();
+    const budgets = readBudgets();
+    const baseData = getGamificationData();
+
+    // Generate fresh insights and wins from current data
+    const insights = generateInsights(transactions);
+    const wins = detectRecentWins(transactions, budgets);
+
+    const updatedData = {
+      ...baseData,
+      insights,
+      recentWins: wins,
+    };
+
+    // Persist updated data
+    saveGamificationData(updatedData);
+
+    return updatedData;
+  }, []); // Empty deps - only calculate once per page load
 
   const handleAddTransaction = () => {
     navigate(ROUTES.TRANSACTIONS);
@@ -74,18 +110,8 @@ export const Dashboard: React.FC = () => {
           {/* Widget 5: Goal Progress (P1) - Implemented in Chunk 4 */}
           <GoalProgressWidget goals={goalProgress} />
 
-          {/* Widget 6: Gamification (P2) - Coming in Chunk 5 */}
-          <section
-            className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300"
-            aria-labelledby="gamification-heading"
-          >
-            <h2 id="gamification-heading" className="text-xl font-semibold text-gray-900 mb-4">
-              Gamification
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Streaks & insights coming in Chunk 5
-            </p>
-          </section>
+          {/* Widget 6: Gamification (P2) - Implemented in Chunk 5 */}
+          <GamificationWidget data={gamificationData} />
         </div>
       </main>
     </div>

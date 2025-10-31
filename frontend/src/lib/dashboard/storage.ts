@@ -7,7 +7,7 @@
 import type { Category } from '@/types/category';
 import type { Transaction } from '@/types/transaction';
 import type { Budget } from '@/types/budget';
-import type { StreakData } from '@/types/gamification';
+import type { StreakData, GamificationData } from '@/types/gamification';
 
 /**
  * localStorage keys used by dashboard (read-only)
@@ -145,6 +145,27 @@ export function readStreakData(): StreakData | null {
  *
  * See: https://github.com/mmtuentertainment/PayPlan/pull/43#issuecomment-3463866463
  */
+
+/**
+ * Read gamification data from localStorage
+ *
+ * @returns Gamification data or null if not found
+ */
+export function readGamification(): GamificationData | null {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.GAMIFICATION);
+    if (!data) return null;
+
+    const parsed = JSON.parse(data);
+    return parsed as GamificationData;
+  } catch (error) {
+    // PII-safe error logging (Feature 019 pattern)
+    if (error instanceof Error) {
+      console.error('[Storage] Error reading gamification:', error.message);
+    }
+    return null;
+  }
+}
 
 /**
  * Check if goals feature is available
