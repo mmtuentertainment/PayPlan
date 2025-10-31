@@ -20,13 +20,17 @@
  */
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { GamificationData } from '@/types/gamification';
+import { ROUTES } from '@/routes';
 
 interface GamificationWidgetProps {
   data: GamificationData | null;
 }
 
 export const GamificationWidget = React.memo<GamificationWidgetProps>(({ data }) => {
+  const navigate = useNavigate();
+
   // Show encouraging empty state for first-time users (MEDIUM-3 fix)
   if (!data || data.streak.currentStreak === 0) {
     return (
@@ -44,9 +48,16 @@ export const GamificationWidget = React.memo<GamificationWidgetProps>(({ data })
           <p className="text-gray-700 text-lg font-medium mb-2">
             Welcome to PayPlan!
           </p>
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 text-sm mb-6">
             Add your first transaction to start tracking your progress, earning insights, and celebrating wins!
           </p>
+          <button
+            onClick={() => navigate(ROUTES.TRANSACTIONS)}
+            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            aria-label="Navigate to transactions page to add your first transaction"
+          >
+            Add Your First Transaction
+          </button>
         </div>
       </section>
     );
