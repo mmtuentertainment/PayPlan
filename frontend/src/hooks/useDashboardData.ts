@@ -2,12 +2,13 @@
  * useDashboardData Hook
  * Feature: Dashboard with Charts (062-short-name-dashboard)
  * Created: 2025-10-29
+ * Updated: 2025-10-31 (Chunk 6: Added loading state)
  *
  * Custom hook that aggregates all dashboard widget data from localStorage.
  * Uses useMemo to prevent unnecessary recalculations on re-renders.
  */
 
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   readCategories,
   readTransactions,
@@ -20,6 +21,7 @@ import {
   getUpcomingBills,
   getGoalProgress,
 } from "@/lib/dashboard/aggregation";
+import { getGamificationData } from "@/lib/dashboard/gamification";
 import type {
   SpendingChartData,
   IncomeExpensesChartData,
@@ -27,6 +29,7 @@ import type {
 import type { Transaction } from "@/types/transaction";
 import type { UpcomingBill } from "@/types/bill";
 import type { GoalProgress } from "@/types/goal";
+import type { GamificationData } from "@/types/gamification";
 
 /**
  * Goal data structure (from localStorage)
@@ -69,6 +72,9 @@ function isGoalData(obj: unknown): obj is GoalData {
  * Dashboard data return type
  */
 export interface DashboardData {
+  /** Loading state (true while data aggregates) */
+  isLoading: boolean;
+
   /** Spending breakdown by category (for pie chart) */
   spendingChartData: SpendingChartData[];
 
@@ -83,6 +89,9 @@ export interface DashboardData {
 
   /** Goal progress data */
   goalProgress: GoalProgress[];
+
+  /** Gamification data (streak, insights, wins) */
+  gamificationData: GamificationData | null;
 }
 
 /**
@@ -116,13 +125,28 @@ export interface DashboardData {
  * ```
  */
 export function useDashboardData(): DashboardData {
-  // Read localStorage once (these calls are already optimized in storage.ts)
-  const categories = readCategories();
-  const transactions = readTransactions();
-  const rawGoals = readGoals();
+  // Loading state - ensures minimum 100ms skeleton display without artificial delay
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Read data once on mount using useState initializer (avoids useMemo dependency issues)
+  // This pattern prevents reading localStorage inside dependency arrays (lesson from PR #62)
+  const [categories] = useState(() => readCategories());
+  const [transactions] = useState(() => readTransactions());
+  const [rawGoals] = useState(() => readGoals());
 
   // Safely narrow goals type with type guard (filter out invalid entries)
   const goals: GoalData[] = rawGoals.filter(isGoalData);
+
+  // Ensure minimum 100ms skeleton display to prevent jarring flash
+  // Data loads synchronously in useState initializers above, so this is a fixed 100ms delay
+  // This prevents flash for users with fast devices/browsers (<100ms perceived load time)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 100); // Minimum 100ms (UX research: <100ms feels instant, 100-300ms feels responsive)
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Memoize aggregation results to prevent recalculation on every render
   const spendingChartData = useMemo<SpendingChartData[]>(
@@ -150,12 +174,25 @@ export function useDashboardData(): DashboardData {
     [goals],
   );
 
+  // Get gamification data (streak, insights, wins)
+  const [gamificationData] = useState<GamificationData | null>(() => {
+    try {
+      return getGamificationData();
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Failed to load gamification data:', error instanceof Error ? error.message : 'Unknown error');
+      }
+      return null;
+    }
+  });
+
   return {
+    isLoading, // NEW: Expose loading state for skeleton conditional rendering
     spendingChartData,
     incomeExpensesData,
     recentTransactions,
     upcomingBills,
     goalProgress,
-    // Note: Gamification data will be added in Chunk 5
+    gamificationData, // Chunk 5: Added gamification data
   };
 }

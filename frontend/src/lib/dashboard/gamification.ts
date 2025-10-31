@@ -46,15 +46,43 @@ const INCOME_FILTER = (amount: number): boolean => amount < 0;
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24; // 86,400,000 ms = 1 day
 
 /**
- * Gamification Thresholds
+ * Gamification Configuration
  *
- * These constants define the sensitivity of insights and wins detection.
- * Extracted from magic numbers to improve readability and maintainability.
+ * These thresholds define the sensitivity of insights and wins detection.
+ * Extracted to a configuration object for future customization (Phase 2+).
+ *
+ * Phase 1: Hardcoded defaults based on behavioral research
+ * Phase 2+: Could be made user-configurable via settings
  */
-const INSIGHT_WEEKEND_THRESHOLD_PERCENT = 20; // Show weekend vs weekday insight if >20% difference
-const INSIGHT_MONTHLY_THRESHOLD_PERCENT = 10; // Show month-over-month insight if >10% difference
-const WIN_LARGE_INCOME_THRESHOLD_CENTS = 100000; // $1000 in cents - celebrate large income
-const WIN_RECENT_DAYS = 7; // Look for wins in last 7 days
+export const GAMIFICATION_CONFIG = {
+  /** Show weekend vs weekday insight if difference exceeds this percentage */
+  INSIGHT_WEEKEND_THRESHOLD_PERCENT: 20,
+
+  /** Show month-over-month insight if difference exceeds this percentage */
+  INSIGHT_MONTHLY_THRESHOLD_PERCENT: 10,
+
+  /** Use only last N days for insight calculations (prevents stale data) */
+  INSIGHT_RECENCY_DAYS: 30,
+
+  /** Only show month-over-month insight after this percentage of month elapsed */
+  INSIGHT_MONTH_PROGRESS_THRESHOLD: 50,
+
+  /** Celebrate income transactions above this amount (in cents) */
+  WIN_LARGE_INCOME_THRESHOLD_CENTS: 100000, // $1000
+
+  /** Look for wins in last N days */
+  WIN_RECENT_DAYS: 7,
+} as const;
+
+// Destructure for backward compatibility
+const {
+  INSIGHT_WEEKEND_THRESHOLD_PERCENT,
+  INSIGHT_MONTHLY_THRESHOLD_PERCENT,
+  INSIGHT_RECENCY_DAYS,
+  INSIGHT_MONTH_PROGRESS_THRESHOLD,
+  WIN_LARGE_INCOME_THRESHOLD_CENTS,
+  WIN_RECENT_DAYS,
+} = GAMIFICATION_CONFIG;
 
 /**
  * Zod Validation Schemas
@@ -277,20 +305,34 @@ export function generateInsights(
 ): PersonalizedInsight[] {
   const insights: PersonalizedInsight[] = [];
 
-  // Insight 1: Weekend vs weekday spending
+  // Insight 1: Weekend vs weekday spending (last 30 days only)
+  // Fix 1 (Chunk 6): Filter to last 30 days to show recent patterns (not 6-month-old data)
+  const thirtyDaysAgo = Date.now() - INSIGHT_RECENCY_DAYS * MILLISECONDS_PER_DAY;
+
   const weekendSpending = transactions
     .filter((t) => {
       const day = new Date(t.date).getDay();
-      return (day === 0 || day === 6) && EXPENSE_FILTER(t.amount); // Sunday or Saturday, expenses only
+      const transactionTime = new Date(t.date).getTime();
+      return (
+        (day === 0 || day === 6) &&
+        EXPENSE_FILTER(t.amount) &&
+        transactionTime > thirtyDaysAgo // Only last 30 days
+      );
     })
-    .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
+    .reduce((sum, t) => sum + t.amount, 0);
 
   const weekdaySpending = transactions
     .filter((t) => {
       const day = new Date(t.date).getDay();
-      return day >= 1 && day <= 5 && EXPENSE_FILTER(t.amount); // Monday-Friday, expenses only
+      const transactionTime = new Date(t.date).getTime();
+      return (
+        day >= 1 &&
+        day <= 5 &&
+        EXPENSE_FILTER(t.amount) &&
+        transactionTime > thirtyDaysAgo // Only last 30 days
+      );
     })
-    .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
+    .reduce((sum, t) => sum + t.amount, 0);
 
   if (weekendSpending > 0 && weekdaySpending > 0) {
     const diff = ((weekendSpending - weekdaySpending) / weekdaySpending) * 100;
@@ -306,30 +348,42 @@ export function generateInsights(
   }
 
   // Insight 2: Month-over-month spending change
-  const currentMonth = new Date().toISOString().slice(0, 7); // "2025-10"
-  const lastMonth = new Date(new Date().setMonth(new Date().getMonth() - 1))
+  // Fix 3 (Chunk 6): Only show after 50% of month to avoid invalid comparisons
+  const now = new Date();
+  const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    .toISOString()
+    .slice(0, 7); // "2025-10"
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     .toISOString()
     .slice(0, 7); // "2025-09"
 
-  const currentMonthSpending = transactions
-    .filter((t) => t.date.startsWith(currentMonth) && EXPENSE_FILTER(t.amount))
-    .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
+  // Check if we're past halfway through current month
+  const dayOfMonth = now.getDate();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const monthProgressPercent = (dayOfMonth / daysInMonth) * 100;
 
-  const lastMonthSpending = transactions
-    .filter((t) => t.date.startsWith(lastMonth) && EXPENSE_FILTER(t.amount))
-    .reduce((sum, t) => sum + t.amount, 0); // amount is already positive for expenses
+  // Only show insight if >50% through month (statistically valid comparison)
+  if (monthProgressPercent > INSIGHT_MONTH_PROGRESS_THRESHOLD) {
+    const currentMonthSpending = transactions
+      .filter((t) => t.date.startsWith(currentMonth) && EXPENSE_FILTER(t.amount))
+      .reduce((sum, t) => sum + t.amount, 0);
 
-  if (lastMonthSpending > 0) {
-    // Avoid divide by zero
-    const diff = ((currentMonthSpending - lastMonthSpending) / lastMonthSpending) * 100;
-    if (Math.abs(diff) > INSIGHT_MONTHLY_THRESHOLD_PERCENT) {
-      insights.push({
-        id: uuid(),
-        type: diff > 0 ? 'negative' : 'positive',
-        category: 'General',
-        percentageChange: diff,
-        message: `You spent ${Math.abs(diff).toFixed(0)}% ${diff > 0 ? 'more' : 'less'} this month ${diff > 0 ? '📈' : '📉'}`,
-      });
+    const lastMonthSpending = transactions
+      .filter((t) => t.date.startsWith(lastMonth) && EXPENSE_FILTER(t.amount))
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    if (lastMonthSpending > 0) {
+      // Avoid divide by zero
+      const diff = ((currentMonthSpending - lastMonthSpending) / lastMonthSpending) * 100;
+      if (Math.abs(diff) > INSIGHT_MONTHLY_THRESHOLD_PERCENT) {
+        insights.push({
+          id: uuid(),
+          type: diff > 0 ? 'negative' : 'positive',
+          category: 'General',
+          percentageChange: diff,
+          message: `You spent ${Math.abs(diff).toFixed(0)}% ${diff > 0 ? 'more' : 'less'} this month ${diff > 0 ? '📈' : '📉'}`,
+        });
+      }
     }
   }
 
@@ -359,11 +413,17 @@ export function detectRecentWins(
 ): RecentWin[] {
   const wins: RecentWin[] = [];
 
-  // Win 1: Under budget for any category
+  // Win 1: Under budget for any category (prorated by day of month)
+  // Fix 2 (Chunk 6): Prorate budget by day of month for accurate pace tracking
   const currentMonth = new Date().toISOString().slice(0, 7);
 
   // Read categories to get category names
   const categories = readCategories();
+
+  // Calculate prorated budget based on day of month
+  const now = new Date();
+  const dayOfMonth = now.getDate(); // 1-31
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); // 28-31
 
   budgets.forEach((budget) => {
     const spent = transactions
@@ -377,12 +437,16 @@ export function detectRecentWins(
 
     // Convert cents to dollars (Phase 1 pattern from Chunk 4)
     const spentDollars = spent / 100;
-    const budgetDollars = budget.amount / 100; // ✅ FIX: Use budget.amount instead of monthlyLimit
+    const budgetDollars = budget.amount / 100;
 
-    if (spentDollars < budgetDollars) {
-      const remainingDollars = budgetDollars - spentDollars;
+    // Calculate prorated budget for current day of month
+    // Example: Oct 5 of 31-day month → 5/31 = 16.1% → $500 budget → $80.65 prorated
+    const proratedBudget = (budgetDollars * dayOfMonth) / daysInMonth;
 
-      // ✅ FIX: Get category name from categories array
+    // Only show win if under PRORATED budget (not full month budget)
+    if (spentDollars < proratedBudget) {
+      const remainingDollars = proratedBudget - spentDollars;
+
       const category = categories.find((c) => c.id === budget.categoryId);
       const categoryName = category?.name || 'Unknown';
 
