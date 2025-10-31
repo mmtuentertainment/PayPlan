@@ -2,10 +2,11 @@
 
 **Date**: 2025-10-30
 **Status**: Accepted
-**Context**: Feature 062 (Dashboard with Charts), Feature 063 (Archive BNPL Code)
+**Context**: Feature 062 (Dashboard with Charts)
 **Severity**: HIGH
 **Related PR**: #55
 **Related Commits**: b3f23e4, cfeb0ae
+**Note**: BNPL code references removed (code deleted 2025-10-31), ADR remains for dashboard date arithmetic pattern
 
 ---
 
@@ -20,16 +21,12 @@ date.setMonth(date.getMonth() - 1); // Expects: Dec 31, 2024
 // Actual result: Mar 2 or Mar 3, 2025 (Jan 31 → Feb 31 → Mar 2/3)
 ```
 
-This bug affected PayPlan in TWO critical locations:
+This bug affected PayPlan in the **Dashboard income/expenses chart** (`aggregation.ts`):
+- Users on days 28-31 saw WRONG months in chart (~10% of users affected)
+- Example: Jan 31 user sees chart with Feb, Mar, Apr, May, Jun, Jul (should be Aug, Sep, Oct, Nov, Dec, Jan)
+- Impact: Misleading financial data, incorrect trend visualization
 
-1. **Dashboard income/expenses chart** (`aggregation.ts`):
-   - Users on days 28-31 saw WRONG months in chart (~10% of users affected)
-   - Example: Jan 31 user sees chart with Feb, Mar, Apr, May, Jun, Jul (should be Aug, Sep, Oct, Nov, Dec, Jan)
-
-2. **BNPL payment schedule generator** (`affirm.ts`):
-   - Monthly payment dates calculated incorrectly
-   - Example: Jan 31 first payment → Mar 2, Apr 2, May 2... (should be Feb 28, Mar 31, Apr 30...)
-   - Impact: Users miss payment deadlines, incur late fees
+**Note**: This ADR originally documented two affected locations. The second location (BNPL payment schedule generator) was deleted when BNPL features were removed (2025-10-31).
 
 ---
 
@@ -48,8 +45,8 @@ targetDate.setMonth(targetDate.getMonth() - i);
 
 **Rationale**: Charts aggregate by month, not day. Day component is discarded anyway.
 
-### Strategy 2: Day-Preserving Calculations (Payment Schedules)
-When exact day-of-month matters:
+### Strategy 2: Day-Preserving Calculations (Recurring Bills)
+When exact day-of-month matters (for recurring bills):
 ```typescript
 const originalDay = date.getDate(); // Save day (e.g., 15, 31)
 date.setDate(1);                    // Set to 1st (safe arithmetic)
@@ -62,7 +59,7 @@ const lastDayOfMonth = new Date(   // Find last valid day
 date.setDate(Math.min(originalDay, lastDayOfMonth)); // Restore day with clamping
 ```
 
-**Rationale**: Payment dates must preserve user's payment day. Clamping ensures Feb 31 → Feb 28/29 (not Mar 2/3).
+**Rationale**: Bill due dates must preserve user's original day. Clamping ensures Feb 31 → Feb 28/29 (not Mar 2/3).
 
 ---
 
@@ -94,8 +91,9 @@ Different use cases have different requirements:
 | Use Case | Requirement | Strategy | Reason |
 |----------|-------------|----------|--------|
 | Dashboard charts | YYYY-MM only | Set to 1st | Day is discarded anyway |
-| Payment schedules | Preserve day | Save/restore day | Payment day matters to user |
 | Recurring bills | Preserve day | Save/restore day | Bill due dates must match original |
+
+**Note**: Payment schedules row removed (BNPL code deleted 2025-10-31)
 
 ---
 
@@ -124,46 +122,13 @@ for (let i = 5; i >= 0; i--) {
 - Fixed for ~10% of users (days 28-31)
 - Chart now shows correct 6-month window for all users
 
-### Location 2: BNPL Payment Schedules (affirm.ts)
+### Location 2: Recurring Bills (Future Implementation)
 
-**File**: `frontend/src/archive/bnpl/lib/parsers/affirm.ts`
-**Lines**: 271-300
-**Function**: `parseAffirmPaymentSchedule()` (fallback path)
+**Status**: NOT YET IMPLEMENTED (reserved for Feature MMT-65)
+**Future File**: `frontend/src/lib/bills/recurring.ts`
+**Pattern**: Same day-preserving strategy as above, but for bill due dates
 
-```typescript
-// Generate monthly installments
-const installments: BNPLInstallment[] = [];
-const baseDate = new Date(firstPaymentDate);
-const originalDay = baseDate.getDate(); // Preserve the original payment day
-
-for (let i = 0; i < monthCount; i++) {
-  const dueDate = new Date(baseDate);
-  // Fix for month boundary bug: Safely add months while preserving day-of-month
-  // Set to 1st, add months, then restore original day (clamped to month's max day)
-  dueDate.setDate(1);
-  dueDate.setMonth(dueDate.getMonth() + i);
-
-  // Restore original day, clamping to last day of target month if needed
-  // e.g., Jan 31 + 1 month = Feb 28/29 (not Mar 2/3)
-  const lastDayOfMonth = new Date(
-    dueDate.getFullYear(),
-    dueDate.getMonth() + 1,
-    0,
-  ).getDate();
-  dueDate.setDate(Math.min(originalDay, lastDayOfMonth));
-
-  installments.push({
-    installmentNumber: i + 1,
-    amount: monthlyAmount,
-    dueDate: dueDate.toISOString().split("T")[0],
-  });
-}
-```
-
-**Impact**:
-- Fixed payment date accuracy for monthly BNPL plans
-- Users with 31st payment date now get last-of-month (28/29/30) instead of overflow
-- Prevents missed payments and late fees
+This location was originally occupied by BNPL payment schedule code (deleted 2025-10-31). The date arithmetic pattern documented here will be reused when implementing recurring bill detection in Phase 2.
 
 ---
 
@@ -171,11 +136,10 @@ for (let i = 0; i < monthCount; i++) {
 
 ### Positive
 - ✅ **Dashboard accuracy**: Charts show correct months for all users (not just days 1-27)
-- ✅ **Payment accuracy**: BNPL schedules preserve user's payment day
 - ✅ **User trust**: No more "Why is my chart showing February twice?" confusion
-- ✅ **Financial safety**: Users won't miss payments due to wrong dates
 - ✅ **Zero dependencies**: No external libraries required
 - ✅ **Documented**: Comments explain the fix for future developers
+- ✅ **Reusable pattern**: Can be applied to recurring bill detection (Phase 2)
 
 ### Negative
 - ⚠️ **Manual implementation**: Must remember to apply this pattern everywhere we do month arithmetic
@@ -219,7 +183,7 @@ const date = new Date('2025-01-31');
 ### Manual Testing (Phase 1)
 Test on days 28-31 of any month:
 1. **Dashboard charts**: Verify last 6 months labels are correct
-2. **BNPL parser**: Verify monthly payment dates preserve original day
+2. **Recurring bills** (Phase 2): Verify monthly bill dates preserve original day
 3. **Cross-month boundaries**: Test Jan 31, Mar 31, May 31, Aug 31, Oct 31, Dec 31
 
 ### Automated Testing (Phase 2+)
@@ -277,7 +241,7 @@ describe('Date arithmetic - month boundary handling', () => {
 
 **Negligible**:
 - Dashboard: 6 iterations (last 6 months)
-- BNPL parser: Typically 3-12 iterations (installment count)
+- Recurring bills (Phase 2): Typically 3-12 iterations per bill
 - Each iteration: ~5 extra operations (setDate, getDate, Math.min)
 - Total overhead: <1ms per function call
 
