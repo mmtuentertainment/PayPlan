@@ -60,7 +60,9 @@ export const Dashboard: React.FC = () => {
     updateStreakData();
   }, []);
 
-  // Generate gamification data (memoized for performance)
+  // Generate gamification data (reads localStorage on each render, calculates when data changes)
+  // NOTE: This intentionally reads inside the component body (not in useMemo) so React can
+  // detect changes. The useMemo then uses a stable JSON key for comparison.
   const gamificationData = useMemo(() => {
     const transactions = readTransactions();
     const budgets = readBudgets();
@@ -80,7 +82,11 @@ export const Dashboard: React.FC = () => {
     saveGamificationData(updatedData);
 
     return updatedData;
-  }, [recentTransactions, upcomingBills]); // Re-calculate when transaction/bill data changes
+  }, [
+    // Use JSON keys for stable comparison (Phase 1: acceptable for small datasets <1000 items)
+    JSON.stringify(readTransactions().map(t => t.id)),
+    JSON.stringify(readBudgets().map(b => b.id)),
+  ]);
 
   const handleAddTransaction = () => {
     navigate(ROUTES.TRANSACTIONS);
