@@ -16,7 +16,7 @@
 
 ### Bot Feedback Patterns (CRITICAL - Prevent These)
 
-**Pattern 1: Import Path Violations (CRITICAL)**
+#### Pattern 1: Import Path Violations (CRITICAL)
 ```typescript
 // ❌ BAD: Using alias imports for types
 import { GamificationData } from '@/types/gamification';
@@ -26,7 +26,7 @@ import type { GamificationData } from '../../types/gamification';
 ```
 **Why**: CodeRabbit flags alias imports for types as violations. Use relative paths consistently.
 
-**Pattern 2: useMemo Dependency Arrays (HIGH)**
+#### Pattern 2: useMemo Dependency Arrays (HIGH)
 ```typescript
 // ⚠️ ISSUE: Reading from localStorage inside dependency array
 const data = useMemo(() => {
@@ -45,7 +45,7 @@ const data = useMemo(() => aggregate(transactions), [transactions]);
 ```
 **Why**: Phase 1 allows `JSON.stringify()` for dependency arrays. Phase 2 will use localStorage event listeners.
 
-**Pattern 3: ARIA Attributes (HIGH - Accessibility)**
+#### Pattern 3: ARIA Attributes (HIGH - Accessibility)
 ```typescript
 // ❌ BAD: Missing ARIA labels on decorative elements
 <span className="text-6xl">🚀</span>
@@ -65,7 +65,7 @@ const data = useMemo(() => aggregate(transactions), [transactions]);
 ```
 **Why**: WCAG 2.1 AA requires ALL decorative elements have ARIA labels. Dynamic content needs `aria-atomic="true"`.
 
-**Pattern 4: Error Handling (MEDIUM - PII Safety)**
+#### Pattern 4: Error Handling (MEDIUM - PII Safety)
 ```typescript
 // ❌ BAD: Logging raw errors (PII leaks)
 catch (error) {
@@ -82,7 +82,7 @@ catch (error) {
 ```
 **Why**: Error messages may contain PII (emails, names). Sanitize before logging.
 
-**Pattern 5: Transaction Sign Convention (HIGH - Logic Bug)**
+#### Pattern 5: Transaction Sign Convention (HIGH - Logic Bug)
 ```typescript
 // ⚠️ ASSUMPTION: Negative = expense, Positive = income
 const expenses = transactions.filter(t => t.amount < 0); // ❌ WRONG
@@ -560,7 +560,7 @@ export const Dashboard: React.FC = () => {
 
 #### Manual Testing: Loading Skeletons
 
-**Test Suite: Loading States**
+#### Test Suite: Loading States
 
 1. **Fast Connection Test** (default):
    - Open `http://localhost:5173/`
@@ -937,14 +937,14 @@ describe('detectRecentWins', () => {
 
 #### Manual Testing Checklist
 
-**Test 1: Weekend/Weekday Insight (30-day filter)**
+#### Test 1: Weekend/Weekday Insight (30-day filter)
 - [ ] Add transactions from 6 months ago (Apr 2025)
 - [ ] Add transactions from last 2 weeks (Oct 15-31)
 - [ ] Open dashboard
 - [ ] ✅ Verify weekend insight ONLY uses recent data
 - [ ] ✅ Verify old transactions ignored
 
-**Test 2: Month-over-Month Insight (50% threshold)**
+#### Test 2: Month-over-Month Insight (50% threshold)
 - [ ] Mock date to Oct 10 (32% through month)
 - [ ] Open dashboard
 - [ ] ✅ Verify month-over-month insight DOES NOT show
@@ -952,7 +952,7 @@ describe('detectRecentWins', () => {
 - [ ] Refresh dashboard
 - [ ] ✅ Verify month-over-month insight DOES show
 
-**Test 3: Prorated Budget Wins**
+#### Test 3: Prorated Budget Wins
 - [ ] Create $500 grocery budget for October
 - [ ] Mock date to Oct 5
 - [ ] Add $50 grocery transaction on Oct 1
@@ -964,7 +964,7 @@ describe('detectRecentWins', () => {
 - [ ] Refresh dashboard
 - [ ] ✅ Verify win DOES NOT show (over prorated pace)
 
-**Test 4: Edge Cases**
+#### Test 4: Edge Cases
 - [ ] Test on last day of month (100% progress)
 - [ ] Test with no transactions
 - [ ] Test with only income (no expenses)
@@ -1602,7 +1602,7 @@ Verify ALL constitutional requirements before creating PR:
 
 ### Final Manual Testing
 
-**Test Suite: Chunk 6 - Polish & Integration**
+#### Test Suite: Chunk 6 - Polish & Integration
 
 **1. Loading Skeleton Test**:
 - [ ] Clear localStorage: `localStorage.clear()`
