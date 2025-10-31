@@ -2,10 +2,11 @@
 
 **Date**: 2025-10-30
 **Status**: Accepted
-**Context**: Feature 062 (Dashboard with Charts), Feature 063 (Archive BNPL Code)
+**Context**: Feature 062 (Dashboard with Charts)
 **Severity**: MAJOR
 **Related PR**: #55
 **Related Commits**: d126f1b
+**Note**: Feature 063 reference removed (BNPL code fully deleted 2025-10-31)
 
 ---
 

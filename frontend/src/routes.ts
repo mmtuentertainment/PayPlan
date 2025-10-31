@@ -4,8 +4,8 @@
  * Features:
  * - 016-build-a-payment-archive (Archives routes)
  * - 017-navigation-system (Settings route)
- * - 020-bnpl-email-parser (BNPL parser route)
- * - 061-spending-categories-budgets (Categories route)
+ * - 061-spending-categories-budgets (Categories, Budgets, Transactions routes)
+ * - 062-dashboard (Dashboard route)
  *
  * Centralized route constants to prevent string duplication
  * and enable easier refactoring.
@@ -33,9 +33,6 @@ export const ROUTES = {
 
   /** User preferences settings page (Feature 017) */
   SETTINGS: '/settings/preferences',
-
-  /** BNPL Email Parser page (Feature 020) */
-  BNPL_PARSER: '/bnpl',
 
   /** Spending Categories page (Feature 061) */
   CATEGORIES: '/categories',
