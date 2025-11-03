@@ -5,6 +5,37 @@ All notable changes to PayPlan will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed (2025-11-03)
+- **Complete codebase reorganization** to feature-based architecture (PR #66)
+- **Constitution updated** to v3.1 (phased TDD, 8-12 features MVP, evidence-based)
+- **CLAUDE.md updated** to v3.1 (TDD requirements, new structure, barrel exports)
+- **Templates updated** for v3.1 (CodeRabbit, plan-template, tasks-template)
+- **Root directory** cleaned (50+ items → 18 items, 64% reduction)
+
+### Added
+- **Feature-based architecture** (`frontend/src/features/` + `shared/`)
+- **5 barrel exports** (index.ts) for clean imports
+- **CONTRIBUTING.md** - Structure guide for contributors
+- **ADR-004** - Feature-based architecture decision record
+- **codebase-architect** tool (9 scripts, 6 language guides, safety system)
+- **Documentation organization** (docs/research, docs/testing, docs/bugs, docs/archive)
+- **Constitution v3.1** - Phased TDD (60%→80%), 8-12 features MVP
+- **TOCs added** to CLAUDE.md and CONTRIBUTING.md
+
+### Removed
+- Flat structure (`components/`, `lib/`, `hooks/`, `types/`)
+- 36 loose files from root (moved to organized docs/)
+- Orphaned type files (moved to features)
+
+### Fixed
+- All import paths updated to use feature-based structure
+- Payment-status moved to archive feature (proper encapsulation)
+- WCAG 2.1 → 2.2 in documentation
+
+---
+
 ## [v0.1.6-a.2] - 2025-10-09
 
 ### Added
