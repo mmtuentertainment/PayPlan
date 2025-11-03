@@ -135,7 +135,7 @@ PayPlan/
 
 **If you need to undo anything:**
 ```bash
-cd /home/matt/PROJECTS/PayPlan
+cd "$(git rev-parse --show-toplevel)"
 python3 tools/codebase-architect/scripts/safety_manager.py restore \
   .codebase-safety/backups/backup_20251102_041129.tar.gz
 ```
@@ -186,7 +186,7 @@ git checkout main           # Abandon all changes (if needed)
 
 ---
 
-**Your codebase went from a fucking mess to professionally organized in ~30 minutes!** 🎉
+**Your codebase went from disorganized to professionally organized in ~30 minutes!** 🎉
 
 **Build status:** ✅ Working perfectly  
 **Recovery:** ✅ Full backup available  
