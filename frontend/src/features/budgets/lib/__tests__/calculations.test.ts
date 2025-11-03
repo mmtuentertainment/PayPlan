@@ -226,10 +226,11 @@ describe('calculateBudgetProgress (property-based)', () => {
   );
 
   // Invariant: Percentage spent can never be negative, regardless of budget or spending amounts
+  // High confidence: 500 iterations for critical financial invariant
   test.prop([
     fc.integer({ min: 1, max: 1000000 }),
     fc.integer({ min: 0, max: 2000000 }),
-  ])(
+  ], { numRuns: 500 })(
     'progress should always be non-negative',
     (budgetAmount, spentAmount) => {
       const budget = createBudget({ amount: budgetAmount, period: '2025-11', categoryId: 'cat-1' });
@@ -242,10 +243,11 @@ describe('calculateBudgetProgress (property-based)', () => {
   );
 
   // Invariant: Mathematical relationship - remaining = budget - spent must hold for any amounts
+  // High confidence: 500 iterations for core arithmetic invariant
   test.prop([
     fc.integer({ min: 1, max: 1000000 }),
     fc.integer({ min: 0, max: 1000000 }),
-  ])(
+  ], { numRuns: 500 })(
     'remaining should equal budget minus spent',
     (budgetAmount, spentAmount) => {
       const budget = createBudget({ amount: budgetAmount, period: '2025-11', categoryId: 'cat-1' });
@@ -259,10 +261,11 @@ describe('calculateBudgetProgress (property-based)', () => {
 
   // Invariant: Status classification must be consistent with percentage thresholds
   // (under: <80%, warning: 80-99%, over: ≥100%)
+  // High confidence: 500 iterations for UI state correctness
   test.prop([
     fc.integer({ min: 1, max: 1000000 }),
     fc.integer({ min: 0, max: 1000000 }),
-  ])(
+  ], { numRuns: 500 })(
     'status should be consistent with percentage',
     (budgetAmount, spentAmount) => {
       const budget = createBudget({ amount: budgetAmount, period: '2025-11', categoryId: 'cat-1' });
@@ -282,7 +285,8 @@ describe('calculateBudgetProgress (property-based)', () => {
   );
 
   // Invariant: Budget input data must be preserved exactly in calculation result
-  test.prop([fc.integer({ min: 1, max: 1000000 })])(
+  // High confidence: 500 iterations for data integrity
+  test.prop([fc.integer({ min: 1, max: 1000000 })], { numRuns: 500 })(
     'budget amounts should be preserved in result',
     (amount) => {
       const budget = createBudget({ amount, period: '2025-11', categoryId: 'cat-1' });

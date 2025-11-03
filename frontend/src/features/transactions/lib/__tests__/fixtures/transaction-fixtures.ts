@@ -1,6 +1,14 @@
 // Transaction test fixtures
 // Feature #063: Business Logic Test Coverage - US2
 // Research Decision 4: Factory + Builder pattern for complex entities
+//
+// Fixture Naming Convention:
+// - Base factory: createTransaction() - Minimal valid entity with defaults
+// - Builder class: TransactionBuilder - Fluent API for complex scenarios requiring multiple modifications
+// - Trait variations: createExpense(), createIncome(), createUnassignedTransaction() - Common use cases
+// - Modifier functions: createTransactionForDate(), createTransactionForCategory() - Single property variations
+// - Edge cases: createZeroTransaction(), createNegativeTransaction() - Validation testing
+// - Bulk helpers: createTransactions(), createTransactionsForRange() - Performance/stress testing
 
 import { v4 as uuid } from 'uuid';
 import type { Transaction } from '../../../types/transaction';

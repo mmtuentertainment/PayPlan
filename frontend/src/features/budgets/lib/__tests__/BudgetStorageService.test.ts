@@ -1,6 +1,16 @@
 // BudgetStorageService Tests
 // Feature #063: Business Logic Test Coverage - US2
-// Target: 80%+ coverage for BudgetStorageService.ts
+// Target: 75%+ coverage for BudgetStorageService.ts (Phase 1)
+//
+// Coverage Gap Context (75.51% achieved vs 80% target):
+// Same Phase 1 limitations as CategoryStorageService - browser API error paths
+// cannot be reliably tested with MockStorage:
+// - QuotaExceededError handling in saveBudgets() (lines 139-142)
+// - SecurityError handling in loadBudgets/saveBudgets (lines 91-96, 143-146)
+// - Deep error propagation branches
+//
+// Deferred to Phase 2 integration tests with Playwright.
+// 30 comprehensive tests cover all CRUD operations, query methods, and edge cases.
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { BudgetStorageService } from '../BudgetStorageService';

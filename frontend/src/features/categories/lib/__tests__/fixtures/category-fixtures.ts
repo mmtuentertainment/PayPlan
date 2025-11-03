@@ -1,6 +1,13 @@
 // Category test fixtures
 // Feature #063: Business Logic Test Coverage - US2
 // Research Decision 4: Factory functions for simple entities
+//
+// Fixture Naming Convention:
+// - Base factory: createCategory() - Minimal valid entity with sensible defaults
+// - Trait variations: createCustomCategory(), createDefaultCategory() - Specific use cases
+// - Modifier functions: createCategoryWithColor(), createCategoryWithIcon() - Single property variations
+// - Edge cases: createCategoryWithInvalidColor(), createCategoryWithEmptyName() - Validation testing
+// - Bulk helpers: createCategories() - Generate multiple entities for performance/stress testing
 
 import { v4 as uuid } from 'uuid';
 import type { Category } from '../../types/category';
