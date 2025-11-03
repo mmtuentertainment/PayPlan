@@ -125,6 +125,7 @@ Each ADR has a status:
 | [001](./001-interface-first-type-strategy.md) | Interface-First Type Strategy | Accepted | 2025-10-30 | MAJOR |
 | [002](./002-canonical-zod-schema-locations.md) | Canonical Zod Schema Locations | Accepted | 2025-10-30 | MAJOR |
 | [003](./003-date-arithmetic-setmonth-boundary-handling.md) | Date Arithmetic - setMonth() Boundary Handling | Accepted | 2025-10-30 | HIGH |
+| [004](./004-feature-based-architecture-adoption.md) | Feature-Based Architecture Adoption | Accepted | 2025-11-02 | **CRITICAL** |
 
 ## How to Use ADRs
 
@@ -171,5 +172,5 @@ Each ADR has a status:
 
 ---
 
-**Last Updated**: 2025-10-30
-**Next ADR Number**: 004
+**Last Updated**: 2025-11-03
+**Next ADR Number**: 005
