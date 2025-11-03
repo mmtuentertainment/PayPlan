@@ -79,12 +79,15 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (REQUIRED for business logic - v3.1) ⚠️
 
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+> **NOTE (Phase 1 v3.1)**: Business logic tests REQUIRED (80% coverage target, 90%+ financial)
+> **UI tests**: Optional (manual testing acceptable)
+> **Phased approach**: Weeks 1-2 test-after, Weeks 3-6 hybrid, Week 7+ strict TDD
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T010 [P] [US1] Business logic tests for lib/**/*.ts (80% coverage)
+- [ ] T011 [P] [US1] Financial calculation tests (90%+ coverage if applicable)
+- [ ] T012 [P] [US1] Schema validation tests (Zod edge cases)
 
 ### Implementation for User Story 1
 

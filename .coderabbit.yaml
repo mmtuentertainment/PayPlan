@@ -248,15 +248,24 @@ reviews:
         
         ## ⚠️ REQUEST CHANGES IF VIOLATED (PHASE 1 REQUIREMENTS)
         
-        ### 4. Ship Fast, Manual Testing Only
-        - ❌ Adding `*.test.ts` or `*.spec.ts` files (defer to Phase 2)
-        - ❌ Adding test coverage requirements (defer to Phase 3)
-        - ❌ Adding performance optimization without user complaints (defer to Phase 4)
-        - ❌ Infrastructure PRs without user features
-        
-        **Guidance**: "Tests are not required in Phase 1 (0-100 users). Focus on shipping
-        features fast. Defer automated tests to Phase 2 (100-1,000 users). Manual testing
-        is sufficient for now."
+        ### 4. Quality-First with Phased TDD (UPDATED v3.1)
+        - ✅ TDD for business logic: `features/*/lib/**/*.ts` must have tests (80% coverage target)
+        - ✅ Financial calculations: 90%+ coverage REQUIRED (money is critical!)
+        - ✅ Overall coverage: 40-60% minimum (phased ramp: 60%→70%→80%)
+        - ❌ TDD for UI components (manual testing acceptable in Phase 1)
+        - ❌ Integration tests (defer to Phase 2)
+        - ❌ E2E tests (defer to Phase 2)
+        - ❌ Performance optimization without user complaints (defer to Phase 4)
+
+        **Phased TDD Approach (v3.1)**:
+        - Weeks 1-2: Test-after (write code, then tests)
+        - Weeks 3-6: Hybrid (some TDD, some test-after)
+        - Week 7+: Strict TDD (write tests first)
+
+        **Guidance**: "Phase 1 v3.1 requires TDD for business logic. Write tests for all
+        lib/**/*.ts files targeting 80% coverage. Financial calculations need 90%+ coverage.
+        UI component tests are optional (manual testing acceptable). This ensures quality
+        while shipping features sustainably."
         
         ### 5. User Features > Infrastructure
         - ❌ CI/CD improvements without user features
