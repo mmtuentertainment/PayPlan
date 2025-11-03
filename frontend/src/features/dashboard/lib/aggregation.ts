@@ -20,7 +20,7 @@ import type { GoalProgress } from "@/shared/types/goal";
 /**
  * Time window constants for bill detection and forecasting
  */
-const LOOKBACK_WINDOW_DAYS = 30; // Look back 30 days to detect recurring patterns
+const LOOKBACK_WINDOW_DAYS = 90; // Look back 90 days to detect recurring patterns (monthly bills need 3 months)
 const FORECAST_WINDOW_DAYS = 7; // Forecast bills due within next 7 days
 const DEFAULT_RECENT_TRANSACTIONS_LIMIT = 5; // Default number of recent transactions to show
 
@@ -245,6 +245,10 @@ export function getRecentTransactions(
  * @param categories - All categories from localStorage
  * @returns Array of upcoming bills due within next FORECAST_WINDOW_DAYS (7 days) or overdue
  *
+ * @remarks
+ * Uses 90-day lookback window to reliably detect monthly recurring bills.
+ * A 30-day window would only capture 1 occurrence of a monthly bill, failing the 2+ requirement.
+ *
  * @performance Completes in <500ms for 1,000 transactions
  * @privacy Read-only, no data written to storage
  *
@@ -257,7 +261,7 @@ export function getRecentTransactions(
  *
  * @algorithm
  * 1. Group transactions by description + amount (expenses only)
- * 2. Find patterns with 2+ occurrences in last LOOKBACK_WINDOW_DAYS (30 days)
+ * 2. Find patterns with 2+ occurrences in last LOOKBACK_WINDOW_DAYS (90 days)
  * 3. Calculate average interval between occurrences
  * 4. Predict next occurrence based on last transaction + avg interval
  * 5. Filter to next FORECAST_WINDOW_DAYS or overdue (no lower bound)
