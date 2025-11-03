@@ -29,6 +29,13 @@ const transactionIdSchema = z
   .regex(/^txn_[a-z0-9]+$/, 'Transaction ID must start with "txn_"');
 
 /**
+ * Category ID schema (format: cat_xxxxxxxx).
+ */
+const categoryIdSchema = z
+  .string()
+  .regex(/^cat_[a-z0-9_]+$/, 'Category ID must start with "cat_"');
+
+/**
  * Schema for a complete Transaction object.
  */
 export const transactionSchema = z.object({
@@ -36,7 +43,7 @@ export const transactionSchema = z.object({
   amount: z.number().int(),
   description: z.string().min(1).max(200),
   date: iso8601DateSchema,
-  categoryId: z.string().optional(),
+  categoryId: categoryIdSchema.optional(),
   createdAt: iso8601DatetimeSchema,
 });
 
@@ -47,7 +54,7 @@ export const createTransactionInputSchema = z.object({
   amount: z.number().int(),
   description: z.string().min(1).max(200),
   date: iso8601DateSchema,
-  categoryId: z.string().optional(),
+  categoryId: categoryIdSchema.optional(),
 });
 
 /**
@@ -57,7 +64,7 @@ export const updateTransactionInputSchema = z.object({
   amount: z.number().int().optional(),
   description: z.string().min(1).max(200).optional(),
   date: iso8601DateSchema.optional(),
-  categoryId: z.union([z.string(), z.null()]).optional(),
+  categoryId: z.union([categoryIdSchema, z.null()]).optional(),
 });
 
 /**

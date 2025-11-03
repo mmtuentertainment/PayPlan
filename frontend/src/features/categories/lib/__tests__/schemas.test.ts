@@ -30,11 +30,6 @@ describe('Category Schemas', () => {
       const category = createCategory();
       const result = categorySchema.safeParse(category);
 
-      if (!result.success) {
-        console.log('Category:', JSON.stringify(category, null, 2));
-        console.log('Errors:', JSON.stringify(result.error.errors, null, 2));
-      }
-
       expectZodSuccess(result);
       expect(result.data).toEqual(category);
     });

@@ -46,6 +46,16 @@ describe('Transaction Schemas', () => {
       expect(result.data?.categoryId).toBeUndefined();
     });
 
+    it('should reject transaction with invalid categoryId format', () => {
+      const invalid = createTestTransaction({ categoryId: 'invalid-category-id' });
+      const result = transactionSchema.safeParse(invalid);
+
+      expectZodError(result, 'categoryId');
+      if (!result.success) {
+        expect(result.error.issues[0].message).toContain('cat_');
+      }
+    });
+
     it('should reject transaction with missing id', () => {
       const invalid = { ...createTestTransaction() };
       delete (invalid as Partial<typeof invalid>).id;
