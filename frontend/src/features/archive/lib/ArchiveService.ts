@@ -30,7 +30,7 @@ import type {
 } from './types';
 import type { PaymentRecord } from '@/shared/types/csvExport';
 import { ArchiveStorage } from './ArchiveStorage';
-import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
+import { PaymentStatusStorage } from '@/features/archive/lib/payment-status/PaymentStatusStorage';
 import { validateArchiveName } from './validation';
 import {
   generateArchiveId,

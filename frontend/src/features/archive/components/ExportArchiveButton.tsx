@@ -13,7 +13,7 @@ import { useState } from 'react';
 import type { Archive } from '@/features/archive/lib/types';
 import { ArchiveService } from '@/features/archive/lib/ArchiveService';
 import { ArchiveStorage } from '@/features/archive/lib/ArchiveStorage';
-import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
+import { PaymentStatusStorage } from '@/features/archive/lib/payment-status/PaymentStatusStorage';
 import { generateArchiveFilename } from '@/features/archive/lib/utils';
 import { downloadCSV } from '@/services/csvExportService';
 import { archiveSchema } from '@/features/archive/lib/validation';

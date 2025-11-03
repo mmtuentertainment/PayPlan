@@ -12,7 +12,7 @@
  * @see SOLUTIONS.md - PaymentArchiveRecord combines status + payment snapshot
  */
 
-import type { PaymentStatus } from '@/lib/payment-status/types';
+import type { PaymentStatus } from '@/features/archive/lib/payment-status/types';
 
 /**
  * T003: PaymentArchiveRecord

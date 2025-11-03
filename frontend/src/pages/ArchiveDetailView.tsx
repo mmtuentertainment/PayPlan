@@ -19,7 +19,7 @@ import type { Archive, ArchiveSummary } from '@/features/archive/lib/types';
 import { archiveSchema } from '@/features/archive/lib/validation';
 import { ArchiveService } from '@/features/archive/lib/ArchiveService';
 import { ArchiveStorage } from '@/features/archive/lib/ArchiveStorage';
-import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
+import { PaymentStatusStorage } from '@/features/archive/lib/payment-status/PaymentStatusStorage';
 import { ArchiveStatistics } from '@/features/archive/components/ArchiveStatistics';
 import { ExportArchiveButton } from '@/features/archive/components/ExportArchiveButton';
 import { DeleteArchiveDialog } from '@/features/archive/components/DeleteArchiveDialog';

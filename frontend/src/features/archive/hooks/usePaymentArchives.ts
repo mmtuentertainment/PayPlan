@@ -16,7 +16,7 @@ import type { Archive, ArchiveIndexEntry, ArchiveError } from '@/features/archiv
 import type { PaymentRecord } from '@/shared/types/csvExport';
 import { ArchiveService } from '@/features/archive/lib/ArchiveService';
 import { ArchiveStorage } from '@/features/archive/lib/ArchiveStorage';
-import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
+import { PaymentStatusStorage } from '@/features/archive/lib/payment-status/PaymentStatusStorage';
 
 /**
  * Hook return type with archive operations and state
