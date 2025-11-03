@@ -17,7 +17,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { PaymentContextProvider, usePaymentContext } from '../PaymentContext';
-import type { PaymentRecord } from '@/types/csvExport';
+import type { PaymentRecord } from '@/shared/types/csvExport';
 import { useState } from 'react';
 
 describe('PaymentContext Validation', () => {

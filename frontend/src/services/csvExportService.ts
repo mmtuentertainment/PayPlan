@@ -1,6 +1,6 @@
 import Papa from 'papaparse';
-import type { PaymentRecord, CSVRow, ExportMetadata, CSVExportData } from '@/types/csvExport';
-import { csvRowSchema, exportMetadataSchema } from '@/types/csvExport';
+import type { PaymentRecord, CSVRow, ExportMetadata, CSVExportData } from '@/shared/types/csvExport';
+import { csvRowSchema, exportMetadataSchema } from '@/shared/types/csvExport';
 
 /**
  * CSV Export Service

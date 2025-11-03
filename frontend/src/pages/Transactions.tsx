@@ -12,7 +12,7 @@
 import { useState } from 'react';
 import { type Transaction, type CreateTransactionInput, type UpdateTransactionInput } from '@/features/transactions/types/transaction';
 import { useCategories } from '@/features/categories/hooks/useCategories';
-import { useTransactions } from '@/hooks/useTransactions';
+import { useTransactions } from '@/shared/hooks/useTransactions';
 import { TransactionCard } from '@/features/transactions/components/TransactionCard';
 import { TransactionForm } from '@/features/transactions/components/TransactionForm';
 import {

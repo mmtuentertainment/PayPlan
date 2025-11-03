@@ -12,7 +12,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CreateArchiveDialog } from '../CreateArchiveDialog';
-import type { PaymentRecord } from '@/types/csvExport';
+import type { PaymentRecord } from '@/shared/types/csvExport';
 
 describe('CreateArchiveDialog', () => {
   const mockPayments: PaymentRecord[] = [

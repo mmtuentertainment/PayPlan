@@ -28,7 +28,7 @@ import type {
   DateRange,
   ArchiveSummary,
 } from './types';
-import type { PaymentRecord } from '@/types/csvExport';
+import type { PaymentRecord } from '@/shared/types/csvExport';
 import { ArchiveStorage } from './ArchiveStorage';
 import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
 import { validateArchiveName } from './validation';

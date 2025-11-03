@@ -9,7 +9,7 @@
 
 import { vi } from 'vitest';
 import type { Archive, ArchiveIndexEntry, ArchiveSummary } from '../types';
-import type { PaymentRecord } from '@/types/csvExport';
+import type { PaymentRecord } from '@/shared/types/csvExport';
 
 /**
  * Create mock usePaymentArchives hook return value

@@ -10,7 +10,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import type { PaymentRecord } from '@/types/csvExport';
+import type { PaymentRecord } from '@/shared/types/csvExport';
 import { usePaymentArchives } from '@/features/archive/hooks/usePaymentArchives';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';

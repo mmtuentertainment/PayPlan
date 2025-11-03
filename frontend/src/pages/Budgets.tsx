@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { type Budget, type CreateBudgetInput } from '@/features/budgets/types/budget';
 import { useCategories } from '@/features/categories/hooks/useCategories';
 import { useBudgets } from '@/features/budgets/hooks/useBudgets';
-import { useTransactions } from '@/hooks/useTransactions';
+import { useTransactions } from '@/shared/hooks/useTransactions';
 import { useBudgetProgress } from '@/features/budgets/hooks/useBudgetProgress';
 import { BudgetList } from '@/features/budgets/components/BudgetList';
 import { BudgetForm } from '@/features/budgets/components/BudgetForm';

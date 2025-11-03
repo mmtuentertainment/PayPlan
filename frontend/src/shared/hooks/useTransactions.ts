@@ -11,7 +11,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '@/features/transactions/types/transaction';
 import { TransactionStorageService } from '@/features/transactions/lib/TransactionStorageService';
-import { useLocalStorage } from './useLocalStorage';
+import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
 
 export interface UseTransactionsResult {
   transactions: Transaction[];

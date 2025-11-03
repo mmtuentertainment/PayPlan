@@ -13,7 +13,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { z } from 'zod';
 import type { Archive, ArchiveIndexEntry, ArchiveError } from '@/features/archive/lib/types';
-import type { PaymentRecord } from '@/types/csvExport';
+import type { PaymentRecord } from '@/shared/types/csvExport';
 import { ArchiveService } from '@/features/archive/lib/ArchiveService';
 import { ArchiveStorage } from '@/features/archive/lib/ArchiveStorage';
 import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';

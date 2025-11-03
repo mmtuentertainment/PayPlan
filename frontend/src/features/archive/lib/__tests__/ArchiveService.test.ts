@@ -13,7 +13,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ArchiveService } from '../ArchiveService';
 import { ArchiveStorage } from '../ArchiveStorage';
 import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
-import type { PaymentRecord } from '@/types/csvExport';
+import type { PaymentRecord } from '@/shared/types/csvExport';
 import { MAX_ARCHIVES } from '../constants';
 import { generateArchiveFilename } from '../utils';
 
