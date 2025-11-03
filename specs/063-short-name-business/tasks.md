@@ -114,59 +114,59 @@
 
 ### Test Fixtures for User Story 2
 
-- [ ] T051 [P] [US2] Create createCategory factory function in frontend/src/features/categories/lib/__tests__/fixtures/category-fixtures.ts
-- [ ] T052 [P] [US2] Create category trait variations in frontend/src/features/categories/lib/__tests__/fixtures/category-fixtures.ts (createCustomCategory, createCategoryWithoutBudget)
-- [ ] T053 [P] [US2] Create category edge case fixtures in frontend/src/features/categories/lib/__tests__/fixtures/category-fixtures.ts (invalid color, empty name)
-- [ ] T054 [P] [US2] Create category fixture barrel export in frontend/src/features/categories/lib/__tests__/fixtures/index.ts
-- [ ] T055 [P] [US2] Create createTransaction factory function in frontend/src/features/transactions/lib/__tests__/fixtures/transaction-fixtures.ts
-- [ ] T056 [P] [US2] Create TransactionBuilder class in frontend/src/features/transactions/lib/__tests__/fixtures/transaction-fixtures.ts
-- [ ] T057 [P] [US2] Implement TransactionBuilder methods in frontend/src/features/transactions/lib/__tests__/fixtures/transaction-fixtures.ts (withAmount, withCategory, withDate, withType)
-- [ ] T058 [P] [US2] Create transaction trait variations in frontend/src/features/transactions/lib/__tests__/fixtures/transaction-fixtures.ts (expense, income, transfer)
-- [ ] T059 [P] [US2] Create transaction fixture barrel export in frontend/src/features/transactions/lib/__tests__/fixtures/index.ts
+- [X] T051 [P] [US2] Create createCategory factory function in frontend/src/features/categories/lib/__tests__/fixtures/category-fixtures.ts
+- [X] T052 [P] [US2] Create category trait variations in frontend/src/features/categories/lib/__tests__/fixtures/category-fixtures.ts (createCustomCategory, createCategoryWithoutBudget)
+- [X] T053 [P] [US2] Create category edge case fixtures in frontend/src/features/categories/lib/__tests__/fixtures/category-fixtures.ts (invalid color, empty name)
+- [X] T054 [P] [US2] Create category fixture barrel export in frontend/src/features/categories/lib/__tests__/fixtures/index.ts
+- [X] T055 [P] [US2] Create createTransaction factory function in frontend/src/features/transactions/lib/__tests__/fixtures/transaction-fixtures.ts
+- [X] T056 [P] [US2] Create TransactionBuilder class in frontend/src/features/transactions/lib/__tests__/fixtures/transaction-fixtures.ts
+- [X] T057 [P] [US2] Implement TransactionBuilder methods in frontend/src/features/transactions/lib/__tests__/fixtures/transaction-fixtures.ts (withAmount, withCategory, withDate, withType)
+- [X] T058 [P] [US2] Create transaction trait variations in frontend/src/features/transactions/lib/__tests__/fixtures/transaction-fixtures.ts (expense, income, transfer)
+- [X] T059 [P] [US2] Create transaction fixture barrel export in frontend/src/features/transactions/lib/__tests__/fixtures/index.ts
 
 ### Tests for User Story 2 (CategoryStorageService)
 
-- [ ] T060 [P] [US2] Create CategoryStorageService test file skeleton in frontend/src/features/categories/lib/__tests__/CategoryStorageService.test.ts
-- [ ] T061 [P] [US2] Write test: CategoryStorageService.create() saves category to localStorage
-- [ ] T062 [P] [US2] Write test: CategoryStorageService.getById() retrieves category
-- [ ] T063 [P] [US2] Write test: CategoryStorageService.update() modifies existing category
-- [ ] T064 [P] [US2] Write test: CategoryStorageService.delete() removes category
-- [ ] T065 [P] [US2] Write test: CategoryStorageService.list() returns all categories
-- [ ] T066 [P] [US2] Write test: CategoryStorageService.create() throws on duplicate ID
-- [ ] T067 [P] [US2] Write test: CategoryStorageService.getById() returns null for missing ID
-- [ ] T068 [P] [US2] Write test: CategoryStorageService handles corrupted localStorage data
-- [ ] T069 [US2] Verify 80%+ coverage for CategoryStorageService
+- [X] T060 [P] [US2] Create CategoryStorageService test file skeleton in frontend/src/features/categories/lib/__tests__/CategoryStorageService.test.ts
+- [X] T061 [P] [US2] Write test: CategoryStorageService.create() saves category to localStorage
+- [X] T062 [P] [US2] Write test: CategoryStorageService.getById() retrieves category
+- [X] T063 [P] [US2] Write test: CategoryStorageService.update() modifies existing category
+- [X] T064 [P] [US2] Write test: CategoryStorageService.delete() removes category
+- [X] T065 [P] [US2] Write test: CategoryStorageService.list() returns all categories
+- [X] T066 [P] [US2] Write test: CategoryStorageService.create() throws on duplicate ID
+- [X] T067 [P] [US2] Write test: CategoryStorageService.getById() returns null for missing ID
+- [X] T068 [P] [US2] Write test: CategoryStorageService handles corrupted localStorage data
+- [X] T069 [US2] Verify 80%+ coverage for CategoryStorageService
 
 ### Tests for User Story 2 (BudgetStorageService)
 
-- [ ] T070 [P] [US2] Create BudgetStorageService test file skeleton in frontend/src/features/budgets/lib/__tests__/BudgetStorageService.test.ts
-- [ ] T071 [P] [US2] Write test: BudgetStorageService.create() saves budget to localStorage
-- [ ] T072 [P] [US2] Write test: BudgetStorageService.getById() retrieves budget
-- [ ] T073 [P] [US2] Write test: BudgetStorageService.update() modifies existing budget
-- [ ] T074 [P] [US2] Write test: BudgetStorageService.delete() removes budget
-- [ ] T075 [P] [US2] Write test: BudgetStorageService.list() returns all budgets
-- [ ] T076 [P] [US2] Write test: BudgetStorageService.create() throws on duplicate ID
-- [ ] T077 [P] [US2] Write test: BudgetStorageService handles invalid data
-- [ ] T078 [P] [US2] Write test: BudgetStorageService throws QuotaExceededError when quota exceeded
-- [ ] T079 [P] [US2] Write test: BudgetStorageService handles corrupted JSON
-- [ ] T080 [US2] Verify 80%+ coverage for BudgetStorageService
+- [X] T070 [P] [US2] Create BudgetStorageService test file skeleton in frontend/src/features/budgets/lib/__tests__/BudgetStorageService.test.ts
+- [X] T071 [P] [US2] Write test: BudgetStorageService.create() saves budget to localStorage
+- [X] T072 [P] [US2] Write test: BudgetStorageService.getById() retrieves budget
+- [X] T073 [P] [US2] Write test: BudgetStorageService.update() modifies existing budget
+- [X] T074 [P] [US2] Write test: BudgetStorageService.delete() removes budget
+- [X] T075 [P] [US2] Write test: BudgetStorageService.list() returns all budgets
+- [X] T076 [P] [US2] Write test: BudgetStorageService.create() throws on duplicate ID
+- [X] T077 [P] [US2] Write test: BudgetStorageService handles invalid data
+- [X] T078 [P] [US2] Write test: BudgetStorageService throws QuotaExceededError when quota exceeded
+- [X] T079 [P] [US2] Write test: BudgetStorageService handles corrupted JSON
+- [X] T080 [US2] Verify 80%+ coverage for BudgetStorageService
 
 ### Tests for User Story 2 (TransactionStorageService)
 
-- [ ] T081 [P] [US2] Create TransactionStorageService test file skeleton in frontend/src/features/transactions/lib/__tests__/TransactionStorageService.test.ts
-- [ ] T082 [P] [US2] Write test: TransactionStorageService.create() saves transaction to localStorage
-- [ ] T083 [P] [US2] Write test: TransactionStorageService.getById() retrieves transaction
-- [ ] T084 [P] [US2] Write test: TransactionStorageService.update() modifies existing transaction
-- [ ] T085 [P] [US2] Write test: TransactionStorageService.delete() removes transaction
-- [ ] T086 [P] [US2] Write test: TransactionStorageService.list() returns all transactions
-- [ ] T087 [P] [US2] Write test: TransactionStorageService handles concurrent writes (last-write-wins)
-- [ ] T088 [P] [US2] Write test: TransactionStorageService handles localStorage quota limits
-- [ ] T089 [P] [US2] Write test: TransactionStorageService handles large datasets efficiently
-- [ ] T090 [US2] Verify 80%+ coverage for TransactionStorageService
+- [X] T081 [P] [US2] Create TransactionStorageService test file skeleton in frontend/src/features/transactions/lib/__tests__/TransactionStorageService.test.ts
+- [X] T082 [P] [US2] Write test: TransactionStorageService.create() saves transaction to localStorage
+- [X] T083 [P] [US2] Write test: TransactionStorageService.getById() retrieves transaction
+- [X] T084 [P] [US2] Write test: TransactionStorageService.update() modifies existing transaction
+- [X] T085 [P] [US2] Write test: TransactionStorageService.delete() removes transaction
+- [X] T086 [P] [US2] Write test: TransactionStorageService.list() returns all transactions
+- [X] T087 [P] [US2] Write test: TransactionStorageService handles concurrent writes (last-write-wins)
+- [X] T088 [P] [US2] Write test: TransactionStorageService handles localStorage quota limits
+- [X] T089 [P] [US2] Write test: TransactionStorageService handles large datasets efficiently
+- [X] T090 [US2] Verify 80%+ coverage for TransactionStorageService
 
 ### Verify Archive Tests
 
-- [ ] T091 [US2] Verify ArchiveService tests already exist and have 80%+ coverage (4 existing test files)
+- [X] T091 [US2] Verify ArchiveService tests already exist and have 80%+ coverage (4 existing test files)
 
 **Checkpoint**: All storage services have 80%+ test coverage (42 tasks)
 
