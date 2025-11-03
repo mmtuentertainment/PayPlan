@@ -3,24 +3,24 @@
 **Optimized for**: Claude Code (Sonnet 4.5)
 **Feature**: Business Logic Test Coverage - User Story 4 (Dashboard Aggregation)
 **Branch**: `063-us4-aggregation-tests` (new)
-**Previous Work**: US1 (calculations), US2 (storage), US3 (schemas) merged
+**Previous Work**: US1 (calculations), US2 (storage), US3 (schemas) merged/pending
 
 ---
 
 ## Context Rehydration
 
-You are **Claude Code**, implementing Feature #063 User Story 4 (Dashboard Aggregation Tests).
+You are implementing Feature #063 User Story 4 (Dashboard Aggregation Tests).
 
-**What exists (merged)**:
+**What exists**:
 - ✅ Test infrastructure (MockStorage, fixtures, assertion utilities with strict types)
-- ✅ 43 calculation tests (90%+ coverage) - PR #68
-- ✅ 78 storage service tests (74-75% coverage) - PR #68
-- ✅ 163 schema validation tests (90%+ coverage) - PR #69 (pending approval)
-- ✅ Shared test utilities (schema-test-utils.ts)
-- ✅ Dashboard aggregation logic (aggregation.ts - 445 lines)
-- ✅ Gamification logic (gamification.ts - 485 lines)
+- ✅ 43 calculation tests (90%+ coverage) - PR #68 merged
+- ✅ 78 storage service tests (74-75% coverage) - PR #68 merged
+- ✅ 163 schema validation tests (90%+ coverage) - PR #69 (US3 - pending approval)
+- ✅ Shared test utilities (schema-test-utils.ts) - PR #69
+- ✅ Dashboard aggregation logic (aggregation.ts - 445 lines, 5 functions)
+- ✅ Gamification logic (gamification.ts - 485 lines) - will be tested in US5
 
-**What you need to create**: Tests for dashboard aggregation functions
+**What you need to create**: Comprehensive tests for dashboard aggregation functions
 
 ---
 
