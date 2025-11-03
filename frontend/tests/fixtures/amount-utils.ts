@@ -3,11 +3,13 @@
 
 /**
  * Convert dollars to cents (financial calculations use integers)
+ * Uses banker's rounding for deterministic, privacy-safe conversions
  * @param dollars - Dollar amount (e.g., 10.50)
  * @returns Cents (e.g., 1050)
  */
 export function toCents(dollars: number): number {
-  return Math.round(dollars * 100);
+  const cents = dollars * 100;
+  return roundToCents(cents);
 }
 
 /**
