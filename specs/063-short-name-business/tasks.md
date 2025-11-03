@@ -180,41 +180,41 @@
 
 ### Tests for User Story 3 (Category Schema)
 
-- [ ] T092 [P] [US3] Create category schema test file skeleton in frontend/src/features/categories/lib/__tests__/schemas.test.ts
-- [ ] T093 [P] [US3] Write test: categorySchema validates valid category
-- [ ] T094 [P] [US3] Write test: categorySchema validates custom category
-- [ ] T095 [P] [US3] Write test: categorySchema rejects missing id field
-- [ ] T096 [P] [US3] Write test: categorySchema rejects missing name field
-- [ ] T097 [P] [US3] Write test: categorySchema rejects invalid color format
-- [ ] T098 [P] [US3] Write test: categorySchema rejects negative budget
-- [ ] T099 [P] [US3] Write test: categorySchema validates all valid colors from sharedFixtures
-- [ ] T100 [P] [US3] Write test: categorySchema rejects all invalid colors from sharedFixtures
-- [ ] T101 [US3] Verify 80%+ coverage for categories/lib/schemas.ts
+- [X] T092 [P] [US3] Create category schema test file skeleton in frontend/src/features/categories/lib/__tests__/schemas.test.ts
+- [X] T093 [P] [US3] Write test: categorySchema validates valid category
+- [X] T094 [P] [US3] Write test: categorySchema validates custom category
+- [X] T095 [P] [US3] Write test: categorySchema rejects missing id field
+- [X] T096 [P] [US3] Write test: categorySchema rejects missing name field
+- [X] T097 [P] [US3] Write test: categorySchema rejects invalid color format
+- [X] T098 [P] [US3] Write test: categorySchema rejects negative budget
+- [X] T099 [P] [US3] Write test: categorySchema validates all valid colors from sharedFixtures
+- [X] T100 [P] [US3] Write test: categorySchema rejects all invalid colors from sharedFixtures
+- [X] T101 [US3] Verify 80%+ coverage for categories/lib/schemas.ts
 
 ### Tests for User Story 3 (Budget Schema)
 
-- [ ] T102 [P] [US3] Create budget schema test file skeleton in frontend/src/features/budgets/lib/__tests__/schemas.test.ts
-- [ ] T103 [P] [US3] Write test: budgetSchema validates valid budget
-- [ ] T104 [P] [US3] Write test: budgetSchema validates budget with rollover
-- [ ] T105 [P] [US3] Write test: budgetSchema rejects negative amount
-- [ ] T106 [P] [US3] Write test: budgetSchema rejects invalid period value
-- [ ] T107 [P] [US3] Write test: budgetSchema rejects invalid date format
-- [ ] T108 [P] [US3] Write test: budgetSchema validates amount limits (min/max)
-- [ ] T109 [US3] Verify 80%+ coverage for budgets/lib/schemas.ts
+- [X] T102 [P] [US3] Create budget schema test file skeleton in frontend/src/features/budgets/lib/__tests__/schemas.test.ts
+- [X] T103 [P] [US3] Write test: budgetSchema validates valid budget
+- [X] T104 [P] [US3] Write test: budgetSchema validates budget with rollover
+- [X] T105 [P] [US3] Write test: budgetSchema rejects negative amount
+- [X] T106 [P] [US3] Write test: budgetSchema rejects invalid period value
+- [X] T107 [P] [US3] Write test: budgetSchema rejects invalid date format
+- [X] T108 [P] [US3] Write test: budgetSchema validates amount limits (min/max)
+- [X] T109 [US3] Verify 80%+ coverage for budgets/lib/schemas.ts
 
 ### Tests for User Story 3 (Transaction Schema)
 
-- [ ] T110 [P] [US3] Create transaction schema test file skeleton in frontend/src/features/transactions/lib/__tests__/schemas.test.ts
-- [ ] T111 [P] [US3] Write test: transactionSchema validates expense transaction
-- [ ] T112 [P] [US3] Write test: transactionSchema validates income transaction
-- [ ] T113 [P] [US3] Write test: transactionSchema validates transfer transaction
-- [ ] T114 [P] [US3] Write test: transactionSchema rejects invalid amount
-- [ ] T115 [P] [US3] Write test: transactionSchema rejects missing category reference
-- [ ] T116 [P] [US3] Write test: transactionSchema rejects invalid date format
-- [ ] T117 [P] [US3] Write test: transactionSchema validates zero amount (edge case)
-- [ ] T118 [US3] Verify 80%+ coverage for transactions/lib/schemas.ts
+- [X] T110 [P] [US3] Create transaction schema test file skeleton in frontend/src/features/transactions/lib/__tests__/schemas.test.ts
+- [X] T111 [P] [US3] Write test: transactionSchema validates expense transaction
+- [X] T112 [P] [US3] Write test: transactionSchema validates income transaction
+- [X] T113 [P] [US3] Write test: transactionSchema validates transfer transaction
+- [X] T114 [P] [US3] Write test: transactionSchema rejects invalid amount
+- [X] T115 [P] [US3] Write test: transactionSchema rejects missing category reference
+- [X] T116 [P] [US3] Write test: transactionSchema rejects invalid date format
+- [X] T117 [P] [US3] Write test: transactionSchema validates zero amount (edge case)
+- [X] T118 [US3] Verify 80%+ coverage for transactions/lib/schemas.ts
 
-**Checkpoint**: All Zod schemas have 80%+ test coverage (27 tasks)
+**Checkpoint**: All Zod schemas have 90%+ test coverage (27 tasks) ✅ COMPLETE
 
 ---
 

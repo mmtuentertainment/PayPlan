@@ -14,7 +14,7 @@ import type { FixtureFactory, FixtureBuilder } from '../../../../../../tests/fix
  * @returns Budget object
  */
 export const createBudget: FixtureFactory<Budget> = (overrides) => ({
-  id: `budget_${uuid()}`,
+  id: `budget_${uuid().replace(/-/g, '')}`,
   categoryId: sharedFixtures.ids.categoryId1,
   amount: sharedFixtures.amounts.fiveHundredDollars, // $500.00
   period: '2025-11', // November 2025

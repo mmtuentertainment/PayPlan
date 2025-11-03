@@ -34,32 +34,48 @@ export function expectStorageSize(expected: number): void {
 }
 
 /**
- * Assert Zod schema validation succeeds
- * @param schema - Zod schema
- * @param data - Data to validate
+ * Type guard for successful Zod parse result
  */
-export function expectZodSuccess<T>(schema: z.ZodSchema<T>, data: unknown): void {
-  const result = schema.safeParse(data);
+function isZodSuccess<T>(result: { success: boolean; data?: T; error?: z.ZodError }): result is { success: true; data: T } {
+  return result.success === true;
+}
+
+/**
+ * Type guard for failed Zod parse result
+ */
+function isZodError<T>(result: { success: boolean; data?: T; error?: z.ZodError }): result is { success: false; error: z.ZodError } {
+  return result.success === false;
+}
+
+/**
+ * Assert Zod schema validation succeeds
+ * @param result - Result from schema.safeParse()
+ */
+export function expectZodSuccess<T>(result: { success: boolean; data?: T; error?: z.ZodError }): asserts result is { success: true; data: T } {
   expect(result.success).toBe(true);
+  if (!isZodSuccess(result)) {
+    throw new Error('Expected Zod validation to succeed');
+  }
 }
 
 /**
  * Assert Zod schema validation fails
- * @param schema - Zod schema
- * @param data - Data to validate
- * @param errorMessage - Optional expected error message (partial match)
+ * @param result - Result from schema.safeParse()
+ * @param field - Optional field name that should have error
  */
-export function expectZodFailure<T>(
-  schema: z.ZodSchema<T>,
-  data: unknown,
-  errorMessage?: string
-): void {
-  const result = schema.safeParse(data);
+export function expectZodError<T>(result: { success: boolean; data?: T; error?: z.ZodError }, field?: string): asserts result is { success: false; error: z.ZodError } {
   expect(result.success).toBe(false);
 
-  if (errorMessage && !result.success) {
-    const errorString = JSON.stringify(result.error.errors);
-    expect(errorString).toContain(errorMessage);
+  if (!isZodError(result)) {
+    throw new Error('Expected Zod validation to fail');
+  }
+
+  if (field) {
+    const hasFieldError = result.error.issues.some((issue: z.ZodIssue) => {
+      const path = issue.path.join('.');
+      return path === field || path.includes(field);
+    });
+    expect(hasFieldError).toBe(true);
   }
 }
 

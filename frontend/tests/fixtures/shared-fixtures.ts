@@ -42,6 +42,12 @@ export interface SharedFixtures {
   };
 
   colors: {
+    green: string;
+    blue: string;
+    red: string;
+    yellow: string;
+    purple: string;
+    orange: string;
     valid: string[];
     invalid: string[];
   };
@@ -87,18 +93,18 @@ export const sharedFixtures: SharedFixtures = {
     ],
   },
 
-  // Deterministic UUIDs (no collisions in tests)
+  // Deterministic IDs (using schema-compliant prefixes)
   ids: {
-    categoryId1: '11111111-1111-1111-1111-111111111111',
-    categoryId2: '22222222-2222-2222-2222-222222222222',
-    categoryId3: '33333333-3333-3333-3333-333333333333',
-    budgetId1: '44444444-4444-4444-4444-444444444444',
-    budgetId2: '55555555-5555-5555-5555-555555555555',
-    budgetId3: '66666666-6666-6666-6666-666666666666',
-    transactionId1: '77777777-7777-7777-7777-777777777777',
-    transactionId2: '88888888-8888-8888-8888-888888888888',
-    transactionId3: '99999999-9999-9999-9999-999999999999',
-    userId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    categoryId1: 'cat_11111111111111111111111111111111',
+    categoryId2: 'cat_22222222222222222222222222222222',
+    categoryId3: 'cat_33333333333333333333333333333333',
+    budgetId1: 'budget_44444444444444444444444444444444',
+    budgetId2: 'budget_55555555555555555555555555555555',
+    budgetId3: 'budget_66666666666666666666666666666666',
+    transactionId1: 'txn_7777777777777777777777777777777',
+    transactionId2: 'txn_8888888888888888888888888888888',
+    transactionId3: 'txn_9999999999999999999999999999999',
+    userId: 'user_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
   },
 
   // Common amounts in cents
@@ -117,6 +123,12 @@ export const sharedFixtures: SharedFixtures = {
 
   // Valid and invalid color codes for category testing
   colors: {
+    green: '#22c55e',
+    blue: '#3b82f6',
+    red: '#ef4444',
+    yellow: '#eab308',
+    purple: '#a855f7',
+    orange: '#f97316',
     valid: [
       '#FF0000', // Red
       '#00FF00', // Green

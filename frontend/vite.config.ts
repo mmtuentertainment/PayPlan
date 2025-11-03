@@ -124,6 +124,27 @@ export default defineConfig({
           branches: 65,
           statements: 74,
         },
+
+        // 90%+ for schemas (US3 - validation logic should be highly tested)
+        // Schemas are pure validation logic (no browser APIs), so 90%+ is achievable
+        'src/features/categories/lib/schemas.ts': {
+          lines: 90,
+          functions: 90,
+          branches: 85,
+          statements: 90,
+        },
+        'src/features/budgets/lib/schemas.ts': {
+          lines: 90,
+          functions: 90,
+          branches: 85,
+          statements: 90,
+        },
+        'src/features/transactions/lib/schemas.ts': {
+          lines: 90,
+          functions: 90,
+          branches: 85,
+          statements: 90,
+        },
       },
     },
   },
