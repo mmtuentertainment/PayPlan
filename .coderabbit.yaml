@@ -268,10 +268,12 @@ reviews:
         while shipping features sustainably."
 
         **Examples** (what to approve/reject):
-        - ✅ APPROVE: PR adds `features/budgets/lib/BudgetService.ts` with 85% test coverage
-        - ❌ REJECT: PR adds `features/budgets/lib/calculateBudget.ts` with 0% test coverage
-        - ✅ APPROVE: PR adds `features/budgets/components/BudgetCard.tsx` with 0% tests (manual testing OK for UI)
-        - ❌ REJECT: PR adds financial calculation without tests (90%+ coverage required!)
+        - ✅ APPROVE: `features/budgets/lib/BudgetService.ts` with 85% test coverage
+        - ✅ APPROVE: `features/categories/lib/CategoryStorage.ts` with 82% test coverage
+        - ❌ REJECT: `features/transactions/lib/calculateBalance.ts` with 0% test coverage (financial!)
+        - ✅ APPROVE: `features/dashboard/components/GamificationWidget.tsx` with 0% tests (UI is OK)
+        - ❌ REJECT: `features/archive/lib/ArchiveService.ts` with 45% coverage (need 80%+ for business logic)
+        - ❌ REJECT: `features/budgets/lib/calculations.ts` without tests (90%+ required for financial!)
 
         ### 5. User Features > Infrastructure
         - ❌ CI/CD improvements without user features
