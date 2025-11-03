@@ -13,7 +13,7 @@
  */
 
 import { useCallback } from 'react';
-import type { PaymentStatus } from '../lib/payment-status/types';
+import type { PaymentStatus } from '../../lib/payment-status/types';
 
 export interface PaymentCheckboxProps {
   /**

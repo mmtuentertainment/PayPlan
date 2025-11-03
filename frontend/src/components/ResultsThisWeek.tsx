@@ -11,7 +11,7 @@ import { paymentRecordsArraySchema } from "@/shared/types/csvExport";
 import { ToastNotification } from "@/components/preferences/ToastNotification";
 import { usePaymentStatus } from "@/hooks/usePaymentStatus";
 import { PaymentCheckbox } from "@/components/payment-status/PaymentCheckbox";
-import { StatusIndicator } from "@/components/payment-status/StatusIndicator";
+import { StatusIndicator } from "@/features/archive/components/payment-status/StatusIndicator";
 import { CreateArchiveDialog } from "@/features/archive/components/CreateArchiveDialog";
 import { ZodError } from "zod";
 import * as Dialog from "@radix-ui/react-dialog";
