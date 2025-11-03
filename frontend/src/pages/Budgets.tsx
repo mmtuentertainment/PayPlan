@@ -16,13 +16,13 @@
  */
 
 import { useState } from 'react';
-import { type Budget, type CreateBudgetInput } from '@/types/budget';
-import { useCategories } from '@/hooks/useCategories';
-import { useBudgets } from '@/hooks/useBudgets';
-import { useTransactions } from '@/hooks/useTransactions';
-import { useBudgetProgress } from '@/hooks/useBudgetProgress';
-import { BudgetList } from '@/components/budgets/BudgetList';
-import { BudgetForm } from '@/components/budgets/BudgetForm';
+import { type Budget, type CreateBudgetInput } from '@/features/budgets/types/budget';
+import { useCategories } from '@/features/categories/hooks/useCategories';
+import { useBudgets } from '@/features/budgets/hooks/useBudgets';
+import { useTransactions } from '@/shared/hooks/useTransactions';
+import { useBudgetProgress } from '@/features/budgets/hooks/useBudgetProgress';
+import { BudgetList } from '@/features/budgets/components/BudgetList';
+import { BudgetForm } from '@/features/budgets/components/BudgetForm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,11 +32,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Alert } from '@/components/ui/alert';
+} from '@/shared/components/ui/alert-dialog';
+import { Button } from '@/shared/components/ui/button';
+import { Alert } from '@/shared/components/ui/alert';
 import { Plus, AlertCircle, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
-import { formatCurrency } from '@/lib/budgets/calculations';
+import { formatCurrency } from '@/features/budgets/lib/calculations';
 
 /**
  * Budgets page component.

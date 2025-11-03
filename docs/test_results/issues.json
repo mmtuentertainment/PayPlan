@@ -1,0 +1,179 @@
+{
+  "root": "/home/matt/PROJECTS/PayPlan/frontend/src",
+  "total_issues": 8,
+  "by_severity": {
+    "critical": 0,
+    "high": 0,
+    "medium": 8,
+    "low": 0
+  },
+  "issues": [
+    {
+      "category": "structure",
+      "type": "inconsistent_naming",
+      "severity": "medium",
+      "message": "Multiple naming conventions detected",
+      "details": {
+        "type": "inconsistent_naming",
+        "severity": "info",
+        "patterns_found": {
+          "PascalCase": 83,
+          "kebab-case": 8,
+          "camelCase": 14
+        },
+        "message": "Multiple naming conventions detected",
+        "recommendation": "Standardize on one naming convention"
+      }
+    },
+    {
+      "category": "dependencies",
+      "type": "orphaned_file",
+      "severity": "medium",
+      "message": "Orphaned file (no imports/exports): types/chart-data.ts",
+      "details": {
+        "file": "types/chart-data.ts"
+      }
+    },
+    {
+      "category": "dependencies",
+      "type": "orphaned_file",
+      "severity": "medium",
+      "message": "Orphaned file (no imports/exports): types/bill.ts",
+      "details": {
+        "file": "types/bill.ts"
+      }
+    },
+    {
+      "category": "dependencies",
+      "type": "orphaned_file",
+      "severity": "medium",
+      "message": "Orphaned file (no imports/exports): types/gamification.ts",
+      "details": {
+        "file": "types/gamification.ts"
+      }
+    },
+    {
+      "category": "dependencies",
+      "type": "orphaned_file",
+      "severity": "medium",
+      "message": "Orphaned file (no imports/exports): types/budget.ts",
+      "details": {
+        "file": "types/budget.ts"
+      }
+    },
+    {
+      "category": "dependencies",
+      "type": "orphaned_file",
+      "severity": "medium",
+      "message": "Orphaned file (no imports/exports): types/category.ts",
+      "details": {
+        "file": "types/category.ts"
+      }
+    },
+    {
+      "category": "dependencies",
+      "type": "orphaned_file",
+      "severity": "medium",
+      "message": "Orphaned file (no imports/exports): types/transaction.ts",
+      "details": {
+        "file": "types/transaction.ts"
+      }
+    },
+    {
+      "category": "dependencies",
+      "type": "orphaned_file",
+      "severity": "medium",
+      "message": "Orphaned file (no imports/exports): types/goal.ts",
+      "details": {
+        "file": "types/goal.ts"
+      }
+    }
+  ],
+  "issues_by_severity": {
+    "medium": [
+      {
+        "category": "structure",
+        "type": "inconsistent_naming",
+        "severity": "medium",
+        "message": "Multiple naming conventions detected",
+        "details": {
+          "type": "inconsistent_naming",
+          "severity": "info",
+          "patterns_found": {
+            "PascalCase": 83,
+            "kebab-case": 8,
+            "camelCase": 14
+          },
+          "message": "Multiple naming conventions detected",
+          "recommendation": "Standardize on one naming convention"
+        }
+      },
+      {
+        "category": "dependencies",
+        "type": "orphaned_file",
+        "severity": "medium",
+        "message": "Orphaned file (no imports/exports): types/chart-data.ts",
+        "details": {
+          "file": "types/chart-data.ts"
+        }
+      },
+      {
+        "category": "dependencies",
+        "type": "orphaned_file",
+        "severity": "medium",
+        "message": "Orphaned file (no imports/exports): types/bill.ts",
+        "details": {
+          "file": "types/bill.ts"
+        }
+      },
+      {
+        "category": "dependencies",
+        "type": "orphaned_file",
+        "severity": "medium",
+        "message": "Orphaned file (no imports/exports): types/gamification.ts",
+        "details": {
+          "file": "types/gamification.ts"
+        }
+      },
+      {
+        "category": "dependencies",
+        "type": "orphaned_file",
+        "severity": "medium",
+        "message": "Orphaned file (no imports/exports): types/budget.ts",
+        "details": {
+          "file": "types/budget.ts"
+        }
+      },
+      {
+        "category": "dependencies",
+        "type": "orphaned_file",
+        "severity": "medium",
+        "message": "Orphaned file (no imports/exports): types/category.ts",
+        "details": {
+          "file": "types/category.ts"
+        }
+      },
+      {
+        "category": "dependencies",
+        "type": "orphaned_file",
+        "severity": "medium",
+        "message": "Orphaned file (no imports/exports): types/transaction.ts",
+        "details": {
+          "file": "types/transaction.ts"
+        }
+      },
+      {
+        "category": "dependencies",
+        "type": "orphaned_file",
+        "severity": "medium",
+        "message": "Orphaned file (no imports/exports): types/goal.ts",
+        "details": {
+          "file": "types/goal.ts"
+        }
+      }
+    ],
+    "critical": [],
+    "high": [],
+    "low": []
+  }
+}

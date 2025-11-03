@@ -1,0 +1,8 @@
+{
+  "framework": "React",
+  "language": "JavaScript",
+  "build_tool": "Vite",
+  "test_framework": "Vitest",
+  "package_manager": "npm",
+  "project_type": "frontend-app"
+}

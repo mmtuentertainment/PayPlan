@@ -1,0 +1,2519 @@
+{
+  "entry_points": [
+    "lib/categories/index.ts",
+    "lib/budgets/index.ts"
+  ],
+  "dead_code": {
+    "unused_files": [
+      "components/payment-status/PaymentCheckbox.tsx",
+      "lib/validation/RuntimeTypeGuard.ts",
+      "components/dashboard/UpcomingBillsWidget.tsx",
+      "lib/archive/utils.ts",
+      "lib/dashboard/schemas.ts",
+      "components/preferences/ToastNotification.tsx",
+      "contexts/PaymentContext.types.ts",
+      "hooks/useNavigationState.ts",
+      "types/goal.ts",
+      "components/archive/ArchiveErrorBoundary.tsx",
+      "types/bill.ts",
+      "components/archive/ArchiveListItem.tsx",
+      "components/dashboard/GamificationWidget.tsx",
+      "lib/budgets/calculations.ts",
+      "components/budgets/BudgetCard.tsx",
+      "components/dashboard/GoalProgressWidget.tsx",
+      "lib/budgets/BudgetStorageService.ts",
+      "components/ui/select.tsx",
+      "components/archive/ArchiveStatistics.tsx",
+      "lib/api.ts",
+      "hooks/useBudgetProgress.ts",
+      "components/ErrorBoundary.tsx",
+      "components/ui/badge.constants.ts",
+      "hooks/usePreferences.ts",
+      "lib/preferences/constants.ts",
+      "main.tsx",
+      "lib/utils.ts",
+      "lib/dashboard/storage.ts",
+      "lib/preferences/schemas.ts",
+      "components/dashboard/SpendingChart.tsx",
+      "lib/preferences/validation.ts",
+      "components/dashboard/EmptyState.tsx",
+      "lib/payment-status/PaymentStatusService.ts",
+      "components/categories/CategoryForm.tsx",
+      "components/categories/DeleteCategoryDialog.tsx",
+      "hooks/usePaymentArchives.ts",
+      "components/archive/CreateArchiveDialog.tsx",
+      "components/dashboard/RecentTransactionsWidget.tsx",
+      "lib/csv.ts",
+      "lib/transactions/schemas.ts",
+      "types/csvExport.ts",
+      "components/categories/CategoryCard.tsx",
+      "lib/preferences/types.ts",
+      "constants/zIndex.ts",
+      "components/ui/alert-dialog.tsx",
+      "lib/archive/constants.ts",
+      "hooks/usePaymentStatus.ts",
+      "hooks/useDashboardData.ts",
+      "lib/transactions/TransactionStorageService.ts",
+      "lib/archive/ArchiveService.ts",
+      "lib/archive/errors.ts",
+      "components/dashboard/IncomeExpensesChartWidget.tsx",
+      "types/navigation.ts",
+      "components/ui/dialog.tsx",
+      "pages/ArchiveListPage.tsx",
+      "services/csvExportService.ts",
+      "routes.ts",
+      "App.tsx",
+      "components/ui/button.tsx",
+      "types/transaction.ts",
+      "components/transactions/TransactionCard.tsx",
+      "pages/Transactions.tsx",
+      "hooks/useLocalStorage.ts",
+      "components/dashboard/IncomeExpensesChart.tsx",
+      "lib/risk-detector.js",
+      "lib/sample.ts",
+      "lib/payment-status/utils.ts",
+      "components/transactions/TransactionForm.tsx",
+      "lib/budgets/schemas.ts",
+      "components/navigation/NavigationHeader.tsx",
+      "components/categories/CategorySelector.tsx",
+      "components/ErrorAlert.tsx",
+      "types/budget.ts",
+      "types/chart-data.ts",
+      "lib/archive/types.ts",
+      "components/navigation/MobileMenu.tsx",
+      "pages/Budgets.tsx",
+      "components/ui/input.tsx",
+      "hooks/useTransactions.ts",
+      "components/archive/ExportArchiveButton.tsx",
+      "components/preferences/PreferenceToggle.tsx",
+      "lib/categories/CategoryStorageService.ts",
+      "lib/categories/constants.ts",
+      "components/ui/tabs.tsx",
+      "pages/Privacy.tsx",
+      "components/ResultsThisWeek.tsx",
+      "pages/ArchiveDetailView.tsx",
+      "lib/security/ConsoleGuard.ts",
+      "lib/telemetry.ts",
+      "lib/budgets/constants.ts",
+      "hooks/useCategories.ts",
+      "components/SuccessToast.tsx",
+      "pages/Dashboard.tsx",
+      "types/category.ts",
+      "components/ui/button.constants.ts",
+      "components/ui/textarea.tsx",
+      "contexts/PaymentContext.context.ts",
+      "components/ui/badge.tsx",
+      "components/preferences/InlineStatusIndicator.tsx",
+      "components/preferences/PreferenceSettings.tsx",
+      "lib/payment-status/PaymentStatusStorage.ts",
+      "lib/payment-status/constants.ts",
+      "components/LoadingSpinner.tsx",
+      "contexts/PaymentContext.tsx",
+      "components/archive/DeleteArchiveDialog.tsx",
+      "components/budgets/BudgetForm.tsx",
+      "components/SummaryCard.tsx",
+      "lib/payday-calculator.js",
+      "constants/animations.ts",
+      "components/navigation/Breadcrumbs.tsx",
+      "lib/categories/predefined.ts",
+      "lib/payment-status/types.ts",
+      "components/dashboard/SpendingChartWidget.tsx",
+      "components/payment-status/StatusIndicator.tsx",
+      "components/dashboard/LoadingSkeleton.tsx",
+      "components/ui/card.tsx",
+      "components/ui/radio-group.tsx",
+      "components/ScheduleTable.tsx",
+      "lib/dashboard/gamification.ts",
+      "lib/dashboard/aggregation.ts",
+      "pages/Docs.tsx",
+      "lib/archive/validation.ts",
+      "components/ui/label.tsx",
+      "lib/archive/performance.ts",
+      "lib/categories/schemas.ts",
+      "types/dashboard.ts",
+      "components/budgets/BudgetList.tsx",
+      "components/ui/alert.tsx",
+      "components/TelemetryConsentBanner.tsx",
+      "lib/preferences/PreferenceStorageService.ts",
+      "lib/archive/ArchiveStorage.ts",
+      "hooks/useBudgets.ts",
+      "components/categories/CategoryList.tsx",
+      "pages/Categories.tsx",
+      "types/gamification.ts",
+      "components/ErrorTest.tsx",
+      "lib/csv-errors.ts",
+      "components/RiskFlags.tsx",
+      "lib/payment-status/validation.ts"
+    ],
+    "unused_exports": {
+      "lib/categories/index.ts": [
+        "",
+        "categorySchema",
+        "categoryStorageSchema",
+        "PREDEFINED_CATEGORIES",
+        "validateCreateCategoryInput",
+        "MAX_STORAGE_SIZE",
+        "validateCategoryStorage",
+        "isDefaultCategory",
+        "MAX_CUSTOM_CATEGORIES",
+        "ERROR_MESSAGES",
+        "getAllDefaultCategories",
+        "createCategoryInputSchema",
+        "MAX_NAME_LENGTH",
+        "SUCCESS_MESSAGES",
+        "validateCategory",
+        "SCHEMA_VERSION",
+        "updateCategoryInputSchema",
+        "getDefaultCategory",
+        "STORAGE_KEY",
+        "CategoryStorageService",
+        "validateUpdateCategoryInput",
+        "DEFAULT_COLORS"
+      ],
+      "lib/budgets/index.ts": [
+        "",
+        "formatPercentage",
+        "calculateBudgetProgressBatch",
+        "getBudgetStatus",
+        "parsePeriod",
+        "formatCurrency",
+        "MAX_STORAGE_SIZE",
+        "updateBudgetInputSchema",
+        "ERROR_MESSAGES",
+        "budgetStorageSchema",
+        "MAX_BUDGETS",
+        "BUDGET_THRESHOLDS",
+        "budgetSchema",
+        "SUCCESS_MESSAGES",
+        "calculateBudgetProgress",
+        "SCHEMA_VERSION",
+        "calculateBudgetSummary",
+        "validateUpdateBudgetInput",
+        "formatPeriod",
+        "getCurrentPeriod",
+        "STORAGE_KEY",
+        "validateBudgetStorage",
+        "validateCreateBudgetInput",
+        "validateBudget",
+        "calculateTotalSpent",
+        "BudgetStorageService",
+        "filterTransactionsByBudget",
+        "calculateTotalBudget",
+        "createBudgetInputSchema"
+      ]
+    },
+    "unused_imports": {},
+    "commented_code": {
+      "components/payment-status/PaymentCheckbox.tsx": [
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        }
+      ],
+      "lib/validation/RuntimeTypeGuard.ts": [
+        {
+          "start": 15,
+          "end": 28,
+          "lines": 14
+        },
+        {
+          "start": 15,
+          "end": 28,
+          "lines": 14
+        },
+        {
+          "start": 55,
+          "end": 69,
+          "lines": 15
+        },
+        {
+          "start": 55,
+          "end": 69,
+          "lines": 15
+        },
+        {
+          "start": 81,
+          "end": 95,
+          "lines": 15
+        },
+        {
+          "start": 81,
+          "end": 95,
+          "lines": 15
+        },
+        {
+          "start": 107,
+          "end": 122,
+          "lines": 16
+        },
+        {
+          "start": 107,
+          "end": 122,
+          "lines": 16
+        },
+        {
+          "start": 146,
+          "end": 161,
+          "lines": 16
+        },
+        {
+          "start": 146,
+          "end": 161,
+          "lines": 16
+        },
+        {
+          "start": 213,
+          "end": 224,
+          "lines": 12
+        },
+        {
+          "start": 213,
+          "end": 224,
+          "lines": 12
+        }
+      ],
+      "lib/archive/utils.ts": [
+        {
+          "start": 14,
+          "end": 24,
+          "lines": 11
+        },
+        {
+          "start": 14,
+          "end": 24,
+          "lines": 11
+        },
+        {
+          "start": 29,
+          "end": 39,
+          "lines": 11
+        },
+        {
+          "start": 29,
+          "end": 39,
+          "lines": 11
+        },
+        {
+          "start": 44,
+          "end": 63,
+          "lines": 20
+        },
+        {
+          "start": 44,
+          "end": 63,
+          "lines": 20
+        },
+        {
+          "start": 74,
+          "end": 91,
+          "lines": 18
+        },
+        {
+          "start": 74,
+          "end": 91,
+          "lines": 18
+        },
+        {
+          "start": 151,
+          "end": 174,
+          "lines": 24
+        },
+        {
+          "start": 151,
+          "end": 174,
+          "lines": 24
+        },
+        {
+          "start": 184,
+          "end": 200,
+          "lines": 17
+        },
+        {
+          "start": 184,
+          "end": 200,
+          "lines": 17
+        },
+        {
+          "start": 223,
+          "end": 239,
+          "lines": 17
+        },
+        {
+          "start": 223,
+          "end": 239,
+          "lines": 17
+        }
+      ],
+      "components/preferences/ToastNotification.tsx": [
+        {
+          "start": 1,
+          "end": 19,
+          "lines": 19
+        },
+        {
+          "start": 1,
+          "end": 19,
+          "lines": 19
+        },
+        {
+          "start": 36,
+          "end": 48,
+          "lines": 13
+        },
+        {
+          "start": 36,
+          "end": 48,
+          "lines": 13
+        }
+      ],
+      "components/archive/ArchiveErrorBoundary.tsx": [
+        {
+          "start": 31,
+          "end": 50,
+          "lines": 20
+        },
+        {
+          "start": 31,
+          "end": 50,
+          "lines": 20
+        },
+        {
+          "start": 152,
+          "end": 181,
+          "lines": 30
+        },
+        {
+          "start": 152,
+          "end": 181,
+          "lines": 30
+        },
+        {
+          "start": 194,
+          "end": 210,
+          "lines": 17
+        },
+        {
+          "start": 194,
+          "end": 210,
+          "lines": 17
+        }
+      ],
+      "components/archive/ArchiveListItem.tsx": [
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        },
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        },
+        {
+          "start": 40,
+          "end": 50,
+          "lines": 11
+        },
+        {
+          "start": 40,
+          "end": 50,
+          "lines": 11
+        },
+        {
+          "start": 79,
+          "end": 134,
+          "lines": 56
+        },
+        {
+          "start": 79,
+          "end": 134,
+          "lines": 56
+        }
+      ],
+      "components/dashboard/GamificationWidget.tsx": [
+        {
+          "start": 1,
+          "end": 20,
+          "lines": 20
+        },
+        {
+          "start": 1,
+          "end": 20,
+          "lines": 20
+        },
+        {
+          "start": 75,
+          "end": 92,
+          "lines": 18
+        },
+        {
+          "start": 75,
+          "end": 92,
+          "lines": 18
+        }
+      ],
+      "lib/budgets/calculations.ts": [
+        {
+          "start": 14,
+          "end": 24,
+          "lines": 11
+        },
+        {
+          "start": 14,
+          "end": 24,
+          "lines": 11
+        }
+      ],
+      "components/budgets/BudgetCard.tsx": [
+        {
+          "start": 1,
+          "end": 17,
+          "lines": 17
+        },
+        {
+          "start": 1,
+          "end": 17,
+          "lines": 17
+        },
+        {
+          "start": 38,
+          "end": 57,
+          "lines": 20
+        },
+        {
+          "start": 38,
+          "end": 57,
+          "lines": 20
+        },
+        {
+          "start": 128,
+          "end": 139,
+          "lines": 12
+        },
+        {
+          "start": 128,
+          "end": 139,
+          "lines": 12
+        },
+        {
+          "start": 148,
+          "end": 177,
+          "lines": 30
+        },
+        {
+          "start": 148,
+          "end": 177,
+          "lines": 30
+        },
+        {
+          "start": 206,
+          "end": 217,
+          "lines": 12
+        },
+        {
+          "start": 206,
+          "end": 217,
+          "lines": 12
+        }
+      ],
+      "lib/budgets/BudgetStorageService.ts": [
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 38,
+          "end": 55,
+          "lines": 18
+        },
+        {
+          "start": 38,
+          "end": 55,
+          "lines": 18
+        }
+      ],
+      "components/archive/ArchiveStatistics.tsx": [
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 43,
+          "end": 53,
+          "lines": 11
+        },
+        {
+          "start": 43,
+          "end": 53,
+          "lines": 11
+        },
+        {
+          "start": 129,
+          "end": 140,
+          "lines": 12
+        },
+        {
+          "start": 129,
+          "end": 140,
+          "lines": 12
+        },
+        {
+          "start": 151,
+          "end": 166,
+          "lines": 16
+        },
+        {
+          "start": 151,
+          "end": 166,
+          "lines": 16
+        }
+      ],
+      "hooks/useBudgetProgress.ts": [
+        {
+          "start": 42,
+          "end": 66,
+          "lines": 25
+        },
+        {
+          "start": 42,
+          "end": 66,
+          "lines": 25
+        },
+        {
+          "start": 112,
+          "end": 127,
+          "lines": 16
+        },
+        {
+          "start": 112,
+          "end": 127,
+          "lines": 16
+        }
+      ],
+      "components/ErrorBoundary.tsx": [
+        {
+          "start": 16,
+          "end": 31,
+          "lines": 16
+        },
+        {
+          "start": 16,
+          "end": 31,
+          "lines": 16
+        }
+      ],
+      "hooks/usePreferences.ts": [
+        {
+          "start": 1,
+          "end": 19,
+          "lines": 19
+        },
+        {
+          "start": 1,
+          "end": 19,
+          "lines": 19
+        },
+        {
+          "start": 183,
+          "end": 220,
+          "lines": 38
+        },
+        {
+          "start": 183,
+          "end": 220,
+          "lines": 38
+        }
+      ],
+      "lib/preferences/constants.ts": [
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        },
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        }
+      ],
+      "lib/dashboard/storage.ts": [
+        {
+          "start": 180,
+          "end": 195,
+          "lines": 16
+        },
+        {
+          "start": 180,
+          "end": 195,
+          "lines": 16
+        },
+        {
+          "start": 222,
+          "end": 233,
+          "lines": 12
+        },
+        {
+          "start": 222,
+          "end": 233,
+          "lines": 12
+        }
+      ],
+      "components/dashboard/SpendingChart.tsx": [
+        {
+          "start": 53,
+          "end": 76,
+          "lines": 24
+        },
+        {
+          "start": 53,
+          "end": 76,
+          "lines": 24
+        }
+      ],
+      "lib/preferences/validation.ts": [
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        },
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        },
+        {
+          "start": 169,
+          "end": 179,
+          "lines": 11
+        },
+        {
+          "start": 169,
+          "end": 179,
+          "lines": 11
+        },
+        {
+          "start": 222,
+          "end": 234,
+          "lines": 13
+        },
+        {
+          "start": 222,
+          "end": 234,
+          "lines": 13
+        },
+        {
+          "start": 261,
+          "end": 277,
+          "lines": 17
+        },
+        {
+          "start": 261,
+          "end": 277,
+          "lines": 17
+        },
+        {
+          "start": 359,
+          "end": 371,
+          "lines": 13
+        },
+        {
+          "start": 359,
+          "end": 371,
+          "lines": 13
+        },
+        {
+          "start": 468,
+          "end": 484,
+          "lines": 17
+        },
+        {
+          "start": 468,
+          "end": 484,
+          "lines": 17
+        }
+      ],
+      "lib/payment-status/PaymentStatusService.ts": [
+        {
+          "start": 1,
+          "end": 16,
+          "lines": 16
+        },
+        {
+          "start": 1,
+          "end": 16,
+          "lines": 16
+        }
+      ],
+      "components/categories/CategoryForm.tsx": [
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 178,
+          "end": 195,
+          "lines": 18
+        },
+        {
+          "start": 178,
+          "end": 195,
+          "lines": 18
+        }
+      ],
+      "components/categories/DeleteCategoryDialog.tsx": [
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 40,
+          "end": 60,
+          "lines": 21
+        },
+        {
+          "start": 40,
+          "end": 60,
+          "lines": 21
+        }
+      ],
+      "hooks/usePaymentArchives.ts": [
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        },
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        },
+        {
+          "start": 35,
+          "end": 56,
+          "lines": 22
+        },
+        {
+          "start": 35,
+          "end": 56,
+          "lines": 22
+        },
+        {
+          "start": 139,
+          "end": 160,
+          "lines": 22
+        },
+        {
+          "start": 139,
+          "end": 160,
+          "lines": 22
+        },
+        {
+          "start": 172,
+          "end": 196,
+          "lines": 25
+        },
+        {
+          "start": 172,
+          "end": 196,
+          "lines": 25
+        }
+      ],
+      "components/archive/CreateArchiveDialog.tsx": [
+        {
+          "start": 24,
+          "end": 36,
+          "lines": 13
+        },
+        {
+          "start": 24,
+          "end": 36,
+          "lines": 13
+        },
+        {
+          "start": 118,
+          "end": 140,
+          "lines": 23
+        },
+        {
+          "start": 118,
+          "end": 140,
+          "lines": 23
+        },
+        {
+          "start": 150,
+          "end": 165,
+          "lines": 16
+        },
+        {
+          "start": 150,
+          "end": 165,
+          "lines": 16
+        }
+      ],
+      "types/csvExport.ts": [
+        {
+          "start": 27,
+          "end": 43,
+          "lines": 17
+        },
+        {
+          "start": 27,
+          "end": 43,
+          "lines": 17
+        }
+      ],
+      "components/categories/CategoryCard.tsx": [
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 32,
+          "end": 48,
+          "lines": 17
+        },
+        {
+          "start": 32,
+          "end": 48,
+          "lines": 17
+        },
+        {
+          "start": 76,
+          "end": 95,
+          "lines": 20
+        },
+        {
+          "start": 76,
+          "end": 95,
+          "lines": 20
+        }
+      ],
+      "constants/zIndex.ts": [
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        }
+      ],
+      "lib/archive/constants.ts": [
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        }
+      ],
+      "hooks/usePaymentStatus.ts": [
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 167,
+          "end": 195,
+          "lines": 29
+        },
+        {
+          "start": 167,
+          "end": 195,
+          "lines": 29
+        }
+      ],
+      "hooks/useDashboardData.ts": [
+        {
+          "start": 93,
+          "end": 126,
+          "lines": 34
+        },
+        {
+          "start": 93,
+          "end": 126,
+          "lines": 34
+        }
+      ],
+      "lib/archive/ArchiveService.ts": [
+        {
+          "start": 1,
+          "end": 19,
+          "lines": 19
+        },
+        {
+          "start": 1,
+          "end": 19,
+          "lines": 19
+        },
+        {
+          "start": 50,
+          "end": 60,
+          "lines": 11
+        },
+        {
+          "start": 50,
+          "end": 60,
+          "lines": 11
+        },
+        {
+          "start": 73,
+          "end": 87,
+          "lines": 15
+        },
+        {
+          "start": 73,
+          "end": 87,
+          "lines": 15
+        },
+        {
+          "start": 317,
+          "end": 329,
+          "lines": 13
+        },
+        {
+          "start": 317,
+          "end": 329,
+          "lines": 13
+        },
+        {
+          "start": 393,
+          "end": 407,
+          "lines": 15
+        },
+        {
+          "start": 393,
+          "end": 407,
+          "lines": 15
+        },
+        {
+          "start": 447,
+          "end": 457,
+          "lines": 11
+        },
+        {
+          "start": 447,
+          "end": 457,
+          "lines": 11
+        },
+        {
+          "start": 474,
+          "end": 490,
+          "lines": 17
+        },
+        {
+          "start": 474,
+          "end": 490,
+          "lines": 17
+        },
+        {
+          "start": 556,
+          "end": 578,
+          "lines": 23
+        },
+        {
+          "start": 556,
+          "end": 578,
+          "lines": 23
+        },
+        {
+          "start": 610,
+          "end": 636,
+          "lines": 27
+        },
+        {
+          "start": 610,
+          "end": 636,
+          "lines": 27
+        }
+      ],
+      "types/navigation.ts": [
+        {
+          "start": 43,
+          "end": 54,
+          "lines": 12
+        },
+        {
+          "start": 43,
+          "end": 54,
+          "lines": 12
+        }
+      ],
+      "pages/ArchiveListPage.tsx": [
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        },
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        }
+      ],
+      "services/csvExportService.ts": [
+        {
+          "start": 14,
+          "end": 25,
+          "lines": 12
+        },
+        {
+          "start": 14,
+          "end": 25,
+          "lines": 12
+        },
+        {
+          "start": 85,
+          "end": 95,
+          "lines": 11
+        },
+        {
+          "start": 85,
+          "end": 95,
+          "lines": 11
+        },
+        {
+          "start": 108,
+          "end": 119,
+          "lines": 12
+        },
+        {
+          "start": 108,
+          "end": 119,
+          "lines": 12
+        },
+        {
+          "start": 139,
+          "end": 150,
+          "lines": 12
+        },
+        {
+          "start": 139,
+          "end": 150,
+          "lines": 12
+        }
+      ],
+      "routes.ts": [
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        },
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        }
+      ],
+      "types/transaction.ts": [
+        {
+          "start": 11,
+          "end": 23,
+          "lines": 13
+        },
+        {
+          "start": 11,
+          "end": 23,
+          "lines": 13
+        }
+      ],
+      "components/transactions/TransactionCard.tsx": [
+        {
+          "start": 54,
+          "end": 81,
+          "lines": 28
+        },
+        {
+          "start": 54,
+          "end": 81,
+          "lines": 28
+        }
+      ],
+      "pages/Transactions.tsx": [
+        {
+          "start": 120,
+          "end": 146,
+          "lines": 27
+        },
+        {
+          "start": 120,
+          "end": 146,
+          "lines": 27
+        }
+      ],
+      "hooks/useLocalStorage.ts": [
+        {
+          "start": 1,
+          "end": 23,
+          "lines": 23
+        },
+        {
+          "start": 1,
+          "end": 23,
+          "lines": 23
+        },
+        {
+          "start": 32,
+          "end": 45,
+          "lines": 14
+        },
+        {
+          "start": 32,
+          "end": 45,
+          "lines": 14
+        },
+        {
+          "start": 83,
+          "end": 94,
+          "lines": 12
+        },
+        {
+          "start": 83,
+          "end": 94,
+          "lines": 12
+        }
+      ],
+      "components/dashboard/IncomeExpensesChart.tsx": [
+        {
+          "start": 80,
+          "end": 105,
+          "lines": 26
+        },
+        {
+          "start": 80,
+          "end": 105,
+          "lines": 26
+        }
+      ],
+      "lib/payment-status/utils.ts": [
+        {
+          "start": 13,
+          "end": 28,
+          "lines": 16
+        },
+        {
+          "start": 13,
+          "end": 28,
+          "lines": 16
+        },
+        {
+          "start": 33,
+          "end": 46,
+          "lines": 14
+        },
+        {
+          "start": 33,
+          "end": 46,
+          "lines": 14
+        },
+        {
+          "start": 51,
+          "end": 66,
+          "lines": 16
+        },
+        {
+          "start": 51,
+          "end": 66,
+          "lines": 16
+        },
+        {
+          "start": 88,
+          "end": 102,
+          "lines": 15
+        },
+        {
+          "start": 88,
+          "end": 102,
+          "lines": 15
+        },
+        {
+          "start": 112,
+          "end": 126,
+          "lines": 15
+        },
+        {
+          "start": 112,
+          "end": 126,
+          "lines": 15
+        }
+      ],
+      "components/navigation/NavigationHeader.tsx": [
+        {
+          "start": 172,
+          "end": 192,
+          "lines": 21
+        },
+        {
+          "start": 172,
+          "end": 192,
+          "lines": 21
+        }
+      ],
+      "components/categories/CategorySelector.tsx": [
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 37,
+          "end": 54,
+          "lines": 18
+        },
+        {
+          "start": 37,
+          "end": 54,
+          "lines": 18
+        },
+        {
+          "start": 110,
+          "end": 131,
+          "lines": 22
+        },
+        {
+          "start": 110,
+          "end": 131,
+          "lines": 22
+        }
+      ],
+      "types/budget.ts": [
+        {
+          "start": 11,
+          "end": 23,
+          "lines": 13
+        },
+        {
+          "start": 11,
+          "end": 23,
+          "lines": 13
+        }
+      ],
+      "lib/archive/types.ts": [
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 17,
+          "end": 40,
+          "lines": 24
+        },
+        {
+          "start": 17,
+          "end": 40,
+          "lines": 24
+        },
+        {
+          "start": 60,
+          "end": 72,
+          "lines": 13
+        },
+        {
+          "start": 60,
+          "end": 72,
+          "lines": 13
+        },
+        {
+          "start": 78,
+          "end": 93,
+          "lines": 16
+        },
+        {
+          "start": 78,
+          "end": 93,
+          "lines": 16
+        },
+        {
+          "start": 102,
+          "end": 122,
+          "lines": 21
+        },
+        {
+          "start": 102,
+          "end": 122,
+          "lines": 21
+        },
+        {
+          "start": 132,
+          "end": 146,
+          "lines": 15
+        },
+        {
+          "start": 132,
+          "end": 146,
+          "lines": 15
+        },
+        {
+          "start": 156,
+          "end": 174,
+          "lines": 19
+        },
+        {
+          "start": 156,
+          "end": 174,
+          "lines": 19
+        },
+        {
+          "start": 187,
+          "end": 208,
+          "lines": 22
+        },
+        {
+          "start": 187,
+          "end": 208,
+          "lines": 22
+        },
+        {
+          "start": 226,
+          "end": 237,
+          "lines": 12
+        },
+        {
+          "start": 226,
+          "end": 237,
+          "lines": 12
+        },
+        {
+          "start": 260,
+          "end": 275,
+          "lines": 16
+        },
+        {
+          "start": 260,
+          "end": 275,
+          "lines": 16
+        }
+      ],
+      "components/navigation/MobileMenu.tsx": [
+        {
+          "start": 16,
+          "end": 29,
+          "lines": 14
+        },
+        {
+          "start": 16,
+          "end": 29,
+          "lines": 14
+        },
+        {
+          "start": 194,
+          "end": 210,
+          "lines": 17
+        },
+        {
+          "start": 194,
+          "end": 210,
+          "lines": 17
+        }
+      ],
+      "pages/Budgets.tsx": [
+        {
+          "start": 1,
+          "end": 16,
+          "lines": 16
+        },
+        {
+          "start": 1,
+          "end": 16,
+          "lines": 16
+        },
+        {
+          "start": 122,
+          "end": 136,
+          "lines": 15
+        },
+        {
+          "start": 122,
+          "end": 136,
+          "lines": 15
+        },
+        {
+          "start": 156,
+          "end": 168,
+          "lines": 13
+        },
+        {
+          "start": 156,
+          "end": 168,
+          "lines": 13
+        },
+        {
+          "start": 179,
+          "end": 200,
+          "lines": 22
+        },
+        {
+          "start": 179,
+          "end": 200,
+          "lines": 22
+        },
+        {
+          "start": 209,
+          "end": 219,
+          "lines": 11
+        },
+        {
+          "start": 209,
+          "end": 219,
+          "lines": 11
+        }
+      ],
+      "components/archive/ExportArchiveButton.tsx": [
+        {
+          "start": 25,
+          "end": 35,
+          "lines": 11
+        },
+        {
+          "start": 25,
+          "end": 35,
+          "lines": 11
+        }
+      ],
+      "components/preferences/PreferenceToggle.tsx": [
+        {
+          "start": 1,
+          "end": 18,
+          "lines": 18
+        },
+        {
+          "start": 1,
+          "end": 18,
+          "lines": 18
+        },
+        {
+          "start": 44,
+          "end": 55,
+          "lines": 12
+        },
+        {
+          "start": 44,
+          "end": 55,
+          "lines": 12
+        }
+      ],
+      "lib/categories/CategoryStorageService.ts": [
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 39,
+          "end": 59,
+          "lines": 21
+        },
+        {
+          "start": 39,
+          "end": 59,
+          "lines": 21
+        },
+        {
+          "start": 300,
+          "end": 346,
+          "lines": 47
+        },
+        {
+          "start": 300,
+          "end": 346,
+          "lines": 47
+        }
+      ],
+      "components/ResultsThisWeek.tsx": [
+        {
+          "start": 183,
+          "end": 201,
+          "lines": 19
+        },
+        {
+          "start": 183,
+          "end": 201,
+          "lines": 19
+        },
+        {
+          "start": 233,
+          "end": 266,
+          "lines": 34
+        },
+        {
+          "start": 233,
+          "end": 266,
+          "lines": 34
+        }
+      ],
+      "pages/ArchiveDetailView.tsx": [
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 210,
+          "end": 227,
+          "lines": 18
+        },
+        {
+          "start": 210,
+          "end": 227,
+          "lines": 18
+        },
+        {
+          "start": 316,
+          "end": 340,
+          "lines": 25
+        },
+        {
+          "start": 316,
+          "end": 340,
+          "lines": 25
+        }
+      ],
+      "lib/security/ConsoleGuard.ts": [
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 70,
+          "end": 80,
+          "lines": 11
+        },
+        {
+          "start": 70,
+          "end": 80,
+          "lines": 11
+        }
+      ],
+      "lib/telemetry.ts": [
+        {
+          "start": 165,
+          "end": 194,
+          "lines": 30
+        },
+        {
+          "start": 165,
+          "end": 194,
+          "lines": 30
+        }
+      ],
+      "hooks/useCategories.ts": [
+        {
+          "start": 35,
+          "end": 62,
+          "lines": 28
+        },
+        {
+          "start": 35,
+          "end": 62,
+          "lines": 28
+        }
+      ],
+      "pages/Dashboard.tsx": [
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 26,
+          "end": 42,
+          "lines": 17
+        },
+        {
+          "start": 26,
+          "end": 42,
+          "lines": 17
+        }
+      ],
+      "types/category.ts": [
+        {
+          "start": 11,
+          "end": 24,
+          "lines": 14
+        },
+        {
+          "start": 11,
+          "end": 24,
+          "lines": 14
+        }
+      ],
+      "components/preferences/InlineStatusIndicator.tsx": [
+        {
+          "start": 1,
+          "end": 18,
+          "lines": 18
+        },
+        {
+          "start": 1,
+          "end": 18,
+          "lines": 18
+        },
+        {
+          "start": 40,
+          "end": 50,
+          "lines": 11
+        },
+        {
+          "start": 40,
+          "end": 50,
+          "lines": 11
+        }
+      ],
+      "components/preferences/PreferenceSettings.tsx": [
+        {
+          "start": 1,
+          "end": 19,
+          "lines": 19
+        },
+        {
+          "start": 1,
+          "end": 19,
+          "lines": 19
+        },
+        {
+          "start": 49,
+          "end": 64,
+          "lines": 16
+        },
+        {
+          "start": 49,
+          "end": 64,
+          "lines": 16
+        },
+        {
+          "start": 223,
+          "end": 247,
+          "lines": 25
+        },
+        {
+          "start": 223,
+          "end": 247,
+          "lines": 25
+        },
+        {
+          "start": 271,
+          "end": 295,
+          "lines": 25
+        },
+        {
+          "start": 271,
+          "end": 295,
+          "lines": 25
+        }
+      ],
+      "lib/payment-status/PaymentStatusStorage.ts": [
+        {
+          "start": 1,
+          "end": 18,
+          "lines": 18
+        },
+        {
+          "start": 1,
+          "end": 18,
+          "lines": 18
+        }
+      ],
+      "lib/payment-status/constants.ts": [
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        }
+      ],
+      "contexts/PaymentContext.tsx": [
+        {
+          "start": 1,
+          "end": 17,
+          "lines": 17
+        },
+        {
+          "start": 1,
+          "end": 17,
+          "lines": 17
+        },
+        {
+          "start": 36,
+          "end": 49,
+          "lines": 14
+        },
+        {
+          "start": 36,
+          "end": 50,
+          "lines": 15
+        },
+        {
+          "start": 62,
+          "end": 86,
+          "lines": 25
+        },
+        {
+          "start": 62,
+          "end": 86,
+          "lines": 25
+        }
+      ],
+      "components/archive/DeleteArchiveDialog.tsx": [
+        {
+          "start": 19,
+          "end": 33,
+          "lines": 15
+        },
+        {
+          "start": 19,
+          "end": 33,
+          "lines": 15
+        }
+      ],
+      "components/budgets/BudgetForm.tsx": [
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 177,
+          "end": 207,
+          "lines": 31
+        },
+        {
+          "start": 177,
+          "end": 207,
+          "lines": 31
+        }
+      ],
+      "components/navigation/Breadcrumbs.tsx": [
+        {
+          "start": 29,
+          "end": 39,
+          "lines": 11
+        }
+      ],
+      "lib/payment-status/types.ts": [
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        },
+        {
+          "start": 1,
+          "end": 11,
+          "lines": 11
+        },
+        {
+          "start": 20,
+          "end": 30,
+          "lines": 11
+        },
+        {
+          "start": 20,
+          "end": 30,
+          "lines": 11
+        },
+        {
+          "start": 37,
+          "end": 49,
+          "lines": 13
+        },
+        {
+          "start": 37,
+          "end": 49,
+          "lines": 13
+        },
+        {
+          "start": 102,
+          "end": 117,
+          "lines": 16
+        },
+        {
+          "start": 102,
+          "end": 117,
+          "lines": 16
+        }
+      ],
+      "components/payment-status/StatusIndicator.tsx": [
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        },
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        },
+        {
+          "start": 40,
+          "end": 51,
+          "lines": 12
+        },
+        {
+          "start": 40,
+          "end": 51,
+          "lines": 12
+        },
+        {
+          "start": 97,
+          "end": 111,
+          "lines": 15
+        },
+        {
+          "start": 97,
+          "end": 111,
+          "lines": 15
+        }
+      ],
+      "components/dashboard/LoadingSkeleton.tsx": [
+        {
+          "start": 1,
+          "end": 21,
+          "lines": 21
+        },
+        {
+          "start": 1,
+          "end": 21,
+          "lines": 21
+        },
+        {
+          "start": 73,
+          "end": 90,
+          "lines": 18
+        },
+        {
+          "start": 73,
+          "end": 90,
+          "lines": 18
+        },
+        {
+          "start": 97,
+          "end": 114,
+          "lines": 18
+        },
+        {
+          "start": 97,
+          "end": 114,
+          "lines": 18
+        }
+      ],
+      "contexts/__tests__/PaymentContext.test.tsx": [
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        }
+      ],
+      "lib/dashboard/gamification.ts": [
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 1,
+          "end": 13,
+          "lines": 13
+        },
+        {
+          "start": 163,
+          "end": 183,
+          "lines": 21
+        },
+        {
+          "start": 163,
+          "end": 183,
+          "lines": 21
+        },
+        {
+          "start": 287,
+          "end": 302,
+          "lines": 16
+        },
+        {
+          "start": 287,
+          "end": 302,
+          "lines": 16
+        },
+        {
+          "start": 394,
+          "end": 409,
+          "lines": 16
+        },
+        {
+          "start": 394,
+          "end": 409,
+          "lines": 16
+        }
+      ],
+      "lib/dashboard/aggregation.ts": [
+        {
+          "start": 241,
+          "end": 264,
+          "lines": 24
+        },
+        {
+          "start": 241,
+          "end": 264,
+          "lines": 24
+        },
+        {
+          "start": 368,
+          "end": 384,
+          "lines": 17
+        },
+        {
+          "start": 368,
+          "end": 384,
+          "lines": 17
+        }
+      ],
+      "lib/archive/validation.ts": [
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        },
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        },
+        {
+          "start": 171,
+          "end": 182,
+          "lines": 12
+        },
+        {
+          "start": 171,
+          "end": 182,
+          "lines": 12
+        }
+      ],
+      "lib/archive/performance.ts": [
+        {
+          "start": 62,
+          "end": 84,
+          "lines": 23
+        },
+        {
+          "start": 62,
+          "end": 84,
+          "lines": 23
+        },
+        {
+          "start": 121,
+          "end": 139,
+          "lines": 19
+        },
+        {
+          "start": 121,
+          "end": 139,
+          "lines": 19
+        },
+        {
+          "start": 160,
+          "end": 178,
+          "lines": 19
+        },
+        {
+          "start": 160,
+          "end": 178,
+          "lines": 19
+        },
+        {
+          "start": 199,
+          "end": 215,
+          "lines": 17
+        },
+        {
+          "start": 199,
+          "end": 215,
+          "lines": 17
+        }
+      ],
+      "lib/archive/__tests__/test-helpers.ts": [
+        {
+          "start": 14,
+          "end": 28,
+          "lines": 15
+        },
+        {
+          "start": 14,
+          "end": 28,
+          "lines": 15
+        }
+      ],
+      "components/budgets/BudgetList.tsx": [
+        {
+          "start": 1,
+          "end": 16,
+          "lines": 16
+        },
+        {
+          "start": 1,
+          "end": 16,
+          "lines": 16
+        },
+        {
+          "start": 31,
+          "end": 50,
+          "lines": 20
+        },
+        {
+          "start": 31,
+          "end": 50,
+          "lines": 20
+        }
+      ],
+      "components/TelemetryConsentBanner.tsx": [
+        {
+          "start": 9,
+          "end": 22,
+          "lines": 14
+        },
+        {
+          "start": 9,
+          "end": 22,
+          "lines": 14
+        },
+        {
+          "start": 296,
+          "end": 306,
+          "lines": 11
+        },
+        {
+          "start": 296,
+          "end": 306,
+          "lines": 11
+        }
+      ],
+      "lib/preferences/PreferenceStorageService.ts": [
+        {
+          "start": 1,
+          "end": 16,
+          "lines": 16
+        },
+        {
+          "start": 1,
+          "end": 16,
+          "lines": 16
+        },
+        {
+          "start": 38,
+          "end": 64,
+          "lines": 27
+        },
+        {
+          "start": 38,
+          "end": 64,
+          "lines": 27
+        },
+        {
+          "start": 80,
+          "end": 90,
+          "lines": 11
+        },
+        {
+          "start": 80,
+          "end": 90,
+          "lines": 11
+        },
+        {
+          "start": 192,
+          "end": 204,
+          "lines": 13
+        },
+        {
+          "start": 192,
+          "end": 204,
+          "lines": 13
+        },
+        {
+          "start": 375,
+          "end": 385,
+          "lines": 11
+        },
+        {
+          "start": 375,
+          "end": 385,
+          "lines": 11
+        },
+        {
+          "start": 421,
+          "end": 431,
+          "lines": 11
+        },
+        {
+          "start": 421,
+          "end": 431,
+          "lines": 11
+        }
+      ],
+      "lib/archive/ArchiveStorage.ts": [
+        {
+          "start": 1,
+          "end": 18,
+          "lines": 18
+        },
+        {
+          "start": 1,
+          "end": 18,
+          "lines": 18
+        }
+      ],
+      "hooks/useBudgets.ts": [
+        {
+          "start": 45,
+          "end": 68,
+          "lines": 24
+        },
+        {
+          "start": 45,
+          "end": 68,
+          "lines": 24
+        }
+      ],
+      "components/categories/CategoryList.tsx": [
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 1,
+          "end": 14,
+          "lines": 14
+        },
+        {
+          "start": 27,
+          "end": 43,
+          "lines": 17
+        },
+        {
+          "start": 27,
+          "end": 43,
+          "lines": 17
+        }
+      ],
+      "pages/Categories.tsx": [
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 1,
+          "end": 15,
+          "lines": 15
+        },
+        {
+          "start": 99,
+          "end": 113,
+          "lines": 15
+        },
+        {
+          "start": 99,
+          "end": 113,
+          "lines": 15
+        },
+        {
+          "start": 121,
+          "end": 141,
+          "lines": 21
+        },
+        {
+          "start": 121,
+          "end": 141,
+          "lines": 21
+        }
+      ],
+      "lib/payment-status/validation.ts": [
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        },
+        {
+          "start": 1,
+          "end": 12,
+          "lines": 12
+        },
+        {
+          "start": 50,
+          "end": 62,
+          "lines": 13
+        },
+        {
+          "start": 50,
+          "end": 62,
+          "lines": 13
+        },
+        {
+          "start": 79,
+          "end": 94,
+          "lines": 16
+        },
+        {
+          "start": 79,
+          "end": 94,
+          "lines": 16
+        },
+        {
+          "start": 119,
+          "end": 133,
+          "lines": 15
+        },
+        {
+          "start": 119,
+          "end": 133,
+          "lines": 15
+        }
+      ]
+    },
+    "empty_files": []
+  },
+  "statistics": {
+    "total_files": 161,
+    "reachable_files": 2,
+    "dead_files": 139,
+    "dead_exports": 51,
+    "files_with_dead_exports": 2,
+    "files_with_commented_code": 81,
+    "dead_code_percentage": 86.33540372670807,
+    "potential_size_savings_bytes": 695377,
+    "potential_size_savings_kb": 679.0791015625
+  },
+  "safe_to_delete": [
+    "components/payment-status/PaymentCheckbox.tsx",
+    "lib/validation/RuntimeTypeGuard.ts",
+    "components/dashboard/UpcomingBillsWidget.tsx",
+    "lib/archive/utils.ts",
+    "lib/dashboard/schemas.ts",
+    "components/preferences/ToastNotification.tsx",
+    "contexts/PaymentContext.types.ts",
+    "hooks/useNavigationState.ts",
+    "types/goal.ts",
+    "components/archive/ArchiveErrorBoundary.tsx",
+    "types/bill.ts",
+    "components/archive/ArchiveListItem.tsx",
+    "components/dashboard/GamificationWidget.tsx",
+    "lib/budgets/calculations.ts",
+    "components/budgets/BudgetCard.tsx",
+    "components/dashboard/GoalProgressWidget.tsx",
+    "lib/budgets/BudgetStorageService.ts",
+    "components/ui/select.tsx",
+    "components/archive/ArchiveStatistics.tsx",
+    "lib/api.ts",
+    "hooks/useBudgetProgress.ts",
+    "components/ErrorBoundary.tsx",
+    "components/ui/badge.constants.ts",
+    "hooks/usePreferences.ts",
+    "lib/preferences/constants.ts",
+    "main.tsx",
+    "lib/utils.ts",
+    "lib/dashboard/storage.ts",
+    "lib/preferences/schemas.ts",
+    "components/dashboard/SpendingChart.tsx",
+    "lib/preferences/validation.ts",
+    "components/dashboard/EmptyState.tsx",
+    "lib/payment-status/PaymentStatusService.ts",
+    "components/categories/CategoryForm.tsx",
+    "components/categories/DeleteCategoryDialog.tsx",
+    "hooks/usePaymentArchives.ts",
+    "components/archive/CreateArchiveDialog.tsx",
+    "components/dashboard/RecentTransactionsWidget.tsx",
+    "lib/csv.ts",
+    "lib/transactions/schemas.ts",
+    "types/csvExport.ts",
+    "components/categories/CategoryCard.tsx",
+    "lib/preferences/types.ts",
+    "constants/zIndex.ts",
+    "components/ui/alert-dialog.tsx",
+    "lib/archive/constants.ts",
+    "hooks/usePaymentStatus.ts",
+    "hooks/useDashboardData.ts",
+    "lib/transactions/TransactionStorageService.ts",
+    "lib/archive/ArchiveService.ts",
+    "lib/archive/errors.ts",
+    "components/dashboard/IncomeExpensesChartWidget.tsx",
+    "types/navigation.ts",
+    "components/ui/dialog.tsx",
+    "pages/ArchiveListPage.tsx",
+    "services/csvExportService.ts",
+    "routes.ts",
+    "App.tsx",
+    "components/ui/button.tsx",
+    "types/transaction.ts",
+    "components/transactions/TransactionCard.tsx",
+    "pages/Transactions.tsx",
+    "hooks/useLocalStorage.ts",
+    "components/dashboard/IncomeExpensesChart.tsx",
+    "lib/risk-detector.js",
+    "lib/sample.ts",
+    "lib/payment-status/utils.ts",
+    "components/transactions/TransactionForm.tsx",
+    "lib/budgets/schemas.ts",
+    "components/navigation/NavigationHeader.tsx",
+    "components/categories/CategorySelector.tsx",
+    "components/ErrorAlert.tsx",
+    "types/budget.ts",
+    "types/chart-data.ts",
+    "lib/archive/types.ts",
+    "components/navigation/MobileMenu.tsx",
+    "pages/Budgets.tsx",
+    "components/ui/input.tsx",
+    "hooks/useTransactions.ts",
+    "components/archive/ExportArchiveButton.tsx",
+    "components/preferences/PreferenceToggle.tsx",
+    "lib/categories/CategoryStorageService.ts",
+    "lib/categories/constants.ts",
+    "components/ui/tabs.tsx",
+    "pages/Privacy.tsx",
+    "components/ResultsThisWeek.tsx",
+    "pages/ArchiveDetailView.tsx",
+    "lib/security/ConsoleGuard.ts",
+    "lib/telemetry.ts",
+    "lib/budgets/constants.ts",
+    "hooks/useCategories.ts",
+    "components/SuccessToast.tsx",
+    "pages/Dashboard.tsx",
+    "types/category.ts",
+    "components/ui/button.constants.ts",
+    "components/ui/textarea.tsx",
+    "contexts/PaymentContext.context.ts",
+    "components/ui/badge.tsx",
+    "components/preferences/InlineStatusIndicator.tsx",
+    "components/preferences/PreferenceSettings.tsx",
+    "lib/payment-status/PaymentStatusStorage.ts",
+    "lib/payment-status/constants.ts",
+    "components/LoadingSpinner.tsx",
+    "contexts/PaymentContext.tsx",
+    "components/archive/DeleteArchiveDialog.tsx",
+    "components/budgets/BudgetForm.tsx",
+    "components/SummaryCard.tsx",
+    "lib/payday-calculator.js",
+    "constants/animations.ts",
+    "components/navigation/Breadcrumbs.tsx",
+    "lib/categories/predefined.ts",
+    "lib/payment-status/types.ts",
+    "components/dashboard/SpendingChartWidget.tsx",
+    "components/payment-status/StatusIndicator.tsx",
+    "components/dashboard/LoadingSkeleton.tsx",
+    "components/ui/card.tsx",
+    "components/ui/radio-group.tsx",
+    "components/ScheduleTable.tsx",
+    "lib/dashboard/gamification.ts",
+    "lib/dashboard/aggregation.ts",
+    "pages/Docs.tsx",
+    "lib/archive/validation.ts",
+    "components/ui/label.tsx",
+    "lib/archive/performance.ts",
+    "lib/categories/schemas.ts",
+    "types/dashboard.ts",
+    "components/budgets/BudgetList.tsx",
+    "components/ui/alert.tsx",
+    "components/TelemetryConsentBanner.tsx",
+    "lib/preferences/PreferenceStorageService.ts",
+    "lib/archive/ArchiveStorage.ts",
+    "hooks/useBudgets.ts",
+    "components/categories/CategoryList.tsx",
+    "pages/Categories.tsx",
+    "types/gamification.ts",
+    "components/ErrorTest.tsx",
+    "lib/csv-errors.ts",
+    "components/RiskFlags.tsx",
+    "lib/payment-status/validation.ts"
+  ]
+}

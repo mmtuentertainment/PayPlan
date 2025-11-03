@@ -17,8 +17,8 @@
  */
 
 import { useContext, useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import type { PaymentRecord } from '@/types/csvExport';
-import { paymentRecordSchema } from '@/types/csvExport';
+import type { PaymentRecord } from '@/shared/types/csvExport';
+import { paymentRecordSchema } from '@/shared/types/csvExport';
 import { PaymentContext } from './PaymentContext.context';
 import type { PaymentContextType, PaymentContextProviderProps, PaymentUpdater } from './PaymentContext.types';
 

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARIA Live Test - PayPlan</title>
+  <style>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .banner {
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    .decline {
+      background: white;
+      color: #3b82f6;
+      border: 1px solid #3b82f6;
+    }
+    .decline:hover {
+      background: #eff6ff;
+    }
+    .instructions {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+    }
+    .pass {
+      color: #16a34a;
+      font-weight: bold;
+    }
+    #status {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f3f4f6;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>ARIA Live Announcements Test</h1>
+
+  <div class="instructions">
+    <h2>Testing Instructions</h2>
+    <ol>
+      <li><strong>Enable NVDA</strong>: Press Ctrl+Alt+N (or start from menu)</li>
+      <li><strong>Test 1 - Allow</strong>: Click "Allow analytics" → Should announce "Anonymous analytics enabled"</li>
+      <li><strong>Test 2 - Decline</strong>: Reload page, click "Decline" → Should announce "Analytics disabled"</li>
+      <li><strong>Test 3 - Escape</strong>: Reload page, press Escape → Should announce "Analytics disabled"</li>
+      <li><strong>Visual Check</strong>: Verify NO visible text appears (only heard via NVDA)</li>
+    </ol>
+  </div>
+
+  <div id="app">
+    <div class="banner" role="dialog" aria-modal="true" aria-labelledby="title" aria-describedby="desc">
+      <h2 id="title">Help improve this tool</h2>
+      <p id="desc">Share anonymous usage data to help us fix bugs faster. We never collect CSV content, provider names, or amounts.</p>
+      <div style="margin-top: 1rem;">
+        <button id="allowBtn">Allow analytics</button>
+        <button id="declineBtn" class="decline">Decline</button>
+      </div>
+    </div>
+
+    <!-- ARIA live region (screen-reader only) -->
+    <div
+      id="liveRegion"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      class="sr-only"
+    ></div>
+  </div>
+
+  <div id="status">
+    <h3>Test Status</h3>
+    <p id="statusText">Waiting for user action...</p>
+  </div>
+
+  <script>
+    const banner = document.querySelector('.banner');
+    const liveRegion = document.getElementById('liveRegion');
+    const statusText = document.getElementById('statusText');
+    const allowBtn = document.getElementById('allowBtn');
+    const declineBtn = document.getElementById('declineBtn');
+
+    function announce(message, action) {
+      liveRegion.textContent = message;
+      statusText.innerHTML = `<span class="pass">✓</span> ${action}: ARIA live region updated with "${message}"`;
+
+      // Hide banner after 100ms delay (matches implementation)
+      setTimeout(() => {
+        banner.style.display = 'none';
+        statusText.innerHTML += '<br><em>Banner hidden after 100ms delay (allows announcement to complete)</em>';
+      }, 100);
+    }
+
+    allowBtn.addEventListener('click', () => {
+      announce('Anonymous analytics enabled', 'Allow clicked');
+    });
+
+    declineBtn.addEventListener('click', () => {
+      announce('Analytics disabled', 'Decline clicked');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        announce('Analytics disabled', 'Escape pressed');
+      }
+    });
+
+    // Focus first button on load
+    setTimeout(() => allowBtn.focus(), 100);
+
+    // Structural validation
+    window.addEventListener('load', () => {
+      const tests = [
+        liveRegion && liveRegion.getAttribute('role') === 'status',
+        liveRegion && liveRegion.getAttribute('aria-live') === 'polite',
+        liveRegion && liveRegion.getAttribute('aria-atomic') === 'true',
+        liveRegion && liveRegion.classList.contains('sr-only')
+      ];
+
+      if (tests.every(t => t)) {
+        console.log('✓ All ARIA attributes correct');
+      } else {
+        console.error('✗ ARIA attribute validation failed');
+      }
+    });
+  </script>
+</body>
+</html>

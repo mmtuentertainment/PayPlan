@@ -1,9 +1,36 @@
 # PayPlan Development Guide for Claude Code
 
-**Last Updated**: 2025-10-30  
-**Current Phase**: Phase 1 (Pre-MVP, 0-100 users)  
-**Constitution Version**: 1.1  
+**Last Updated**: 2025-11-02 (Major Update - Clean Architecture + TDD Requirements)
+**Current Phase**: Phase 1 (Pre-MVP, 0-100 users)
+**Constitution Version**: 3.1 (Evidence-based: Phased TDD, 8-12 features MVP, 60-80% coverage ramp)
+**Codebase Status**: ✅ CLEAN (Feature-based architecture, professionally organized)
 **Workflow**: HIL → Manus → Claude Code
+
+---
+
+## Table of Contents
+
+1. [Quick Start](#quick-start)
+2. [Your Role in the Workflow](#your-role-in-the-workflow)
+3. [Current Phase: Phase 1](#current-phase-phase-1-pre-mvp)
+4. [Project Overview](#project-overview)
+5. [Technology Stack](#technology-stack)
+6. [Project Structure](#project-structure-updated-2025-11-02)
+7. [Development Workflow](#development-workflow)
+8. [Bot Review Loop](#bot-review-loop-critical)
+9. [Phase 1 Definition of Done](#phase-1-definition-of-done-updated-v31)
+10. [Constitutional Principles](#constitutional-principles-must-follow)
+11. [Conflict Resolution](#conflict-resolution)
+12. [Mandatory Features](#mandatory-features-post-pivot-roadmap)
+13. [Code Standards](#code-standards)
+14. [Accessibility Requirements](#accessibility-requirements-immutable)
+15. [Privacy Requirements](#privacy-requirements-immutable)
+16. [Performance Guidelines](#performance-guidelines-phase-1)
+17. [Common Commands](#common-commands)
+18. [Tooling Integration](#tooling-integration)
+19. [Frequently Asked Questions](#frequently-asked-questions)
+20. [Working with the New Folder Structure](#working-with-the-new-folder-structure-2025-11-02)
+21. [Resources](#resources)
 
 ---
 
@@ -27,7 +54,7 @@ Before implementing any feature:
    - `tasks.md` - Executable task breakdown
    - `checklist.md` - Quality validation items
    - `research.md` - Deep research findings
-4. **Implement**: Follow Phase 1 requirements (no automated tests required)
+4. **Implement**: Follow Phase 1 requirements (TDD for business logic, manual testing for UI)
 5. **Create PR**: NEVER commit directly to main
 6. **Bot Review Loop**: Respond to bot feedback until both bots are green
 7. **Wait for HIL Approval**: Only merge after HIL approves
@@ -84,19 +111,25 @@ HIL (Human) → Manus (AI PM) → Claude Code (You) → Bot Reviews → HIL Appr
 
 **Goal**: Ship 8 table-stakes features in 12 weeks to reach market competitiveness
 
-**Phase 1 Priorities**:
-- ✅ **Ship features fast**: 2-week sprints, monthly releases
-- ✅ **Manual testing only**: Test features work, no automated tests required
-- ✅ **User features > Infrastructure**: Build what users see, not plumbing
-- ✅ **Simple solutions**: YAGNI principle, avoid over-engineering
-- ✅ **Accessibility**: WCAG 2.1 AA compliance (screen reader + keyboard nav)
+**Phase 1 Priorities** (Constitution v3.1 - UPDATED):
+- ✅ **TDD for Business Logic**: 80% coverage for `lib/**/*.ts` (phased ramp: 60%→70%→80%)
+- ✅ **Financial Logic**: 90%+ coverage ALWAYS (money calculations are critical!)
+- ✅ **Overall Coverage**: 40-60% minimum (business logic 80% + UI 0% = weighted)
+- ✅ **Ship 8-12 MVP features**: Focus on core features, validate market need
+- ✅ **Accessibility**: WCAG 2.2 AA compliance (updated from 2.1)
 - ✅ **Privacy**: localStorage-first, no auth required
+- ✅ **Simple solutions**: YAGNI principle, avoid over-engineering
+
+**Phase 1 TDD Approach** (Phased Transition):
+- **Weeks 1-2**: Test-after (write code, then tests) - learning phase
+- **Weeks 3-6**: Hybrid (some TDD, some test-after) - transition
+- **Week 7+**: Strict TDD (write tests first) - full adoption
 
 **Phase 1 NOT Required**:
-- ❌ Automated test suite (defer to Phase 2)
-- ❌ 80% code coverage (defer to Phase 3)
-- ❌ Performance optimization (defer to Phase 4)
-- ❌ Full Spec-Kit workflow for simple features
+- ❌ TDD for UI components (manual testing acceptable)
+- ❌ Integration test suite (defer to Phase 2)
+- ❌ E2E tests (defer to Phase 2)
+- ❌ Performance optimization (defer to Phase 4, optimize if users complain)
 
 ---
 
@@ -167,43 +200,88 @@ PayPlan is a **privacy-first budgeting app** designed to help **low-income earne
 
 ---
 
-## Project Structure
+## Project Structure (UPDATED 2025-11-02)
+
+**IMPORTANT**: PayPlan now uses **feature-based architecture** (reorganized 2025-11-02)
 
 ```
 PayPlan/
 ├── frontend/
 │   ├── src/
-│   │   ├── components/       # React components
-│   │   │   ├── ui/           # Radix UI primitives
-│   │   │   ├── charts/       # Chart components
-│   │   │   └── ...           # Feature components
-│   │   ├── lib/              # Business logic
-│   │   │   ├── storage/      # localStorage utilities
-│   │   │   ├── validation/   # Zod schemas
-│   │   │   └── ...           # Feature logic
-│   │   ├── pages/            # Route components
-│   │   ├── hooks/            # Custom React hooks
-│   │   └── App.tsx           # Root component
-│   ├── public/               # Static assets
+│   │   ├── features/              # ⭐ FEATURE-BASED ARCHITECTURE
+│   │   │   ├── categories/        # Spending categories feature (Tier 0 MVP #1)
+│   │   │   │   ├── components/    # CategoryCard, CategoryForm, CategoryList...
+│   │   │   │   ├── hooks/         # useCategories
+│   │   │   │   ├── lib/           # CategoryStorageService, schemas, constants
+│   │   │   │   ├── types/         # category.ts
+│   │   │   │   └── index.ts       # ✨ Barrel export (public API)
+│   │   │   ├── budgets/           # Budget creation feature (Tier 0 MVP #2)
+│   │   │   │   ├── components/, hooks/, lib/, types/, index.ts
+│   │   │   ├── dashboard/         # Dashboard with charts (Tier 0 MVP #3)
+│   │   │   │   ├── components/, hooks/, lib/, types/, index.ts
+│   │   │   ├── transactions/      # Transaction entry (Tier 0 MVP #8)
+│   │   │   │   ├── components/, lib/, types/, index.ts
+│   │   │   └── archive/           # Transaction archives
+│   │   │       ├── components/, hooks/, lib/, index.ts
+│   │   ├── shared/                # Shared across features
+│   │   │   ├── components/        # UI kit (Button, Alert, LoadingSpinner...)
+│   │   │   ├── lib/               # Utils, CSV, API, validation, telemetry
+│   │   │   ├── hooks/             # Shared custom hooks
+│   │   │   └── types/             # Shared types (bill, goal)
+│   │   ├── pages/                 # Route components
+│   │   ├── App.tsx, main.tsx      # Entry points
+│   │   └── routes.ts              # Route definitions
+│   ├── public/                    # Static assets
 │   └── package.json
-├── specs/                    # Feature specifications (Spec-Kit)
-│   ├── 020-spending-categories/
-│   │   ├── spec.md           # Feature specification
-│   │   ├── plan.md           # Implementation plan (Tier 2 only)
-│   │   └── tasks.md          # Task breakdown (Tier 2 only)
+├── docs/                          # ⭐ ALL DOCUMENTATION ORGANIZED
+│   ├── research/                  # Competitor analysis (15 files)
+│   ├── testing/                   # Test reports (8 files)
+│   ├── architecture/              # ADRs (Architecture Decision Records)
+│   ├── bugs/                      # Critical bug documentation
+│   ├── constitution/              # Constitution research
+│   └── archive/                   # Old files (safely archived)
+├── specs/                         # Feature specifications (10 active specs)
+│   ├── 061-spending-categories-budgets/
+│   │   ├── spec.md, plan.md, tasks.md, data-model.md, research.md
+│   ├── 062-short-name-dashboard/
 │   └── ...
 ├── memory/
-│   └── constitution.md       # Project constitution (READ THIS FIRST)
+│   └── constitution.md            # ⚠️ READ THIS FIRST (v3.1)
+├── tools/                         # Development tools
+│   └── codebase-architect/        # Codebase analysis tool
 ├── .claude/
-│   └── commands/             # Spec-Kit slash commands
-│       ├── speckit.specify.md
-│       ├── speckit.plan.md
-│       ├── speckit.tasks.md
-│       └── speckit.implement.md
-├── .coderabbit.yaml          # CodeRabbit config (constitutional enforcement)
-├── CLAUDE.md                 # This file
+│   └── commands/                  # Spec-Kit slash commands
+├── CLAUDE.md                      # This file
+├── CONTRIBUTING.md                # ⭐ NEW: Structure guide for contributors
 └── README.md
 ```
+
+**⚠️ CRITICAL**: Use the NEW feature-based structure when looking for files!
+- Old: `src/components/categories/` ❌ NO LONGER EXISTS
+- New: `src/features/categories/components/` ✅ CORRECT
+
+### Barrel Exports (Clean Imports)
+
+**Each feature has an `index.ts` barrel export for clean imports:**
+
+```typescript
+// ✅ CORRECT: Clean imports using barrel exports
+import { CategoryCard, useCategories } from '@/features/categories';
+import { BudgetCard, useBudgets } from '@/features/budgets';
+import { GamificationWidget, useDashboardData } from '@/features/dashboard';
+import { TransactionCard } from '@/features/transactions';
+import { ArchiveService } from '@/features/archive';
+
+// ❌ AVOID: Long verbose paths (still work, but not recommended)
+import { CategoryCard } from '@/features/categories/components/CategoryCard';
+import { useCategories } from '@/features/categories/hooks/useCategories';
+```
+
+**Benefits:**
+- Clean, concise imports
+- Single source of truth for public API
+- Easy to see what each feature exports
+- Better encapsulation
 
 ---
 
@@ -413,23 +491,32 @@ After you create a PR, an automated bot review loop begins. **You MUST iterate u
 
 ---
 
-## Phase 1 Definition of Done
+## Phase 1 Definition of Done (UPDATED v3.1)
 
 **A feature is "done" when**:
 
 1. ✅ **Functional**: Feature works as described in spec/issue
-2. ✅ **Manual Testing**: Tested manually, acceptance criteria met
-3. ✅ **Accessibility**: Screen reader tested (NVDA/VoiceOver), keyboard navigation works
-4. ✅ **Privacy**: No PII leaks, localStorage-first
-5. ✅ **Error Handling**: User-friendly error messages
-6. ✅ **Responsive**: Works on mobile, tablet, desktop
-7. ✅ **Documented**: README updated (if needed)
+2. ✅ **TDD for Business Logic**: All `lib/**/*.ts` files have tests (80% coverage target)
+3. ✅ **Financial Logic Tested**: Money calculations have 90%+ coverage (CRITICAL)
+4. ✅ **Overall Coverage**: 40-60% minimum (phased ramp: 60%→70%→80%)
+5. ✅ **Manual UI Testing**: UI tested manually, screenshots in PR, acceptance criteria met
+6. ✅ **Accessibility**: Screen reader tested (NVDA/VoiceOver), keyboard navigation works, WCAG 2.2 AA
+7. ✅ **Privacy**: No PII leaks, localStorage-first
+8. ✅ **Error Handling**: User-friendly error messages with recovery guidance
+9. ✅ **Responsive**: Works on mobile, tablet, desktop
+10. ✅ **Documented**: README/docs updated (if needed)
+
+**TDD Required (v3.1)**:
+- ✅ Business logic (`features/*/lib/**/*.ts`) - Write tests BEFORE or WITH code
+- ✅ Calculations (budgets, categories, etc.) - Test-first mandatory
+- ✅ Storage services - Test CRUD operations
+- ✅ Schemas (Zod validation) - Test edge cases
 
 **NOT required in Phase 1**:
-- ❌ Automated tests
-- ❌ Code coverage metrics
-- ❌ Performance benchmarks
-- ❌ Full Spec-Kit documentation
+- ❌ TDD for UI components (manual testing acceptable)
+- ❌ Integration tests (defer to Phase 2)
+- ❌ E2E tests (defer to Phase 2)
+- ❌ Performance benchmarks (defer to Phase 4)
 
 ---
 
@@ -467,11 +554,11 @@ After you create a PR, an automated bot review loop begins. **You MUST iterate u
    - Touch-friendly UI (44x44px targets)
    - PWA support (offline, installable)
 
-6. **Quality-First** (Principle VI, Phased):
-   - **Phase 1**: Manual testing only, ship fast
-   - **Phase 2**: 40% coverage, critical path tests
-   - **Phase 3**: 80% coverage, TDD for new features
-   - **Phase 4**: 90% coverage, enterprise quality
+6. **Quality-First** (Principle VI, Phased - UPDATED v3.1):
+   - **Phase 1**: TDD for business logic (60-80% coverage), manual UI testing, ship with quality
+   - **Phase 2**: Add integration tests, 70-80% overall coverage
+   - **Phase 3**: Full TDD for all code, 80-90% coverage
+   - **Phase 4**: Enterprise quality, 90%+ coverage
 
 7. **Simplicity/YAGNI** (Principle VII):
    - Small features (<2 weeks)
@@ -492,7 +579,8 @@ After you create a PR, an automated bot review loop begins. **You MUST iterate u
 
 **Example**:
 - "Should we add analytics?" → NO (Privacy-First > Product insights)
-- "Should we write tests?" → NO (Phase 1: Manual testing only)
+- "Should we write tests for business logic?" → YES (Phase 1 v3.1: TDD required for lib/**/*)
+- "Should we write tests for UI?" → NO (Phase 1: Manual UI testing acceptable)
 - "Should we optimize this chart?" → ONLY IF users complain (Phase 1: Velocity > Performance)
 
 ---
@@ -809,19 +897,22 @@ npm run lint
 npm run format
 ```
 
-### Testing (Phase 2+)
+### Testing (Phase 1+ - NOW REQUIRED)
 
 ```bash
-# Run tests
+# Run tests (business logic tests required in Phase 1!)
 npm test
 
-# Run tests with coverage
+# Run tests with coverage (target: 60-80% overall, 80% business logic)
 npm run test:coverage
 
-# Run E2E tests
+# Run tests for specific feature
+npm test features/categories
+
+# Run E2E tests (Phase 2+)
 npm run test:e2e
 
-# Run accessibility tests
+# Run accessibility tests (Phase 2+)
 npm run test:a11y
 ```
 
@@ -839,8 +930,8 @@ npm run test:a11y
 
 - Automated code review enforcing constitutional principles
 - Rejects PRs that violate IMMUTABLE principles
-- Checks accessibility (WCAG 2.1 AA)
-- Verifies Phase 1 requirements (no automated tests required)
+- Checks accessibility (WCAG 2.2 AA)
+- Verifies Phase 1 requirements (TDD for business logic, phased coverage)
 - **You must respond to ALL feedback** (fix or defer to Linear)
 
 ### Claude Code Bot (GitHub Actions)
@@ -875,15 +966,30 @@ npm run test:a11y
 
 ### Q: Do I need to write tests in Phase 1?
 
-**A: NO.** Phase 1 requires manual testing only. Automated tests are deferred to Phase 2 (100-1,000 users). Focus on shipping features fast.
+**A: YES for business logic, NO for UI.** Constitution v3.1 requires:
+- ✅ **Business logic tests** (`features/*/lib/**/*.ts`) - 80% coverage target
+- ✅ **Financial calculations** - 90%+ coverage (money is critical!)
+- ✅ **Storage services** - Test CRUD operations
+- ❌ **UI component tests** - Manual testing acceptable
+- ❌ **E2E tests** - Defer to Phase 2
+
+**Phased approach** (v3.1):
+- Weeks 1-2: Test-after (code first, then tests)
+- Weeks 3-6: Hybrid (mix of TDD and test-after)
+- Week 7+: Strict TDD (tests first)
 
 ### Q: Should I optimize performance?
 
 **A: ONLY IF users complain.** Phase 1 has no performance targets. Optimize only if users report "slow" or "laggy" features.
 
-### Q: When should I use full Spec-Kit workflow?
+### Q: When should I use Spec-Kit workflow?
 
-**A: Only for Tier 2 (complex) features.** Most features are Tier 1 (medium) and only need spec.md. Simple features (Tier 0) don't even need spec.md.
+**A: For Tier 1+ features.** Constitution v3.1 requires:
+- **Tier 0** (<3 days): GitHub issue only (no spec needed)
+- **Tier 1** (3-7 days): spec.md + plan.md minimum
+- **Tier 2** (7-14 days): Full Spec-Kit (spec, plan, tasks, research)
+
+See constitution or ask Manus if unsure which tier.
 
 ### Q: What if Privacy conflicts with a feature request?
 
@@ -899,19 +1005,107 @@ npm run test:a11y
 
 ---
 
+## Working with the New Folder Structure (2025-11-02)
+
+**IMPORTANT**: The codebase was reorganized on 2025-11-02 into a clean feature-based architecture.
+
+### Finding Code
+
+**Features** (self-contained modules):
+```
+frontend/src/features/
+├── categories/    - Spending categories (MVP #1)
+├── budgets/       - Budget creation (MVP #2)
+├── dashboard/     - Dashboard with charts (MVP #3)
+├── transactions/  - Transaction entry (MVP #8)
+└── archive/       - Transaction archives
+```
+
+**Each feature contains:**
+- `components/` - React UI components
+- `hooks/` - Custom React hooks
+- `lib/` - Business logic, storage, schemas (⚠️ TEST THIS!)
+- `types/` - TypeScript types
+- `index.ts` - Barrel export (use for clean imports)
+
+**Shared utilities:**
+```
+frontend/src/shared/
+├── components/    - UI kit, alerts, spinners
+├── lib/           - Utils, CSV, API, validation, telemetry
+├── hooks/         - Shared hooks
+└── types/         - Shared types (bill, goal)
+```
+
+### Adding a New Feature
+
+```bash
+# 1. Create feature directory
+mkdir -p frontend/src/features/my-feature/{components,hooks,lib,types}
+
+# 2. Add business logic to lib/ (with tests!)
+# Create: features/my-feature/lib/MyFeatureService.ts
+# Create: features/my-feature/lib/__tests__/MyFeatureService.test.ts
+
+# 3. Add UI components to components/
+# Create: features/my-feature/components/MyFeatureCard.tsx
+
+# 4. Create barrel export
+# Create: features/my-feature/index.ts
+# Export public API: components, hooks, lib functions, types
+
+# 5. Use clean imports
+import { MyFeatureCard } from '@/features/my-feature';
+```
+
+### Import Path Patterns
+
+```typescript
+// ✅ CORRECT: Use barrel exports
+import { CategoryCard, useCategories } from '@/features/categories';
+import { Button } from '@/shared/components/ui/button';
+import { formatCurrency } from '@/shared/lib/utils';
+
+// ❌ WRONG: Old flat structure (doesn't exist anymore!)
+import { CategoryCard } from '@/components/categories/CategoryCard';
+import { useCategories } from '@/hooks/useCategories';
+
+// ⚠️ WORKS BUT VERBOSE: Skip barrel exports
+import { CategoryCard } from '@/features/categories/components/CategoryCard';
+```
+
+### Finding Documentation
+
+**All documentation is now organized:**
+```
+docs/
+├── research/          - Competitor analysis, market research
+├── testing/           - Test reports, manual tests
+├── bugs/              - Critical bug documentation
+├── architecture/      - ADRs (Architecture Decision Records)
+├── constitution/      - Constitution research
+└── archive/           - Old files (safely kept, not deleted)
+```
+
+**See also:** `CONTRIBUTING.md` for detailed structure guide
+
+---
+
 ## Resources
 
-- **Constitution**: `memory/constitution.md` (READ THIS FIRST)
+- **Constitution**: `memory/constitution.md` (READ THIS FIRST - v3.1)
+- **Contributing Guide**: `CONTRIBUTING.md` (NEW - folder structure guide)
 - **Implementation Prompts**: `.claude/prompts/implement-*.md` (created by Manus)
 - **Spec-Kit Commands**: `.claude/commands/*.md`
 - **CodeRabbit Config**: `.coderabbit.yaml`
-- **Market Research**: `docs/market-research/*.md`
-- **Competitor Analysis**: `docs/reports/analysis/*.md`
+- **Research**: `docs/research/*.md` (15 competitor analysis files)
+- **Architecture**: `docs/architecture/decisions/*.md` (ADRs)
 
 ---
 
 ## Version History
 
+- **2025-11-02**: MAJOR UPDATE - Clean architecture, TDD requirements, v3.1 alignment, barrel exports
 - **2025-10-30**: Added Architecture Decision Records (ADR) process documentation
 - **2025-10-28**: Added HIL → Manus → Claude Code workflow, bot review loop process
 - **2025-10-27**: Updated for Constitution v1.1 (Phase 1 focus, Spec-Kit integration, tooling integration)
@@ -919,9 +1113,11 @@ npm run test:a11y
 
 ---
 
-**Remember**: You are building a privacy-first budgeting app for 40 million Gen Z users living paycheck-to-paycheck. Ship features fast, maintain accessibility, and always prioritize user privacy. Read the constitution before every feature implementation.
+**Remember**: You are building a privacy-first budgeting app for 40 million Gen Z users living paycheck-to-paycheck. Ship features with TDD for business logic, maintain accessibility, and always prioritize user privacy. Read the constitution before every feature implementation.
 
-**Current Goal**: Ship 8 table-stakes features in 12 weeks to reach market competitiveness.
+**Current Goal**: Ship 8-12 MVP features in 8-12 weeks to validate market need.
 
-**You've got this!** 🚀
+**Constitution v3.1**: Phased TDD (60%→80%), evidence-based development, sustainable pace over burnout.
+
+**Your codebase is now CLEAN and organized!** Time to build features! 🚀
 

@@ -4,10 +4,10 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { axe } from 'vitest-axe';
 import Breadcrumbs from './Breadcrumbs';
-import * as usePaymentArchivesModule from '@/hooks/usePaymentArchives';
+import * as usePaymentArchivesModule from '@/features/archive/hooks/usePaymentArchives';
 
 // Mock the usePaymentArchives hook
-vi.mock('@/hooks/usePaymentArchives');
+vi.mock('@/features/archive/hooks/usePaymentArchives');
 
 describe('Breadcrumbs', () => {
   beforeEach(() => {

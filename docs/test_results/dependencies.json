@@ -1,0 +1,2455 @@
+{
+  "language": "typescript",
+  "total_files": 159,
+  "dependencies": {
+    "App.tsx": [
+      "hooks/usePreferences",
+      "react",
+      "components/navigation/NavigationHeader",
+      "components/navigation/Breadcrumbs",
+      "pages/ArchiveListPage",
+      "lib/preferences/constants",
+      "zod",
+      "routes",
+      "components/preferences/PreferenceSettings",
+      "react-router-dom",
+      "components/preferences/ToastNotification",
+      "components/ErrorTest",
+      "pages/ArchiveDetailView",
+      "lib/preferences/schemas",
+      "components/ErrorBoundary"
+    ],
+    "main.tsx": [
+      "react",
+      "index.css",
+      "App.tsx",
+      "react-dom/client",
+      "components/ErrorBoundary"
+    ],
+    "components/SuccessToast.tsx": [
+      "lucide-react",
+      "react"
+    ],
+    "components/ErrorAlert.tsx": [
+      "lucide-react",
+      "react"
+    ],
+    "components/TelemetryConsentBanner.tsx": [
+      "react",
+      "@/lib/telemetry"
+    ],
+    "components/ErrorBoundary.tsx": [
+      "react"
+    ],
+    "components/RiskFlags.tsx": [
+      "@/components/ui/badge",
+      "@/components/ui/card"
+    ],
+    "components/ResultsThisWeek.tsx": [
+      "react",
+      "@/components/preferences/ToastNotification",
+      "@/types/csvExport",
+      "@/components/ui/button",
+      "zod",
+      "@/services/csvExportService",
+      "@/components/payment-status/StatusIndicator",
+      "@/hooks/usePaymentStatus",
+      "@/components/ui/card",
+      "@/components/payment-status/PaymentCheckbox",
+      "@/lib/security/ConsoleGuard",
+      "@/components/archive/CreateArchiveDialog",
+      "@radix-ui/react-dialog"
+    ],
+    "components/SummaryCard.tsx": [
+      "react",
+      "@/components/ui/card"
+    ],
+    "components/ScheduleTable.tsx": [
+      "@/components/ui/badge",
+      "@/components/ui/card"
+    ],
+    "components/ErrorTest.tsx": [
+      "react"
+    ],
+    "components/archive/ArchiveListItem.tsx": [
+      "components/archive/DeleteArchiveDialog",
+      "react",
+      "react-router-dom",
+      "@/lib/archive/types"
+    ],
+    "components/archive/ExportArchiveButton.tsx": [
+      "react",
+      "@/lib/archive/utils",
+      "@/lib/payment-status/PaymentStatusStorage",
+      "@/lib/archive/ArchiveStorage",
+      "@/services/csvExportService",
+      "@/lib/archive/types",
+      "@/lib/archive/ArchiveService",
+      "@/lib/archive/validation"
+    ],
+    "components/archive/ArchiveErrorBoundary.tsx": [
+      "react",
+      "@/lib/archive/errors",
+      "@/routes",
+      "react-router-dom"
+    ],
+    "components/archive/ArchiveStatistics.tsx": [
+      "@/lib/archive/validation",
+      "@/lib/archive/utils",
+      "@/lib/archive/types",
+      "zod"
+    ],
+    "components/archive/CreateArchiveDialog.tsx": [
+      "react",
+      "@/hooks/usePaymentArchives",
+      "@/types/csvExport",
+      "@/components/ui/button",
+      "@/components/ui/card"
+    ],
+    "components/archive/__tests__/ArchiveStatistics.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "components/archive/ArchiveStatistics",
+      "@/lib/archive/types"
+    ],
+    "components/archive/__tests__/DeleteArchiveDialog.test.tsx": [
+      "components/archive/DeleteArchiveDialog",
+      "vitest",
+      "@testing-library/react",
+      "@testing-library/user-event"
+    ],
+    "components/archive/__tests__/ArchiveErrorBoundary.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "react-router-dom",
+      "components/archive/ArchiveErrorBoundary"
+    ],
+    "components/archive/__tests__/CreateArchiveDialog.test.tsx": [
+      "components/archive/CreateArchiveDialog",
+      "@/types/csvExport",
+      "vitest",
+      "@testing-library/react",
+      "@testing-library/user-event"
+    ],
+    "components/archive/__tests__/ExportArchiveButton.test.tsx": [
+      "vitest",
+      "components/archive/ExportArchiveButton",
+      "@testing-library/react",
+      "@/lib/archive/types"
+    ],
+    "components/preferences/ToastNotification.tsx": [
+      "lucide-react",
+      "react",
+      "lib/preferences/constants"
+    ],
+    "components/preferences/PreferenceSettings.tsx": [
+      "lucide-react",
+      "react",
+      "components/ui/button",
+      "components/preferences/PreferenceToggle",
+      "lib/preferences/types",
+      "components/ui/card"
+    ],
+    "components/preferences/InlineStatusIndicator.tsx": [
+      "lucide-react",
+      "lib/preferences/types"
+    ],
+    "components/preferences/PreferenceToggle.tsx": [
+      "components/ui/label",
+      "lib/preferences/types"
+    ],
+    "components/dashboard/SpendingChart.tsx": [
+      "react",
+      "recharts",
+      "types/chart-data"
+    ],
+    "components/dashboard/RecentTransactionsWidget.tsx": [
+      "react",
+      "components/dashboard/EmptyState",
+      "types/transaction",
+      "react-router-dom",
+      "date-fns"
+    ],
+    "components/dashboard/EmptyState.tsx": [
+      "react"
+    ],
+    "components/dashboard/UpcomingBillsWidget.tsx": [
+      "types/bill",
+      "react",
+      "components/dashboard/EmptyState",
+      "date-fns"
+    ],
+    "components/dashboard/IncomeExpensesChartWidget.tsx": [
+      "react",
+      "components/dashboard/EmptyState",
+      "components/dashboard/IncomeExpensesChart",
+      "types/chart-data",
+      "react-router-dom"
+    ],
+    "components/dashboard/IncomeExpensesChart.tsx": [
+      "react",
+      "types/chart-data"
+    ],
+    "components/dashboard/GamificationWidget.tsx": [
+      "@/types/gamification",
+      "react",
+      "@/routes",
+      "react-router-dom"
+    ],
+    "components/dashboard/LoadingSkeleton.tsx": [
+      "react"
+    ],
+    "components/dashboard/SpendingChartWidget.tsx": [
+      "react",
+      "components/dashboard/EmptyState",
+      "types/chart-data",
+      "components/dashboard/SpendingChart"
+    ],
+    "components/dashboard/GoalProgressWidget.tsx": [
+      "types/goal",
+      "react",
+      "components/dashboard/EmptyState",
+      "react-router-dom"
+    ],
+    "components/dashboard/__tests__/GamificationWidget.test.tsx": [
+      "vitest",
+      "components/dashboard/GamificationWidget",
+      "@testing-library/react",
+      "react-router-dom"
+    ],
+    "components/transactions/TransactionCard.tsx": [
+      "lucide-react",
+      "@/types/category",
+      "@/components/ui/button",
+      "@/types/transaction",
+      "@/lib/budgets/calculations",
+      "@/components/ui/card",
+      "@/lib/utils"
+    ],
+    "components/transactions/TransactionForm.tsx": [
+      "lucide-react",
+      "react",
+      "@/types/category",
+      "@/components/ui/label",
+      "@/components/ui/input",
+      "@/components/ui/button",
+      "@/components/categories/CategorySelector",
+      "@/components/ui/alert",
+      "@/types/transaction",
+      "@/lib/transactions/schemas"
+    ],
+    "components/categories/CategoryList.tsx": [
+      "components/categories/CategoryCard",
+      "@/types/category"
+    ],
+    "components/categories/DeleteCategoryDialog.tsx": [
+      "lucide-react",
+      "@/types/category",
+      "@/components/ui/alert"
+    ],
+    "components/categories/CategoryForm.tsx": [
+      "lucide-react",
+      "react",
+      "@/types/category",
+      "@/lib/categories/schemas",
+      "@/components/ui/label",
+      "@/components/ui/input",
+      "@/components/ui/button",
+      "@/components/ui/alert",
+      "@/lib/categories/constants"
+    ],
+    "components/categories/CategorySelector.tsx": [
+      "lucide-react",
+      "@/types/category"
+    ],
+    "components/categories/CategoryCard.tsx": [
+      "lucide-react",
+      "@/types/category",
+      "@/components/ui/button",
+      "@/components/ui/card",
+      "@/lib/utils"
+    ],
+    "components/budgets/BudgetForm.tsx": [
+      "lucide-react",
+      "react",
+      "@/types/category",
+      "@/lib/budgets/schemas",
+      "@/components/ui/label",
+      "@/components/ui/input",
+      "@/components/ui/button",
+      "@/components/categories/CategorySelector",
+      "@/components/ui/alert",
+      "@/types/budget"
+    ],
+    "components/budgets/BudgetCard.tsx": [
+      "lucide-react",
+      "@/types/category",
+      "react-aria",
+      "@/components/ui/button",
+      "@/lib/budgets/calculations",
+      "@/components/ui/card",
+      "@/lib/utils",
+      "@/types/budget"
+    ],
+    "components/budgets/BudgetList.tsx": [
+      "@/types/budget",
+      "@/types/category",
+      "components/budgets/BudgetCard"
+    ],
+    "components/navigation/NavigationHeader.tsx": [
+      "react",
+      "components/navigation/MobileMenu",
+      "routes",
+      "types/navigation",
+      "hooks/useNavigationState",
+      "react-router-dom"
+    ],
+    "components/navigation/Breadcrumbs.tsx": [
+      "react",
+      "@/hooks/usePaymentArchives",
+      "zod",
+      "@radix-ui/react-tooltip",
+      "@/routes",
+      "react-router-dom"
+    ],
+    "components/navigation/MobileMenu.tsx": [
+      "react",
+      "constants/animations",
+      "types/navigation",
+      "react-router-dom",
+      "constants/zIndex",
+      "react-focus-lock"
+    ],
+    "components/navigation/Breadcrumbs.test.tsx": [
+      "components/navigation/Breadcrumbs",
+      "@/hooks/usePaymentArchives",
+      "vitest",
+      "@testing-library/react",
+      "react-router-dom",
+      "@testing-library/user-event",
+      "vitest-axe"
+    ],
+    "components/navigation/MobileMenu.test.tsx": [
+      "vitest",
+      "components/navigation/MobileMenu",
+      "@testing-library/react",
+      "react-router-dom",
+      "types/navigation",
+      "@testing-library/user-event"
+    ],
+    "components/navigation/NavigationHeader.test.tsx": [
+      "components/navigation/NavigationHeader",
+      "vitest",
+      "@testing-library/react",
+      "react-router-dom",
+      "types/navigation",
+      "@testing-library/user-event",
+      "vitest-axe"
+    ],
+    "components/payment-status/StatusIndicator.tsx": [
+      "lucide-react",
+      "components/ui/badge",
+      "lib/payment-status/types"
+    ],
+    "components/payment-status/PaymentCheckbox.tsx": [
+      "react",
+      "lib/payment-status/types"
+    ],
+    "components/ui/radio-group.tsx": [
+      "lucide-react",
+      "react",
+      "@/lib/utils",
+      "@radix-ui/react-radio-group"
+    ],
+    "components/ui/button.tsx": [
+      "react",
+      "class-variance-authority",
+      "components/ui/button.constants",
+      "@/lib/utils",
+      "@radix-ui/react-slot"
+    ],
+    "components/ui/tabs.tsx": [
+      "@/lib/utils",
+      "react",
+      "@radix-ui/react-tabs"
+    ],
+    "components/ui/card.tsx": [
+      "@/lib/utils",
+      "react"
+    ],
+    "components/ui/dialog.tsx": [
+      "lucide-react",
+      "react",
+      "@/lib/utils",
+      "@radix-ui/react-dialog"
+    ],
+    "components/ui/button.constants.ts": [
+      "class-variance-authority"
+    ],
+    "components/ui/select.tsx": [
+      "lucide-react",
+      "react",
+      "@/lib/utils",
+      "@radix-ui/react-select"
+    ],
+    "components/ui/label.tsx": [
+      "class-variance-authority",
+      "react",
+      "@/lib/utils",
+      "@radix-ui/react-label"
+    ],
+    "components/ui/textarea.tsx": [
+      "@/lib/utils",
+      "react"
+    ],
+    "components/ui/alert.tsx": [
+      "class-variance-authority",
+      "react",
+      "@/lib/utils"
+    ],
+    "components/ui/alert-dialog.tsx": [
+      "@/lib/utils",
+      "react",
+      "@/components/ui/button",
+      "@radix-ui/react-alert-dialog"
+    ],
+    "components/ui/input.tsx": [
+      "@/lib/utils",
+      "react"
+    ],
+    "components/ui/badge.constants.ts": [
+      "class-variance-authority"
+    ],
+    "components/ui/badge.tsx": [
+      "class-variance-authority",
+      "react",
+      "@/lib/utils",
+      "components/ui/badge.constants"
+    ],
+    "lib/api.ts": [
+      "zod"
+    ],
+    "lib/csv.ts": [
+      "papaparse",
+      "zod"
+    ],
+    "lib/utils.ts": [
+      "clsx",
+      "tailwind-merge"
+    ],
+    "lib/telemetry.ts": [
+      "lib/validation/RuntimeTypeGuard",
+      "lib/csv-errors"
+    ],
+    "lib/csv-errors.ts": [
+      "lib/telemetry"
+    ],
+    "lib/archive/ArchiveService.ts": [
+      "@/lib/payment-status/PaymentStatusStorage",
+      "@/types/csvExport",
+      "lib/archive/validation",
+      "lib/archive/ArchiveStorage",
+      "lib/archive/performance",
+      "papaparse"
+    ],
+    "lib/archive/validation.ts": [
+      "zod"
+    ],
+    "lib/archive/constants.ts": [
+      "lib/archive/types"
+    ],
+    "lib/archive/utils.ts": [
+      "uuid"
+    ],
+    "lib/archive/ArchiveStorage.ts": [
+      "lib/archive/performance",
+      "lib/archive/utils"
+    ],
+    "lib/archive/types.ts": [
+      "@/lib/payment-status/types"
+    ],
+    "lib/archive/__tests__/ArchiveStorage.test.ts": [
+      "vitest",
+      "lib/archive/ArchiveStorage",
+      "lib/archive/constants",
+      "lib/archive/types"
+    ],
+    "lib/archive/__tests__/validation.test.ts": [
+      "vitest",
+      "lib/archive/validation",
+      "lib/archive/constants"
+    ],
+    "lib/archive/__tests__/performance.test.ts": [
+      "vitest"
+    ],
+    "lib/archive/__tests__/test-helpers.ts": [
+      "vitest",
+      "lib/archive/types",
+      "@/types/csvExport"
+    ],
+    "lib/archive/__tests__/ArchiveService.test.ts": [
+      "@/types/csvExport",
+      "@/lib/payment-status/PaymentStatusStorage",
+      "vitest",
+      "lib/archive/ArchiveStorage",
+      "lib/archive/ArchiveService",
+      "lib/archive/constants",
+      "lib/archive/utils"
+    ],
+    "lib/preferences/schemas.ts": [
+      "lib/preferences/types",
+      "zod"
+    ],
+    "lib/preferences/validation.ts": [
+      "luxon",
+      "zod"
+    ],
+    "lib/security/ConsoleGuard.test.ts": [
+      "vitest",
+      "lib/security/ConsoleGuard"
+    ],
+    "lib/dashboard/storage.ts": [
+      "@/lib/dashboard/schemas",
+      "@/types/category",
+      "@/lib/budgets/schemas",
+      "@/lib/categories/schemas",
+      "@/types/gamification",
+      "@/types/transaction",
+      "@/lib/transactions/schemas",
+      "@/types/budget"
+    ],
+    "lib/dashboard/schemas.ts": [
+      "zod"
+    ],
+    "lib/dashboard/gamification.ts": [
+      "uuid",
+      "zod",
+      "@/types/transaction",
+      "lib/dashboard/storage",
+      "@/types/budget"
+    ],
+    "lib/dashboard/aggregation.ts": [
+      "@/types/goal",
+      "@/types/transaction",
+      "@/types/category",
+      "@/types/bill"
+    ],
+    "lib/transactions/TransactionStorageService.ts": [
+      "uuid"
+    ],
+    "lib/transactions/schemas.ts": [
+      "zod"
+    ],
+    "lib/categories/schemas.ts": [
+      "lib/categories/constants",
+      "zod"
+    ],
+    "lib/categories/predefined.ts": [
+      "types/category"
+    ],
+    "lib/categories/CategoryStorageService.ts": [
+      "uuid",
+      "lib/categories/predefined"
+    ],
+    "lib/categories/index.ts": [
+      "lib/categories/CategoryStorageService"
+    ],
+    "lib/budgets/schemas.ts": [
+      "zod"
+    ],
+    "lib/budgets/BudgetStorageService.ts": [
+      "uuid"
+    ],
+    "lib/budgets/calculations.ts": [
+      "types/transaction",
+      "types/budget",
+      "lib/budgets/constants"
+    ],
+    "lib/budgets/index.ts": [
+      "lib/budgets/BudgetStorageService"
+    ],
+    "lib/payment-status/PaymentStatusService.ts": [
+      "lib/payment-status/types",
+      "lib/payment-status/validation",
+      "lib/payment-status/constants",
+      "lib/payment-status/PaymentStatusStorage",
+      "lib/payment-status/utils"
+    ],
+    "lib/payment-status/PaymentStatusStorage.ts": [
+      "lib/payment-status/utils"
+    ],
+    "lib/payment-status/validation.ts": [
+      "zod"
+    ],
+    "lib/payment-status/constants.ts": [
+      "lib/payment-status/types"
+    ],
+    "lib/payment-status/utils.ts": [
+      "uuid"
+    ],
+    "types/csvExport.ts": [
+      "zod"
+    ],
+    "types/dashboard.ts": [
+      "types/goal",
+      "types/transaction",
+      "types/chart-data",
+      "types/gamification",
+      "types/bill"
+    ],
+    "types/navigation.ts": [
+      "react",
+      "zod"
+    ],
+    "services/csvExportService.ts": [
+      "papaparse",
+      "@/types/csvExport"
+    ],
+    "contexts/PaymentContext.context.ts": [
+      "contexts/PaymentContext.types",
+      "react"
+    ],
+    "contexts/PaymentContext.tsx": [
+      "contexts/PaymentContext.types",
+      "react",
+      "@/types/csvExport",
+      "contexts/PaymentContext.context"
+    ],
+    "contexts/PaymentContext.types.ts": [
+      "react",
+      "@/types/csvExport"
+    ],
+    "contexts/__tests__/PaymentContext.test.tsx": [
+      "react",
+      "@/types/csvExport",
+      "vitest",
+      "contexts/PaymentContext",
+      "@testing-library/react"
+    ],
+    "pages/Dashboard.tsx": [
+      "react",
+      "@/components/dashboard/RecentTransactionsWidget",
+      "@/components/dashboard/GamificationWidget",
+      "@/components/dashboard/UpcomingBillsWidget",
+      "@/components/dashboard/SpendingChartWidget",
+      "@/components/dashboard/LoadingSkeleton",
+      "@/components/dashboard/GoalProgressWidget",
+      "@/components/dashboard/IncomeExpensesChartWidget",
+      "@/hooks/useDashboardData"
+    ],
+    "pages/Budgets.tsx": [
+      "lucide-react",
+      "react",
+      "@/hooks/useCategories",
+      "@/components/budgets/BudgetForm",
+      "@/components/ui/button",
+      "@/components/ui/alert",
+      "@/lib/budgets/calculations",
+      "@/hooks/useBudgetProgress",
+      "@/hooks/useBudgets",
+      "@/types/budget",
+      "@/components/budgets/BudgetList",
+      "@/hooks/useTransactions"
+    ],
+    "pages/ArchiveDetailView.tsx": [
+      "react",
+      "@/components/archive/ExportArchiveButton",
+      "@/hooks/usePaymentArchives",
+      "@/lib/archive/ArchiveStorage",
+      "@/lib/payment-status/PaymentStatusStorage",
+      "@/components/archive/ArchiveStatistics",
+      "@/components/archive/DeleteArchiveDialog",
+      "@/routes",
+      "react-router-dom",
+      "@/lib/archive/types",
+      "@/lib/archive/ArchiveService",
+      "@/lib/archive/validation",
+      "@/components/archive/ArchiveErrorBoundary"
+    ],
+    "pages/Docs.tsx": [
+      "react",
+      "swagger-ui-react/swagger-ui.css"
+    ],
+    "pages/ArchiveListPage.tsx": [
+      "react",
+      "@/components/archive/ArchiveListItem",
+      "@/hooks/usePaymentArchives",
+      "react-router-dom"
+    ],
+    "pages/Transactions.tsx": [
+      "lucide-react",
+      "react",
+      "@/hooks/useCategories",
+      "@/components/ui/button",
+      "@/components/transactions/TransactionCard",
+      "@/components/transactions/TransactionForm",
+      "@/types/transaction",
+      "@/components/ui/alert",
+      "@/hooks/useTransactions"
+    ],
+    "pages/Categories.tsx": [
+      "lucide-react",
+      "react",
+      "@/components/categories/DeleteCategoryDialog",
+      "@/hooks/useCategories",
+      "@/components/categories/CategoryList",
+      "@/types/category",
+      "@/components/ui/button",
+      "@/components/ui/alert",
+      "@/components/categories/CategoryForm"
+    ],
+    "pages/__tests__/ArchiveListPage.test.tsx": [
+      "@/hooks/usePaymentArchives",
+      "vitest",
+      "pages/ArchiveListPage",
+      "@testing-library/react",
+      "react-router-dom"
+    ],
+    "pages/__tests__/ArchiveDetailView.test.tsx": [
+      "@/hooks/usePaymentArchives",
+      "vitest",
+      "@testing-library/react",
+      "react-router-dom",
+      "@/lib/archive/types",
+      "pages/ArchiveDetailView"
+    ],
+    "hooks/useDashboardData.ts": [
+      "@/types/goal",
+      "react",
+      "@/types/gamification",
+      "@/types/transaction",
+      "@/lib/dashboard/gamification",
+      "@/types/bill"
+    ],
+    "hooks/usePreferences.test-utils.ts": [
+      "lib/preferences/types"
+    ],
+    "hooks/usePreferences.ts": [
+      "react",
+      "lib/preferences/PreferenceStorageService",
+      "lib/preferences/constants"
+    ],
+    "hooks/useNavigationState.ts": [
+      "react"
+    ],
+    "hooks/useCategories.ts": [
+      "react",
+      "lib/categories",
+      "types/category"
+    ],
+    "hooks/usePaymentArchives.ts": [
+      "react",
+      "@/types/csvExport",
+      "@/lib/archive/ArchiveStorage",
+      "@/lib/payment-status/PaymentStatusStorage",
+      "zod",
+      "@/lib/archive/types",
+      "@/lib/archive/ArchiveService"
+    ],
+    "hooks/usePaymentStatus.ts": [
+      "react",
+      "lib/payment-status/PaymentStatusService",
+      "lib/payment-status/constants",
+      "lib/payment-status/PaymentStatusStorage"
+    ],
+    "hooks/useNavigationState.test.ts": [
+      "vitest",
+      "@testing-library/react",
+      "hooks/useNavigationState"
+    ],
+    "hooks/useBudgetProgress.ts": [
+      "types/transaction",
+      "react",
+      "types/budget"
+    ],
+    "hooks/useTransactions.ts": [
+      "react",
+      "@/types/transaction",
+      "hooks/useLocalStorage",
+      "@/lib/transactions/TransactionStorageService"
+    ],
+    "hooks/useLocalStorage.ts": [
+      "react"
+    ],
+    "hooks/useBudgets.ts": [
+      "react",
+      "types/budget",
+      "lib/budgets"
+    ]
+  },
+  "imports": {
+    "App.tsx": [
+      "react-router-dom",
+      "react",
+      "react",
+      "components/preferences/PreferenceSettings",
+      "components/preferences/ToastNotification",
+      "components/ErrorTest",
+      "hooks/usePreferences",
+      "lib/preferences/constants",
+      "lib/preferences/schemas",
+      "zod",
+      "pages/ArchiveListPage",
+      "pages/ArchiveDetailView",
+      "routes",
+      "components/navigation/NavigationHeader",
+      "components/navigation/Breadcrumbs",
+      "components/ErrorBoundary",
+      "react"
+    ],
+    "main.tsx": [
+      "react",
+      "react-dom/client",
+      "App.tsx",
+      "components/ErrorBoundary",
+      "index.css"
+    ],
+    "components/SuccessToast.tsx": [
+      "react",
+      "lucide-react"
+    ],
+    "components/ErrorAlert.tsx": [
+      "react",
+      "lucide-react"
+    ],
+    "components/TelemetryConsentBanner.tsx": [
+      "react",
+      "@/lib/telemetry"
+    ],
+    "components/ErrorBoundary.tsx": [
+      "react",
+      "react",
+      "react"
+    ],
+    "components/RiskFlags.tsx": [
+      "@/components/ui/card",
+      "@/components/ui/badge"
+    ],
+    "components/ResultsThisWeek.tsx": [
+      "react",
+      "@/components/ui/card",
+      "@/components/ui/button",
+      "@/services/csvExportService",
+      "@/types/csvExport",
+      "@/types/csvExport",
+      "@/components/preferences/ToastNotification",
+      "@/hooks/usePaymentStatus",
+      "@/components/payment-status/PaymentCheckbox",
+      "@/components/payment-status/StatusIndicator",
+      "@/components/archive/CreateArchiveDialog",
+      "zod",
+      "@radix-ui/react-dialog",
+      "@/lib/security/ConsoleGuard",
+      "@/types/csvExport"
+    ],
+    "components/SummaryCard.tsx": [
+      "react",
+      "@/components/ui/card"
+    ],
+    "components/ScheduleTable.tsx": [
+      "@/components/ui/card",
+      "@/components/ui/badge"
+    ],
+    "components/ErrorTest.tsx": [
+      "react"
+    ],
+    "components/archive/ArchiveListItem.tsx": [
+      "react",
+      "react-router-dom",
+      "@/lib/archive/types",
+      "components/archive/DeleteArchiveDialog",
+      "@/lib/archive/types"
+    ],
+    "components/archive/ExportArchiveButton.tsx": [
+      "react",
+      "@/lib/archive/types",
+      "@/lib/archive/ArchiveService",
+      "@/lib/archive/ArchiveStorage",
+      "@/lib/payment-status/PaymentStatusStorage",
+      "@/lib/archive/utils",
+      "@/services/csvExportService",
+      "@/lib/archive/validation",
+      "@/lib/archive/types"
+    ],
+    "components/archive/ArchiveErrorBoundary.tsx": [
+      "react",
+      "react",
+      "react-router-dom",
+      "@/routes",
+      "@/lib/archive/errors",
+      "react"
+    ],
+    "components/archive/ArchiveStatistics.tsx": [
+      "zod",
+      "@/lib/archive/types",
+      "@/lib/archive/utils",
+      "@/lib/archive/validation",
+      "@/lib/archive/types"
+    ],
+    "components/archive/CreateArchiveDialog.tsx": [
+      "react",
+      "@/types/csvExport",
+      "@/hooks/usePaymentArchives",
+      "@/components/ui/button",
+      "@/components/ui/card",
+      "@/types/csvExport"
+    ],
+    "components/archive/__tests__/ArchiveStatistics.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "components/archive/ArchiveStatistics",
+      "@/lib/archive/types",
+      "@/lib/archive/types"
+    ],
+    "components/archive/__tests__/DeleteArchiveDialog.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "@testing-library/user-event",
+      "components/archive/DeleteArchiveDialog"
+    ],
+    "components/archive/__tests__/ArchiveErrorBoundary.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "react-router-dom",
+      "components/archive/ArchiveErrorBoundary"
+    ],
+    "components/archive/__tests__/CreateArchiveDialog.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "@testing-library/user-event",
+      "components/archive/CreateArchiveDialog",
+      "@/types/csvExport",
+      "@/types/csvExport"
+    ],
+    "components/archive/__tests__/ExportArchiveButton.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "components/archive/ExportArchiveButton",
+      "@/lib/archive/types",
+      "@/lib/archive/types"
+    ],
+    "components/preferences/ToastNotification.tsx": [
+      "react",
+      "lucide-react",
+      "lib/preferences/constants"
+    ],
+    "components/preferences/PreferenceSettings.tsx": [
+      "react",
+      "components/ui/button",
+      "components/ui/card",
+      "components/preferences/PreferenceToggle",
+      "lib/preferences/types",
+      "lucide-react"
+    ],
+    "components/preferences/InlineStatusIndicator.tsx": [
+      "lucide-react",
+      "lib/preferences/types",
+      "lib/preferences/types"
+    ],
+    "components/preferences/PreferenceToggle.tsx": [
+      "components/ui/label",
+      "lib/preferences/types",
+      "lib/preferences/types"
+    ],
+    "components/dashboard/SpendingChart.tsx": [
+      "react",
+      "recharts",
+      "types/chart-data",
+      "types/chart-data"
+    ],
+    "components/dashboard/RecentTransactionsWidget.tsx": [
+      "react",
+      "react-router-dom",
+      "date-fns",
+      "types/transaction",
+      "components/dashboard/EmptyState",
+      "types/transaction"
+    ],
+    "components/dashboard/EmptyState.tsx": [
+      "react"
+    ],
+    "components/dashboard/UpcomingBillsWidget.tsx": [
+      "react",
+      "date-fns",
+      "types/bill",
+      "components/dashboard/EmptyState",
+      "types/bill"
+    ],
+    "components/dashboard/IncomeExpensesChartWidget.tsx": [
+      "react",
+      "react-router-dom",
+      "components/dashboard/IncomeExpensesChart",
+      "components/dashboard/EmptyState",
+      "types/chart-data",
+      "types/chart-data"
+    ],
+    "components/dashboard/IncomeExpensesChart.tsx": [
+      "react",
+      "types/chart-data",
+      "types/chart-data"
+    ],
+    "components/dashboard/GamificationWidget.tsx": [
+      "react",
+      "react-router-dom",
+      "@/types/gamification",
+      "@/routes",
+      "@/types/gamification"
+    ],
+    "components/dashboard/LoadingSkeleton.tsx": [
+      "react"
+    ],
+    "components/dashboard/SpendingChartWidget.tsx": [
+      "react",
+      "components/dashboard/SpendingChart",
+      "components/dashboard/EmptyState",
+      "types/chart-data",
+      "types/chart-data"
+    ],
+    "components/dashboard/GoalProgressWidget.tsx": [
+      "react",
+      "react-router-dom",
+      "types/goal",
+      "components/dashboard/EmptyState",
+      "types/goal"
+    ],
+    "components/dashboard/__tests__/GamificationWidget.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "react-router-dom",
+      "components/dashboard/GamificationWidget"
+    ],
+    "components/transactions/TransactionCard.tsx": [
+      "@/types/transaction",
+      "@/types/category",
+      "@/components/ui/card",
+      "@/components/ui/button",
+      "lucide-react",
+      "lucide-react",
+      "@/lib/budgets/calculations",
+      "@/lib/utils"
+    ],
+    "components/transactions/TransactionForm.tsx": [
+      "react",
+      "@/types/transaction",
+      "@/types/category",
+      "@/lib/transactions/schemas",
+      "@/components/ui/button",
+      "@/components/ui/input",
+      "@/components/ui/label",
+      "@/components/categories/CategorySelector",
+      "@/components/ui/alert",
+      "lucide-react"
+    ],
+    "components/categories/CategoryList.tsx": [
+      "@/types/category",
+      "components/categories/CategoryCard"
+    ],
+    "components/categories/DeleteCategoryDialog.tsx": [
+      "@/types/category",
+      "@/components/ui/alert",
+      "lucide-react"
+    ],
+    "components/categories/CategoryForm.tsx": [
+      "react",
+      "@/types/category",
+      "@/lib/categories/schemas",
+      "@/lib/categories/constants",
+      "@/components/ui/button",
+      "@/components/ui/input",
+      "@/components/ui/label",
+      "lucide-react",
+      "@/components/ui/alert",
+      "lucide-react"
+    ],
+    "components/categories/CategorySelector.tsx": [
+      "@/types/category",
+      "lucide-react"
+    ],
+    "components/categories/CategoryCard.tsx": [
+      "@/types/category",
+      "@/components/ui/card",
+      "@/components/ui/button",
+      "lucide-react",
+      "lucide-react",
+      "@/lib/utils"
+    ],
+    "components/budgets/BudgetForm.tsx": [
+      "react",
+      "@/types/budget",
+      "@/types/category",
+      "@/lib/budgets/schemas",
+      "@/components/ui/button",
+      "@/components/ui/input",
+      "@/components/ui/label",
+      "@/components/categories/CategorySelector",
+      "@/components/ui/alert",
+      "lucide-react"
+    ],
+    "components/budgets/BudgetCard.tsx": [
+      "@/types/budget",
+      "@/types/category",
+      "@/components/ui/card",
+      "@/components/ui/button",
+      "react-aria",
+      "lucide-react",
+      "@/lib/utils",
+      "@/lib/budgets/calculations",
+      "lucide-react"
+    ],
+    "components/budgets/BudgetList.tsx": [
+      "@/types/budget",
+      "@/types/category",
+      "components/budgets/BudgetCard"
+    ],
+    "components/navigation/NavigationHeader.tsx": [
+      "react",
+      "react-router-dom",
+      "types/navigation",
+      "routes",
+      "hooks/useNavigationState",
+      "components/navigation/MobileMenu",
+      "types/navigation"
+    ],
+    "components/navigation/Breadcrumbs.tsx": [
+      "react",
+      "react-router-dom",
+      "@radix-ui/react-tooltip",
+      "zod",
+      "@/routes",
+      "@/hooks/usePaymentArchives"
+    ],
+    "components/navigation/MobileMenu.tsx": [
+      "react",
+      "react-router-dom",
+      "react-focus-lock",
+      "types/navigation",
+      "constants/zIndex",
+      "constants/animations",
+      "types/navigation"
+    ],
+    "components/navigation/Breadcrumbs.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "@testing-library/user-event",
+      "react-router-dom",
+      "vitest-axe",
+      "components/navigation/Breadcrumbs",
+      "@/hooks/usePaymentArchives"
+    ],
+    "components/navigation/MobileMenu.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "@testing-library/user-event",
+      "react-router-dom",
+      "components/navigation/MobileMenu",
+      "types/navigation",
+      "types/navigation"
+    ],
+    "components/navigation/NavigationHeader.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "@testing-library/user-event",
+      "react-router-dom",
+      "vitest-axe",
+      "components/navigation/NavigationHeader",
+      "types/navigation",
+      "types/navigation"
+    ],
+    "components/payment-status/StatusIndicator.tsx": [
+      "lucide-react",
+      "components/ui/badge",
+      "lib/payment-status/types",
+      "lib/payment-status/types"
+    ],
+    "components/payment-status/PaymentCheckbox.tsx": [
+      "react",
+      "lib/payment-status/types",
+      "lib/payment-status/types"
+    ],
+    "components/ui/radio-group.tsx": [
+      "react",
+      "@radix-ui/react-radio-group",
+      "lucide-react",
+      "@/lib/utils"
+    ],
+    "components/ui/button.tsx": [
+      "react",
+      "@radix-ui/react-slot",
+      "class-variance-authority",
+      "@/lib/utils",
+      "components/ui/button.constants"
+    ],
+    "components/ui/tabs.tsx": [
+      "react",
+      "@radix-ui/react-tabs",
+      "@/lib/utils"
+    ],
+    "components/ui/card.tsx": [
+      "react",
+      "@/lib/utils"
+    ],
+    "components/ui/dialog.tsx": [
+      "react",
+      "@radix-ui/react-dialog",
+      "lucide-react",
+      "@/lib/utils"
+    ],
+    "components/ui/button.constants.ts": [
+      "class-variance-authority"
+    ],
+    "components/ui/select.tsx": [
+      "react",
+      "@radix-ui/react-select",
+      "lucide-react",
+      "@/lib/utils"
+    ],
+    "components/ui/label.tsx": [
+      "react",
+      "@radix-ui/react-label",
+      "class-variance-authority",
+      "@/lib/utils"
+    ],
+    "components/ui/textarea.tsx": [
+      "react",
+      "@/lib/utils"
+    ],
+    "components/ui/alert.tsx": [
+      "react",
+      "class-variance-authority",
+      "@/lib/utils"
+    ],
+    "components/ui/alert-dialog.tsx": [
+      "react",
+      "@radix-ui/react-alert-dialog",
+      "@/lib/utils",
+      "@/components/ui/button"
+    ],
+    "components/ui/input.tsx": [
+      "react",
+      "@/lib/utils"
+    ],
+    "components/ui/badge.constants.ts": [
+      "class-variance-authority"
+    ],
+    "components/ui/badge.tsx": [
+      "react",
+      "class-variance-authority",
+      "@/lib/utils",
+      "components/ui/badge.constants"
+    ],
+    "lib/api.ts": [
+      "zod"
+    ],
+    "lib/csv.ts": [
+      "papaparse",
+      "zod"
+    ],
+    "lib/utils.ts": [
+      "clsx",
+      "tailwind-merge"
+    ],
+    "lib/telemetry.ts": [
+      "lib/validation/RuntimeTypeGuard",
+      "lib/csv-errors"
+    ],
+    "lib/csv-errors.ts": [
+      "lib/telemetry",
+      "lib/telemetry"
+    ],
+    "lib/archive/ArchiveService.ts": [
+      "@/types/csvExport",
+      "lib/archive/ArchiveStorage",
+      "@/lib/payment-status/PaymentStatusStorage",
+      "lib/archive/validation",
+      "papaparse",
+      "lib/archive/performance",
+      "@/types/csvExport"
+    ],
+    "lib/archive/validation.ts": [
+      "zod"
+    ],
+    "lib/archive/constants.ts": [
+      "lib/archive/types",
+      "lib/archive/types"
+    ],
+    "lib/archive/utils.ts": [
+      "uuid"
+    ],
+    "lib/archive/ArchiveStorage.ts": [
+      "lib/archive/utils",
+      "lib/archive/performance"
+    ],
+    "lib/archive/types.ts": [
+      "@/lib/payment-status/types",
+      "@/lib/payment-status/types"
+    ],
+    "lib/archive/__tests__/ArchiveStorage.test.ts": [
+      "vitest",
+      "lib/archive/ArchiveStorage",
+      "lib/archive/constants",
+      "lib/archive/types",
+      "lib/archive/types"
+    ],
+    "lib/archive/__tests__/validation.test.ts": [
+      "vitest",
+      "lib/archive/validation",
+      "lib/archive/constants"
+    ],
+    "lib/archive/__tests__/performance.test.ts": [
+      "vitest"
+    ],
+    "lib/archive/__tests__/test-helpers.ts": [
+      "vitest",
+      "lib/archive/types",
+      "@/types/csvExport",
+      "lib/archive/types",
+      "@/types/csvExport"
+    ],
+    "lib/archive/__tests__/ArchiveService.test.ts": [
+      "vitest",
+      "lib/archive/ArchiveService",
+      "lib/archive/ArchiveStorage",
+      "@/lib/payment-status/PaymentStatusStorage",
+      "@/types/csvExport",
+      "lib/archive/constants",
+      "lib/archive/utils",
+      "@/types/csvExport"
+    ],
+    "lib/preferences/schemas.ts": [
+      "zod",
+      "lib/preferences/types"
+    ],
+    "lib/preferences/validation.ts": [
+      "zod",
+      "luxon"
+    ],
+    "lib/security/ConsoleGuard.test.ts": [
+      "vitest",
+      "lib/security/ConsoleGuard"
+    ],
+    "lib/dashboard/storage.ts": [
+      "@/types/category",
+      "@/types/transaction",
+      "@/types/budget",
+      "@/types/gamification",
+      "@/lib/categories/schemas",
+      "@/lib/transactions/schemas",
+      "@/lib/budgets/schemas",
+      "@/lib/dashboard/schemas",
+      "@/types/category",
+      "@/types/transaction",
+      "@/types/budget",
+      "@/types/gamification"
+    ],
+    "lib/dashboard/schemas.ts": [
+      "zod"
+    ],
+    "lib/dashboard/gamification.ts": [
+      "uuid",
+      "zod",
+      "@/types/transaction",
+      "@/types/budget",
+      "lib/dashboard/storage",
+      "@/types/transaction",
+      "@/types/budget"
+    ],
+    "lib/dashboard/aggregation.ts": [
+      "@/types/transaction",
+      "@/types/category",
+      "@/types/bill",
+      "@/types/goal",
+      "@/types/transaction",
+      "@/types/category",
+      "@/types/bill",
+      "@/types/goal"
+    ],
+    "lib/transactions/TransactionStorageService.ts": [
+      "uuid"
+    ],
+    "lib/transactions/schemas.ts": [
+      "zod"
+    ],
+    "lib/categories/schemas.ts": [
+      "zod",
+      "lib/categories/constants"
+    ],
+    "lib/categories/predefined.ts": [
+      "types/category",
+      "types/category"
+    ],
+    "lib/categories/CategoryStorageService.ts": [
+      "lib/categories/predefined",
+      "uuid"
+    ],
+    "lib/categories/index.ts": [
+      "lib/categories/CategoryStorageService"
+    ],
+    "lib/budgets/schemas.ts": [
+      "zod"
+    ],
+    "lib/budgets/BudgetStorageService.ts": [
+      "uuid"
+    ],
+    "lib/budgets/calculations.ts": [
+      "types/budget",
+      "types/transaction",
+      "lib/budgets/constants",
+      "types/budget",
+      "types/transaction"
+    ],
+    "lib/budgets/index.ts": [
+      "lib/budgets/BudgetStorageService"
+    ],
+    "lib/payment-status/PaymentStatusService.ts": [
+      "lib/payment-status/types",
+      "lib/payment-status/PaymentStatusStorage",
+      "lib/payment-status/validation",
+      "lib/payment-status/utils",
+      "lib/payment-status/constants",
+      "lib/payment-status/types"
+    ],
+    "lib/payment-status/PaymentStatusStorage.ts": [
+      "lib/payment-status/utils"
+    ],
+    "lib/payment-status/validation.ts": [
+      "zod"
+    ],
+    "lib/payment-status/constants.ts": [
+      "lib/payment-status/types",
+      "lib/payment-status/types"
+    ],
+    "lib/payment-status/utils.ts": [
+      "uuid"
+    ],
+    "types/csvExport.ts": [
+      "zod"
+    ],
+    "types/dashboard.ts": [
+      "types/chart-data",
+      "types/gamification",
+      "types/goal",
+      "types/transaction",
+      "types/bill",
+      "types/chart-data",
+      "types/gamification",
+      "types/goal",
+      "types/transaction",
+      "types/bill"
+    ],
+    "types/navigation.ts": [
+      "react",
+      "zod",
+      "react"
+    ],
+    "services/csvExportService.ts": [
+      "papaparse",
+      "@/types/csvExport",
+      "@/types/csvExport",
+      "@/types/csvExport"
+    ],
+    "contexts/PaymentContext.context.ts": [
+      "react",
+      "contexts/PaymentContext.types",
+      "contexts/PaymentContext.types"
+    ],
+    "contexts/PaymentContext.tsx": [
+      "react",
+      "@/types/csvExport",
+      "@/types/csvExport",
+      "contexts/PaymentContext.context",
+      "contexts/PaymentContext.types",
+      "@/types/csvExport",
+      "contexts/PaymentContext.types"
+    ],
+    "contexts/PaymentContext.types.ts": [
+      "react",
+      "@/types/csvExport",
+      "react",
+      "@/types/csvExport"
+    ],
+    "contexts/__tests__/PaymentContext.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "contexts/PaymentContext",
+      "@/types/csvExport",
+      "react",
+      "@/types/csvExport"
+    ],
+    "pages/Dashboard.tsx": [
+      "react",
+      "@/hooks/useDashboardData",
+      "@/components/dashboard/LoadingSkeleton",
+      "@/components/dashboard/SpendingChartWidget",
+      "@/components/dashboard/IncomeExpensesChartWidget",
+      "@/components/dashboard/RecentTransactionsWidget",
+      "@/components/dashboard/UpcomingBillsWidget",
+      "@/components/dashboard/GoalProgressWidget",
+      "@/components/dashboard/GamificationWidget"
+    ],
+    "pages/Budgets.tsx": [
+      "react",
+      "@/types/budget",
+      "@/hooks/useCategories",
+      "@/hooks/useBudgets",
+      "@/hooks/useTransactions",
+      "@/hooks/useBudgetProgress",
+      "@/components/budgets/BudgetList",
+      "@/components/budgets/BudgetForm",
+      "@/components/ui/button",
+      "@/components/ui/alert",
+      "lucide-react",
+      "@/lib/budgets/calculations"
+    ],
+    "pages/ArchiveDetailView.tsx": [
+      "react",
+      "react-router-dom",
+      "@/hooks/usePaymentArchives",
+      "@/lib/archive/types",
+      "@/lib/archive/validation",
+      "@/lib/archive/ArchiveService",
+      "@/lib/archive/ArchiveStorage",
+      "@/lib/payment-status/PaymentStatusStorage",
+      "@/components/archive/ArchiveStatistics",
+      "@/components/archive/ExportArchiveButton",
+      "@/components/archive/DeleteArchiveDialog",
+      "@/components/archive/ArchiveErrorBoundary",
+      "@/routes",
+      "@/lib/archive/types"
+    ],
+    "pages/Docs.tsx": [
+      "react",
+      "swagger-ui-react/swagger-ui.css"
+    ],
+    "pages/ArchiveListPage.tsx": [
+      "react",
+      "@/hooks/usePaymentArchives",
+      "@/components/archive/ArchiveListItem",
+      "react-router-dom"
+    ],
+    "pages/Transactions.tsx": [
+      "react",
+      "@/types/transaction",
+      "@/hooks/useCategories",
+      "@/hooks/useTransactions",
+      "@/components/transactions/TransactionCard",
+      "@/components/transactions/TransactionForm",
+      "@/components/ui/button",
+      "@/components/ui/alert",
+      "lucide-react"
+    ],
+    "pages/Categories.tsx": [
+      "react",
+      "@/types/category",
+      "@/hooks/useCategories",
+      "@/components/categories/CategoryList",
+      "@/components/categories/CategoryForm",
+      "@/components/categories/DeleteCategoryDialog",
+      "@/components/ui/button",
+      "@/components/ui/alert",
+      "lucide-react"
+    ],
+    "pages/__tests__/ArchiveListPage.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "react-router-dom",
+      "pages/ArchiveListPage",
+      "@/hooks/usePaymentArchives"
+    ],
+    "pages/__tests__/ArchiveDetailView.test.tsx": [
+      "vitest",
+      "@testing-library/react",
+      "react-router-dom",
+      "pages/ArchiveDetailView",
+      "@/hooks/usePaymentArchives",
+      "@/lib/archive/types",
+      "@/lib/archive/types"
+    ],
+    "hooks/useDashboardData.ts": [
+      "react",
+      "@/lib/dashboard/gamification",
+      "@/types/transaction",
+      "@/types/bill",
+      "@/types/goal",
+      "@/types/gamification",
+      "@/types/transaction",
+      "@/types/bill",
+      "@/types/goal",
+      "@/types/gamification"
+    ],
+    "hooks/usePreferences.test-utils.ts": [
+      "lib/preferences/types",
+      "lib/preferences/types"
+    ],
+    "hooks/usePreferences.ts": [
+      "react",
+      "lib/preferences/PreferenceStorageService",
+      "lib/preferences/constants"
+    ],
+    "hooks/useNavigationState.ts": [
+      "react"
+    ],
+    "hooks/useCategories.ts": [
+      "react",
+      "types/category",
+      "lib/categories",
+      "types/category"
+    ],
+    "hooks/usePaymentArchives.ts": [
+      "react",
+      "zod",
+      "@/lib/archive/types",
+      "@/types/csvExport",
+      "@/lib/archive/ArchiveService",
+      "@/lib/archive/ArchiveStorage",
+      "@/lib/payment-status/PaymentStatusStorage",
+      "@/lib/archive/types",
+      "@/types/csvExport"
+    ],
+    "hooks/usePaymentStatus.ts": [
+      "react",
+      "lib/payment-status/PaymentStatusService",
+      "lib/payment-status/PaymentStatusStorage",
+      "lib/payment-status/constants"
+    ],
+    "hooks/useNavigationState.test.ts": [
+      "vitest",
+      "@testing-library/react",
+      "hooks/useNavigationState"
+    ],
+    "hooks/useBudgetProgress.ts": [
+      "react",
+      "types/budget",
+      "types/transaction",
+      "types/budget",
+      "types/transaction"
+    ],
+    "hooks/useTransactions.ts": [
+      "react",
+      "@/types/transaction",
+      "@/lib/transactions/TransactionStorageService",
+      "hooks/useLocalStorage",
+      "@/types/transaction"
+    ],
+    "hooks/useLocalStorage.ts": [
+      "react"
+    ],
+    "hooks/useBudgets.ts": [
+      "react",
+      "types/budget",
+      "lib/budgets",
+      "types/budget"
+    ]
+  },
+  "exports": {
+    "routes.ts": [
+      "ROUTES"
+    ],
+    "components/SuccessToast.tsx": [
+      "SuccessToast"
+    ],
+    "components/LoadingSpinner.tsx": [
+      "LoadingSpinner"
+    ],
+    "components/ErrorAlert.tsx": [
+      "ErrorAlert",
+      "ErrorList"
+    ],
+    "components/TelemetryConsentBanner.tsx": [
+      "TelemetryConsentBanner"
+    ],
+    "components/RiskFlags.tsx": [
+      "RiskFlags"
+    ],
+    "components/ResultsThisWeek.tsx": [
+      "ResultsThisWeek"
+    ],
+    "components/SummaryCard.tsx": [
+      "SummaryCard"
+    ],
+    "components/ScheduleTable.tsx": [
+      "ScheduleTable"
+    ],
+    "components/ErrorTest.tsx": [
+      "ErrorTest"
+    ],
+    "components/archive/ArchiveListItem.tsx": [
+      "ArchiveListItem"
+    ],
+    "components/archive/DeleteArchiveDialog.tsx": [
+      "DeleteArchiveDialog"
+    ],
+    "components/archive/ExportArchiveButton.tsx": [
+      "ExportArchiveButton"
+    ],
+    "components/archive/ArchiveErrorBoundary.tsx": [
+      "ArchiveErrorBoundary"
+    ],
+    "components/archive/ArchiveStatistics.tsx": [
+      "ArchiveStatistics"
+    ],
+    "components/archive/CreateArchiveDialog.tsx": [
+      "CreateArchiveDialog"
+    ],
+    "components/preferences/ToastNotification.tsx": [
+      "ToastNotification"
+    ],
+    "components/preferences/PreferenceSettings.tsx": [
+      "PreferenceSettings"
+    ],
+    "components/preferences/InlineStatusIndicator.tsx": [
+      "InlineStatusIndicator"
+    ],
+    "components/preferences/PreferenceToggle.tsx": [
+      "PreferenceToggle"
+    ],
+    "components/dashboard/SpendingChart.tsx": [
+      "SpendingChart"
+    ],
+    "components/dashboard/RecentTransactionsWidget.tsx": [
+      "RecentTransactionsWidget"
+    ],
+    "components/dashboard/EmptyState.tsx": [
+      "EmptyState"
+    ],
+    "components/dashboard/UpcomingBillsWidget.tsx": [
+      "UpcomingBillsWidget"
+    ],
+    "components/dashboard/IncomeExpensesChartWidget.tsx": [
+      "IncomeExpensesChartWidget"
+    ],
+    "components/dashboard/IncomeExpensesChart.tsx": [
+      "IncomeExpensesChart"
+    ],
+    "components/dashboard/GamificationWidget.tsx": [
+      "GamificationWidget"
+    ],
+    "components/dashboard/LoadingSkeleton.tsx": [
+      "LoadingSkeleton"
+    ],
+    "components/dashboard/SpendingChartWidget.tsx": [
+      "SpendingChartWidget"
+    ],
+    "components/dashboard/GoalProgressWidget.tsx": [
+      "GoalProgressWidget"
+    ],
+    "components/transactions/TransactionCard.tsx": [
+      "TransactionCard"
+    ],
+    "components/transactions/TransactionForm.tsx": [
+      "TransactionForm"
+    ],
+    "components/categories/CategoryList.tsx": [
+      "CategoryList"
+    ],
+    "components/categories/DeleteCategoryDialog.tsx": [
+      "DeleteCategoryDialog"
+    ],
+    "components/categories/CategoryForm.tsx": [
+      "CategoryForm"
+    ],
+    "components/categories/CategorySelector.tsx": [
+      "CategorySelector"
+    ],
+    "components/categories/CategoryCard.tsx": [
+      "CategoryCard"
+    ],
+    "components/budgets/BudgetForm.tsx": [
+      "BudgetForm"
+    ],
+    "components/budgets/BudgetCard.tsx": [
+      "BudgetCard"
+    ],
+    "components/budgets/BudgetList.tsx": [
+      "BudgetList"
+    ],
+    "components/navigation/NavigationHeader.tsx": [
+      "NavigationHeader"
+    ],
+    "components/navigation/MobileMenu.tsx": [
+      "MobileMenu"
+    ],
+    "components/payment-status/StatusIndicator.tsx": [
+      "StatusIndicator"
+    ],
+    "components/payment-status/PaymentCheckbox.tsx": [
+      "PaymentCheckbox"
+    ],
+    "components/ui/radio-group.tsx": [
+      "RadioGroup",
+      "RadioGroupItem"
+    ],
+    "components/ui/button.tsx": [
+      "Button",
+      "buttonVariants"
+    ],
+    "components/ui/tabs.tsx": [
+      "Tabs",
+      "TabsList",
+      "TabsTrigger",
+      "TabsContent"
+    ],
+    "components/ui/card.tsx": [
+      "Card",
+      "CardHeader",
+      "CardFooter",
+      "CardTitle",
+      "CardDescription",
+      "CardContent"
+    ],
+    "components/ui/dialog.tsx": [
+      "Dialog",
+      "DialogPortal",
+      "DialogOverlay",
+      "DialogClose",
+      "DialogTrigger",
+      "DialogContent",
+      "DialogHeader",
+      "DialogFooter",
+      "DialogTitle",
+      "DialogDescription",
+      ""
+    ],
+    "components/ui/button.constants.ts": [
+      "buttonVariants"
+    ],
+    "components/ui/select.tsx": [
+      "Select",
+      "SelectGroup",
+      "SelectValue",
+      "SelectTrigger",
+      "SelectContent",
+      "SelectLabel",
+      "SelectItem",
+      "SelectSeparator",
+      "SelectScrollUpButton",
+      "SelectScrollDownButton",
+      ""
+    ],
+    "components/ui/label.tsx": [
+      " Label "
+    ],
+    "components/ui/textarea.tsx": [
+      " Textarea "
+    ],
+    "components/ui/alert.tsx": [
+      "Alert",
+      "AlertTitle",
+      "AlertDescription"
+    ],
+    "components/ui/alert-dialog.tsx": [
+      "AlertDialog",
+      "AlertDialogPortal",
+      "AlertDialogOverlay",
+      "AlertDialogTrigger",
+      "AlertDialogContent",
+      "AlertDialogHeader",
+      "AlertDialogFooter",
+      "AlertDialogTitle",
+      "AlertDialogDescription",
+      "AlertDialogAction",
+      "AlertDialogCancel",
+      ""
+    ],
+    "components/ui/input.tsx": [
+      " Input "
+    ],
+    "components/ui/badge.constants.ts": [
+      "badgeVariants"
+    ],
+    "components/ui/badge.tsx": [
+      "Badge",
+      "badgeVariants"
+    ],
+    "constants/zIndex.ts": [
+      "Z_INDEX"
+    ],
+    "constants/animations.ts": [
+      "MOBILE_MENU_ANIMATION_DURATION",
+      "FADE_IN_DURATION"
+    ],
+    "lib/api.ts": [
+      "InstallmentSchema",
+      "RequestSchema",
+      "ResponseSchema"
+    ],
+    "lib/csv.ts": [
+      "RowSchema"
+    ],
+    "lib/utils.ts": [
+      "cn"
+    ],
+    "lib/telemetry.ts": [
+      "CONSENT_KEY",
+      "isDNT",
+      "getConsent",
+      "setConsent",
+      "bucketRows",
+      "bucketSize",
+      "__setTransport",
+      "extractPhaseFromError",
+      "extractDelimiterFromError",
+      "error",
+      "maybeUsage"
+    ],
+    "lib/sample.ts": [
+      "SAMPLE_CSV"
+    ],
+    "lib/csv-errors.ts": [
+      "CsvSizeError",
+      "CsvRowCountError",
+      "CsvDelimiterError",
+      "CsvParseError",
+      "CsvDateFormatError",
+      "CsvDateRealError",
+      "CsvCurrencyError",
+      "isCsvError",
+      "getErrorPhase"
+    ],
+    "lib/archive/ArchiveService.ts": [
+      "ArchiveService"
+    ],
+    "lib/archive/validation.ts": [
+      "dateRangeSchema",
+      "archiveMetadataSchema",
+      "paymentArchiveRecordSchema",
+      "archiveSchema",
+      "archiveIndexEntrySchema",
+      "archiveIndexSchema",
+      "validateArchiveName",
+      "isValidArchiveId",
+      "validateArchive",
+      "validateArchiveIndex"
+    ],
+    "lib/archive/constants.ts": [
+      "ARCHIVE_INDEX_KEY",
+      "ARCHIVE_KEY_PREFIX",
+      "getArchiveKey",
+      "MAX_ARCHIVES",
+      "MAX_STORAGE_SIZE",
+      "STORAGE_WARNING_THRESHOLD",
+      "SCHEMA_VERSION",
+      "INDEX_SCHEMA_VERSION",
+      "MIN_NAME_LENGTH",
+      "MAX_NAME_LENGTH",
+      "ERROR_MESSAGES",
+      "PERFORMANCE_TARGETS",
+      "DEFAULT_ARCHIVE_VERSION",
+      "DEFAULT_DATE_RANGE"
+    ],
+    "lib/archive/utils.ts": [
+      "generateArchiveId",
+      "getCurrentTimestamp",
+      "calculateByteSize",
+      "formatDateRange",
+      "slugifyArchiveName",
+      "generateArchiveFilename",
+      "calculatePercentage",
+      "sortByCreatedAtDesc"
+    ],
+    "lib/archive/errors.ts": [
+      "ArchiveError",
+      "ArchiveParseError",
+      "ArchiveValidationError",
+      "ArchiveQuotaError",
+      "ArchiveNotFoundError",
+      "isCorruptedDataError"
+    ],
+    "lib/archive/ArchiveStorage.ts": [
+      "ArchiveStorage"
+    ],
+    "lib/archive/types.ts": [
+      "isArchiveIndexEntry",
+      "isArchive"
+    ],
+    "lib/archive/performance.ts": [
+      "PERFORMANCE_TARGETS",
+      "logPerformance",
+      "measureSync",
+      "startTimer"
+    ],
+    "lib/archive/__tests__/test-helpers.ts": [
+      "createMockUsePaymentArchives",
+      "createMockArchiveIndexEntry",
+      "createMockPayment",
+      "createMockArchiveSummary",
+      "createMockArchive"
+    ],
+    "lib/preferences/schemas.ts": [
+      "timezoneValueSchema",
+      "paydayDatesValueSchema",
+      "businessDaySettingsValueSchema",
+      "currencyFormatValueSchema",
+      "localeValueSchema",
+      "timezonePreferenceSchema",
+      "paydayDatesPreferenceSchema",
+      "businessDaySettingsPreferenceSchema",
+      "currencyFormatPreferenceSchema",
+      "localePreferenceSchema",
+      "userPreferenceSchema",
+      "preferenceUpdateSchema",
+      "validatePreferenceUpdate"
+    ],
+    "lib/preferences/PreferenceStorageService.ts": [
+      "PreferenceStorageService"
+    ],
+    "lib/preferences/validation.ts": [
+      "timezoneSchema",
+      "specificDatesPatternSchema",
+      "weeklyPatternSchema",
+      "biweeklyPatternSchema",
+      "monthlyPatternSchema",
+      "paydayPatternSchema",
+      "businessDaySettingsSchema",
+      "currencyFormatSchema",
+      "localeSchema",
+      "categoryValueSchema",
+      "userPreferenceSchema",
+      "serializedPreferenceCollectionSchema",
+      "preferenceCollectionSchema",
+      "validatePreferenceValue"
+    ],
+    "lib/preferences/constants.ts": [
+      "STORAGE_KEY",
+      "STORAGE_LIMIT_BYTES",
+      "SCHEMA_VERSION",
+      "DEBOUNCE_DELAY_MS",
+      "RESTORATION_TARGET_MS",
+      "TOAST_DURATION_MS",
+      "ARIA_LIVE_POLITENESS",
+      "ANNOUNCEMENT_DEBOUNCE_MS",
+      "DEFAULT_TIMEZONE",
+      "DEFAULT_PAYDAY_PATTERN",
+      "DEFAULT_BUSINESS_DAY_SETTINGS",
+      "DEFAULT_CURRENCY_FORMAT",
+      "DEFAULT_LOCALE",
+      "DEFAULT_PREFERENCES",
+      "MAX_PREFERENCE_CATEGORIES",
+      "MAX_HOLIDAYS",
+      "MAX_SPECIFIC_DATES",
+      "MIN_DAY_OF_WEEK",
+      "MAX_DAY_OF_WEEK",
+      "MIN_DAY_OF_MONTH",
+      "MAX_DAY_OF_MONTH",
+      "ERROR_MESSAGES",
+      "SUCCESS_MESSAGES"
+    ],
+    "lib/preferences/types.ts": [
+      "PreferenceCategory"
+    ],
+    "lib/security/ConsoleGuard.ts": [
+      "consoleGuard",
+      " ConsoleGuardImpl "
+    ],
+    "lib/validation/RuntimeTypeGuard.ts": [
+      "validateUIInputValue",
+      "isValidTabValue",
+      "isValidRadioValue",
+      "validateNumericInput",
+      "validateDateInput",
+      "isObject",
+      "isArray",
+      "getDoNotTrack"
+    ],
+    "lib/dashboard/storage.ts": [
+      "STORAGE_KEYS",
+      "readCategories",
+      "readTransactions",
+      "readBudgets",
+      "readGoals",
+      "readStreakData",
+      "isGoalsFeatureAvailable"
+    ],
+    "lib/dashboard/schemas.ts": [
+      "SpendingChartDataSchema",
+      "MonthDataSchema",
+      "IncomeExpensesChartDataSchema",
+      "UpcomingBillSchema",
+      "GoalProgressSchema",
+      "StreakDataSchema",
+      "RecentWinSchema",
+      "PersonalizedInsightSchema",
+      "GamificationDataSchema"
+    ],
+    "lib/dashboard/gamification.ts": [
+      "GAMIFICATION_CONFIG",
+      "getStreakData",
+      "updateStreakData",
+      "getGamificationData",
+      "saveGamificationData",
+      "generateInsights",
+      "detectRecentWins"
+    ],
+    "lib/dashboard/aggregation.ts": [
+      "aggregateSpendingByCategory",
+      "aggregateIncomeExpenses",
+      "getRecentTransactions",
+      "getUpcomingBills",
+      "getGoalProgress"
+    ],
+    "lib/transactions/TransactionStorageService.ts": [
+      "TransactionStorageService"
+    ],
+    "lib/transactions/schemas.ts": [
+      "transactionSchema",
+      "createTransactionInputSchema",
+      "updateTransactionInputSchema",
+      "validateTransaction",
+      "validateCreateTransactionInput",
+      "validateUpdateTransactionInput"
+    ],
+    "lib/categories/schemas.ts": [
+      "categorySchema",
+      "createCategoryInputSchema",
+      "updateCategoryInputSchema",
+      "categoryStorageSchema",
+      "validateCategory",
+      "validateCreateCategoryInput",
+      "validateUpdateCategoryInput",
+      "validateCategoryStorage"
+    ],
+    "lib/categories/predefined.ts": [
+      "PREDEFINED_CATEGORIES",
+      "isDefaultCategory",
+      "getDefaultCategory",
+      "getAllDefaultCategories"
+    ],
+    "lib/categories/CategoryStorageService.ts": [
+      "CategoryStorageService"
+    ],
+    "lib/categories/constants.ts": [
+      "STORAGE_KEY",
+      "SCHEMA_VERSION",
+      "MAX_CUSTOM_CATEGORIES",
+      "MAX_NAME_LENGTH",
+      "MAX_STORAGE_SIZE",
+      "DEFAULT_COLORS",
+      "ERROR_MESSAGES",
+      "SUCCESS_MESSAGES"
+    ],
+    "lib/categories/index.ts": [
+      " CategoryStorageService ",
+      "STORAGE_KEY",
+      "SCHEMA_VERSION",
+      "MAX_CUSTOM_CATEGORIES",
+      "MAX_NAME_LENGTH",
+      "MAX_STORAGE_SIZE",
+      "DEFAULT_COLORS",
+      "ERROR_MESSAGES",
+      "SUCCESS_MESSAGES",
+      "",
+      "categorySchema",
+      "createCategoryInputSchema",
+      "updateCategoryInputSchema",
+      "categoryStorageSchema",
+      "validateCategory",
+      "validateCreateCategoryInput",
+      "validateUpdateCategoryInput",
+      "validateCategoryStorage",
+      "",
+      "PREDEFINED_CATEGORIES",
+      "isDefaultCategory",
+      "getDefaultCategory",
+      "getAllDefaultCategories",
+      ""
+    ],
+    "lib/budgets/schemas.ts": [
+      "budgetSchema",
+      "createBudgetInputSchema",
+      "updateBudgetInputSchema",
+      "budgetStorageSchema",
+      "validateBudget",
+      "validateCreateBudgetInput",
+      "validateUpdateBudgetInput",
+      "validateBudgetStorage"
+    ],
+    "lib/budgets/BudgetStorageService.ts": [
+      "BudgetStorageService"
+    ],
+    "lib/budgets/calculations.ts": [
+      "calculateBudgetProgress",
+      "calculateBudgetProgressBatch",
+      "filterTransactionsByBudget",
+      "getBudgetStatus",
+      "formatCurrency",
+      "formatPercentage",
+      "calculateTotalBudget",
+      "calculateTotalSpent",
+      "calculateBudgetSummary"
+    ],
+    "lib/budgets/constants.ts": [
+      "STORAGE_KEY",
+      "SCHEMA_VERSION",
+      "MAX_BUDGETS",
+      "MAX_STORAGE_SIZE",
+      "BUDGET_THRESHOLDS",
+      "ERROR_MESSAGES",
+      "SUCCESS_MESSAGES",
+      "formatPeriod",
+      "getCurrentPeriod",
+      "parsePeriod"
+    ],
+    "lib/budgets/index.ts": [
+      " BudgetStorageService ",
+      "STORAGE_KEY",
+      "SCHEMA_VERSION",
+      "MAX_BUDGETS",
+      "MAX_STORAGE_SIZE",
+      "BUDGET_THRESHOLDS",
+      "ERROR_MESSAGES",
+      "SUCCESS_MESSAGES",
+      "formatPeriod",
+      "getCurrentPeriod",
+      "parsePeriod",
+      "",
+      "budgetSchema",
+      "createBudgetInputSchema",
+      "updateBudgetInputSchema",
+      "budgetStorageSchema",
+      "validateBudget",
+      "validateCreateBudgetInput",
+      "validateUpdateBudgetInput",
+      "validateBudgetStorage",
+      "",
+      "calculateBudgetProgress",
+      "calculateBudgetProgressBatch",
+      "filterTransactionsByBudget",
+      "getBudgetStatus",
+      "formatCurrency",
+      "formatPercentage",
+      "calculateTotalBudget",
+      "calculateTotalSpent",
+      "calculateBudgetSummary",
+      ""
+    ],
+    "lib/payment-status/PaymentStatusService.ts": [
+      "PaymentStatusService"
+    ],
+    "lib/payment-status/PaymentStatusStorage.ts": [
+      "PaymentStatusStorage"
+    ],
+    "lib/payment-status/validation.ts": [
+      "paymentStatusSchema",
+      "paymentStatusRecordSchema",
+      "semanticVersionSchema",
+      "serializedPaymentStatusCollectionSchema",
+      "validatePaymentStatus",
+      "validatePaymentStatusRecord",
+      "validateSerializedCollection",
+      "isValidPaymentId",
+      "isValidTimestamp"
+    ],
+    "lib/payment-status/constants.ts": [
+      "STORAGE_KEY",
+      "SCHEMA_VERSION",
+      "DEFAULT_STATUS",
+      "ESTIMATED_RECORD_SIZE",
+      "MAX_SAFE_RECORDS",
+      "ESTIMATED_MAX_SIZE",
+      "BROWSER_STORAGE_LIMIT",
+      "WARNING_THRESHOLD",
+      "ERROR_MESSAGES",
+      "DEFAULT_COLLECTION_METADATA",
+      "PERFORMANCE_TARGETS",
+      "FEATURE_FLAGS",
+      "DEBUG"
+    ],
+    "lib/payment-status/utils.ts": [
+      "generatePaymentId",
+      "getCurrentTimestamp",
+      "formatTimestamp",
+      "calculateByteSize",
+      "isLocalStorageAvailable",
+      "safeJsonParse",
+      "safeJsonStringify",
+      "deepClone"
+    ],
+    "lib/payment-status/types.ts": [
+      "isPaymentStatus",
+      "isPaymentStatusRecord"
+    ],
+    "types/csvExport.ts": [
+      "paymentRecordSchema",
+      "paymentRecordsArraySchema",
+      "csvRowSchema",
+      "exportMetadataSchema",
+      "csvExportDataSchema"
+    ],
+    "types/navigation.ts": [
+      "navigationItemSchema"
+    ],
+    "services/csvExportService.ts": [
+      "transformPaymentToCSVRow",
+      "generateExportMetadata",
+      "generateCSV",
+      "downloadCSV",
+      "exportPaymentsToCSV"
+    ],
+    "contexts/PaymentContext.context.ts": [
+      "PaymentContext"
+    ],
+    "contexts/PaymentContext.tsx": [
+      "usePaymentContext",
+      "PaymentContextProvider"
+    ],
+    "pages/Dashboard.tsx": [
+      "Dashboard"
+    ],
+    "pages/Budgets.tsx": [
+      "Budgets"
+    ],
+    "pages/ArchiveDetailView.tsx": [
+      "ArchiveDetailView"
+    ],
+    "pages/Docs.tsx": [
+      "Docs"
+    ],
+    "pages/ArchiveListPage.tsx": [
+      "ArchiveListPage"
+    ],
+    "pages/Transactions.tsx": [
+      "Transactions"
+    ],
+    "pages/Privacy.tsx": [
+      "Privacy"
+    ],
+    "pages/Categories.tsx": [
+      "Categories"
+    ],
+    "hooks/useDashboardData.ts": [
+      "useDashboardData"
+    ],
+    "hooks/usePreferences.test-utils.ts": [
+      "resetStoreForTesting"
+    ],
+    "hooks/usePreferences.ts": [
+      "usePreferences",
+      "__testOnly"
+    ],
+    "hooks/useNavigationState.ts": [
+      "useNavigationState"
+    ],
+    "hooks/useCategories.ts": [
+      "useCategories"
+    ],
+    "hooks/usePaymentArchives.ts": [
+      "usePaymentArchives"
+    ],
+    "hooks/usePaymentStatus.ts": [
+      "usePaymentStatus"
+    ],
+    "hooks/useBudgetProgress.ts": [
+      "useBudgetProgress",
+      "useSingleBudgetProgress"
+    ],
+    "hooks/useTransactions.ts": [
+      "useTransactions"
+    ],
+    "hooks/useLocalStorage.ts": [
+      "useLocalStorage"
+    ],
+    "hooks/useBudgets.ts": [
+      "useBudgets"
+    ]
+  },
+  "circular_dependencies": [],
+  "orphaned_files": [
+    "types/transaction.ts",
+    "types/bill.ts",
+    "types/gamification.ts",
+    "types/goal.ts",
+    "types/chart-data.ts",
+    "types/category.ts",
+    "types/budget.ts"
+  ],
+  "statistics": {
+    "total_imports": 591,
+    "total_exports": 453,
+    "files_with_most_imports": [
+      [
+        "App.tsx",
+        17
+      ],
+      [
+        "components/ResultsThisWeek.tsx",
+        15
+      ],
+      [
+        "pages/ArchiveDetailView.tsx",
+        14
+      ],
+      [
+        "lib/dashboard/storage.ts",
+        12
+      ],
+      [
+        "pages/Budgets.tsx",
+        12
+      ]
+    ],
+    "files_with_most_dependencies": [
+      [
+        "App.tsx",
+        15
+      ],
+      [
+        "components/ResultsThisWeek.tsx",
+        13
+      ],
+      [
+        "pages/ArchiveDetailView.tsx",
+        13
+      ],
+      [
+        "pages/Budgets.tsx",
+        12
+      ],
+      [
+        "components/transactions/TransactionForm.tsx",
+        10
+      ]
+    ],
+    "most_imported_modules": [
+      [
+        "react",
+        74
+      ],
+      [
+        "@/types/csvExport",
+        25
+      ],
+      [
+        "lucide-react",
+        24
+      ],
+      [
+        "react-router-dom",
+        19
+      ],
+      [
+        "vitest",
+        19
+      ],
+      [
+        "zod",
+        18
+      ],
+      [
+        "@/lib/archive/types",
+        16
+      ],
+      [
+        "@/types/category",
+        15
+      ],
+      [
+        "@/lib/utils",
+        15
+      ],
+      [
+        "@testing-library/react",
+        13
+      ]
+    ],
+    "coupling_score": 2.7860696517412937
+  }
+}

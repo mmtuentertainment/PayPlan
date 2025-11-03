@@ -10,11 +10,11 @@
  */
 
 import { useState } from 'react';
-import { type Transaction, type CreateTransactionInput, type UpdateTransactionInput } from '@/types/transaction';
-import { useCategories } from '@/hooks/useCategories';
-import { useTransactions } from '@/hooks/useTransactions';
-import { TransactionCard } from '@/components/transactions/TransactionCard';
-import { TransactionForm } from '@/components/transactions/TransactionForm';
+import { type Transaction, type CreateTransactionInput, type UpdateTransactionInput } from '@/features/transactions/types/transaction';
+import { useCategories } from '@/features/categories/hooks/useCategories';
+import { useTransactions } from '@/shared/hooks/useTransactions';
+import { TransactionCard } from '@/features/transactions/components/TransactionCard';
+import { TransactionForm } from '@/features/transactions/components/TransactionForm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,9 +24,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Alert } from '@/components/ui/alert';
+} from '@/shared/components/ui/alert-dialog';
+import { Button } from '@/shared/components/ui/button';
+import { Alert } from '@/shared/components/ui/alert';
 import { Plus, AlertCircle } from 'lucide-react';
 
 export function Transactions() {

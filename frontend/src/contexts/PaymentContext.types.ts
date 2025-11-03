@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { PaymentRecord } from '@/types/csvExport';
+import type { PaymentRecord } from '@/shared/types/csvExport';
 
 /**
  * Updater function type for atomic state updates

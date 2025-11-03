@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
-import { getConsent, setConsent, isDNT, CONSENT_KEY } from "@/lib/telemetry";
+import { getConsent, setConsent, isDNT, CONSENT_KEY } from "@/shared/lib/telemetry";
 
 // Timing constants for auto-dismiss feature (FR-011 through FR-034)
 const COUNTDOWN_SECONDS = 10;      // Initial countdown duration

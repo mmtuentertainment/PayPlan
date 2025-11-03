@@ -2,7 +2,7 @@
 
 **Feature Branch**: `062-short-name-dashboard`
 **Created**: 2025-10-29
-**Status**: Draft
+**Status**: ✅ **IMPLEMENTED** (5 PRs merged 2025-10-29 to 2025-10-31, 100% user story coverage)
 **Linear Issue**: [MMT-85](https://linear.app/mmtu-entertainment/issue/MMT-85/dashboard-with-charts)
 **Epic**: [MMT-69 - Budgeting App MVP](https://linear.app/mmtu-entertainment/issue/MMT-69/epic-budgeting-app-mvp)
 
@@ -155,16 +155,14 @@ As a user, I want to see my budget review streak, personalized insights, and rec
 - **FR-008**: System MUST display personalized insights based on spending patterns (e.g., "You spend 40% more on weekends")
 - **FR-009**: System MUST display recent wins (e.g., "You're $200 under budget this month!")
 - **FR-010**: System MUST aggregate data from localStorage (categories, budgets, transactions, goals)
-- **FR-011**: System MUST load the complete dashboard in under 1 second
-- **FR-012**: System MUST render all charts in under 500 milliseconds
-- **FR-013**: System MUST be fully responsive (mobile, tablet, desktop layouts)
-- **FR-014**: System MUST meet WCAG 2.1 AA accessibility standards (keyboard navigation, screen reader support, color contrast)
-- **FR-015**: System MUST show appropriate empty states when user has no data
-- **FR-016**: System MUST handle localStorage read errors gracefully with user-friendly error messages
-- **FR-017**: System MUST allow users to click on chart segments to drill down into details
-- **FR-018**: System MUST allow users to click on widget items (transactions, bills, goals) to view full details
-- **FR-019**: System MUST show loading skeletons while data is being fetched
-- **FR-020**: System MUST refresh dashboard data when user navigates back from other pages
+- **FR-011**: System MUST be fully responsive (mobile, tablet, desktop layouts)
+- **FR-012**: System MUST meet WCAG 2.2 AA accessibility standards (keyboard navigation, screen reader support, color contrast)
+- **FR-013**: System MUST show appropriate empty states when user has no data
+- **FR-014**: System MUST handle localStorage read errors gracefully with user-friendly error messages
+- **FR-015**: System MUST allow users to click on chart segments to drill down into details
+- **FR-016**: System MUST allow users to click on widget items (transactions, bills, goals) to view full details
+- **FR-017**: System MUST show loading skeletons while data is being fetched
+- **FR-018**: System MUST refresh dashboard data when user navigates back from other pages
 
 ### Key Entities *(include if feature involves data)*
 
@@ -188,9 +186,10 @@ As a user, I want to see my budget review streak, personalized insights, and rec
   - Attributes: id, categoryId, amount, period, createdAt, updatedAt
   - Relationships: Belongs to Category
 
-- **Goal** (not yet implemented): Used for goal progress widget
+- **Goal**: Used for goal progress widget (basic implementation exists for dashboard display)
   - Attributes: id, name, targetAmount, currentAmount, targetDate, status, createdAt, updatedAt
   - Relationships: None (standalone entity)
+  - Note: Full CRUD implementation deferred to Feature MMT-64; dashboard reads from localStorage with graceful degradation
 
 ---
 
@@ -198,26 +197,22 @@ As a user, I want to see my budget review streak, personalized insights, and rec
 
 ### Measurable Outcomes
 
-- **SC-001**: Users can view the dashboard in under 1 second from app launch
-- **SC-002**: Users can understand their spending patterns in under 30 seconds (measured via user testing)
-- **SC-003**: Dashboard displays accurately for users with 0 transactions, 100 transactions, and 1,000+ transactions
-- **SC-004**: Dashboard works on mobile (320px width), tablet (768px width), and desktop (1920px width) without horizontal scrolling
-- **SC-005**: All charts render in under 500 milliseconds (measured via performance profiling)
-- **SC-006**: Dashboard passes WCAG 2.1 AA accessibility audit (keyboard navigation, screen reader, color contrast)
-- **SC-007**: 90% of users successfully navigate from dashboard to transaction details on first attempt (measured via user testing)
-- **SC-008**: Dashboard load time remains under 1 second even with 10,000+ transactions in localStorage
-- **SC-009**: Empty states clearly guide users to add data (measured via user feedback)
-- **SC-010**: Dashboard data refreshes automatically when user adds/edits transactions, categories, or budgets
+- **SC-001**: Users can understand their spending patterns in under 30 seconds (measured via user testing)
+- **SC-002**: Dashboard displays accurately for users with 0 transactions, 100 transactions, and 1,000+ transactions
+- **SC-003**: Dashboard works on mobile (320px width), tablet (768px width), and desktop (1920px width) without horizontal scrolling
+- **SC-004**: Dashboard passes WCAG 2.2 AA accessibility audit (keyboard navigation, screen reader, color contrast)
+- **SC-005**: 90% of users successfully navigate from dashboard to transaction details on first attempt (measured via user testing)
+- **SC-006**: Empty states clearly guide users to add data (measured via user feedback)
+- **SC-007**: Dashboard data refreshes automatically when user adds/edits transactions, categories, or budgets
 
 ---
 
 ## Technical Constraints
 
-### Performance
-- Dashboard must load in <1 second on 3G connection
-- Charts must render in <500ms after data load
+### Performance (Phase 1)
 - Data aggregation must be memoized to avoid unnecessary recalculations
-- localStorage reads must be debounced to 500ms to avoid excessive I/O
+- Features must feel responsive during manual testing (no specific quantitative targets in Phase 1)
+- **Note**: Quantitative performance metrics (<1s load, <500ms charts) defer to Phase 4 per constitution
 
 ### Accessibility
 - All charts must have ARIA labels and roles
@@ -226,6 +221,7 @@ As a user, I want to see my budget review streak, personalized insights, and rec
 - Color contrast: 4.5:1 for text, 3:1 for chart segments
 - Charts must not rely on color alone (use patterns, labels, and icons)
 - Focus indicators must be visible (2px outline)
+- Touch targets: Minimum 24x24px (WCAG 2.2: 2.5.8), prefer 44x44px for comfort
 
 ### Data Storage
 - Dashboard reads from existing localStorage keys: `payplan_categories_v1`, `payplan_budgets_v1`, `payplan_transactions_v1`
@@ -251,6 +247,10 @@ The following features are explicitly OUT OF SCOPE for this initial implementati
 - **Historical trend analysis** (3, 6, 12 months) - Defer to MMT-66 (Analytics)
 - **Automated tests** - Manual testing only in Phase 1 (per constitution)
 - **Drill-down filters** (click category to filter transactions) - Defer to Phase 2
+- **Performance benchmarks** (<1s load time, <500ms chart rendering) - Defer to Phase 4 (10K+ users)
+  - **Rationale**: Phase 1 constitution requires manual testing only; features must "feel responsive" but no quantitative targets until Phase 4
+  - **Future**: Add Lighthouse CI, Web Vitals monitoring, performance profiling in Phase 4
+- **Load testing** (10,000+ transaction stress tests) - Defer to Phase 4
 
 ---
 
@@ -267,17 +267,17 @@ The following features are explicitly OUT OF SCOPE for this initial implementati
 - **Categories** (Feature 061) - Must be implemented for spending breakdown chart
 - **Budgets** (Feature 061) - Must be implemented for income vs. expenses chart
 - **Transactions** (Feature 061) - Must be implemented for recent transactions widget and all calculations
-- **Goals** (Feature MMT-64) - Should be implemented for goal progress widget (gracefully degrade if not available)
+- **Goals** (Feature MMT-64) - Basic localStorage read support implemented for dashboard; full CRUD deferred to MMT-64
 - **localStorage** - Must be available and have sufficient space
 - **Navigation system** (Feature 017) - Must support Dashboard as default route
 
 ### Constitution Requirements
 - **Privacy-First** (Principle I): All data read from localStorage, no server required
-- **Accessibility-First** (Principle II): WCAG 2.1 AA compliance for all charts and widgets
+- **Accessibility-First** (Principle II): WCAG 2.2 AA compliance for all charts and widgets
 - **Visual-First** (Principle IV): Dashboard is the primary view, charts make data understandable at a glance
-- **Mobile-First** (Principle V): Responsive design, touch-friendly widgets (44x44px minimum)
-- **Quality-First** (Principle VI, Phase 1): Manual testing only, ship fast (<2 weeks)
-- **Performance** (Phase 1): <1s load time, <500ms chart rendering (per constitution)
+- **Mobile-First** (Principle V): Responsive design, touch-friendly widgets (24x24px minimum WCAG 2.2, 44x44px preferred)
+- **Quality-First** (Principle VI, Phase 1): Phased TDD for business logic (60-80% coverage), manual testing for UI
+- **Performance** (Phase 1): No quantitative targets; features must feel responsive during manual testing (quantitative targets deferred to Phase 4 per Constitution v3.1)
 
 ---
 
@@ -290,7 +290,7 @@ The following features are explicitly OUT OF SCOPE for this initial implementati
 5. **Error handling**: localStorage read failures show user-friendly error messages with recovery options
 6. **Performance**: Standard web app expectations (no users have complained about speed issues yet)
 7. **Gamification scope**: Basic streak tracking and insights in Phase 1, advanced gamification in Phase 2
-8. **Goal tracking**: If goals feature (MMT-64) is not implemented, goal progress widget is hidden
+8. **Goal tracking**: GoalProgressWidget implemented with basic localStorage read support; full CRUD (create/edit/delete goals) deferred to Feature MMT-64
 9. **Mobile layout**: Widgets stack vertically on mobile (<768px), 2-column on tablet, 3-column on desktop
 10. **Color scheme**: Follow existing PayPlan brand colors (defined in Tailwind config)
 
@@ -302,5 +302,5 @@ The following features are explicitly OUT OF SCOPE for this initial implementati
 - **Linear Issue**: [MMT-85](https://linear.app/mmtu-entertainment/issue/MMT-85/dashboard-with-charts)
 - **Epic**: [MMT-69 - Budgeting App MVP](https://linear.app/mmtu-entertainment/issue/MMT-69/epic-budgeting-app-mvp)
 - **Feature 061**: `specs/061-spending-categories-budgets/spec.md` (Categories, Budgets, Transactions)
-- **Recharts Documentation**: https://recharts.org/ (for chart implementation reference)
-- **WCAG 2.1 AA**: https://www.w3.org/WAI/WCAG21/quickref/?currentsidebar=%23col_customize&levels=aa (accessibility compliance)
+- **Recharts Documentation**: <https://recharts.org/> (for chart implementation reference)
+- **WCAG 2.2 AA**: <https://www.w3.org/WAI/WCAG22/quickref/?currentsidebar=%23col_customize&levels=aa> (accessibility compliance)

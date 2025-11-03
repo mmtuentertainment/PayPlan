@@ -1,0 +1,1485 @@
+{
+  "pattern": "feature-based",
+  "steps": [
+    {
+      "phase": "preparation",
+      "order": 1,
+      "description": "Prepare for migration",
+      "tasks": [
+        "Create backup of current codebase",
+        "Ensure all tests are passing",
+        "Commit all pending changes",
+        "Document current structure"
+      ]
+    },
+    {
+      "phase": "structure",
+      "order": 2,
+      "description": "Create new directory structure",
+      "tasks": [
+        "Create directory: features/",
+        "Create directory: features/components/",
+        "Create directory: features/hooks/",
+        "Create directory: features/services/",
+        "Create directory: features/types/",
+        "Create directory: features/utils/",
+        "Create directory: shared/",
+        "Create directory: shared/components/",
+        "Create directory: shared/hooks/",
+        "Create directory: shared/utils/"
+      ]
+    },
+    {
+      "phase": "migration",
+      "order": 3,
+      "description": "Move component files",
+      "tasks": [
+        "Move App.tsx to features/app.tsx/components/App.tsx",
+        "Move main.tsx to features/main.tsx/components/main.tsx",
+        "Move components/SuccessToast.tsx to features/successtoast.tsx/components/SuccessToast.tsx",
+        "Move components/LoadingSpinner.tsx to features/loadingspinner.tsx/components/LoadingSpinner.tsx",
+        "Move components/ErrorAlert.tsx to features/erroralert.tsx/components/ErrorAlert.tsx"
+      ],
+      "total_moves": 80
+    },
+    {
+      "phase": "migration",
+      "order": 4,
+      "description": "Move service files",
+      "tasks": [
+        "Move lib/api.ts to features/api.ts/services/api.ts",
+        "Move lib/archive/ArchiveService.ts to features/archive/services/ArchiveService.ts",
+        "Move lib/archive/__tests__/ArchiveService.test.ts to features/archive/services/ArchiveService.test.ts",
+        "Move lib/preferences/PreferenceStorageService.ts to features/preferences/services/PreferenceStorageService.ts",
+        "Move lib/transactions/TransactionStorageService.ts to features/transactions/services/TransactionStorageService.ts"
+      ],
+      "total_moves": 9
+    },
+    {
+      "phase": "migration",
+      "order": 5,
+      "description": "Move util files",
+      "tasks": [
+        "Move lib/utils.ts to shared/utils/utils.ts",
+        "Move lib/archive/utils.ts to shared/utils/utils.ts",
+        "Move lib/payment-status/utils.ts to shared/utils/utils.ts"
+      ],
+      "total_moves": 3
+    },
+    {
+      "phase": "migration",
+      "order": 6,
+      "description": "Move model files",
+      "tasks": [
+        "Move lib/archive/types.ts to shared/types/types.ts",
+        "Move lib/preferences/schemas.ts to shared/types/schemas.ts",
+        "Move lib/preferences/types.ts to shared/types/types.ts",
+        "Move lib/validation/RuntimeTypeGuard.ts to shared/types/RuntimeTypeGuard.ts",
+        "Move lib/dashboard/schemas.ts to shared/types/schemas.ts"
+      ],
+      "total_moves": 10
+    },
+    {
+      "phase": "migration",
+      "order": 7,
+      "description": "Move test files",
+      "tasks": [
+        "Move lib/archive/__tests__/ArchiveStorage.test.ts to tests/ArchiveStorage.test.ts",
+        "Move lib/archive/__tests__/validation.test.ts to tests/validation.test.ts",
+        "Move lib/archive/__tests__/performance.test.ts to tests/performance.test.ts",
+        "Move lib/archive/__tests__/test-helpers.ts to tests/test-helpers.ts",
+        "Move lib/security/ConsoleGuard.test.ts to tests/ConsoleGuard.test.ts"
+      ],
+      "total_moves": 7
+    },
+    {
+      "phase": "migration",
+      "order": 8,
+      "description": "Move hook files",
+      "tasks": [
+        "Move hooks/useDashboardData.ts to features/dashboard/hooks/useDashboardData.ts",
+        "Move hooks/usePreferences.ts to features/hooks/hooks/usePreferences.ts",
+        "Move hooks/useNavigationState.ts to features/hooks/hooks/useNavigationState.ts",
+        "Move hooks/useCategories.ts to features/hooks/hooks/useCategories.ts",
+        "Move hooks/usePaymentArchives.ts to features/hooks/hooks/usePaymentArchives.ts"
+      ],
+      "total_moves": 10
+    },
+    {
+      "phase": "updates",
+      "order": 9,
+      "description": "Update import statements",
+      "tasks": [
+        "Run import update script",
+        "Verify all imports resolve",
+        "Fix any circular dependencies"
+      ]
+    },
+    {
+      "phase": "validation",
+      "order": 10,
+      "description": "Validate migration",
+      "tasks": [
+        "Run all tests",
+        "Check for broken imports",
+        "Verify build process",
+        "Test application functionality"
+      ]
+    },
+    {
+      "phase": "cleanup",
+      "order": 11,
+      "description": "Clean up after migration",
+      "tasks": [
+        "Remove empty directories",
+        "Update documentation",
+        "Update build configuration",
+        "Commit changes"
+      ]
+    }
+  ],
+  "file_moves": [
+    {
+      "from": "App.tsx",
+      "to": "features/app.tsx/components/App.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "main.tsx",
+      "to": "features/main.tsx/components/main.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/SuccessToast.tsx",
+      "to": "features/successtoast.tsx/components/SuccessToast.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/LoadingSpinner.tsx",
+      "to": "features/loadingspinner.tsx/components/LoadingSpinner.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ErrorAlert.tsx",
+      "to": "features/erroralert.tsx/components/ErrorAlert.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/TelemetryConsentBanner.tsx",
+      "to": "features/telemetryconsentbanner.tsx/components/TelemetryConsentBanner.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ErrorBoundary.tsx",
+      "to": "features/errorboundary.tsx/components/ErrorBoundary.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/RiskFlags.tsx",
+      "to": "features/riskflags.tsx/components/RiskFlags.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ResultsThisWeek.tsx",
+      "to": "features/resultsthisweek.tsx/components/ResultsThisWeek.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/SummaryCard.tsx",
+      "to": "features/summarycard.tsx/components/SummaryCard.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ScheduleTable.tsx",
+      "to": "features/scheduletable.tsx/components/ScheduleTable.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ErrorTest.tsx",
+      "to": "features/errortest.tsx/components/ErrorTest.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/ArchiveListItem.tsx",
+      "to": "features/archive/components/ArchiveListItem.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/DeleteArchiveDialog.tsx",
+      "to": "features/archive/components/DeleteArchiveDialog.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/ExportArchiveButton.tsx",
+      "to": "features/archive/components/ExportArchiveButton.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/ArchiveErrorBoundary.tsx",
+      "to": "features/archive/components/ArchiveErrorBoundary.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/ArchiveStatistics.tsx",
+      "to": "features/archive/components/ArchiveStatistics.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/CreateArchiveDialog.tsx",
+      "to": "features/archive/components/CreateArchiveDialog.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/__tests__/ArchiveStatistics.test.tsx",
+      "to": "features/archive/components/ArchiveStatistics.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/__tests__/DeleteArchiveDialog.test.tsx",
+      "to": "features/archive/components/DeleteArchiveDialog.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/__tests__/ArchiveErrorBoundary.test.tsx",
+      "to": "features/archive/components/ArchiveErrorBoundary.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/__tests__/CreateArchiveDialog.test.tsx",
+      "to": "features/archive/components/CreateArchiveDialog.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/archive/__tests__/ExportArchiveButton.test.tsx",
+      "to": "features/archive/components/ExportArchiveButton.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/preferences/ToastNotification.tsx",
+      "to": "features/preferences/components/ToastNotification.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/preferences/PreferenceSettings.tsx",
+      "to": "features/settings/components/PreferenceSettings.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/preferences/InlineStatusIndicator.tsx",
+      "to": "features/preferences/components/InlineStatusIndicator.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/preferences/PreferenceToggle.tsx",
+      "to": "features/preferences/components/PreferenceToggle.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/SpendingChart.tsx",
+      "to": "features/dashboard/components/SpendingChart.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/RecentTransactionsWidget.tsx",
+      "to": "features/dashboard/components/RecentTransactionsWidget.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/EmptyState.tsx",
+      "to": "features/dashboard/components/EmptyState.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/UpcomingBillsWidget.tsx",
+      "to": "features/dashboard/components/UpcomingBillsWidget.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/IncomeExpensesChartWidget.tsx",
+      "to": "features/dashboard/components/IncomeExpensesChartWidget.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/IncomeExpensesChart.tsx",
+      "to": "features/dashboard/components/IncomeExpensesChart.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/GamificationWidget.tsx",
+      "to": "features/dashboard/components/GamificationWidget.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/LoadingSkeleton.tsx",
+      "to": "features/dashboard/components/LoadingSkeleton.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/SpendingChartWidget.tsx",
+      "to": "features/dashboard/components/SpendingChartWidget.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/GoalProgressWidget.tsx",
+      "to": "features/dashboard/components/GoalProgressWidget.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/dashboard/__tests__/GamificationWidget.test.tsx",
+      "to": "features/dashboard/components/GamificationWidget.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/transactions/TransactionCard.tsx",
+      "to": "features/transactions/components/TransactionCard.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/transactions/TransactionForm.tsx",
+      "to": "features/transactions/components/TransactionForm.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/categories/CategoryList.tsx",
+      "to": "features/categories/components/CategoryList.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/categories/DeleteCategoryDialog.tsx",
+      "to": "features/categories/components/DeleteCategoryDialog.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/categories/CategoryForm.tsx",
+      "to": "features/categories/components/CategoryForm.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/categories/CategorySelector.tsx",
+      "to": "features/categories/components/CategorySelector.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/categories/CategoryCard.tsx",
+      "to": "features/categories/components/CategoryCard.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/budgets/BudgetForm.tsx",
+      "to": "features/budgets/components/BudgetForm.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/budgets/BudgetCard.tsx",
+      "to": "features/budgets/components/BudgetCard.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/budgets/BudgetList.tsx",
+      "to": "features/budgets/components/BudgetList.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/navigation/NavigationHeader.tsx",
+      "to": "features/navigation/components/NavigationHeader.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/navigation/Breadcrumbs.tsx",
+      "to": "features/navigation/components/Breadcrumbs.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/navigation/MobileMenu.tsx",
+      "to": "features/navigation/components/MobileMenu.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/navigation/Breadcrumbs.test.tsx",
+      "to": "features/navigation/components/Breadcrumbs.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/navigation/MobileMenu.test.tsx",
+      "to": "features/navigation/components/MobileMenu.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/navigation/NavigationHeader.test.tsx",
+      "to": "features/navigation/components/NavigationHeader.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/payment-status/StatusIndicator.tsx",
+      "to": "features/payment-status/components/StatusIndicator.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/payment-status/PaymentCheckbox.tsx",
+      "to": "features/payment-status/components/PaymentCheckbox.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/radio-group.tsx",
+      "to": "features/ui/components/radio-group.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/button.tsx",
+      "to": "features/ui/components/button.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/tabs.tsx",
+      "to": "features/ui/components/tabs.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/card.tsx",
+      "to": "features/ui/components/card.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/dialog.tsx",
+      "to": "features/ui/components/dialog.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/select.tsx",
+      "to": "features/ui/components/select.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/label.tsx",
+      "to": "features/ui/components/label.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/textarea.tsx",
+      "to": "features/ui/components/textarea.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/alert.tsx",
+      "to": "features/ui/components/alert.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/alert-dialog.tsx",
+      "to": "features/ui/components/alert-dialog.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/input.tsx",
+      "to": "features/ui/components/input.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "components/ui/badge.tsx",
+      "to": "features/ui/components/badge.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "contexts/PaymentContext.tsx",
+      "to": "features/contexts/components/PaymentContext.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "contexts/__tests__/PaymentContext.test.tsx",
+      "to": "features/contexts/components/PaymentContext.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/Dashboard.tsx",
+      "to": "features/dashboard/components/Dashboard.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/Budgets.tsx",
+      "to": "features/budgets.tsx/components/Budgets.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/ArchiveDetailView.tsx",
+      "to": "features/archivedetailview.tsx/components/ArchiveDetailView.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/Docs.tsx",
+      "to": "features/docs.tsx/components/Docs.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/ArchiveListPage.tsx",
+      "to": "features/archivelistpage.tsx/components/ArchiveListPage.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/Transactions.tsx",
+      "to": "features/transactions.tsx/components/Transactions.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/Privacy.tsx",
+      "to": "features/privacy.tsx/components/Privacy.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/Categories.tsx",
+      "to": "features/categories.tsx/components/Categories.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/__tests__/ArchiveListPage.test.tsx",
+      "to": "features/__tests__/components/ArchiveListPage.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "pages/__tests__/ArchiveDetailView.test.tsx",
+      "to": "features/__tests__/components/ArchiveDetailView.test.tsx",
+      "type": "component",
+      "reason": "Organize component files together"
+    },
+    {
+      "from": "lib/api.ts",
+      "to": "features/api.ts/services/api.ts",
+      "type": "service",
+      "reason": "Organize service files together"
+    },
+    {
+      "from": "lib/archive/ArchiveService.ts",
+      "to": "features/archive/services/ArchiveService.ts",
+      "type": "service",
+      "reason": "Organize service files together"
+    },
+    {
+      "from": "lib/archive/__tests__/ArchiveService.test.ts",
+      "to": "features/archive/services/ArchiveService.test.ts",
+      "type": "service",
+      "reason": "Organize service files together"
+    },
+    {
+      "from": "lib/preferences/PreferenceStorageService.ts",
+      "to": "features/preferences/services/PreferenceStorageService.ts",
+      "type": "service",
+      "reason": "Organize service files together"
+    },
+    {
+      "from": "lib/transactions/TransactionStorageService.ts",
+      "to": "features/transactions/services/TransactionStorageService.ts",
+      "type": "service",
+      "reason": "Organize service files together"
+    },
+    {
+      "from": "lib/categories/CategoryStorageService.ts",
+      "to": "features/categories/services/CategoryStorageService.ts",
+      "type": "service",
+      "reason": "Organize service files together"
+    },
+    {
+      "from": "lib/budgets/BudgetStorageService.ts",
+      "to": "features/budgets/services/BudgetStorageService.ts",
+      "type": "service",
+      "reason": "Organize service files together"
+    },
+    {
+      "from": "lib/payment-status/PaymentStatusService.ts",
+      "to": "features/payment-status/services/PaymentStatusService.ts",
+      "type": "service",
+      "reason": "Organize service files together"
+    },
+    {
+      "from": "services/csvExportService.ts",
+      "to": "features/services/services/csvExportService.ts",
+      "type": "service",
+      "reason": "Organize service files together"
+    },
+    {
+      "from": "lib/utils.ts",
+      "to": "shared/utils/utils.ts",
+      "type": "util",
+      "reason": "Organize util files together"
+    },
+    {
+      "from": "lib/archive/utils.ts",
+      "to": "shared/utils/utils.ts",
+      "type": "util",
+      "reason": "Organize util files together"
+    },
+    {
+      "from": "lib/payment-status/utils.ts",
+      "to": "shared/utils/utils.ts",
+      "type": "util",
+      "reason": "Organize util files together"
+    },
+    {
+      "from": "lib/archive/types.ts",
+      "to": "shared/types/types.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "lib/preferences/schemas.ts",
+      "to": "shared/types/schemas.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "lib/preferences/types.ts",
+      "to": "shared/types/types.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "lib/validation/RuntimeTypeGuard.ts",
+      "to": "shared/types/RuntimeTypeGuard.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "lib/dashboard/schemas.ts",
+      "to": "shared/types/schemas.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "lib/transactions/schemas.ts",
+      "to": "shared/types/schemas.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "lib/categories/schemas.ts",
+      "to": "shared/types/schemas.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "lib/budgets/schemas.ts",
+      "to": "shared/types/schemas.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "lib/payment-status/types.ts",
+      "to": "shared/types/types.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "contexts/PaymentContext.types.ts",
+      "to": "shared/types/PaymentContext.types.ts",
+      "type": "model",
+      "reason": "Organize model files together"
+    },
+    {
+      "from": "lib/archive/__tests__/ArchiveStorage.test.ts",
+      "to": "tests/ArchiveStorage.test.ts",
+      "type": "test",
+      "reason": "Organize test files together"
+    },
+    {
+      "from": "lib/archive/__tests__/validation.test.ts",
+      "to": "tests/validation.test.ts",
+      "type": "test",
+      "reason": "Organize test files together"
+    },
+    {
+      "from": "lib/archive/__tests__/performance.test.ts",
+      "to": "tests/performance.test.ts",
+      "type": "test",
+      "reason": "Organize test files together"
+    },
+    {
+      "from": "lib/archive/__tests__/test-helpers.ts",
+      "to": "tests/test-helpers.ts",
+      "type": "test",
+      "reason": "Organize test files together"
+    },
+    {
+      "from": "lib/security/ConsoleGuard.test.ts",
+      "to": "tests/ConsoleGuard.test.ts",
+      "type": "test",
+      "reason": "Organize test files together"
+    },
+    {
+      "from": "hooks/usePreferences.test-utils.ts",
+      "to": "tests/usePreferences.test-utils.ts",
+      "type": "test",
+      "reason": "Organize test files together"
+    },
+    {
+      "from": "hooks/useNavigationState.test.ts",
+      "to": "tests/useNavigationState.test.ts",
+      "type": "test",
+      "reason": "Organize test files together"
+    },
+    {
+      "from": "hooks/useDashboardData.ts",
+      "to": "features/dashboard/hooks/useDashboardData.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    },
+    {
+      "from": "hooks/usePreferences.ts",
+      "to": "features/hooks/hooks/usePreferences.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    },
+    {
+      "from": "hooks/useNavigationState.ts",
+      "to": "features/hooks/hooks/useNavigationState.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    },
+    {
+      "from": "hooks/useCategories.ts",
+      "to": "features/hooks/hooks/useCategories.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    },
+    {
+      "from": "hooks/usePaymentArchives.ts",
+      "to": "features/hooks/hooks/usePaymentArchives.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    },
+    {
+      "from": "hooks/usePaymentStatus.ts",
+      "to": "features/hooks/hooks/usePaymentStatus.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    },
+    {
+      "from": "hooks/useBudgetProgress.ts",
+      "to": "features/hooks/hooks/useBudgetProgress.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    },
+    {
+      "from": "hooks/useTransactions.ts",
+      "to": "features/hooks/hooks/useTransactions.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    },
+    {
+      "from": "hooks/useLocalStorage.ts",
+      "to": "features/hooks/hooks/useLocalStorage.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    },
+    {
+      "from": "hooks/useBudgets.ts",
+      "to": "features/hooks/hooks/useBudgets.ts",
+      "type": "hook",
+      "reason": "Organize hook files together"
+    }
+  ],
+  "import_updates": {
+    "App.tsx": {
+      "old": "App",
+      "new": "features/app.tsx/components/App",
+      "affected_files": []
+    },
+    "main.tsx": {
+      "old": "main",
+      "new": "features/main.tsx/components/main",
+      "affected_files": []
+    },
+    "components/SuccessToast.tsx": {
+      "old": "components/SuccessToast",
+      "new": "features/successtoast.tsx/components/SuccessToast",
+      "affected_files": []
+    },
+    "components/LoadingSpinner.tsx": {
+      "old": "components/LoadingSpinner",
+      "new": "features/loadingspinner.tsx/components/LoadingSpinner",
+      "affected_files": []
+    },
+    "components/ErrorAlert.tsx": {
+      "old": "components/ErrorAlert",
+      "new": "features/erroralert.tsx/components/ErrorAlert",
+      "affected_files": []
+    },
+    "components/TelemetryConsentBanner.tsx": {
+      "old": "components/TelemetryConsentBanner",
+      "new": "features/telemetryconsentbanner.tsx/components/TelemetryConsentBanner",
+      "affected_files": []
+    },
+    "components/ErrorBoundary.tsx": {
+      "old": "components/ErrorBoundary",
+      "new": "features/errorboundary.tsx/components/ErrorBoundary",
+      "affected_files": []
+    },
+    "components/RiskFlags.tsx": {
+      "old": "components/RiskFlags",
+      "new": "features/riskflags.tsx/components/RiskFlags",
+      "affected_files": []
+    },
+    "components/ResultsThisWeek.tsx": {
+      "old": "components/ResultsThisWeek",
+      "new": "features/resultsthisweek.tsx/components/ResultsThisWeek",
+      "affected_files": []
+    },
+    "components/SummaryCard.tsx": {
+      "old": "components/SummaryCard",
+      "new": "features/summarycard.tsx/components/SummaryCard",
+      "affected_files": []
+    },
+    "components/ScheduleTable.tsx": {
+      "old": "components/ScheduleTable",
+      "new": "features/scheduletable.tsx/components/ScheduleTable",
+      "affected_files": []
+    },
+    "components/ErrorTest.tsx": {
+      "old": "components/ErrorTest",
+      "new": "features/errortest.tsx/components/ErrorTest",
+      "affected_files": []
+    },
+    "components/archive/ArchiveListItem.tsx": {
+      "old": "components/archive/ArchiveListItem",
+      "new": "features/archive/components/ArchiveListItem",
+      "affected_files": []
+    },
+    "components/archive/DeleteArchiveDialog.tsx": {
+      "old": "components/archive/DeleteArchiveDialog",
+      "new": "features/archive/components/DeleteArchiveDialog",
+      "affected_files": []
+    },
+    "components/archive/ExportArchiveButton.tsx": {
+      "old": "components/archive/ExportArchiveButton",
+      "new": "features/archive/components/ExportArchiveButton",
+      "affected_files": []
+    },
+    "components/archive/ArchiveErrorBoundary.tsx": {
+      "old": "components/archive/ArchiveErrorBoundary",
+      "new": "features/archive/components/ArchiveErrorBoundary",
+      "affected_files": []
+    },
+    "components/archive/ArchiveStatistics.tsx": {
+      "old": "components/archive/ArchiveStatistics",
+      "new": "features/archive/components/ArchiveStatistics",
+      "affected_files": []
+    },
+    "components/archive/CreateArchiveDialog.tsx": {
+      "old": "components/archive/CreateArchiveDialog",
+      "new": "features/archive/components/CreateArchiveDialog",
+      "affected_files": []
+    },
+    "components/archive/__tests__/ArchiveStatistics.test.tsx": {
+      "old": "components/archive/__tests__/ArchiveStatistics.test",
+      "new": "features/archive/components/ArchiveStatistics.test",
+      "affected_files": []
+    },
+    "components/archive/__tests__/DeleteArchiveDialog.test.tsx": {
+      "old": "components/archive/__tests__/DeleteArchiveDialog.test",
+      "new": "features/archive/components/DeleteArchiveDialog.test",
+      "affected_files": []
+    },
+    "components/archive/__tests__/ArchiveErrorBoundary.test.tsx": {
+      "old": "components/archive/__tests__/ArchiveErrorBoundary.test",
+      "new": "features/archive/components/ArchiveErrorBoundary.test",
+      "affected_files": []
+    },
+    "components/archive/__tests__/CreateArchiveDialog.test.tsx": {
+      "old": "components/archive/__tests__/CreateArchiveDialog.test",
+      "new": "features/archive/components/CreateArchiveDialog.test",
+      "affected_files": []
+    },
+    "components/archive/__tests__/ExportArchiveButton.test.tsx": {
+      "old": "components/archive/__tests__/ExportArchiveButton.test",
+      "new": "features/archive/components/ExportArchiveButton.test",
+      "affected_files": []
+    },
+    "components/preferences/ToastNotification.tsx": {
+      "old": "components/preferences/ToastNotification",
+      "new": "features/preferences/components/ToastNotification",
+      "affected_files": []
+    },
+    "components/preferences/PreferenceSettings.tsx": {
+      "old": "components/preferences/PreferenceSettings",
+      "new": "features/settings/components/PreferenceSettings",
+      "affected_files": []
+    },
+    "components/preferences/InlineStatusIndicator.tsx": {
+      "old": "components/preferences/InlineStatusIndicator",
+      "new": "features/preferences/components/InlineStatusIndicator",
+      "affected_files": []
+    },
+    "components/preferences/PreferenceToggle.tsx": {
+      "old": "components/preferences/PreferenceToggle",
+      "new": "features/preferences/components/PreferenceToggle",
+      "affected_files": []
+    },
+    "components/dashboard/SpendingChart.tsx": {
+      "old": "components/dashboard/SpendingChart",
+      "new": "features/dashboard/components/SpendingChart",
+      "affected_files": []
+    },
+    "components/dashboard/RecentTransactionsWidget.tsx": {
+      "old": "components/dashboard/RecentTransactionsWidget",
+      "new": "features/dashboard/components/RecentTransactionsWidget",
+      "affected_files": []
+    },
+    "components/dashboard/EmptyState.tsx": {
+      "old": "components/dashboard/EmptyState",
+      "new": "features/dashboard/components/EmptyState",
+      "affected_files": []
+    },
+    "components/dashboard/UpcomingBillsWidget.tsx": {
+      "old": "components/dashboard/UpcomingBillsWidget",
+      "new": "features/dashboard/components/UpcomingBillsWidget",
+      "affected_files": []
+    },
+    "components/dashboard/IncomeExpensesChartWidget.tsx": {
+      "old": "components/dashboard/IncomeExpensesChartWidget",
+      "new": "features/dashboard/components/IncomeExpensesChartWidget",
+      "affected_files": []
+    },
+    "components/dashboard/IncomeExpensesChart.tsx": {
+      "old": "components/dashboard/IncomeExpensesChart",
+      "new": "features/dashboard/components/IncomeExpensesChart",
+      "affected_files": []
+    },
+    "components/dashboard/GamificationWidget.tsx": {
+      "old": "components/dashboard/GamificationWidget",
+      "new": "features/dashboard/components/GamificationWidget",
+      "affected_files": []
+    },
+    "components/dashboard/LoadingSkeleton.tsx": {
+      "old": "components/dashboard/LoadingSkeleton",
+      "new": "features/dashboard/components/LoadingSkeleton",
+      "affected_files": []
+    },
+    "components/dashboard/SpendingChartWidget.tsx": {
+      "old": "components/dashboard/SpendingChartWidget",
+      "new": "features/dashboard/components/SpendingChartWidget",
+      "affected_files": []
+    },
+    "components/dashboard/GoalProgressWidget.tsx": {
+      "old": "components/dashboard/GoalProgressWidget",
+      "new": "features/dashboard/components/GoalProgressWidget",
+      "affected_files": []
+    },
+    "components/dashboard/__tests__/GamificationWidget.test.tsx": {
+      "old": "components/dashboard/__tests__/GamificationWidget.test",
+      "new": "features/dashboard/components/GamificationWidget.test",
+      "affected_files": []
+    },
+    "components/transactions/TransactionCard.tsx": {
+      "old": "components/transactions/TransactionCard",
+      "new": "features/transactions/components/TransactionCard",
+      "affected_files": []
+    },
+    "components/transactions/TransactionForm.tsx": {
+      "old": "components/transactions/TransactionForm",
+      "new": "features/transactions/components/TransactionForm",
+      "affected_files": []
+    },
+    "components/categories/CategoryList.tsx": {
+      "old": "components/categories/CategoryList",
+      "new": "features/categories/components/CategoryList",
+      "affected_files": []
+    },
+    "components/categories/DeleteCategoryDialog.tsx": {
+      "old": "components/categories/DeleteCategoryDialog",
+      "new": "features/categories/components/DeleteCategoryDialog",
+      "affected_files": []
+    },
+    "components/categories/CategoryForm.tsx": {
+      "old": "components/categories/CategoryForm",
+      "new": "features/categories/components/CategoryForm",
+      "affected_files": []
+    },
+    "components/categories/CategorySelector.tsx": {
+      "old": "components/categories/CategorySelector",
+      "new": "features/categories/components/CategorySelector",
+      "affected_files": []
+    },
+    "components/categories/CategoryCard.tsx": {
+      "old": "components/categories/CategoryCard",
+      "new": "features/categories/components/CategoryCard",
+      "affected_files": []
+    },
+    "components/budgets/BudgetForm.tsx": {
+      "old": "components/budgets/BudgetForm",
+      "new": "features/budgets/components/BudgetForm",
+      "affected_files": []
+    },
+    "components/budgets/BudgetCard.tsx": {
+      "old": "components/budgets/BudgetCard",
+      "new": "features/budgets/components/BudgetCard",
+      "affected_files": []
+    },
+    "components/budgets/BudgetList.tsx": {
+      "old": "components/budgets/BudgetList",
+      "new": "features/budgets/components/BudgetList",
+      "affected_files": []
+    },
+    "components/navigation/NavigationHeader.tsx": {
+      "old": "components/navigation/NavigationHeader",
+      "new": "features/navigation/components/NavigationHeader",
+      "affected_files": []
+    },
+    "components/navigation/Breadcrumbs.tsx": {
+      "old": "components/navigation/Breadcrumbs",
+      "new": "features/navigation/components/Breadcrumbs",
+      "affected_files": []
+    },
+    "components/navigation/MobileMenu.tsx": {
+      "old": "components/navigation/MobileMenu",
+      "new": "features/navigation/components/MobileMenu",
+      "affected_files": []
+    },
+    "components/navigation/Breadcrumbs.test.tsx": {
+      "old": "components/navigation/Breadcrumbs.test",
+      "new": "features/navigation/components/Breadcrumbs.test",
+      "affected_files": []
+    },
+    "components/navigation/MobileMenu.test.tsx": {
+      "old": "components/navigation/MobileMenu.test",
+      "new": "features/navigation/components/MobileMenu.test",
+      "affected_files": []
+    },
+    "components/navigation/NavigationHeader.test.tsx": {
+      "old": "components/navigation/NavigationHeader.test",
+      "new": "features/navigation/components/NavigationHeader.test",
+      "affected_files": []
+    },
+    "components/payment-status/StatusIndicator.tsx": {
+      "old": "components/payment-status/StatusIndicator",
+      "new": "features/payment-status/components/StatusIndicator",
+      "affected_files": []
+    },
+    "components/payment-status/PaymentCheckbox.tsx": {
+      "old": "components/payment-status/PaymentCheckbox",
+      "new": "features/payment-status/components/PaymentCheckbox",
+      "affected_files": []
+    },
+    "components/ui/radio-group.tsx": {
+      "old": "components/ui/radio-group",
+      "new": "features/ui/components/radio-group",
+      "affected_files": []
+    },
+    "components/ui/button.tsx": {
+      "old": "components/ui/button",
+      "new": "features/ui/components/button",
+      "affected_files": []
+    },
+    "components/ui/tabs.tsx": {
+      "old": "components/ui/tabs",
+      "new": "features/ui/components/tabs",
+      "affected_files": []
+    },
+    "components/ui/card.tsx": {
+      "old": "components/ui/card",
+      "new": "features/ui/components/card",
+      "affected_files": []
+    },
+    "components/ui/dialog.tsx": {
+      "old": "components/ui/dialog",
+      "new": "features/ui/components/dialog",
+      "affected_files": []
+    },
+    "components/ui/select.tsx": {
+      "old": "components/ui/select",
+      "new": "features/ui/components/select",
+      "affected_files": []
+    },
+    "components/ui/label.tsx": {
+      "old": "components/ui/label",
+      "new": "features/ui/components/label",
+      "affected_files": []
+    },
+    "components/ui/textarea.tsx": {
+      "old": "components/ui/textarea",
+      "new": "features/ui/components/textarea",
+      "affected_files": []
+    },
+    "components/ui/alert.tsx": {
+      "old": "components/ui/alert",
+      "new": "features/ui/components/alert",
+      "affected_files": []
+    },
+    "components/ui/alert-dialog.tsx": {
+      "old": "components/ui/alert-dialog",
+      "new": "features/ui/components/alert-dialog",
+      "affected_files": []
+    },
+    "components/ui/input.tsx": {
+      "old": "components/ui/input",
+      "new": "features/ui/components/input",
+      "affected_files": []
+    },
+    "components/ui/badge.tsx": {
+      "old": "components/ui/badge",
+      "new": "features/ui/components/badge",
+      "affected_files": []
+    },
+    "contexts/PaymentContext.tsx": {
+      "old": "contexts/PaymentContext",
+      "new": "features/contexts/components/PaymentContext",
+      "affected_files": []
+    },
+    "contexts/__tests__/PaymentContext.test.tsx": {
+      "old": "contexts/__tests__/PaymentContext.test",
+      "new": "features/contexts/components/PaymentContext.test",
+      "affected_files": []
+    },
+    "pages/Dashboard.tsx": {
+      "old": "pages/Dashboard",
+      "new": "features/dashboard/components/Dashboard",
+      "affected_files": []
+    },
+    "pages/Budgets.tsx": {
+      "old": "pages/Budgets",
+      "new": "features/budgets.tsx/components/Budgets",
+      "affected_files": []
+    },
+    "pages/ArchiveDetailView.tsx": {
+      "old": "pages/ArchiveDetailView",
+      "new": "features/archivedetailview.tsx/components/ArchiveDetailView",
+      "affected_files": []
+    },
+    "pages/Docs.tsx": {
+      "old": "pages/Docs",
+      "new": "features/docs.tsx/components/Docs",
+      "affected_files": []
+    },
+    "pages/ArchiveListPage.tsx": {
+      "old": "pages/ArchiveListPage",
+      "new": "features/archivelistpage.tsx/components/ArchiveListPage",
+      "affected_files": []
+    },
+    "pages/Transactions.tsx": {
+      "old": "pages/Transactions",
+      "new": "features/transactions.tsx/components/Transactions",
+      "affected_files": []
+    },
+    "pages/Privacy.tsx": {
+      "old": "pages/Privacy",
+      "new": "features/privacy.tsx/components/Privacy",
+      "affected_files": []
+    },
+    "pages/Categories.tsx": {
+      "old": "pages/Categories",
+      "new": "features/categories.tsx/components/Categories",
+      "affected_files": []
+    },
+    "pages/__tests__/ArchiveListPage.test.tsx": {
+      "old": "pages/__tests__/ArchiveListPage.test",
+      "new": "features/__tests__/components/ArchiveListPage.test",
+      "affected_files": []
+    },
+    "pages/__tests__/ArchiveDetailView.test.tsx": {
+      "old": "pages/__tests__/ArchiveDetailView.test",
+      "new": "features/__tests__/components/ArchiveDetailView.test",
+      "affected_files": []
+    },
+    "lib/api.ts": {
+      "old": "lib/api",
+      "new": "features/api.ts/services/api",
+      "affected_files": []
+    },
+    "lib/archive/ArchiveService.ts": {
+      "old": "lib/archive/ArchiveService",
+      "new": "features/archive/services/ArchiveService",
+      "affected_files": []
+    },
+    "lib/archive/__tests__/ArchiveService.test.ts": {
+      "old": "lib/archive/__tests__/ArchiveService.test",
+      "new": "features/archive/services/ArchiveService.test",
+      "affected_files": []
+    },
+    "lib/preferences/PreferenceStorageService.ts": {
+      "old": "lib/preferences/PreferenceStorageService",
+      "new": "features/preferences/services/PreferenceStorageService",
+      "affected_files": []
+    },
+    "lib/transactions/TransactionStorageService.ts": {
+      "old": "lib/transactions/TransactionStorageService",
+      "new": "features/transactions/services/TransactionStorageService",
+      "affected_files": []
+    },
+    "lib/categories/CategoryStorageService.ts": {
+      "old": "lib/categories/CategoryStorageService",
+      "new": "features/categories/services/CategoryStorageService",
+      "affected_files": []
+    },
+    "lib/budgets/BudgetStorageService.ts": {
+      "old": "lib/budgets/BudgetStorageService",
+      "new": "features/budgets/services/BudgetStorageService",
+      "affected_files": []
+    },
+    "lib/payment-status/PaymentStatusService.ts": {
+      "old": "lib/payment-status/PaymentStatusService",
+      "new": "features/payment-status/services/PaymentStatusService",
+      "affected_files": []
+    },
+    "services/csvExportService.ts": {
+      "old": "services/csvExportService",
+      "new": "features/services/services/csvExportService",
+      "affected_files": []
+    },
+    "lib/utils.ts": {
+      "old": "lib/utils",
+      "new": "shared/utils/utils",
+      "affected_files": []
+    },
+    "lib/archive/utils.ts": {
+      "old": "lib/archive/utils",
+      "new": "shared/utils/utils",
+      "affected_files": []
+    },
+    "lib/payment-status/utils.ts": {
+      "old": "lib/payment-status/utils",
+      "new": "shared/utils/utils",
+      "affected_files": []
+    },
+    "lib/archive/types.ts": {
+      "old": "lib/archive/types",
+      "new": "shared/types/types",
+      "affected_files": []
+    },
+    "lib/preferences/schemas.ts": {
+      "old": "lib/preferences/schemas",
+      "new": "shared/types/schemas",
+      "affected_files": []
+    },
+    "lib/preferences/types.ts": {
+      "old": "lib/preferences/types",
+      "new": "shared/types/types",
+      "affected_files": []
+    },
+    "lib/validation/RuntimeTypeGuard.ts": {
+      "old": "lib/validation/RuntimeTypeGuard",
+      "new": "shared/types/RuntimeTypeGuard",
+      "affected_files": []
+    },
+    "lib/dashboard/schemas.ts": {
+      "old": "lib/dashboard/schemas",
+      "new": "shared/types/schemas",
+      "affected_files": []
+    },
+    "lib/transactions/schemas.ts": {
+      "old": "lib/transactions/schemas",
+      "new": "shared/types/schemas",
+      "affected_files": []
+    },
+    "lib/categories/schemas.ts": {
+      "old": "lib/categories/schemas",
+      "new": "shared/types/schemas",
+      "affected_files": []
+    },
+    "lib/budgets/schemas.ts": {
+      "old": "lib/budgets/schemas",
+      "new": "shared/types/schemas",
+      "affected_files": []
+    },
+    "lib/payment-status/types.ts": {
+      "old": "lib/payment-status/types",
+      "new": "shared/types/types",
+      "affected_files": []
+    },
+    "contexts/PaymentContext.types.ts": {
+      "old": "contexts/PaymentContext.types",
+      "new": "shared/types/PaymentContext.types",
+      "affected_files": []
+    },
+    "lib/archive/__tests__/ArchiveStorage.test.ts": {
+      "old": "lib/archive/__tests__/ArchiveStorage.test",
+      "new": "tests/ArchiveStorage.test",
+      "affected_files": []
+    },
+    "lib/archive/__tests__/validation.test.ts": {
+      "old": "lib/archive/__tests__/validation.test",
+      "new": "tests/validation.test",
+      "affected_files": []
+    },
+    "lib/archive/__tests__/performance.test.ts": {
+      "old": "lib/archive/__tests__/performance.test",
+      "new": "tests/performance.test",
+      "affected_files": []
+    },
+    "lib/archive/__tests__/test-helpers.ts": {
+      "old": "lib/archive/__tests__/test-helpers",
+      "new": "tests/test-helpers",
+      "affected_files": []
+    },
+    "lib/security/ConsoleGuard.test.ts": {
+      "old": "lib/security/ConsoleGuard.test",
+      "new": "tests/ConsoleGuard.test",
+      "affected_files": []
+    },
+    "hooks/usePreferences.test-utils.ts": {
+      "old": "hooks/usePreferences.test-utils",
+      "new": "tests/usePreferences.test-utils",
+      "affected_files": []
+    },
+    "hooks/useNavigationState.test.ts": {
+      "old": "hooks/useNavigationState.test",
+      "new": "tests/useNavigationState.test",
+      "affected_files": []
+    },
+    "hooks/useDashboardData.ts": {
+      "old": "hooks/useDashboardData",
+      "new": "features/dashboard/hooks/useDashboardData",
+      "affected_files": []
+    },
+    "hooks/usePreferences.ts": {
+      "old": "hooks/usePreferences",
+      "new": "features/hooks/hooks/usePreferences",
+      "affected_files": []
+    },
+    "hooks/useNavigationState.ts": {
+      "old": "hooks/useNavigationState",
+      "new": "features/hooks/hooks/useNavigationState",
+      "affected_files": []
+    },
+    "hooks/useCategories.ts": {
+      "old": "hooks/useCategories",
+      "new": "features/hooks/hooks/useCategories",
+      "affected_files": []
+    },
+    "hooks/usePaymentArchives.ts": {
+      "old": "hooks/usePaymentArchives",
+      "new": "features/hooks/hooks/usePaymentArchives",
+      "affected_files": []
+    },
+    "hooks/usePaymentStatus.ts": {
+      "old": "hooks/usePaymentStatus",
+      "new": "features/hooks/hooks/usePaymentStatus",
+      "affected_files": []
+    },
+    "hooks/useBudgetProgress.ts": {
+      "old": "hooks/useBudgetProgress",
+      "new": "features/hooks/hooks/useBudgetProgress",
+      "affected_files": []
+    },
+    "hooks/useTransactions.ts": {
+      "old": "hooks/useTransactions",
+      "new": "features/hooks/hooks/useTransactions",
+      "affected_files": []
+    },
+    "hooks/useLocalStorage.ts": {
+      "old": "hooks/useLocalStorage",
+      "new": "features/hooks/hooks/useLocalStorage",
+      "affected_files": []
+    },
+    "hooks/useBudgets.ts": {
+      "old": "hooks/useBudgets",
+      "new": "features/hooks/hooks/useBudgets",
+      "affected_files": []
+    }
+  },
+  "new_directories": [
+    "features/",
+    "features/components/",
+    "features/hooks/",
+    "features/services/",
+    "features/types/",
+    "features/utils/",
+    "shared/",
+    "shared/components/",
+    "shared/hooks/",
+    "shared/utils/",
+    "shared/types/",
+    "core/",
+    "core/api/",
+    "core/config/",
+    "core/constants/",
+    "core/types/"
+  ],
+  "risk_assessment": {
+    "level": "high",
+    "factors": [
+      "Large number of file moves: 119",
+      "Many import updates needed: 119",
+      "Low test coverage: 4.3%"
+    ],
+    "mitigations": [
+      "Execute migration in phases",
+      "Use automated tools for import updates",
+      "Add tests before migration"
+    ]
+  }
+}

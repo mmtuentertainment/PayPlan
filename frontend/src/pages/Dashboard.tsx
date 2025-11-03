@@ -14,14 +14,14 @@
  */
 
 import React from 'react';
-import { useDashboardData } from '@/hooks/useDashboardData';
-import { LoadingSkeleton } from '@/components/dashboard/LoadingSkeleton';
-import { SpendingChartWidget } from '@/components/dashboard/SpendingChartWidget';
-import { IncomeExpensesChartWidget } from '@/components/dashboard/IncomeExpensesChartWidget';
-import { RecentTransactionsWidget } from '@/components/dashboard/RecentTransactionsWidget';
-import { UpcomingBillsWidget } from '@/components/dashboard/UpcomingBillsWidget';
-import { GoalProgressWidget } from '@/components/dashboard/GoalProgressWidget';
-import { GamificationWidget } from '@/components/dashboard/GamificationWidget';
+import { useDashboardData } from '@/features/dashboard/hooks/useDashboardData';
+import { LoadingSkeleton } from '@/features/dashboard/components/LoadingSkeleton';
+import { SpendingChartWidget } from '@/features/dashboard/components/SpendingChartWidget';
+import { IncomeExpensesChartWidget } from '@/features/dashboard/components/IncomeExpensesChartWidget';
+import { RecentTransactionsWidget } from '@/features/dashboard/components/RecentTransactionsWidget';
+import { UpcomingBillsWidget } from '@/features/dashboard/components/UpcomingBillsWidget';
+import { GoalProgressWidget } from '@/features/dashboard/components/GoalProgressWidget';
+import { GamificationWidget } from '@/features/dashboard/components/GamificationWidget';
 
 /**
  * Dashboard Page Component
