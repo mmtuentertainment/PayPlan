@@ -37,10 +37,28 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
-    testTimeout: 5000, // Conservative 5s default - apply targeted increases for slow tests only
+    testTimeout: 2000, // T023: Reduced from 5s to 2s for fast TDD feedback (Research Decision 3)
+
+    // T024: Parallel execution configuration (default, explicit for clarity)
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: false, // Use all CPU cores
+        isolate: true, // Isolate test environments
+      },
+    },
+
+    // Watch mode optimization
+    watch: {
+      exclude: ['node_modules/**', 'dist/**', 'coverage/**'],
+    },
+
     coverage: {
-      provider: 'v8',
+      provider: 'v8', // Faster than c8/istanbul (Research Decision 3)
       reporter: ['text', 'json', 'html', 'lcov'],
+
+      // Only collect coverage for business logic
+      include: ['src/features/*/lib/**/*.ts'],
       exclude: [
         'node_modules/**',
         'tests/**',
@@ -49,15 +67,27 @@ export default defineConfig({
         'vite.config.ts',
         'tailwind.config.ts',
         'postcss.config.js',
-        'src/main.tsx', // App entry point
+        'src/main.tsx',
         '**/*.d.ts',
         '**/types/**',
+        '**/__tests__/**', // Exclude test directories
+        '**/fixtures/**', // Exclude test fixtures
       ],
+
+      // T025: Per-file coverage thresholds (Research Decision 1)
       thresholds: {
         lines: 80,
         functions: 80,
         branches: 75,
         statements: 80,
+
+        // 90%+ for financial calculations (Constitution v3.1 requirement)
+        'src/features/budgets/lib/calculations.ts': {
+          lines: 90,
+          functions: 90,
+          branches: 85,
+          statements: 90,
+        },
       },
     },
   },
