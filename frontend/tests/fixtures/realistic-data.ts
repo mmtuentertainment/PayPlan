@@ -28,7 +28,8 @@ export const createRealisticTransaction = (overrides?: Partial<Transaction>): Tr
   ];
 
   // Realistic amount distribution: 70% small ($5-50), 20% medium ($50-200), 10% large ($200-1000)
-  const rand = Math.random();
+  // Use faker's seeded random for deterministic distribution
+  const rand = faker.number.float({ min: 0, max: 1 });
   let amount: number;
   if (rand < 0.7) {
     amount = faker.number.int({ min: 500, max: 5000 }); // $5-$50
@@ -170,7 +171,7 @@ export const createMonthOfTransactions = (count: number = 100): Transaction[] =>
 
     // Weekend transactions (dining, entertainment)
     const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-    if (isWeekend && Math.random() < 0.7) {
+    if (isWeekend && faker.number.float({ min: 0, max: 1 }) < 0.7) {
       transactions.push(
         createRealisticTransaction({
           categoryId: faker.helpers.arrayElement(['cat_dining', 'cat_entertainment']),
