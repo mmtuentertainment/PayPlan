@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { fc, test } from '@fast-check/vitest';
+import type { Transaction } from '@/features/transactions/types/transaction';
 import {
   calculateBudgetProgress,
   calculateBudgetProgressBatch,
@@ -24,7 +25,7 @@ describe('calculateBudgetProgress', () => {
   // ========================================
   it('should return 0% when nothing spent', () => {
     const budget = createBudget({ amount: 50000, period: '2025-11' });
-    const transactions: any[] = []; // No transactions
+    const transactions: Transaction[] = []; // No transactions
 
     const result = calculateBudgetProgress(budget, transactions);
 
@@ -90,7 +91,7 @@ describe('calculateBudgetProgress', () => {
   // ========================================
   it('should handle zero budget correctly', () => {
     const budget = createBudget({ amount: 0, period: '2025-11', categoryId: 'cat-1' });
-    const transactionsNoSpending: any[] = [];
+    const transactionsNoSpending: Transaction[] = [];
     const transactionsWithSpending = [
       createTransaction({ amount: 100, categoryId: 'cat-1', date: '2025-11-15' }),
     ];
@@ -197,7 +198,7 @@ describe('calculateBudgetProgress', () => {
 describe('calculateBudgetProgress (property-based)', () => {
   test.prop([fc.integer({ min: 1, max: 1000000 })])('progress should be 0% when no transactions', (amount) => {
     const budget = createBudget({ amount, period: '2025-11', categoryId: 'cat-1' });
-    const transactions: any[] = [];
+    const transactions: Transaction[] = [];
 
     const result = calculateBudgetProgress(budget, transactions);
 

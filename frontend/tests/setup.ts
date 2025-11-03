@@ -2,7 +2,7 @@
 // Feature #063: Business Logic Test Coverage
 // Configures localStorage mocking and test environment
 
-import { beforeEach, vi } from 'vitest';
+import { beforeEach, afterEach, vi } from 'vitest';
 import { createMockStorage } from './fixtures/mock-storage';
 
 // Create and apply localStorage mock before each test
@@ -24,4 +24,9 @@ beforeEach(() => {
 
   // Clear storage before each test for isolation
   localStorage.clear();
+});
+
+// Restore all mocks after each test for complete isolation
+afterEach(() => {
+  vi.restoreAllMocks();
 });
