@@ -69,8 +69,15 @@ export function isSafeInteger(value: number): boolean {
  * @param min - Minimum cents
  * @param max - Maximum cents
  * @returns Random amount in cents
+ * @throws Error if min > max or ranges are unsafe
  */
 export function randomAmount(min: number, max: number): number {
+  if (min > max) {
+    throw new Error(`randomAmount: min (${min}) must be <= max (${max})`);
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) {
+    throw new Error(`randomAmount: min and max must be finite numbers (got min=${min}, max=${max})`);
+  }
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 

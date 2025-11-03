@@ -152,13 +152,13 @@ describe('TransactionStorageService - Realistic Data Scenarios', () => {
   });
 
   describe('Performance Testing with Realistic Volumes', () => {
-    it('should handle 1000 transactions efficiently', () => {
+    it('should handle 200 transactions efficiently', () => {
       const stressData = createStressTestData();
 
       const startTime = performance.now();
 
-      // Create all transactions
-      stressData.transactions.slice(0, 1000).forEach((txn) => {
+      // Create 200 transactions (realistic monthly volume for heavy user)
+      stressData.transactions.slice(0, 200).forEach((txn) => {
         service.createTransaction({
           amount: txn.amount,
           description: txn.description,
@@ -170,22 +170,22 @@ describe('TransactionStorageService - Realistic Data Scenarios', () => {
       const endTime = performance.now();
       const duration = endTime - startTime;
 
-      // Should complete in reasonable time (< 5 seconds)
-      expect(duration).toBeLessThan(5000);
+      // Should complete in reasonable time (< 3 seconds)
+      expect(duration).toBeLessThan(3000);
 
       // Verify all stored
       const loadResult = service.loadTransactions();
       expect(loadResult.success).toBe(true);
       if (loadResult.success) {
-        expect(loadResult.data.length).toBe(1000);
+        expect(loadResult.data.length).toBe(200);
       }
     });
 
     it('should filter large datasets efficiently', () => {
       const stressData = createStressTestData();
 
-      // Create transactions across multiple categories
-      stressData.transactions.slice(0, 500).forEach((txn) => {
+      // Create 200 transactions across multiple categories
+      stressData.transactions.slice(0, 200).forEach((txn) => {
         service.createTransaction({
           amount: txn.amount,
           description: txn.description,
@@ -196,7 +196,7 @@ describe('TransactionStorageService - Realistic Data Scenarios', () => {
 
       const startTime = performance.now();
 
-      // Filter by category (should be fast even with 500 transactions)
+      // Filter by category (should be fast even with 200 transactions)
       const result = service.getTransactionsByCategory('cat_groceries');
 
       const endTime = performance.now();

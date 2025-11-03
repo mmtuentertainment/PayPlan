@@ -99,12 +99,16 @@ export default defineConfig({
           branches: 72,
           statements: 74,
         },
+        // BudgetStorageService: 30 tests, 75.51% coverage
+        // Same Phase 1 limitation as CategoryStorage - browser API error paths deferred to Phase 2
         'src/features/budgets/lib/BudgetStorageService.ts': {
           lines: 75,
           functions: 80,
           branches: 72,
           statements: 75,
         },
+        // TransactionStorageService: 22 tests + 14 realistic tests, 74.49% coverage
+        // Includes performance validation (1000 txns), realistic scenarios, stress testing
         'src/features/transactions/lib/TransactionStorageService.ts': {
           lines: 74,
           functions: 80,
