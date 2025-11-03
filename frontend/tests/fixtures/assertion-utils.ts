@@ -34,11 +34,28 @@ export function expectStorageSize(expected: number): void {
 }
 
 /**
+ * Type guard for successful Zod parse result
+ */
+function isZodSuccess<T>(result: { success: boolean; data?: T; error?: z.ZodError }): result is { success: true; data: T } {
+  return result.success === true;
+}
+
+/**
+ * Type guard for failed Zod parse result
+ */
+function isZodError<T>(result: { success: boolean; data?: T; error?: z.ZodError }): result is { success: false; error: z.ZodError } {
+  return result.success === false;
+}
+
+/**
  * Assert Zod schema validation succeeds
  * @param result - Result from schema.safeParse()
  */
-export function expectZodSuccess<T>(result: { success: boolean; data?: T; error?: z.ZodError }): void {
+export function expectZodSuccess<T>(result: { success: boolean; data?: T; error?: z.ZodError }): asserts result is { success: true; data: T } {
   expect(result.success).toBe(true);
+  if (!isZodSuccess(result)) {
+    throw new Error('Expected Zod validation to succeed');
+  }
 }
 
 /**
@@ -46,10 +63,14 @@ export function expectZodSuccess<T>(result: { success: boolean; data?: T; error?
  * @param result - Result from schema.safeParse()
  * @param field - Optional field name that should have error
  */
-export function expectZodError<T>(result: { success: boolean; data?: T; error?: z.ZodError }, field?: string): void {
+export function expectZodError<T>(result: { success: boolean; data?: T; error?: z.ZodError }, field?: string): asserts result is { success: false; error: z.ZodError } {
   expect(result.success).toBe(false);
 
-  if (field && !result.success && result.error) {
+  if (!isZodError(result)) {
+    throw new Error('Expected Zod validation to fail');
+  }
+
+  if (field) {
     const hasFieldError = result.error.issues.some((issue: z.ZodIssue) => {
       const path = issue.path.join('.');
       return path === field || path.includes(field);

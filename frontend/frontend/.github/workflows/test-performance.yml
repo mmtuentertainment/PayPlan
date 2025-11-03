@@ -1,0 +1,43 @@
+# Test Performance Check
+# Ensures schema tests execute in under 2 seconds for fast TDD feedback
+# Part of Feature #063 US3 - Schema Validation Tests
+
+name: Test Performance Check
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/src/features/*/lib/__tests__/schemas.test.ts'
+      - 'frontend/tests/**'
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      
+      - name: Run schema tests with timing
+        working-directory: frontend
+        run: |
+          START=$(date +%s%3N)
+          npm test -- schemas.test.ts
+          END=$(date +%s%3N)
+          DURATION=$((END - START))
+          echo "Schema test duration: ${DURATION}ms"
+          
+          if [ $DURATION -gt 2000 ]; then
+            echo "❌ Schema tests took ${DURATION}ms (threshold: 2000ms)"
+            echo "Tests are too slow for fast TDD feedback loop"
+            exit 1
+          else
+            echo "✅ Schema tests took ${DURATION}ms (under 2000ms threshold)"
+          fi
