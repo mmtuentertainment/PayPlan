@@ -620,9 +620,14 @@ describe('Dashboard Aggregation', () => {
       const result = getUpcomingBills(transactions, categories);
 
       // Should detect the recurring pattern (3 occurrences within 90 days)
-      // Note: Next predicted occurrence may or may not fall within 7-day forecast window
-      // This test validates pattern detection, not forecast window filtering
-      expect(result.length).toBeGreaterThanOrEqual(0); // At minimum, doesn't crash
+      // With 90-day window: Pattern detected (3 occurrences)
+      // With 30-day window: Would miss first occurrence, failing 2+ requirement
+      expect(result).not.toHaveLength(0); // Must detect at least one bill
+      expect(result.some((bill) => bill.name === 'Monthly Subscription')).toBe(true);
+
+      // Verify detected bill has correct amount
+      const monthlyBill = result.find((bill) => bill.name === 'Monthly Subscription');
+      expect(monthlyBill?.amount).toBe(5000);
     });
 
     it('should detect 2-month pattern within 90-day window (60 days apart)', () => {
@@ -654,7 +659,12 @@ describe('Dashboard Aggregation', () => {
 
       // With 90-day window: These 2 transactions should be detected as recurring
       // With 30-day window: The 60-day-old transaction would be excluded, missing pattern
-      expect(result.length).toBeGreaterThanOrEqual(0); // Pattern detected or next occurrence outside forecast window
+      expect(result).not.toHaveLength(0); // Must detect at least one bill
+      expect(result.some((bill) => bill.name === 'Bi-Monthly Bill')).toBe(true);
+
+      // Verify detected bill has correct amount
+      const biMonthlyBill = result.find((bill) => bill.name === 'Bi-Monthly Bill');
+      expect(biMonthlyBill?.amount).toBe(5000);
     });
   });
 
