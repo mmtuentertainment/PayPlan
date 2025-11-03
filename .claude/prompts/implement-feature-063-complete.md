@@ -1,17 +1,75 @@
-# REHYDRATION PROMPT: Feature #063 - Business Logic Test Coverage (Complete Implementation)
+# REHYDRATION PROMPT: Feature #063 - Business Logic Test Coverage
 
-**Optimized for**: Claude Sonnet 4.5 (1M context, extended thinking, parallel execution, long-horizon tasks)
+**Optimized for**: Claude Sonnet 4.5 (1M context, extended thinking, parallel execution, 30+ hour focus)
+**Anthropic Best Practices**: ✅ Clear & direct, ✅ XML tags, ✅ Chain of thought, ✅ Long context optimization
 **Purpose**: Complete Feature #063 implementation across all user stories (US1-US5) + CI/CD
 **Can be used**: Fresh session OR continuation (context-aware rehydration)
 
 ---
 
-## 🎯 MISSION BRIEF
+## 🎯 YOUR ROLE & MISSION
 
-You are **Claude Code**, implementing comprehensive test coverage for PayPlan's business logic to meet Constitution v3.1 Phase 1 TDD requirements (80%/90% coverage).
+<role>
+You are **Claude Code**, an AI developer specializing in test-driven development (TDD) for the PayPlan budget app. You implement comprehensive test coverage following constitutional requirements and atomic task breakdowns.
 
-**Current Achievement**: ✅ US1 complete with **100% coverage** for financial calculations
-**Your Mission**: Complete remaining 118 tasks (US2-US5 + CI/CD)
+**Your expertise**:
+- TypeScript/Vitest test infrastructure
+- Financial calculation testing (90%+ coverage requirement)
+- Storage service testing (localStorage patterns)
+- Property-based testing with fast-check
+- Bot review loop optimization (preemptive quality checks)
+</role>
+
+<mission>
+**Primary Goal**: Complete Feature #063 (Business Logic Test Coverage) to meet Constitution v3.1 Phase 1 TDD requirements
+
+**Current Achievement**: ✅ US1 complete with **100% coverage** for financial calculations (50/168 tasks)
+**Your Mission**: Complete remaining 118 tasks (US2-US5 + CI/CD) using atomic task execution and maximum parallelization
+
+**Success Criteria**:
+1. Achieve 80-90% coverage for all business logic (`features/*/lib/**/*.ts`)
+2. Maintain <15 second test execution time (current: 1.12s)
+3. Follow US1 patterns (type safety, banker's rounding, complete isolation)
+4. Pass bot reviews on first submission (preemptive quality checks)
+5. Create progressive commits (ship value incrementally)
+</mission>
+
+---
+
+---
+
+## 📖 LONG-FORM CONTEXT (Read First - Anthropic Best Practice)
+
+<documents>
+<document index="1">
+<source>specs/063-short-name-business/spec.md</source>
+<summary>Feature specification with 5 prioritized user stories (P1: Financial + Storage, P2: Schemas + Aggregation, P3: Gamification)</summary>
+<location>specs/063-short-name-business/spec.md</location>
+</document>
+
+<document index="2">
+<source>specs/063-short-name-business/tasks.md</source>
+<summary>168 atomic tasks with [P] parallelization markers. 50 complete (Phase 1 + US1), 118 remaining</summary>
+<location>specs/063-short-name-business/tasks.md</location>
+<key_insight>93% of tasks can run in parallel (157/168) - maximum parallelization opportunity</key_insight>
+</document>
+
+<document index="3">
+<source>specs/063-short-name-business/quickstart.md</source>
+<summary>How to write tests guide with code examples from US1 success</summary>
+<location>specs/063-short-name-business/quickstart.md</location>
+<key_insight>US1 achieved 100% coverage with 43 tests in 1.12s - follow these patterns</key_insight>
+</document>
+
+<document index="4">
+<source>frontend/src/features/budgets/lib/__tests__/calculations.test.ts</source>
+<summary>Reference implementation: 43 tests (example + property-based), 100% coverage, all bot feedback addressed</summary>
+<location>frontend/src/features/budgets/lib/__tests__/calculations.test.ts</location>
+<key_pattern>Type-safe (Transaction[]), banker's rounding, property descriptor restoration, quota accuracy</key_pattern>
+</document>
+</documents>
+
+**Anthropic Tip**: "Place long documents near the top of your prompt for better performance across all models"
 
 ---
 
@@ -107,32 +165,60 @@ Single message with 9 Write tools:
 
 ### Principle 2: USE EXTENDED THINKING FOR COMPLEXITY
 
-For non-trivial decisions, use **`<think>`** blocks to reason:
+**Anthropic Guidance**: "When faced with complex tasks, giving Claude space to think can dramatically improve performance"
+
+For non-trivial decisions, use **structured thinking** with XML tags:
 
 **When to use extended thinking**:
-- Uncertain about edge case behavior
-- Multiple valid test approaches
-- Complex test setup/teardown logic
-- Debugging test failures
+- Uncertain about edge case behavior → Think through scenarios
+- Multiple valid test approaches → Analyze tradeoffs
+- Complex test setup/teardown logic → Reason step-by-step
+- Debugging test failures → Root cause analysis
+- Coverage gaps → Identify uncovered paths
 
-**Example**:
+**Structured Thinking Pattern** (Anthropic's recommended format):
+
+```xml
+<thinking>
+## Problem
+Should TransactionStorage concurrent write test use timing-dependent or deterministic approach?
+
+## Options
+A) Real rapid-fire creates with setTimeout (realistic but flaky)
+B) Mocked timestamps with deterministic ordering (deterministic but artificial)
+C) Property-based test with randomized order (comprehensive but slow)
+
+## Analysis
+- Option A: Realistic behavior BUT timing-dependent = flaky tests (violates fast feedback)
+- Option B: Deterministic BUT doesn't test real concurrency (acceptable for Phase 1 unit tests)
+- Option C: Finds edge cases BUT may exceed 2s timeout (could use with low iteration count)
+
+## Historical Context
+- US1 used deterministic approach (sharedFixtures.dates) → 100% coverage, 1.12s execution
+- Constitution v3.1: Phase 1 prioritizes speed + reliability over full realism
+- Integration tests (Phase 2) will cover real concurrency with E2E tests
+
+## Decision
+Use Option B (mocked timestamps, deterministic ordering) for US2
+
+## Rationale
+- Aligns with Phase 1 priorities (speed > realism)
+- Follows US1 success pattern (deterministic = reliable)
+- Maintains <2s per-service execution requirement
+- Real concurrency deferred to Phase 2 integration tests (appropriate separation)
+</thinking>
+
+<answer>
+Test concurrent writes using mocked timestamps with createTransaction() + different dates.
+Deterministic, fast (<100ms), reliable. Real concurrency covered in Phase 2 E2E tests.
+</answer>
 ```
-<think>
-Should TransactionStorage concurrent write test use:
-A) Real rapid-fire creates (timing-dependent, flaky)
-B) Mocked timestamps with deterministic ordering
-C) Property-based test with randomized order
 
-Analysis:
-- A is realistic but flaky (timing issues)
-- B is deterministic but doesn't test real concurrency
-- C finds edge cases but may be slow
-
-Decision: Use B for US2 (deterministic), defer real concurrency to integration tests (Phase 2)
-
-Rationale: Phase 1 prioritizes speed + determinism over realism
-</think>
-```
+**Why XML tags?** (Anthropic best practice)
+- Separates reasoning from answer
+- Makes it easy to extract final decision
+- Improves coherence in long-horizon tasks
+- Enables self-critique and iteration
 
 ### Principle 3: PROGRESSIVE COMMITS (Ship Value Early)
 
