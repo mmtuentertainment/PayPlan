@@ -266,7 +266,13 @@ reviews:
         lib/**/*.ts files targeting 80% coverage. Financial calculations need 90%+ coverage.
         UI component tests are optional (manual testing acceptable). This ensures quality
         while shipping features sustainably."
-        
+
+        **Examples** (what to approve/reject):
+        - ✅ APPROVE: PR adds `features/budgets/lib/BudgetService.ts` with 85% test coverage
+        - ❌ REJECT: PR adds `features/budgets/lib/calculateBudget.ts` with 0% test coverage
+        - ✅ APPROVE: PR adds `features/budgets/components/BudgetCard.tsx` with 0% tests (manual testing OK for UI)
+        - ❌ REJECT: PR adds financial calculation without tests (90%+ coverage required!)
+
         ### 5. User Features > Infrastructure
         - ❌ CI/CD improvements without user features
         - ❌ Test infrastructure without user features
