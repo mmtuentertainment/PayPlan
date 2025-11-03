@@ -8,6 +8,32 @@
 
 ---
 
+## Table of Contents
+
+1. [Quick Start](#quick-start)
+2. [Your Role in the Workflow](#your-role-in-the-workflow)
+3. [Current Phase: Phase 1](#current-phase-phase-1-pre-mvp)
+4. [Project Overview](#project-overview)
+5. [Technology Stack](#technology-stack)
+6. [Project Structure](#project-structure-updated-2025-11-02)
+7. [Development Workflow](#development-workflow)
+8. [Bot Review Loop](#bot-review-loop-critical)
+9. [Phase 1 Definition of Done](#phase-1-definition-of-done-updated-v31)
+10. [Constitutional Principles](#constitutional-principles-must-follow)
+11. [Conflict Resolution](#conflict-resolution)
+12. [Mandatory Features](#mandatory-features-post-pivot-roadmap)
+13. [Code Standards](#code-standards)
+14. [Accessibility Requirements](#accessibility-requirements-immutable)
+15. [Privacy Requirements](#privacy-requirements-immutable)
+16. [Performance Guidelines](#performance-guidelines-phase-1)
+17. [Common Commands](#common-commands)
+18. [Tooling Integration](#tooling-integration)
+19. [Frequently Asked Questions](#frequently-asked-questions)
+20. [Working with the New Folder Structure](#working-with-the-new-folder-structure-2025-11-02)
+21. [Resources](#resources)
+
+---
+
 ## Quick Start
 
 **You are Claude Code, the AI developer implementing PayPlan features.**

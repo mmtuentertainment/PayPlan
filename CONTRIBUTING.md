@@ -4,6 +4,23 @@ Welcome! This guide explains how to work with PayPlan's clean, feature-based cod
 
 ---
 
+## Table of Contents
+
+1. [Project Structure](#project-structure)
+2. [Adding a New Feature](#adding-a-new-feature)
+3. [File Naming Conventions](#file-naming-conventions)
+4. [Import Path Aliases](#import-path-aliases)
+5. [Documentation Structure](#documentation-structure)
+6. [Feature Specifications](#feature-specifications-specs)
+7. [Development Tools](#development-tools-tools)
+8. [Feature Organization Principles](#feature-organization-principles)
+9. [Testing](#testing)
+10. [Constitution Alignment](#constitution-alignment-v31)
+11. [Quick Reference](#quick-reference)
+12. [Development Workflow](#development-workflow)
+
+---
+
 ## Project Structure
 
 ### Frontend (`frontend/src/`)
