@@ -16,9 +16,10 @@ import { sharedFixtures } from '../../../../../tests/fixtures/shared-fixtures';
 
 // Helper to create minimal transaction for schema testing
 // Note: Uses inline definition to avoid coupling to full Transaction type
+// Uses deterministic ID (can be overridden in test)
 function createTestTransaction(overrides?: Partial<ReturnType<typeof createTestTransaction>>) {
   return {
-    id: `txn_${Math.random().toString(36).substring(2, 15)}`,
+    id: sharedFixtures.ids.transactionId1,
     amount: sharedFixtures.amounts.hundredDollars,
     description: 'Test transaction',
     date: '2025-11-15',

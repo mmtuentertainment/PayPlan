@@ -64,7 +64,7 @@ export const updateTransactionInputSchema = z.object({
   amount: z.number().int().optional(),
   description: z.string().min(1).max(200).optional(),
   date: iso8601DateSchema.optional(),
-  categoryId: z.union([categoryIdSchema, z.null()]).optional(),
+  categoryId: categoryIdSchema.nullable().optional(),
 });
 
 /**
