@@ -37,7 +37,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
-    testTimeout: 2000, // T023: Reduced from 5s to 2s for fast TDD feedback (Research Decision 3)
+    // T023: Test timeout configuration
+    // 2s default for unit tests (fast TDD feedback)
+    // Note: Performance/stress tests with 200+ transactions may approach this limit.
+    // If tests timeout, either optimize code or increase specific test timeout:
+    // it('slow test', () => { ... }, { timeout: 5000 })
+    testTimeout: 2000, // Reduced from 5s to 2s for fast TDD feedback (Research Decision 3)
 
     // T024: Parallel execution configuration (default, explicit for clarity)
     pool: 'threads',
@@ -76,6 +81,10 @@ export default defineConfig({
 
       // T025: Per-file coverage thresholds (Research Decision 1)
       thresholds: {
+        // Global thresholds: 80% target for Phase 1
+        // Note: These are aspirational. Per-file thresholds below reflect Phase 1 reality
+        // (74-75% for storage services due to browser API error path limitations).
+        // Overall weighted average across all tested files should approach 80%.
         lines: 80,
         functions: 80,
         branches: 75,
