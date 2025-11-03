@@ -228,6 +228,49 @@ describe('calculateBudgetProgress (property-based)', () => {
 
     expect(result.percentageSpent).toBeGreaterThanOrEqual(0);
   });
+
+  // Additional invariants
+  test.prop([
+    fc.integer({ min: 1, max: 1000000 }),
+    fc.integer({ min: 0, max: 1000000 }),
+  ])('remaining should equal budget minus spent', (budgetAmount, spentAmount) => {
+    const budget = createBudget({ amount: budgetAmount, period: '2025-11', categoryId: 'cat-1' });
+    const transactions = [createTransaction({ amount: spentAmount, categoryId: 'cat-1', date: '2025-11-15' })];
+
+    const result = calculateBudgetProgress(budget, transactions);
+
+    expect(result.remainingAmount).toBe(budgetAmount - spentAmount);
+  });
+
+  test.prop([
+    fc.integer({ min: 1, max: 1000000 }),
+    fc.integer({ min: 0, max: 1000000 }),
+  ])('status should be consistent with percentage', (budgetAmount, spentAmount) => {
+    const budget = createBudget({ amount: budgetAmount, period: '2025-11', categoryId: 'cat-1' });
+    const transactions = [createTransaction({ amount: spentAmount, categoryId: 'cat-1', date: '2025-11-15' })];
+
+    const result = calculateBudgetProgress(budget, transactions);
+
+    // Verify status matches percentage thresholds
+    if (result.percentageSpent >= 100) {
+      expect(result.status).toBe('over');
+    } else if (result.percentageSpent >= 80) {
+      expect(result.status).toBe('warning');
+    } else {
+      expect(result.status).toBe('under');
+    }
+  });
+
+  test.prop([fc.integer({ min: 1, max: 1000000 })])('budget amounts should be preserved in result', (amount) => {
+    const budget = createBudget({ amount, period: '2025-11', categoryId: 'cat-1' });
+    const transactions: Transaction[] = [];
+
+    const result = calculateBudgetProgress(budget, transactions);
+
+    expect(result.budgetAmount).toBe(amount);
+    expect(result.budgetId).toBe(budget.id);
+    expect(result.categoryId).toBe(budget.categoryId);
+  });
 });
 
 describe('filterTransactionsByBudget', () => {

@@ -88,6 +88,26 @@ export default defineConfig({
           branches: 85,
           statements: 90,
         },
+
+        // 80%+ for storage services (US2 - future)
+        'src/features/categories/lib/CategoryStorageService.ts': {
+          lines: 80,
+          functions: 80,
+          branches: 75,
+          statements: 80,
+        },
+        'src/features/budgets/lib/BudgetStorageService.ts': {
+          lines: 80,
+          functions: 80,
+          branches: 75,
+          statements: 80,
+        },
+        'src/features/transactions/lib/TransactionStorageService.ts': {
+          lines: 80,
+          functions: 80,
+          branches: 75,
+          statements: 80,
+        },
       },
     },
   },

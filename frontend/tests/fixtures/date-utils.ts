@@ -101,3 +101,41 @@ export function getFiscalYearEnd(date: Date): Date {
 
   return createDate(fiscalYear, 6, 30);
 }
+
+/**
+ * Convert Date to ISO date string (YYYY-MM-DD)
+ * Useful for budget periods and transaction dates
+ * @param date - Date to convert
+ * @returns ISO date string (YYYY-MM-DD)
+ */
+export function toISODateString(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Convert Date to period string (YYYY-MM)
+ * Useful for budget periods
+ * @param date - Date to convert
+ * @returns Period string (YYYY-MM)
+ */
+export function toPeriodString(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+/**
+ * Parse ISO date string to Date
+ * @param isoString - ISO date string (YYYY-MM-DD)
+ * @returns Date object or null if invalid
+ */
+export function parseISODateString(isoString: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoString);
+  if (!match) return null;
+
+  const [, year, month, day] = match;
+  return createDate(Number(year), Number(month), Number(day));
+}
