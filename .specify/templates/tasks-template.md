@@ -79,19 +79,22 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (REQUIRED for business logic - v3.1) ⚠️
 
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+> **NOTE (Phase 1 v3.1)**: Business logic tests REQUIRED (80% coverage target, 90%+ financial)
+> **UI tests**: Optional (manual testing acceptable)
+> **Phased approach**: Weeks 1-2 test-after, Weeks 3-6 hybrid, Week 7+ strict TDD
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T010 [P] [US1] Business logic tests for lib/**/*.ts (80% coverage)
+- [ ] T011 [P] [US1] Financial calculation tests (90%+ coverage if applicable)
+- [ ] T012 [P] [US1] Schema validation tests (Zod edge cases)
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T013 [P] [US1] Create [Entity1] model in src/models/[entity1].py
+- [ ] T014 [P] [US1] Create [Entity2] model in src/models/[entity2].py
+- [ ] T015 [US1] Implement [Service] in src/services/[service].py (depends on T013, T014)
+- [ ] T016 [US1] Implement [endpoint/feature] in src/[location]/[file].py
 - [ ] T016 [US1] Add validation and error handling
 - [ ] T017 [US1] Add logging for user story 1 operations
 
