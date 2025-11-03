@@ -5,6 +5,9 @@
 import { beforeEach, afterEach, vi } from 'vitest';
 import { createMockStorage } from './fixtures/mock-storage';
 
+// Store original length descriptor for restoration
+let originalLengthDescriptor: PropertyDescriptor | undefined;
+
 // Create and apply localStorage mock before each test
 beforeEach(() => {
   const mockStorage = createMockStorage();
@@ -15,6 +18,9 @@ beforeEach(() => {
   vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(mockStorage.removeItem);
   vi.spyOn(Storage.prototype, 'clear').mockImplementation(mockStorage.clear);
   vi.spyOn(Storage.prototype, 'key').mockImplementation(mockStorage.key);
+
+  // Save original descriptor before modifying
+  originalLengthDescriptor = Object.getOwnPropertyDescriptor(Storage.prototype, 'length');
 
   // Mock length property
   Object.defineProperty(Storage.prototype, 'length', {
@@ -29,4 +35,9 @@ beforeEach(() => {
 // Restore all mocks after each test for complete isolation
 afterEach(() => {
   vi.restoreAllMocks();
+
+  // Restore original length descriptor
+  if (originalLengthDescriptor) {
+    Object.defineProperty(Storage.prototype, 'length', originalLengthDescriptor);
+  }
 });
