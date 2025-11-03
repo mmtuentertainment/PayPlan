@@ -334,6 +334,43 @@ const totalPercentage = result.reduce((sum, r) => sum + r.percentage, 0);
 expect(totalPercentage).toBeCloseTo(100, 1); // Within 0.1%
 ```
 
+### 5. Parameterized Tests (Reduce Duplication)
+
+```typescript
+// Use it.each() for testing multiple similar cases
+describe('aggregateSpendingByCategory', () => {
+  it.each([
+    { amount: 0, description: 'zero amount' },
+    { amount: 1, description: 'one cent' },
+    { amount: sharedFixtures.amounts.maxSafeInteger, description: 'MAX_SAFE_INTEGER' },
+  ])('should handle $description transactions', ({ amount }) => {
+    const transactions = [createTransaction({ amount })];
+    const categories = [createCategory()];
+
+    const result = aggregateSpendingByCategory(transactions, categories);
+
+    if (amount === 0) {
+      expect(result).toEqual([]); // Zero spending = empty
+    } else {
+      expect(result[0].amount).toBe(amount);
+    }
+  });
+});
+
+// Use it.each() for edge case validation
+describe('input validation', () => {
+  it.each([
+    { input: null, description: 'null transactions' },
+    { input: undefined, description: 'undefined transactions' },
+    { input: 'not-array', description: 'string instead of array' },
+    { input: 123, description: 'number instead of array' },
+  ])('should return empty array for $description', ({ input }) => {
+    const result = aggregateSpendingByCategory(input as any, []);
+    expect(result).toEqual([]);
+  });
+});
+```
+
 ---
 
 ## Files to Create
