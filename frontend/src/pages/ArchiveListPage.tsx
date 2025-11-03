@@ -12,8 +12,8 @@
  */
 
 import { useState } from 'react';
-import { usePaymentArchives } from '@/hooks/usePaymentArchives';
-import { ArchiveListItem } from '@/components/archive/ArchiveListItem';
+import { usePaymentArchives } from '@/features/archive/hooks/usePaymentArchives';
+import { ArchiveListItem } from '@/features/archive/components/ArchiveListItem';
 import { Link } from 'react-router-dom';
 
 /**

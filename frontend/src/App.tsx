@@ -27,7 +27,7 @@ import { ArchiveDetailView } from "./pages/ArchiveDetailView";
 import { ROUTES } from "./routes";
 import { NavigationHeader } from "./components/navigation/NavigationHeader";
 import Breadcrumbs from "./components/navigation/Breadcrumbs";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ErrorBoundary from "@/shared/components/ErrorBoundary";
 
 function App() {
   // Initialize preferences hook at app level

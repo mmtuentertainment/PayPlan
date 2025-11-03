@@ -1,0 +1,15 @@
+# Codebase Architect - Python Dependencies
+#
+# All scripts use Python standard library only.
+# No external dependencies required.
+#
+# Python version: 3.7+
+#
+# Standard library modules used:
+# - argparse (CLI argument parsing)
+# - ast (Python AST parsing)
+# - json (JSON output)
+# - os, pathlib (file system operations)
+# - re (regex pattern matching)
+# - collections (defaultdict, deque)
+# - typing (type hints)

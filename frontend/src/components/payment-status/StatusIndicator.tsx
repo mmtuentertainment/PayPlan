@@ -12,7 +12,7 @@
  */
 
 import { Check, Clock } from 'lucide-react';
-import { Badge } from '../ui/badge';
+import { Badge } from '@/shared/components/ui/badge';
 import type { PaymentStatus } from '../../lib/payment-status/types';
 
 export interface StatusIndicatorProps {

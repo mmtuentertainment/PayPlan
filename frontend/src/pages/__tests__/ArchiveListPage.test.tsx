@@ -12,10 +12,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ArchiveListPage } from '../ArchiveListPage';
-import * as usePaymentArchivesModule from '@/hooks/usePaymentArchives';
+import * as usePaymentArchivesModule from '@/features/archive/hooks/usePaymentArchives';
 
 // Mock the hook
-vi.mock('@/hooks/usePaymentArchives');
+vi.mock('@/features/archive/hooks/usePaymentArchives');
 
 describe('ArchiveListPage', () => {
   beforeEach(() => {

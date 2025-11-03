@@ -14,16 +14,16 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { usePaymentArchives } from '@/hooks/usePaymentArchives';
-import type { Archive, ArchiveSummary } from '@/lib/archive/types';
-import { archiveSchema } from '@/lib/archive/validation';
-import { ArchiveService } from '@/lib/archive/ArchiveService';
-import { ArchiveStorage } from '@/lib/archive/ArchiveStorage';
+import { usePaymentArchives } from '@/features/archive/hooks/usePaymentArchives';
+import type { Archive, ArchiveSummary } from '@/features/archive/lib/types';
+import { archiveSchema } from '@/features/archive/lib/validation';
+import { ArchiveService } from '@/features/archive/lib/ArchiveService';
+import { ArchiveStorage } from '@/features/archive/lib/ArchiveStorage';
 import { PaymentStatusStorage } from '@/lib/payment-status/PaymentStatusStorage';
-import { ArchiveStatistics } from '@/components/archive/ArchiveStatistics';
-import { ExportArchiveButton } from '@/components/archive/ExportArchiveButton';
-import { DeleteArchiveDialog } from '@/components/archive/DeleteArchiveDialog';
-import { ArchiveErrorBoundary } from '@/components/archive/ArchiveErrorBoundary';
+import { ArchiveStatistics } from '@/features/archive/components/ArchiveStatistics';
+import { ExportArchiveButton } from '@/features/archive/components/ExportArchiveButton';
+import { DeleteArchiveDialog } from '@/features/archive/components/DeleteArchiveDialog';
+import { ArchiveErrorBoundary } from '@/features/archive/components/ArchiveErrorBoundary';
 import { ROUTES } from '@/routes';
 
 /**

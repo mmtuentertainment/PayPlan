@@ -1,0 +1,8 @@
+{
+  "framework": null,
+  "language": "JavaScript",
+  "build_tool": null,
+  "test_framework": "Jest",
+  "package_manager": "npm",
+  "project_type": "unknown"
+}

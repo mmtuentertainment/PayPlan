@@ -240,19 +240,19 @@ This document provides a granular, dependency-ordered task breakdown for impleme
 
 ### Tasks
 
-- [ ] T036 [P] [US5] Create GoalProgressWidget component in frontend/src/components/dashboard/GoalProgressWidget.tsx
-- [ ] T037 [US5] Implement progress bars with percentage and remaining amount in GoalProgressWidget.tsx
-- [ ] T038 [US5] Add status indicators (on-track green, at-risk yellow, completed green with celebration) in GoalProgressWidget.tsx
-- [ ] T039 [US5] Add conditional rendering (hide widget if goals feature not implemented) in GoalProgressWidget.tsx
-- [ ] T040 [US5] Integrate GoalProgressWidget into Dashboard page in Dashboard.tsx
+- [x] T036 [P] [US5] Create GoalProgressWidget component in frontend/src/components/dashboard/GoalProgressWidget.tsx ✅ COMPLETED
+- [x] T037 [US5] Implement progress bars with percentage and remaining amount in GoalProgressWidget.tsx ✅ COMPLETED
+- [x] T038 [US5] Add status indicators (on-track green, at-risk yellow, completed green with celebration) in GoalProgressWidget.tsx ✅ COMPLETED
+- [x] T039 [US5] Add conditional rendering (gracefully hide widget if no goals in localStorage) in GoalProgressWidget.tsx ✅ COMPLETED
+- [x] T040 [US5] Integrate GoalProgressWidget into Dashboard page in Dashboard.tsx ✅ COMPLETED
 
 **Completion Criteria** (US5):
 - ✅ Widget displays up to 3 goals with progress bars showing percentage complete
 - ✅ Progress bar shows "$600 to go" text for $400 saved of $1,000 target
 - ✅ Completed goals show celebration badge and "Goal Complete!" message
 - ✅ Screen reader reads "Emergency Fund: $400 of $1,000 saved, 40% complete, $600 remaining"
-- ✅ Widget is hidden if goals feature (payplan_goals_v1) does not exist
-- ✅ Empty state shows "Create your first savings goal" CTA
+- ✅ Widget gracefully hides when no goals exist in localStorage (payplan_goals_v1)
+- ✅ Empty state shows "Create your first savings goal" CTA (Note: Full CRUD deferred to Feature MMT-64)
 
 **Manual Testing**:
 1. Create 3 goals with different progress levels (25%, 50%, 100%)

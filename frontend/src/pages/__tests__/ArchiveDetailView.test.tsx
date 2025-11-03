@@ -12,11 +12,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { ArchiveDetailView } from '../ArchiveDetailView';
-import * as usePaymentArchivesModule from '@/hooks/usePaymentArchives';
-import type { Archive } from '@/lib/archive/types';
+import * as usePaymentArchivesModule from '@/features/archive/hooks/usePaymentArchives';
+import type { Archive } from '@/features/archive/lib/types';
 
 // Mock the hook
-vi.mock('@/hooks/usePaymentArchives');
+vi.mock('@/features/archive/hooks/usePaymentArchives');
 
 // Test archive data
 const mockArchive: Archive = {

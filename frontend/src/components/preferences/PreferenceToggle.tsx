@@ -17,7 +17,7 @@
  * @see spec.md FR-002 (explicit opt-in required)
  */
 
-import { Label } from '../ui/label';
+import { Label } from '@/shared/components/ui/label';
 import type { PreferenceCategoryType } from '../../lib/preferences/types';
 
 export interface PreferenceToggleProps {

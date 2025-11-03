@@ -1,0 +1,64 @@
+{
+  "name": "Example Codebase Configuration",
+  "description": "Template configuration for .codebase-architect.json",
+  "version": "1.0.0",
+
+  "rules": {
+    "maxNestingDepth": 4,
+    "enforceBarrelExports": true,
+    "namingConvention": "kebab-case",
+    "forbiddenDependencies": [
+      {
+        "from": "domain/*",
+        "to": "infrastructure/*",
+        "reason": "Domain layer should not depend on infrastructure"
+      },
+      {
+        "from": "presentation/*",
+        "to": "domain/*",
+        "reason": "Presentation should depend on application layer, not domain"
+      }
+    ],
+    "requiredDirectories": [
+      "src",
+      "tests",
+      "docs"
+    ],
+    "fileNamingPatterns": {
+      "components": "PascalCase.tsx",
+      "hooks": "use*.ts",
+      "utils": "kebab-case.ts",
+      "types": "kebab-case.types.ts"
+    }
+  },
+
+  "ignore": [
+    "node_modules",
+    "dist",
+    "build",
+    "__pycache__",
+    ".git",
+    ".venv",
+    "venv",
+    "coverage",
+    "*.pyc",
+    "*.pyo",
+    ".DS_Store",
+    "Thumbs.db"
+  ],
+
+  "analysis": {
+    "detectCircularDependencies": true,
+    "detectOrphanedFiles": true,
+    "detectDeadCode": true,
+    "detectGodFiles": true,
+    "maxFileSize": 500,
+    "maxFunctionLength": 50
+  },
+
+  "patterns": {
+    "preferred": "feature-based",
+    "alternatives": ["mvc", "clean", "modular"],
+    "customPatterns": []
+  }
+}

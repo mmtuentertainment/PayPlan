@@ -15,13 +15,13 @@
  */
 
 import { useState } from 'react';
-import { type Category, type CreateCategoryInput } from '@/types/category';
-import { useCategories } from '@/hooks/useCategories';
-import { CategoryList } from '@/components/categories/CategoryList';
-import { CategoryForm } from '@/components/categories/CategoryForm';
-import { DeleteCategoryDialog } from '@/components/categories/DeleteCategoryDialog';
-import { Button } from '@/components/ui/button';
-import { Alert } from '@/components/ui/alert';
+import { type Category, type CreateCategoryInput } from '@/features/categories/types/category';
+import { useCategories } from '@/features/categories/hooks/useCategories';
+import { CategoryList } from '@/features/categories/components/CategoryList';
+import { CategoryForm } from '@/features/categories/components/CategoryForm';
+import { DeleteCategoryDialog } from '@/features/categories/components/DeleteCategoryDialog';
+import { Button } from '@/shared/components/ui/button';
+import { Alert } from '@/shared/components/ui/alert';
 import { Plus, AlertCircle } from 'lucide-react';
 
 /**

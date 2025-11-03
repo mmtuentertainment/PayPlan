@@ -19,8 +19,8 @@
  */
 
 import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '../ui/alert-dialog';
+} from '@/shared/components/ui/alert-dialog';
 import { PreferenceToggle } from './PreferenceToggle';
 import { PreferenceCategory, type PreferenceCategoryType, type PreferenceCollection } from '../../lib/preferences/types';
 import { RotateCcw } from 'lucide-react';

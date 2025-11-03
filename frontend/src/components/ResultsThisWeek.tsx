@@ -3,8 +3,8 @@
 // T027-T032: User Story 2 - Create Archive from Results (Feature 017)
 
 import { useState, useEffect, useRef } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
 import { exportPaymentsToCSV, downloadCSV } from "@/services/csvExportService";
 import type { PaymentRecord } from "@/types/csvExport";
 import { paymentRecordsArraySchema } from "@/types/csvExport";
@@ -12,7 +12,7 @@ import { ToastNotification } from "@/components/preferences/ToastNotification";
 import { usePaymentStatus } from "@/hooks/usePaymentStatus";
 import { PaymentCheckbox } from "@/components/payment-status/PaymentCheckbox";
 import { StatusIndicator } from "@/components/payment-status/StatusIndicator";
-import { CreateArchiveDialog } from "@/components/archive/CreateArchiveDialog";
+import { CreateArchiveDialog } from "@/features/archive/components/CreateArchiveDialog";
 import { ZodError } from "zod";
 import * as Dialog from "@radix-ui/react-dialog";
 import { consoleGuard } from "@/lib/security/ConsoleGuard";

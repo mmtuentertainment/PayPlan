@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { z } from 'zod';
 import { ROUTES } from '@/routes';
-import { usePaymentArchives } from '@/hooks/usePaymentArchives';
+import { usePaymentArchives } from '@/features/archive/hooks/usePaymentArchives';
 
 export interface BreadcrumbItem {
   label: string;
