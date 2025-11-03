@@ -226,26 +226,26 @@
 
 ### Test Fixtures for User Story 4
 
-- [ ] T119 [P] [US4] Create createDashboardData factory function in frontend/src/features/dashboard/lib/__tests__/fixtures/dashboard-fixtures.ts
-- [ ] T120 [P] [US4] Create dashboard scenario variations in frontend/src/features/dashboard/lib/__tests__/fixtures/dashboard-fixtures.ts (emptyDashboard, activeDashboard, overspentDashboard)
-- [ ] T121 [P] [US4] Create dashboard fixture barrel export in frontend/src/features/dashboard/lib/__tests__/fixtures/index.ts
+- [X] T119 [P] [US4] Create createDashboardData factory function in frontend/src/features/dashboard/lib/__tests__/fixtures/dashboard-fixtures.ts
+- [X] T120 [P] [US4] Create dashboard scenario variations in frontend/src/features/dashboard/lib/__tests__/fixtures/dashboard-fixtures.ts (emptyDashboard, activeDashboard, overspentDashboard)
+- [X] T121 [P] [US4] Create dashboard fixture barrel export in frontend/src/features/dashboard/lib/__tests__/fixtures/index.ts
 
 ### Tests for User Story 4 (Aggregation)
 
-- [ ] T122 [P] [US4] Create aggregation test file skeleton in frontend/src/features/dashboard/lib/__tests__/aggregation.test.ts
-- [ ] T123 [P] [US4] Write test: spending by category totals match expected (single category)
-- [ ] T124 [P] [US4] Write test: spending by category totals match expected (multiple categories)
-- [ ] T125 [P] [US4] Write test: monthly income calculation is accurate
-- [ ] T126 [P] [US4] Write test: monthly expenses calculation is accurate
-- [ ] T127 [P] [US4] Write test: date range filtering works correctly
-- [ ] T128 [P] [US4] Write test: goal progress percentage is accurate
-- [ ] T129 [P] [US4] Write test: goal remaining amount is accurate
-- [ ] T130 [P] [US4] Write test: aggregation handles empty data gracefully
-- [ ] T131 [P] [US4] Write test: aggregation handles zero amounts
-- [ ] T132 [P] [US4] Write test: aggregation handles missing categories
-- [ ] T133 [US4] Verify 80%+ coverage for dashboard/lib/aggregation.ts
+- [X] T122 [P] [US4] Create aggregation test file skeleton in frontend/src/features/dashboard/lib/__tests__/aggregation.test.ts
+- [X] T123 [P] [US4] Write test: spending by category totals match expected (single category)
+- [X] T124 [P] [US4] Write test: spending by category totals match expected (multiple categories)
+- [X] T125 [P] [US4] Write test: monthly income calculation is accurate
+- [X] T126 [P] [US4] Write test: monthly expenses calculation is accurate
+- [X] T127 [P] [US4] Write test: date range filtering works correctly
+- [X] T128 [P] [US4] Write test: goal progress percentage is accurate
+- [X] T129 [P] [US4] Write test: goal remaining amount is accurate
+- [X] T130 [P] [US4] Write test: aggregation handles empty data gracefully
+- [X] T131 [P] [US4] Write test: aggregation handles zero amounts
+- [X] T132 [P] [US4] Write test: aggregation handles missing categories
+- [X] T133 [US4] Verify 80%+ coverage for dashboard/lib/aggregation.ts (ACHIEVED: 92.77% lines, 85.07% branches)
 
-**Checkpoint**: Dashboard aggregation has 80%+ test coverage (15 tasks)
+**Checkpoint**: Dashboard aggregation has 80%+ test coverage (15 tasks) ✅ COMPLETE
 
 ---
 
