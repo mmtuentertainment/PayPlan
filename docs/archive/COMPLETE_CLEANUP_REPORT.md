@@ -185,7 +185,7 @@
 ### Docs Organization (9 categories)
 
 **New docs/ structure:**
-```
+```text
 docs/
 ├── research/           (15 competitor analysis files)
 ├── testing/            (8 reports + manual test files)
@@ -197,7 +197,7 @@ docs/
 ├── build-analysis/     (stats.html moved here)
 ├── test_results/       (today's codebase analysis)
 └── market-research/    (existing)
-```
+```text
 
 ---
 
@@ -216,7 +216,7 @@ docs/
 **Status:** ℹ️ **Already Organized**
 
 **Current Structure:**
-```
+```text
 specs/
 ├── 002-realign-payplan-specs/
 ├── 004-pr-hygiene-openapi-lint/
@@ -229,7 +229,7 @@ specs/
 ├── 062-short-name-dashboard/
 ├── archived/
 └── fixtures/
-```
+```text
 
 **Analysis:** Already organized by feature number, has archived folder for old specs. **No cleanup needed!** ✅
 

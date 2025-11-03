@@ -42,7 +42,7 @@ PayPlan's codebase had grown into a flat, disorganized structure with significan
 
 **Adopt feature-based architecture** with the following structure:
 
-```
+```text
 frontend/src/
 ├── features/              # Self-contained feature modules
 │   ├── categories/        # Spending categories (MVP #1)
@@ -60,7 +60,7 @@ frontend/src/
     ├── lib/               # Utilities
     ├── hooks/             # Shared hooks
     └── types/             # Shared types
-```
+```text
 
 **Key Principles:**
 1. **Feature Colocation:** All code for a feature lives together
@@ -73,13 +73,13 @@ frontend/src/
 ## Alternatives Considered
 
 ### Alternative 1: Layer-Based (MVC-style)
-```
+```text
 src/
 ├── components/    # All components
 ├── services/      # All services
 ├── hooks/         # All hooks
 └── types/         # All types
-```
+```text
 
 **Pros:**
 - Familiar to developers from traditional MVC
@@ -96,13 +96,13 @@ src/
 ---
 
 ### Alternative 2: Domain-Driven Design (Clean Architecture)
-```
+```text
 src/
 ├── domain/           # Business entities
 ├── application/      # Use cases
 ├── infrastructure/   # External services
 └── presentation/     # UI layer
-```
+```text
 
 **Pros:**
 - Strong separation of concerns
@@ -120,13 +120,13 @@ src/
 ---
 
 ### Alternative 3: Hybrid (Pages + Components)
-```
+```text
 src/
 ├── pages/         # Route pages
 ├── components/    # Shared components
 ├── features/      # Feature-specific code
 └── lib/           # Business logic
-```
+```text
 
 **Pros:**
 - Gradual migration path
@@ -142,14 +142,14 @@ src/
 ---
 
 ### Alternative 4: Feature-Based (CHOSEN)
-```
+```text
 src/
 ├── features/      # Self-contained features
 │   ├── categories/
 │   ├── budgets/
 │   └── ...
 └── shared/        # Shared utilities
-```
+```text
 
 **Pros:**
 - ✅ All feature code in one place
@@ -348,13 +348,13 @@ src/
 cd frontend && npm run build
 # ✓ built in 12.06s
 # 0 TypeScript errors
-```
+```text
 
 **Circular Dependency Check:**
 ```bash
 npx madge --circular frontend/src
 # ✔ No circular dependency found!
-```
+```text
 
 **Import Verification:**
 - ✅ All barrel exports working
@@ -410,18 +410,18 @@ npx madge --circular frontend/src
 
 ### Migration Strategy
 
-**Phase 1: Analysis (1 hour)**
+### Phase 1: Analysis (1 hour)
 - Used codebase-architect to analyze structure
 - Identified 99 files to reorganize
 - Mapped features to constitutional requirements
 
-**Phase 2: Execution (2 hours)**
+### Phase 2: Execution (2 hours)
 - Created backup (130MB)
 - Moved files with `git mv` (tracked renames)
 - Updated 20+ import paths (automated with sed)
 - Created 5 barrel exports
 
-**Phase 3: Verification (1 hour)**
+### Phase 3: Verification (1 hour)
 - Build verification (12.06s, 0 errors)
 - Circular dependency check (0 found)
 - Documentation (CONTRIBUTING.md, updated CLAUDE.md)
@@ -431,47 +431,47 @@ npx madge --circular frontend/src
 ### File Moves
 
 **Categories Feature (20 files):**
-```
+```text
 components/categories/* → features/categories/components/
 lib/categories/*        → features/categories/lib/
 hooks/useCategories.ts  → features/categories/hooks/
 types/category.ts       → features/categories/types/
-```
+```text
 
 **Budgets Feature (18 files):**
-```
+```text
 components/budgets/* → features/budgets/components/
 lib/budgets/*        → features/budgets/lib/
 hooks/useBudgets.ts  → features/budgets/hooks/
 types/budget.ts      → features/budgets/types/
-```
+```text
 
 **Dashboard Feature (24 files):**
-```
+```text
 components/dashboard/* → features/dashboard/components/
 lib/dashboard/*        → features/dashboard/lib/
 hooks/useDashboard*    → features/dashboard/hooks/
 types/chart-data.ts    → features/dashboard/types/
 types/gamification.ts  → features/dashboard/types/
 types/dashboard.ts     → features/dashboard/types/
-```
+```text
 
 **Transactions Feature (8 files):**
-```
+```text
 components/transactions/* → features/transactions/components/
 lib/transactions/*        → features/transactions/lib/
 types/transaction.ts      → features/transactions/types/
-```
+```text
 
 **Archive Feature (29 files):**
-```
+```text
 components/archive/* → features/archive/components/
 lib/archive/*        → features/archive/lib/
 hooks/usePayment*    → features/archive/hooks/
-```
+```text
 
 **Shared Utilities (moved to shared/):**
-```
+```text
 components/ui/*           → shared/components/ui/
 components/ErrorAlert.tsx → shared/components/
 lib/utils.ts              → shared/lib/
@@ -480,7 +480,7 @@ lib/api.ts                → shared/lib/
 lib/validation/*          → shared/lib/validation/
 types/bill.ts             → shared/types/
 types/goal.ts             → shared/types/
-```
+```text
 
 **Total:** 99 files reorganized
 
@@ -493,7 +493,7 @@ Each feature now has `index.ts`:
 export * from './lib';                    // Business logic
 export { CategoryCard } from './components/CategoryCard';
 export { useCategories } from './hooks/useCategories';
-```
+```text
 
 **Benefits:**
 - Clean imports: `import { CategoryCard } from '@/features/categories'`
@@ -578,7 +578,7 @@ export { useCategories } from './hooks/useCategories';
 ### Potential Evolution:
 
 **If PayPlan grows to 50+ features:**
-```
+```text
 features/
 ├── budgeting/       # Subdomain
 │   ├── categories/
@@ -588,16 +588,16 @@ features/
 │   ├── reports/
 │   └── insights/
 └── ...
-```
+```text
 
 **If PayPlan goes multi-platform:**
-```
+```text
 packages/
 ├── web/              # Web app (current frontend/)
 ├── mobile/           # React Native
 ├── shared-domain/    # Shared business logic
 └── shared-ui/        # Shared components
-```
+```text
 
 ---
 

@@ -104,11 +104,11 @@
 **Line 233-235**
 
 **Content:**
-```
+```text
 ⚠️ CRITICAL: Use the NEW feature-based structure!
 - Old: src/components/categories/ ❌ NO LONGER EXISTS
 - New: src/features/categories/components/ ✅ CORRECT
-```
+```text
 
 **Why Added:** Prevent Claude from looking for files in old locations
 

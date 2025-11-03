@@ -9,9 +9,9 @@ Implement the **Income vs Expenses bar chart widget** - the second P0 widget sho
 ## 📖 Step 1: Read the Implementation Prompt
 
 **FIRST ACTION - Read this file completely:**
-```
+```text
 /home/matt/PROJECTS/PayPlan/specs/062-short-name-dashboard/implementation-prompts/chunk-3-income.md
-```
+```text
 
 This file contains:
 - Full feature context
@@ -25,7 +25,7 @@ This file contains:
 **Working directory:**
 ```bash
 cd /home/matt/PROJECTS/PayPlan
-```
+```text
 
 **Verify prerequisites (Chunks 1 & 2 complete):**
 - ✅ `frontend/src/lib/dashboard/aggregation.ts` exists (data layer)
@@ -36,7 +36,7 @@ cd /home/matt/PROJECTS/PayPlan
 **Create branch:**
 ```bash
 git checkout -b 062-dashboard-chunk3-income
-```
+```text
 
 ## ✅ Step 3: Implement (Use TodoWrite to Track!)
 
@@ -54,7 +54,7 @@ git checkout -b 062-dashboard-chunk3-income
 **TypeScript compilation:**
 ```bash
 cd frontend && npx tsc --noEmit
-```
+```text
 
 **Manual testing (use MCP browser automation):**
 ```bash
@@ -64,7 +64,7 @@ npm run dev  # Start dev server
 # 2. Take screenshot of Dashboard
 # 3. Verify Income vs Expenses widget renders
 # 4. Check console for errors
-```
+```text
 
 **Accessibility check:**
 - Screen reader reads hidden table
@@ -85,14 +85,14 @@ accessibility, tooltip, empty state, Dashboard integration.
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
 git push origin 062-dashboard-chunk3-income
-```
+```text
 
 **Create PR using gh CLI:**
 ```bash
 gh pr create --title "feat(dashboard): Chunk 3 - Income vs Expenses Chart (T022-T026)" \
   --body "[See PR template in chunk-3-income.md]" \
   --base 062-short-name-dashboard
-```
+```text
 
 ## 🤖 Step 6: Bot Review Loop
 
@@ -108,7 +108,7 @@ mcp__linear__create_issue
 # title: "[Bot Suggestion] [description]"
 # team: "PayPlan"
 # labels: ["bot-suggestion", "chunk-3"]
-```
+```text
 
 **Iterate until both bots are GREEN ✅**
 
@@ -119,7 +119,7 @@ mcp__linear__create_issue
 git checkout 062-short-name-dashboard
 git merge 062-dashboard-chunk3-income -m "feat(dashboard): merge Chunk 3"
 git push origin 062-short-name-dashboard
-```
+```text
 
 **Update docs:**
 1. Edit `specs/062-short-name-dashboard/implementation-prompts/README.md`
@@ -173,15 +173,15 @@ git push origin 062-short-name-dashboard
 
 **Your first command (copy/paste this):**
 
-```
+```text
 Read /home/matt/PROJECTS/PayPlan/specs/062-short-name-dashboard/implementation-prompts/chunk-3-income.md
-```
+```text
 
 **Then immediately:**
 
 ```bash
 cd /home/matt/PROJECTS/PayPlan && git checkout -b 062-dashboard-chunk3-income
-```
+```text
 
 **Then use TodoWrite to create your task list from the implementation prompt.**
 

@@ -171,7 +171,7 @@ After comprehensive research into budget tracking best practices and transaction
 
 ### Current Architecture: ✅ SOUND
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │           React Components              │
 │  (Transactions, Budgets, Categories)    │
@@ -201,7 +201,7 @@ After comprehensive research into budget tracking best practices and transaction
 ┌─────────────────────────────────────────┐
 │         localStorage API                │
 └─────────────────────────────────────────┘
-```
+```text
 
 **Strengths**:
 - Clear separation of concerns
@@ -306,7 +306,7 @@ The following features are intentionally NOT included in this fix:
 - Search/filter (Phase 2)
 
 Focus ONLY on fixing the `getSnapshot` caching bug.
-```
+```text
 
 This prevents scope creep and keeps the fix focused.
 

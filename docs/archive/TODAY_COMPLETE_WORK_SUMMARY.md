@@ -38,7 +38,7 @@
 ### 2. Frontend Architecture (Feature-Based)
 
 **Reorganized 99 files:**
-```
+```text
 Before (Flat Mess):
   src/components/  (mixed: budgets, categories, dashboard, ui...)
   src/lib/         (mixed: budgets, categories, utils...)
@@ -56,7 +56,7 @@ After (Clean Feature-Based):
     ├── components/    (ui/, alerts, spinners)
     ├── lib/           (utils, csv, api, validation, telemetry)
     └── types/         (bill, goal)
-```
+```text
 
 **Barrel Exports:** 5 index.ts files for clean imports
 **Build:** ✅ 12.06s, 0 TypeScript errors
@@ -67,7 +67,7 @@ After (Clean Feature-Based):
 ### 3. Root Directory (Professional Organization)
 
 **Organized 36+ loose files:**
-```
+```text
 Before (50+ items scattered):
   BUDGET-APP-*.md (15 research files)
   MANUAL-TEST-*.md (8 test reports)
@@ -88,7 +88,7 @@ After (23 items, clean):
   tools/
     └── codebase-architect/  (analysis tool)
   + Essential files only (README, CHANGELOG, CLAUDE, configs)
-```
+```text
 
 **Reduction:** 54% fewer root items
 

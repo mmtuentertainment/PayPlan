@@ -22,16 +22,16 @@
 ### Frontend Structure (99 files reorganized)
 
 **Before:**
-```
+```text
 frontend/src/
 ├── components/  (flat mess: budgets, categories, dashboard, ui...)
 ├── lib/         (flat mess: budgets, categories, utils...)
 ├── hooks/       (flat, ungrouped)
 └── types/       (orphaned files)
-```
+```text
 
 **After:**
-```
+```text
 frontend/src/
 ├── features/
 │   ├── categories/     96 KB  (components, hooks, lib, types)
@@ -40,7 +40,7 @@ frontend/src/
 │   ├── transactions/   52 KB  (components, hooks, lib, types)
 │   └── archive/       308 KB  (components, hooks, lib, types)
 └── shared/            160 KB  (components, lib, types, hooks)
-```
+```text
 
 **Benefits:**
 - ✅ All feature code self-contained
@@ -57,7 +57,7 @@ frontend/src/
 
 **After:** Clean, organized documentation
 
-```
+```text
 PayPlan/
 ├── docs/
 │   ├── research/         (15 competitor analysis files)
@@ -72,7 +72,7 @@ PayPlan/
     ├── CHANGELOG.md      (version history)
     ├── CLAUDE.md         (development guide)
     └── configs only      (package.json, vercel.json, etc.)
-```
+```text
 
 **Benefits:**
 - ✅ Easy to find documentation
@@ -138,14 +138,14 @@ PayPlan/
 cd "$(git rev-parse --show-toplevel)"
 python3 tools/codebase-architect/scripts/safety_manager.py restore \
   .codebase-safety/backups/backup_20251102_041129.tar.gz
-```
+```text
 
 **Git also tracks everything:**
 ```bash
 git log --oneline -10       # See recent changes
 git diff HEAD~1             # See all file moves
 git checkout main           # Abandon all changes (if needed)
-```
+```text
 
 ---
 

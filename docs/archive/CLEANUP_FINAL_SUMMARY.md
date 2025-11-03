@@ -22,7 +22,7 @@
 - No organization → Professional architecture
 
 **New Structure:**
-```
+```text
 frontend/src/
 ├── features/
 │   ├── categories/   (components, hooks, lib, types, index.ts)
@@ -31,7 +31,7 @@ frontend/src/
 │   ├── transactions/ (components, lib, types, index.ts)
 │   └── archive/      (components, hooks, lib, index.ts)
 └── shared/           (components, lib, types)
-```
+```text
 
 **Benefits:**
 - ✅ Easy to find code (everything grouped by feature)
@@ -72,7 +72,7 @@ import { GamificationWidget, useDashboardData } from '@/features/dashboard';
 // Instead of messy long paths:
 import { CategoryCard } from '@/features/categories/components/CategoryCard';
 import { useCategories } from '@/features/categories/hooks/useCategories';
-```
+```text
 
 **All 5 features have barrel exports working!**
 
@@ -81,7 +81,7 @@ import { useCategories } from '@/features/categories/hooks/useCategories';
 ### 4. Documentation Organization
 
 **New docs/ structure:**
-```
+```text
 docs/
 ├── research/          (15 competitor analysis files)
 ├── testing/           (8 test reports + manual tests)
@@ -91,7 +91,7 @@ docs/
 ├── architecture/      (ADRs)
 ├── test_results/      (today's analysis results)
 └── ORGANIZATION_SUMMARY.md
-```
+```text
 
 **Benefits:**
 - ✅ All research in one place
@@ -159,7 +159,7 @@ mkdir -p frontend/src/features/my-feature/{components,hooks,lib,types}
 
 # 4. Import cleanly
 import { MyComponent } from '@/features/my-feature';
-```
+```text
 
 ### Importing from Features:
 
@@ -169,7 +169,7 @@ import { CategoryCard, useCategories } from '@/features/categories';
 
 // ❌ Verbose way (still works, but not recommended)
 import { CategoryCard } from '@/features/categories/components/CategoryCard';
-```
+```text
 
 ---
 
@@ -181,13 +181,13 @@ import { CategoryCard } from '@/features/categories/components/CategoryCard';
 ```bash
 python3 tools/codebase-architect/scripts/safety_manager.py restore \
   .codebase-safety/backups/backup_20251102_041129.tar.gz
-```
+```text
 
 **Git also tracks everything:**
 ```bash
 git log --oneline -20    # See what changed
 git diff HEAD~1          # See all file moves
-```
+```text
 
 ---
 

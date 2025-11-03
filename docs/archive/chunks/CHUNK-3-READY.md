@@ -35,9 +35,9 @@
 
 **Open a fresh Claude Code session and paste this single line:**
 
-```
+```text
 Read /home/matt/PROJECTS/PayPlan/START-CHUNK-3.md and execute all steps
-```
+```text
 
 That's it! The START-CHUNK-3.md file contains:
 - All instructions
@@ -52,23 +52,23 @@ That's it! The START-CHUNK-3.md file contains:
 
 **If you want to skip the guide and go straight to tasks:**
 
-```
+```text
 Read /home/matt/PROJECTS/PayPlan/specs/062-short-name-dashboard/implementation-prompts/chunk-3-income.md
-```
+```text
 
 Then manually:
 ```bash
 cd /home/matt/PROJECTS/PayPlan
 git checkout -b 062-dashboard-chunk3-income
-```
+```text
 
 ### Option 3: Step-by-Step (Most Detailed)
 
 **Read the full walkthrough:**
 
-```
+```text
 Read /home/matt/PROJECTS/PayPlan/specs/062-short-name-dashboard/implementation-prompts/CHUNK-3-START-PROMPT.md
-```
+```text
 
 This includes:
 - Prerequisites checklist
@@ -131,32 +131,32 @@ This includes:
 ## 📚 Key Files Reference
 
 **Implementation Prompt (Your Bible):**
-```
+```text
 /home/matt/PROJECTS/PayPlan/specs/062-short-name-dashboard/implementation-prompts/chunk-3-income.md
-```
+```text
 
 **Reference Code (Copy Patterns):**
-```
+```text
 /home/matt/PROJECTS/PayPlan/frontend/src/components/dashboard/SpendingChart.tsx
 /home/matt/PROJECTS/PayPlan/frontend/src/components/dashboard/SpendingChartWidget.tsx
-```
+```text
 
 **Data Layer (Already Exists):**
-```
+```text
 /home/matt/PROJECTS/PayPlan/frontend/src/lib/dashboard/aggregation.ts
 /home/matt/PROJECTS/PayPlan/frontend/src/hooks/useDashboardData.ts
-```
+```text
 
 **Reusable Components:**
-```
+```text
 /home/matt/PROJECTS/PayPlan/frontend/src/components/dashboard/EmptyState.tsx
-```
+```text
 
 **Project Guidelines:**
-```
+```text
 /home/matt/PROJECTS/PayPlan/CLAUDE.md
 /home/matt/PROJECTS/PayPlan/memory/constitution_v1.1_TEMP.md
-```
+```text
 
 ---
 
@@ -202,15 +202,15 @@ This includes:
 
 **Copy and paste this into Claude Code:**
 
-```
+```text
 Read /home/matt/PROJECTS/PayPlan/START-CHUNK-3.md and execute all steps in order, using TodoWrite to track progress
-```
+```text
 
 **Or if you prefer the direct approach:**
 
-```
+```text
 Read /home/matt/PROJECTS/PayPlan/specs/062-short-name-dashboard/implementation-prompts/chunk-3-income.md then create branch 062-dashboard-chunk3-income and implement all tasks
-```
+```text
 
 ---
 
@@ -249,8 +249,8 @@ Chunk 3 is very similar to Chunk 2. You've already done this once - now just do 
 
 **Start now with:**
 
-```
+```text
 Read /home/matt/PROJECTS/PayPlan/START-CHUNK-3.md
-```
+```text
 
 Good luck! 🚀
