@@ -205,6 +205,57 @@ describe('Category Schemas', () => {
       expectZodSuccess(result);
       expect(result.data?.name).toBe('Groceries');
     });
+
+    // Edge cases: Unicode, special characters, SQL injection patterns
+    it('should validate category name with Unicode characters', () => {
+      const category = createCategory({ name: '食品 (Food)' });
+      const result = categorySchema.safeParse(category);
+
+      expectZodSuccess(result);
+    });
+
+    it('should validate category name with emoji', () => {
+      const category = createCategory({ name: 'Groceries 🛒' });
+      const result = categorySchema.safeParse(category);
+
+      expectZodSuccess(result);
+    });
+
+    it('should validate category name with apostrophe', () => {
+      const category = createCategory({ name: "John's Groceries" });
+      const result = categorySchema.safeParse(category);
+
+      expectZodSuccess(result);
+    });
+
+    it('should validate category name with hyphen', () => {
+      const category = createCategory({ name: 'Rent-Utilities' });
+      const result = categorySchema.safeParse(category);
+
+      expectZodSuccess(result);
+    });
+
+    // Edge cases: ID validation
+    it('should reject category ID with spaces', () => {
+      const invalid = createCategory({ id: 'cat_with spaces' });
+      const result = categorySchema.safeParse(invalid);
+
+      expectZodError(result, 'id');
+    });
+
+    it('should reject category ID with special characters', () => {
+      const invalid = createCategory({ id: 'cat_with@special!' });
+      const result = categorySchema.safeParse(invalid);
+
+      expectZodError(result, 'id');
+    });
+
+    it('should reject category ID with uppercase letters', () => {
+      const invalid = createCategory({ id: 'cat_WithUpperCase' });
+      const result = categorySchema.safeParse(invalid);
+
+      expectZodError(result, 'id');
+    });
   });
 
   describe('createCategoryInputSchema', () => {

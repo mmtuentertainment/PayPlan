@@ -14,7 +14,8 @@ import {
 import { expectZodSuccess, expectZodError } from '../../../../../tests/fixtures/assertion-utils';
 import { sharedFixtures } from '../../../../../tests/fixtures/shared-fixtures';
 
-// Helper to create transaction for testing
+// Helper to create minimal transaction for schema testing
+// Note: Uses inline definition to avoid coupling to full Transaction type
 function createTestTransaction(overrides?: Partial<ReturnType<typeof createTestTransaction>>) {
   return {
     id: `txn_${Math.random().toString(36).substring(2, 15)}`,
@@ -189,6 +190,59 @@ describe('Transaction Schemas', () => {
       const result = transactionSchema.safeParse(transaction);
 
       expectZodSuccess(result);
+    });
+
+    // Edge cases: ID validation
+    it('should reject transaction ID with spaces', () => {
+      const invalid = createTestTransaction({ id: 'txn_with spaces' });
+      const result = transactionSchema.safeParse(invalid);
+
+      expectZodError(result, 'id');
+    });
+
+    it('should reject transaction ID with special characters', () => {
+      const invalid = createTestTransaction({ id: 'txn_with@special!' });
+      const result = transactionSchema.safeParse(invalid);
+
+      expectZodError(result, 'id');
+    });
+
+    it('should reject transaction ID with uppercase letters', () => {
+      const invalid = createTestTransaction({ id: 'txn_WithUpperCase' });
+      const result = transactionSchema.safeParse(invalid);
+
+      expectZodError(result, 'id');
+    });
+
+    it('should reject categoryId with spaces', () => {
+      const invalid = createTestTransaction({ categoryId: 'cat_with spaces' });
+      const result = transactionSchema.safeParse(invalid);
+
+      expectZodError(result, 'categoryId');
+    });
+
+    it('should reject categoryId with special characters', () => {
+      const invalid = createTestTransaction({ categoryId: 'cat_with@special!' });
+      const result = transactionSchema.safeParse(invalid);
+
+      expectZodError(result, 'categoryId');
+    });
+
+    // Edge cases: Special characters in description (XSS prevention)
+    it('should validate description with HTML-like content', () => {
+      const transaction = createTestTransaction({ description: '<script>alert("test")</script>' });
+      const result = transactionSchema.safeParse(transaction);
+
+      expectZodSuccess(result);
+      // Note: Zod doesn't sanitize, but React escapes by default
+    });
+
+    it('should validate description with SQL-like content', () => {
+      const transaction = createTestTransaction({ description: "'; DROP TABLE transactions; --" });
+      const result = transactionSchema.safeParse(transaction);
+
+      expectZodSuccess(result);
+      // Note: No SQL injection risk with localStorage
     });
   });
 

@@ -166,6 +166,42 @@ describe('Budget Schemas', () => {
 
       expectZodError(result, 'updatedAt');
     });
+
+    // Edge cases: ID validation
+    it('should reject budget ID with spaces', () => {
+      const invalid = createBudget({ id: 'budget_with spaces' });
+      const result = budgetSchema.safeParse(invalid);
+
+      expectZodError(result, 'id');
+    });
+
+    it('should reject budget ID with special characters', () => {
+      const invalid = createBudget({ id: 'budget_with@special!' });
+      const result = budgetSchema.safeParse(invalid);
+
+      expectZodError(result, 'id');
+    });
+
+    it('should reject budget ID with uppercase letters', () => {
+      const invalid = createBudget({ id: 'budget_WithUpperCase' });
+      const result = budgetSchema.safeParse(invalid);
+
+      expectZodError(result, 'id');
+    });
+
+    it('should reject categoryId with spaces', () => {
+      const invalid = createBudget({ categoryId: 'cat_with spaces' });
+      const result = budgetSchema.safeParse(invalid);
+
+      expectZodError(result, 'categoryId');
+    });
+
+    it('should reject categoryId with special characters', () => {
+      const invalid = createBudget({ categoryId: 'cat_with@special!' });
+      const result = budgetSchema.safeParse(invalid);
+
+      expectZodError(result, 'categoryId');
+    });
   });
 
   describe('createBudgetInputSchema', () => {
