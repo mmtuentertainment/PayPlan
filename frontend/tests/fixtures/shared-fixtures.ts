@@ -42,6 +42,12 @@ export interface SharedFixtures {
   };
 
   colors: {
+    green: string;
+    blue: string;
+    red: string;
+    yellow: string;
+    purple: string;
+    orange: string;
     valid: string[];
     invalid: string[];
   };
@@ -117,6 +123,12 @@ export const sharedFixtures: SharedFixtures = {
 
   // Valid and invalid color codes for category testing
   colors: {
+    green: '#22c55e',
+    blue: '#3b82f6',
+    red: '#ef4444',
+    yellow: '#eab308',
+    purple: '#a855f7',
+    orange: '#f97316',
     valid: [
       '#FF0000', // Red
       '#00FF00', // Green
