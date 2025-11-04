@@ -479,32 +479,36 @@ describe('Gamification Logic', () => {
       expect(weekendInsight?.type).toBe('negative'); // Spending more is negative
     });
 
+    /**
+     * Test: Month-over-month spending trend insight (only shows after 50% of month)
+     *
+     * Scenario:
+     * - Today: Nov 20 (20/30 = 66.67% of month elapsed - past 50% threshold)
+     * - Current month spending: $500 (on day 15)
+     * - Last month spending: $1000 (on day 15)
+     * - Difference: -50% (spending less)
+     *
+     * Expected: POSITIVE insight "You spent 50% less this month 📉"
+     *
+     * Rationale: Only show month-over-month comparison after 50% of month to ensure
+     * statistically valid comparison (prevents "you spent less" on day 2 of month)
+     */
     it('should generate month-over-month insight when past 50% of month', () => {
-      // Only test if we're past halfway through current month
-      const now = new Date();
-      const dayOfMonth = now.getDate();
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      const monthProgressPercent = (dayOfMonth / daysInMonth) * 100;
-
-      if (monthProgressPercent <= GAMIFICATION_CONFIG.INSIGHT_MONTH_PROGRESS_THRESHOLD) {
-        // Skip test if not past threshold
-        return;
-      }
-
-      const currentMonth = new Date().toISOString().slice(0, 7);
-      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-        .toISOString()
-        .slice(0, 7);
+      // Use fake timers to set date past 50% of month (ensures test always runs)
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2025-11-20T12:00:00')); // Nov 20 (20/30 = 66.67% > 50%)
 
       const transactions = [
-        // Current month: $500
-        createExpense({ amount: 50000, date: `${currentMonth}-15` }),
+        // Current month (November): $500
+        createExpense({ amount: 50000, date: '2025-11-15' }),
 
-        // Last month: $1000
-        createExpense({ amount: 100000, date: `${lastMonth}-15` }),
+        // Last month (October): $1000
+        createExpense({ amount: 100000, date: '2025-10-15' }),
       ];
 
       const result = generateInsights(transactions);
+
+      vi.useRealTimers(); // Restore real timers
 
       // Current month is 50% less than last month (exceeds 10% threshold)
       const monthlyInsight = result.find((insight) =>
