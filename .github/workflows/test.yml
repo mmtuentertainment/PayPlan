@@ -76,41 +76,52 @@ jobs:
 
             const coverage = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
 
-            // Format coverage table for business logic files only
+            // Get changed files in this PR (MEDIUM-1 fix: only show changed files)
+            const { data: prFiles } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            const changedFiles = new Set(prFiles.map(f => f.filename));
+
+            // Format coverage table for changed business logic files only
             const businessLogicFiles = Object.entries(coverage)
-              .filter(([file]) => file.includes('/lib/') && !file.includes('__tests__'))
+              .filter(([file]) => {
+                // Only include business logic files that changed in this PR
+                const relativePath = file.replace(/^\/.*?\//, ''); // Remove absolute path prefix
+                return file.includes('/lib/') &&
+                       !file.includes('__tests__') &&
+                       (changedFiles.has(relativePath) || changedFiles.has('frontend/' + relativePath));
+              })
               .sort((a, b) => a[0].localeCompare(b[0]));
 
-            if (businessLogicFiles.length === 0) {
-              console.log('No business logic files with coverage');
-              return;
-            }
+            // If no changed files, show overall stats only
+            const tableRows = businessLogicFiles.length > 0
+              ? businessLogicFiles.map(([file, data]) => {
+                  const fileName = file.split('/').pop();
+                  const lines = data.lines.pct.toFixed(2);
+                  const branches = data.branches.pct.toFixed(2);
+                  const functions = data.functions.pct.toFixed(2);
+                  const statements = data.statements.pct.toFixed(2);
 
-            const tableRows = businessLogicFiles.map(([file, data]) => {
-              const fileName = file.split('/').pop();
-              const lines = data.lines.pct.toFixed(2);
-              const branches = data.branches.pct.toFixed(2);
-              const functions = data.functions.pct.toFixed(2);
-              const statements = data.statements.pct.toFixed(2);
+                  // Highlight files below Phase 1 targets
+                  const linesIcon = parseFloat(lines) >= 80 ? '✅' : '⚠️';
 
-              // Highlight files below Phase 1 targets
-              const linesIcon = parseFloat(lines) >= 80 ? '✅' : '⚠️';
-              const branchesIcon = parseFloat(branches) >= 75 ? '✅' : '⚠️';
-
-              return `| ${linesIcon} ${fileName} | ${lines}% | ${branches}% | ${functions}% | ${statements}% |`;
-            }).join('\n');
+                  return `| ${linesIcon} ${fileName} | ${lines}% | ${branches}% | ${functions}% | ${statements}% |`;
+                }).join('\n')
+              : '_No business logic files changed in this PR_';
 
             const overallLines = coverage.total.lines.pct.toFixed(2);
             const overallBranches = coverage.total.branches.pct.toFixed(2);
             const overallFunctions = coverage.total.functions.pct.toFixed(2);
             const overallStatements = coverage.total.statements.pct.toFixed(2);
 
-            const comment = [
+            const commentBody = [
               '## 📊 Test Coverage Report (Business Logic)',
               '',
               'Phase 1 Targets: 80% lines for business logic, 90% for financial calculations',
               '',
-              '### Per-File Coverage',
+              '### Changed Files Coverage',
               '',
               '| File | Lines | Branches | Functions | Statements |',
               '|------|-------|----------|-----------|------------|',
@@ -130,9 +141,32 @@ jobs:
               `📦 Full coverage report available in [workflow artifacts](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
             ].join('\n');
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            // LOW-1 fix: Update existing comment instead of creating duplicates
+            const botComment = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
-            });
+              issue_number: context.issue.number,
+            }).then(({ data }) => data.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('📊 Test Coverage Report')
+            ));
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+              console.log('Updated existing coverage comment');
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+              console.log('Created new coverage comment');
+            }
