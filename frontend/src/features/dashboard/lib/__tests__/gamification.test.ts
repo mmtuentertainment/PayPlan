@@ -454,14 +454,10 @@ describe('Gamification Logic', () => {
 
       const transactions = [
         // Weekend: Saturday Nov 1 + Sunday Nov 2 = $400 total
-        // NOTE: Date-only strings are parsed as UTC (ECMAScript spec quirk)
-        // Nov 1, 2025 = Saturday in UTC (day=6)
-        // Nov 2, 2025 = Sunday in UTC (day=0)
         createExpense({ amount: 20000, date: '2025-11-01' }), // Saturday (UTC day=6)
         createExpense({ amount: 20000, date: '2025-11-02' }), // Sunday (UTC day=0)
 
         // Weekdays: Mon-Fri previous week = $125 total ($25/day × 5 days)
-        // Oct 27-31, 2025 = Monday-Friday in UTC (days 1-5)
         createExpense({ amount: 2500, date: '2025-10-27' }), // Monday (UTC day=1)
         createExpense({ amount: 2500, date: '2025-10-28' }), // Tuesday (UTC day=2)
         createExpense({ amount: 2500, date: '2025-10-29' }), // Wednesday (UTC day=3)
@@ -542,7 +538,7 @@ describe('Gamification Logic', () => {
         ...Array.from({ length: 10 }, (_, i) => {
           const date = new Date();
           date.setDate(date.getDate() - i * 7); // Weekly on weekends
-          const day = date.getDay();
+          const day = date.getUTCDay(); // Use UTC to match date-only string parsing
           if (day === 0 || day === 6) {
             return createExpense({ amount: 10000, date: date.toISOString().split('T')[0] });
           }
@@ -584,7 +580,7 @@ describe('Gamification Logic', () => {
 
     it('should not generate insight when below threshold', () => {
       const saturdayDate = new Date();
-      saturdayDate.setDate(saturdayDate.getDate() - ((saturdayDate.getDay() + 1) % 7));
+      saturdayDate.setDate(saturdayDate.getDate() - ((saturdayDate.getUTCDay() + 1) % 7)); // Use UTC
 
       const mondayDate = new Date(saturdayDate);
       mondayDate.setDate(saturdayDate.getDate() - 5);
