@@ -34,6 +34,17 @@ import { createGoal } from './fixtures/dashboard-fixtures';
 import { createCategory } from '@/features/categories/lib/__tests__/fixtures/category-fixtures';
 import { sharedFixtures } from '../../../../../tests/fixtures/shared-fixtures';
 
+/**
+ * Helper: Format a date N days ago as YYYY-MM-DD string
+ * @param daysAgo - Number of days in the past (0 = today, 1 = yesterday, etc.)
+ * @returns ISO date string in YYYY-MM-DD format
+ */
+function formatDateDaysAgo(daysAgo: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 describe('Gamification Logic', () => {
   beforeEach(() => {
     // Clear localStorage before each test (isolation)
@@ -121,17 +132,21 @@ describe('Gamification Logic', () => {
   });
 
   describe('updateStreakData', () => {
+    /**
+     * Test: First activity starts a 1-day streak
+     *
+     * Scenario:
+     * - Last activity: Yesterday
+     * - Today: New activity
+     *
+     * Expected: currentStreak = 1, longestStreak = 1
+     */
     it('should start streak on first activity', () => {
-      // Set lastActivityDate to yesterday so today counts as new activity
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-
       const gamificationData: GamificationData = {
         streak: {
           currentStreak: 0,
           longestStreak: 0,
-          lastActivityDate: new Date(yesterdayString).toISOString(),
+          lastActivityDate: new Date(formatDateDaysAgo(1)).toISOString(),
         },
         recentWins: [],
         insights: [],
@@ -149,17 +164,21 @@ describe('Gamification Logic', () => {
       expect(stored.streak.currentStreak).toBe(1);
     });
 
+    /**
+     * Test: Same-day activity doesn't increment streak (prevents gaming)
+     *
+     * Scenario:
+     * - Activity 1 today: Streak becomes 1
+     * - Activity 2 same day: Streak stays 1 (not 2)
+     *
+     * Expected: Users can't game the system by refreshing the page multiple times
+     */
     it('should not increment streak on same-day activity (prevent gaming)', () => {
-      // Set up yesterday's activity
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-
       const gamificationData: GamificationData = {
         streak: {
           currentStreak: 0,
           longestStreak: 0,
-          lastActivityDate: new Date(yesterdayString).toISOString(),
+          lastActivityDate: new Date(formatDateDaysAgo(1)).toISOString(),
         },
         recentWins: [],
         insights: [],
@@ -176,17 +195,21 @@ describe('Gamification Logic', () => {
       expect(second.longestStreak).toBe(1);
     });
 
+    /**
+     * Test: Consecutive day activity increments streak
+     *
+     * Scenario:
+     * - Yesterday: Activity (streak = 3)
+     * - Today: New activity
+     *
+     * Expected: currentStreak = 4, longestStreak stays 5 (4 < 5)
+     */
     it('should increment streak on consecutive day activity', () => {
-      // Simulate activity yesterday
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-
       const gamificationData: GamificationData = {
         streak: {
           currentStreak: 3,
           longestStreak: 5,
-          lastActivityDate: new Date(yesterdayString).toISOString(),
+          lastActivityDate: new Date(formatDateDaysAgo(1)).toISOString(),
         },
         recentWins: [],
         insights: [],
@@ -199,17 +222,22 @@ describe('Gamification Logic', () => {
       expect(result.longestStreak).toBe(5); // Unchanged (4 < 5)
     });
 
+    /**
+     * Test: Streak breaks after missed days (loss aversion principle)
+     *
+     * Scenario:
+     * - 3 days ago: Activity (streak = 5)
+     * - Missed 2 days (no activity)
+     * - Today: New activity
+     *
+     * Expected: currentStreak resets to 1, longestStreak preserved at 10
+     */
     it('should detect streak break after missed day', () => {
-      // Simulate activity 3 days ago (missed 2 days = streak broken)
-      const threeDaysAgo = new Date();
-      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-      const threeDaysAgoString = `${threeDaysAgo.getFullYear()}-${String(threeDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(threeDaysAgo.getDate()).padStart(2, '0')}`;
-
       const gamificationData: GamificationData = {
         streak: {
           currentStreak: 5,
           longestStreak: 10,
-          lastActivityDate: new Date(threeDaysAgoString).toISOString(),
+          lastActivityDate: new Date(formatDateDaysAgo(3)).toISOString(),
         },
         recentWins: [],
         insights: [],
@@ -222,17 +250,21 @@ describe('Gamification Logic', () => {
       expect(result.longestStreak).toBe(10); // Longest preserved
     });
 
+    /**
+     * Test: Longest streak updates when current exceeds it (aspirational goal)
+     *
+     * Scenario:
+     * - Yesterday: Activity (streak = 9, longest = 9)
+     * - Today: New activity
+     *
+     * Expected: currentStreak = 10, longestStreak = 10 (new personal record!)
+     */
     it('should update longest streak when current exceeds it', () => {
-      // Current streak at 9, longest at 9 → today makes it 10 (new record!)
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-
       const gamificationData: GamificationData = {
         streak: {
           currentStreak: 9,
           longestStreak: 9,
-          lastActivityDate: new Date(yesterdayString).toISOString(),
+          lastActivityDate: new Date(formatDateDaysAgo(1)).toISOString(),
         },
         recentWins: [],
         insights: [],
@@ -246,16 +278,11 @@ describe('Gamification Logic', () => {
     });
 
     it('should handle edge case: exactly 24 hours later (consecutive day)', () => {
-      // Activity at exactly 24 hours ago (edge case for day boundary)
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-
       const gamificationData: GamificationData = {
         streak: {
           currentStreak: 1,
           longestStreak: 1,
-          lastActivityDate: new Date(yesterdayString).toISOString(),
+          lastActivityDate: new Date(formatDateDaysAgo(1)).toISOString(),
         },
         recentWins: [],
         insights: [],
@@ -267,17 +294,22 @@ describe('Gamification Logic', () => {
       expect(result.currentStreak).toBe(2); // Should increment
     });
 
+    /**
+     * Test: Longest streak preserved across breaks (historical achievement)
+     *
+     * Scenario:
+     * - 3 days ago: Activity (streak = 5, longest = 20 from past)
+     * - Missed 2 days
+     * - Today: New activity
+     *
+     * Expected: currentStreak resets to 1, but longestStreak stays 20
+     */
     it('should preserve longest streak across multiple streak breaks', () => {
-      // Start with longest=20, current=5
-      const threeDaysAgo = new Date();
-      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-      const threeDaysAgoString = `${threeDaysAgo.getFullYear()}-${String(threeDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(threeDaysAgo.getDate()).padStart(2, '0')}`;
-
       const gamificationData: GamificationData = {
         streak: {
           currentStreak: 5,
           longestStreak: 20, // Historical record
-          lastActivityDate: new Date(threeDaysAgoString).toISOString(),
+          lastActivityDate: new Date(formatDateDaysAgo(3)).toISOString(),
         },
         recentWins: [],
         insights: [],
@@ -585,6 +617,22 @@ describe('Gamification Logic', () => {
   });
 
   describe('detectRecentWins', () => {
+    /**
+     * Test: Under-budget win detection with prorated budget calculation
+     *
+     * Scenario:
+     * - Today: Nov 4 (day 4 of November, which has 30 days)
+     * - Day progress: 4/30 = 13.33% of month elapsed
+     * - Monthly budget: $500
+     * - Prorated budget: $500 × (4/30) = $66.67
+     * - Actual spending: $50
+     * - Remaining: $16.67 under prorated budget
+     *
+     * Expected: WIN detected with message "You're $16.67 under budget for Groceries! 💪"
+     *
+     * Rationale: Prorated budget prevents false wins early in month
+     * (e.g., spending $100 on day 1 with $500 monthly budget isn't a "win")
+     */
     it('should detect under-budget win (prorated)', () => {
       const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -595,10 +643,6 @@ describe('Gamification Logic', () => {
       });
       localStorage.setItem('payplan_categories_v1', JSON.stringify([category]));
 
-      // Today is Nov 3 or 4 (depends on timezone)
-      // Day 4 of November (30 days) → 4/30 = 13.33% of month elapsed
-      // Budget: $500 → Prorated: $500 * 4/30 = $66.67
-      // Spent: $50 → Under prorated budget! WIN 🎉
       const budget = createBudget({
         categoryId: 'cat_groceries',
         amount: 50000, // $500
