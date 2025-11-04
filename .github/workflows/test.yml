@@ -86,6 +86,27 @@ jobs:
 
             const coverage = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
 
+            // CRITICAL fix: Define thresholds BEFORE using them in businessLogicFiles filter
+            // LOW-2 fix: Read thresholds from vite.config.ts instead of hardcoding
+            const viteConfigPath = './frontend/vite.config.ts';
+            let thresholds = { lines: 80, branches: 75, functions: 80, statements: 80 };
+
+            try {
+              const viteConfig = fs.readFileSync(viteConfigPath, 'utf8');
+              // Extract global thresholds (simple regex - works for our config format)
+              const linesMatch = viteConfig.match(/^\s+lines:\s+(\d+),/m);
+              const branchesMatch = viteConfig.match(/^\s+branches:\s+(\d+),/m);
+              const functionsMatch = viteConfig.match(/^\s+functions:\s+(\d+),/m);
+              const statementsMatch = viteConfig.match(/^\s+statements:\s+(\d+),/m);
+
+              if (linesMatch) thresholds.lines = parseInt(linesMatch[1]);
+              if (branchesMatch) thresholds.branches = parseInt(branchesMatch[1]);
+              if (functionsMatch) thresholds.functions = parseInt(functionsMatch[1]);
+              if (statementsMatch) thresholds.statements = parseInt(statementsMatch[1]);
+            } catch (error) {
+              console.log('Could not read thresholds from vite.config.ts, using defaults');
+            }
+
             // Get changed files in this PR with error handling (MEDIUM-2 fix)
             let changedFiles = new Set();
             let showAllFiles = false;
@@ -147,26 +168,7 @@ jobs:
             const overallFunctions = coverage.total.functions.pct.toFixed(2);
             const overallStatements = coverage.total.statements.pct.toFixed(2);
 
-            // LOW-2 fix: Read thresholds from vite.config.ts instead of hardcoding
-            const viteConfigPath = './frontend/vite.config.ts';
-            let thresholds = { lines: 80, branches: 75, functions: 80, statements: 80 };
-
-            try {
-              const viteConfig = fs.readFileSync(viteConfigPath, 'utf8');
-              // Extract global thresholds (simple regex - works for our config format)
-              const linesMatch = viteConfig.match(/^\s+lines:\s+(\d+),/m);
-              const branchesMatch = viteConfig.match(/^\s+branches:\s+(\d+),/m);
-              const functionsMatch = viteConfig.match(/^\s+functions:\s+(\d+),/m);
-              const statementsMatch = viteConfig.match(/^\s+statements:\s+(\d+),/m);
-
-              if (linesMatch) thresholds.lines = parseInt(linesMatch[1]);
-              if (branchesMatch) thresholds.branches = parseInt(branchesMatch[1]);
-              if (functionsMatch) thresholds.functions = parseInt(functionsMatch[1]);
-              if (statementsMatch) thresholds.statements = parseInt(statementsMatch[1]);
-            } catch (error) {
-              console.log('Could not read thresholds from vite.config.ts, using defaults');
-            }
-
+            // thresholds already defined above (moved earlier to fix use-before-definition)
             const commentBody = [
               '## 📊 Test Coverage Report (Business Logic)',
               '',
