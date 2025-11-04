@@ -309,9 +309,13 @@ export function generateInsights(
   // Fix 1 (Chunk 6): Filter to last 30 days to show recent patterns (not 6-month-old data)
   const thirtyDaysAgo = Date.now() - INSIGHT_RECENCY_DAYS * MILLISECONDS_PER_DAY;
 
+  // NOTE: Date-only strings (YYYY-MM-DD) are parsed as UTC per ECMAScript spec
+  // This is a historical spec error that contradicts ISO 8601 but cannot be changed
+  // due to web compatibility. We use getUTCDay() to match the UTC parsing behavior.
+  // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
   const weekendSpending = transactions
     .filter((t) => {
-      const day = new Date(t.date).getDay();
+      const day = new Date(t.date).getUTCDay(); // Use UTC day to match UTC parsing
       const transactionTime = new Date(t.date).getTime();
       return (
         (day === 0 || day === 6) &&
@@ -323,7 +327,7 @@ export function generateInsights(
 
   const weekdaySpending = transactions
     .filter((t) => {
-      const day = new Date(t.date).getDay();
+      const day = new Date(t.date).getUTCDay(); // Use UTC day to match UTC parsing
       const transactionTime = new Date(t.date).getTime();
       return (
         day >= 1 &&
