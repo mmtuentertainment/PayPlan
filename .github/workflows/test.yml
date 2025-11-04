@@ -1,5 +1,5 @@
 # Test Suite - Feature #063 Phase 8
-# Runs business logic tests with coverage reporting on every PR
+# Runs business logic tests with coverage reporting on every PR and push to main
 # Enforces per-file coverage thresholds defined in vite.config.ts
 
 name: Test Suite
@@ -14,6 +14,14 @@ on:
       - 'frontend/package.json'
       - 'frontend/vite.config.ts'
       - '.github/workflows/test.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/src/**/*.ts'
+      - 'frontend/src/**/*.tsx'
+      - 'frontend/tests/**'
+      - 'frontend/package.json'
+      - 'frontend/vite.config.ts'
 
 permissions:
   contents: read
@@ -127,8 +135,8 @@ jobs:
                   const functions = data.functions.pct.toFixed(2);
                   const statements = data.statements.pct.toFixed(2);
 
-                  // Highlight files below Phase 1 targets
-                  const linesIcon = parseFloat(lines) >= 80 ? '✅' : '⚠️';
+                  // Highlight files below Phase 1 targets (dynamic threshold)
+                  const linesIcon = parseFloat(lines) >= thresholds.lines ? '✅' : '⚠️';
 
                   return `| ${linesIcon} ${fileName} | ${lines}% | ${branches}% | ${functions}% | ${statements}% |`;
                 }).join('\n')
@@ -179,37 +187,46 @@ jobs:
               `| Functions | ${overallFunctions}% | ${thresholds.functions}%+ |`,
               `| Statements | ${overallStatements}% | ${thresholds.statements}%+ |`,
               '',
-              'Note: UI components (0% coverage) are tested manually per Phase 1 requirements.',
+              '**Notes**:',
+              '- UI components (0% coverage) tested manually per Phase 1 requirements',
+              '- Storage services show 74-75% due to browser API error paths (Phase 1 accepted limitation)',
+              '- Viewing on mobile? Tables may wrap. See full HTML report in artifacts for better formatting.',
               '',
               `📦 Full coverage report available in [workflow artifacts](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
             ].join('\n');
 
             // LOW-1 fix: Update existing comment instead of creating duplicates
-            const botComment = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            }).then(({ data }) => data.find(comment =>
-              comment.user.type === 'Bot' &&
-              comment.body.includes('📊 Test Coverage Report')
-            ));
-
-            if (botComment) {
-              // Update existing comment
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body: commentBody
-              });
-              console.log('Updated existing coverage comment');
-            } else {
-              // Create new comment
-              await github.rest.issues.createComment({
+            // LOW-3 fix: Add error handling for comment API calls
+            try {
+              const botComment = await github.rest.issues.listComments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: commentBody
-              });
-              console.log('Created new coverage comment');
+              }).then(({ data }) => data.find(comment =>
+                comment.user.type === 'Bot' &&
+                comment.body.includes('📊 Test Coverage Report')
+              ));
+
+              if (botComment) {
+                // Update existing comment
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body: commentBody
+                });
+                console.log('Updated existing coverage comment');
+              } else {
+                // Create new comment
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: commentBody
+                });
+                console.log('Created new coverage comment');
+              }
+            } catch (error) {
+              console.error('Failed to post coverage comment:', error.message);
+              // Don't fail workflow - commenting is informational, not critical
             }
