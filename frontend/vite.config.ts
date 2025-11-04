@@ -60,7 +60,7 @@ export default defineConfig({
 
     coverage: {
       provider: 'v8', // Faster than c8/istanbul (Research Decision 3)
-      reporter: ['text', 'json', 'html', 'lcov'],
+      reporter: ['text', 'json-summary', 'json', 'html', 'lcov'],
 
       // Only collect coverage for business logic
       include: ['src/features/*/lib/**/*.ts'],
