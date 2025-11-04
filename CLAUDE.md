@@ -996,11 +996,14 @@ it('should throw on negative budget', () => {
 **Feature #063 provides reusable fixtures for all business logic tests**:
 
 ```typescript
-// Import fixtures
+// Import fixtures using @/ alias (cleaner than relative paths)
 import { createCategory } from '@/features/categories/lib/__tests__/fixtures/category-fixtures';
 import { createBudget } from '@/features/budgets/lib/__tests__/fixtures/budget-fixtures';
 import { createExpense, createIncome } from '@/features/transactions/lib/__tests__/fixtures/transaction-fixtures';
-import { sharedFixtures } from '../../../../../tests/fixtures/shared-fixtures';
+import { sharedFixtures } from '@/tests/fixtures/shared-fixtures';
+
+// Note: @/ alias resolves to frontend/src/ (configured in vite.config.ts)
+// Prefer @/ over relative paths like ../../../../../tests/fixtures/shared-fixtures
 
 // Create test data with defaults
 const category = createCategory(); // Uses defaults (Groceries, green color, etc.)
@@ -1060,7 +1063,14 @@ it('should return default when localStorage is empty', () => {
 
 ### Testing Date-Based Logic
 
-**IMPORTANT**: Use fake timers for deterministic dates:
+**When to use fake timers**:
+- ✅ Testing logic that depends on "now" (current month, streak tracking)
+- ✅ Testing date comparisons (is transaction from last 30 days?)
+- ✅ Testing date arithmetic (calculate prorated budget by day of month)
+- ❌ Testing pure functions with static date inputs (no Date.now() calls)
+- ❌ Testing date parsing/formatting (doesn't depend on current time)
+
+**Use fake timers for deterministic dates**:
 
 ```typescript
 import { vi, beforeEach, afterEach } from 'vitest';
@@ -1078,6 +1088,16 @@ it('should calculate current month correctly', () => {
   // Test runs as if it's Nov 4, 2025 at noon (timezone-independent)
   const result = getCurrentMonth();
   expect(result).toBe('2025-11');
+});
+```
+
+**Example WITHOUT fake timers** (static date input):
+```typescript
+// This test doesn't need fake timers (no Date.now() dependency)
+it('should parse ISO date correctly', () => {
+  const result = parseDate('2025-11-04');
+  expect(result.year).toBe(2025);
+  expect(result.month).toBe(11);
 });
 ```
 
