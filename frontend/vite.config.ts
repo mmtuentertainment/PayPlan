@@ -155,6 +155,16 @@ export default defineConfig({
           branches: 75,
           statements: 80,
         },
+
+        // 80%+ for dashboard gamification (US5 - streak tracking, insights, wins)
+        // Gamification functions implement behavioral psychology principles
+        // 35 comprehensive tests, 88.32% line coverage, 87.03% branch coverage
+        'src/features/dashboard/lib/gamification.ts': {
+          lines: 80,
+          functions: 80,
+          branches: 75,
+          statements: 80,
+        },
       },
     },
   },

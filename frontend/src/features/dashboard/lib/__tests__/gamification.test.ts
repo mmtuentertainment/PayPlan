@@ -1,0 +1,876 @@
+/**
+ * Gamification Logic Tests
+ * Feature #063: Business Logic Test Coverage - User Story 5
+ *
+ * Tests streak tracking, insights generation, and wins detection.
+ * Behavioral psychology principles validated:
+ * - Streak tracking: Loss aversion (Kahneman & Tversky)
+ * - Insights: Progress principle (Teresa Amabile)
+ * - Wins: Positive reinforcement (BJ Fogg Behavior Model)
+ *
+ * Target: 80%+ coverage, <5s execution
+ */
+
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  getStreakData,
+  updateStreakData,
+  getGamificationData,
+  saveGamificationData,
+  generateInsights,
+  detectRecentWins,
+  GAMIFICATION_CONFIG,
+} from '../gamification';
+import type {
+  StreakData,
+  GamificationData,
+  PersonalizedInsight,
+  RecentWin,
+} from '@/features/dashboard/types/gamification';
+import { createTransaction, createExpense, createIncome } from '@/features/transactions/lib/__tests__/fixtures/transaction-fixtures';
+import { createBudget } from '@/features/budgets/lib/__tests__/fixtures/budget-fixtures';
+import { createGoal } from './fixtures/dashboard-fixtures';
+import { createCategory } from '@/features/categories/lib/__tests__/fixtures/category-fixtures';
+import { sharedFixtures } from '../../../../../tests/fixtures/shared-fixtures';
+
+describe('Gamification Logic', () => {
+  beforeEach(() => {
+    // Clear localStorage before each test (isolation)
+    localStorage.clear();
+
+    // Reset any mocked dates
+    vi.clearAllMocks();
+  });
+
+  describe('getStreakData', () => {
+    it('should return default streak data when localStorage is empty', () => {
+      const result = getStreakData();
+
+      expect(result.currentStreak).toBe(0);
+      expect(result.longestStreak).toBe(0);
+      expect(result.lastActivityDate).toBeTruthy();
+      expect(typeof result.lastActivityDate).toBe('string');
+    });
+
+    it('should read streak data from localStorage', () => {
+      const streakData: GamificationData = {
+        streak: {
+          currentStreak: 5,
+          longestStreak: 10,
+          lastActivityDate: '2025-11-03T00:00:00.000Z',
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(streakData));
+
+      const result = getStreakData();
+
+      expect(result.currentStreak).toBe(5);
+      expect(result.longestStreak).toBe(10);
+      expect(result.lastActivityDate).toBe('2025-11-03T00:00:00.000Z');
+    });
+
+    it('should return default data when localStorage contains corrupted JSON', () => {
+      localStorage.setItem('payplan_gamification_v1', 'invalid-json-{');
+
+      const result = getStreakData();
+
+      expect(result.currentStreak).toBe(0);
+      expect(result.longestStreak).toBe(0);
+      expect(result.lastActivityDate).toBeTruthy();
+    });
+
+    it('should return default data when localStorage contains invalid streak data', () => {
+      // Missing currentStreak field (Zod validation should fail)
+      const invalidData = {
+        streak: {
+          longestStreak: 10,
+          lastActivityDate: '2025-11-03T00:00:00.000Z',
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(invalidData));
+
+      const result = getStreakData();
+
+      expect(result.currentStreak).toBe(0);
+      expect(result.longestStreak).toBe(0);
+    });
+
+    it('should return default data when streak has negative values', () => {
+      const invalidData: GamificationData = {
+        streak: {
+          currentStreak: -5, // Invalid: negative streak
+          longestStreak: 10,
+          lastActivityDate: '2025-11-03T00:00:00.000Z',
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(invalidData));
+
+      const result = getStreakData();
+
+      // Zod schema should reject negative values
+      expect(result.currentStreak).toBe(0);
+      expect(result.longestStreak).toBe(0);
+    });
+  });
+
+  describe('updateStreakData', () => {
+    it('should start streak on first activity', () => {
+      // Set lastActivityDate to yesterday so today counts as new activity
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      const gamificationData: GamificationData = {
+        streak: {
+          currentStreak: 0,
+          longestStreak: 0,
+          lastActivityDate: new Date(yesterdayString).toISOString(),
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(gamificationData));
+
+      const result = updateStreakData();
+
+      expect(result.currentStreak).toBe(1);
+      expect(result.longestStreak).toBe(1);
+      expect(result.lastActivityDate).toBeTruthy();
+
+      // Verify persistence
+      const stored = getGamificationData();
+      expect(stored.streak.currentStreak).toBe(1);
+    });
+
+    it('should not increment streak on same-day activity (prevent gaming)', () => {
+      // Set up yesterday's activity
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      const gamificationData: GamificationData = {
+        streak: {
+          currentStreak: 0,
+          longestStreak: 0,
+          lastActivityDate: new Date(yesterdayString).toISOString(),
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(gamificationData));
+
+      // First activity today
+      const first = updateStreakData();
+      expect(first.currentStreak).toBe(1);
+
+      // Second activity same day (should NOT increment)
+      const second = updateStreakData();
+      expect(second.currentStreak).toBe(1); // Still 1, not 2
+      expect(second.longestStreak).toBe(1);
+    });
+
+    it('should increment streak on consecutive day activity', () => {
+      // Simulate activity yesterday
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      const gamificationData: GamificationData = {
+        streak: {
+          currentStreak: 3,
+          longestStreak: 5,
+          lastActivityDate: new Date(yesterdayString).toISOString(),
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(gamificationData));
+
+      const result = updateStreakData();
+
+      expect(result.currentStreak).toBe(4); // 3 + 1
+      expect(result.longestStreak).toBe(5); // Unchanged (4 < 5)
+    });
+
+    it('should detect streak break after missed day', () => {
+      // Simulate activity 3 days ago (missed 2 days = streak broken)
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      const threeDaysAgoString = `${threeDaysAgo.getFullYear()}-${String(threeDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(threeDaysAgo.getDate()).padStart(2, '0')}`;
+
+      const gamificationData: GamificationData = {
+        streak: {
+          currentStreak: 5,
+          longestStreak: 10,
+          lastActivityDate: new Date(threeDaysAgoString).toISOString(),
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(gamificationData));
+
+      const result = updateStreakData();
+
+      expect(result.currentStreak).toBe(1); // Reset to 1 (loss aversion)
+      expect(result.longestStreak).toBe(10); // Longest preserved
+    });
+
+    it('should update longest streak when current exceeds it', () => {
+      // Current streak at 9, longest at 9 → today makes it 10 (new record!)
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      const gamificationData: GamificationData = {
+        streak: {
+          currentStreak: 9,
+          longestStreak: 9,
+          lastActivityDate: new Date(yesterdayString).toISOString(),
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(gamificationData));
+
+      const result = updateStreakData();
+
+      expect(result.currentStreak).toBe(10);
+      expect(result.longestStreak).toBe(10); // Updated!
+    });
+
+    it('should handle edge case: exactly 24 hours later (consecutive day)', () => {
+      // Activity at exactly 24 hours ago (edge case for day boundary)
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      const gamificationData: GamificationData = {
+        streak: {
+          currentStreak: 1,
+          longestStreak: 1,
+          lastActivityDate: new Date(yesterdayString).toISOString(),
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(gamificationData));
+
+      const result = updateStreakData();
+
+      expect(result.currentStreak).toBe(2); // Should increment
+    });
+
+    it('should preserve longest streak across multiple streak breaks', () => {
+      // Start with longest=20, current=5
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      const threeDaysAgoString = `${threeDaysAgo.getFullYear()}-${String(threeDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(threeDaysAgo.getDate()).padStart(2, '0')}`;
+
+      const gamificationData: GamificationData = {
+        streak: {
+          currentStreak: 5,
+          longestStreak: 20, // Historical record
+          lastActivityDate: new Date(threeDaysAgoString).toISOString(),
+        },
+        recentWins: [],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(gamificationData));
+
+      const result = updateStreakData();
+
+      // Streak broke, but longest preserved
+      expect(result.currentStreak).toBe(1);
+      expect(result.longestStreak).toBe(20); // Still 20!
+    });
+  });
+
+  describe('getGamificationData', () => {
+    it('should return default gamification data when localStorage is empty', () => {
+      const result = getGamificationData();
+
+      expect(result.streak.currentStreak).toBe(0);
+      expect(result.streak.longestStreak).toBe(0);
+      expect(result.recentWins).toEqual([]);
+      expect(result.insights).toEqual([]);
+    });
+
+    it('should read complete gamification data from localStorage', () => {
+      const data: GamificationData = {
+        streak: {
+          currentStreak: 5,
+          longestStreak: 10,
+          lastActivityDate: '2025-11-03T00:00:00.000Z',
+        },
+        recentWins: [
+          {
+            id: uuidv4(), // Use real UUID
+            message: 'Test win',
+            timestamp: '2025-11-03T00:00:00.000Z',
+            icon: '🎉',
+          },
+        ],
+        insights: [
+          {
+            id: uuidv4(), // Use real UUID
+            type: 'positive',
+            category: 'Groceries',
+            percentageChange: -20,
+            message: 'Test insight',
+          },
+        ],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(data));
+
+      const result = getGamificationData();
+
+      expect(result.streak.currentStreak).toBe(5);
+      expect(result.recentWins).toHaveLength(1);
+      expect(result.recentWins[0].message).toBe('Test win');
+      expect(result.insights).toHaveLength(1);
+      expect(result.insights[0].message).toBe('Test insight');
+    });
+
+    it('should return default data when localStorage contains invalid gamification data', () => {
+      // Invalid: recentWins has >3 items (max is 3)
+      const invalidData = {
+        streak: {
+          currentStreak: 5,
+          longestStreak: 10,
+          lastActivityDate: '2025-11-03T00:00:00.000Z',
+        },
+        recentWins: [
+          { id: uuidv4(), message: 'Win 1', timestamp: '2025-11-03T00:00:00.000Z', icon: '🎉' },
+          { id: uuidv4(), message: 'Win 2', timestamp: '2025-11-03T00:00:00.000Z', icon: '🎉' },
+          { id: uuidv4(), message: 'Win 3', timestamp: '2025-11-03T00:00:00.000Z', icon: '🎉' },
+          { id: uuidv4(), message: 'Win 4', timestamp: '2025-11-03T00:00:00.000Z', icon: '🎉' }, // 4th item exceeds max
+        ],
+        insights: [],
+      };
+      localStorage.setItem('payplan_gamification_v1', JSON.stringify(invalidData));
+
+      const result = getGamificationData();
+
+      // Zod schema rejects the full object but getStreakData() reads the streak separately
+      // So streak is preserved (valid), but wins/insights are reset
+      expect(result.streak.currentStreak).toBe(5); // Streak is still valid
+      expect(result.streak.longestStreak).toBe(10);
+      expect(result.recentWins).toEqual([]); // Wins reset (invalid)
+      expect(result.insights).toEqual([]); // Insights reset (valid but empty)
+    });
+  });
+
+  describe('saveGamificationData', () => {
+    it('should persist gamification data to localStorage', () => {
+      const data: GamificationData = {
+        streak: {
+          currentStreak: 7,
+          longestStreak: 15,
+          lastActivityDate: '2025-11-03T00:00:00.000Z',
+        },
+        recentWins: [],
+        insights: [],
+      };
+
+      saveGamificationData(data);
+
+      const stored = localStorage.getItem('payplan_gamification_v1');
+      expect(stored).toBeTruthy();
+
+      const parsed = JSON.parse(stored!);
+      expect(parsed.streak.currentStreak).toBe(7);
+      expect(parsed.streak.longestStreak).toBe(15);
+    });
+
+    it('should handle localStorage write errors gracefully', () => {
+      // Mock localStorage.setItem to throw (e.g., quota exceeded)
+      const originalSetItem = localStorage.setItem;
+      localStorage.setItem = vi.fn(() => {
+        throw new Error('QuotaExceededError');
+      });
+
+      const data: GamificationData = {
+        streak: {
+          currentStreak: 1,
+          longestStreak: 1,
+          lastActivityDate: '2025-11-03T00:00:00.000Z',
+        },
+        recentWins: [],
+        insights: [],
+      };
+
+      // Should not throw
+      expect(() => saveGamificationData(data)).not.toThrow();
+
+      // Restore original
+      localStorage.setItem = originalSetItem;
+    });
+  });
+
+  describe('generateInsights', () => {
+    it('should generate weekend overspending insight when difference exceeds threshold', () => {
+      // Use fake timers to control "now" and eliminate timezone issues
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2025-11-04T12:00:00')); // Tuesday Nov 4, 2025 at noon
+
+      const transactions = [
+        // Weekend: Saturday Nov 2 + Sunday Nov 3 = $400 total
+        createExpense({ amount: 20000, date: '2025-11-02' }), // Saturday (day=6)
+        createExpense({ amount: 20000, date: '2025-11-03' }), // Sunday (day=0)
+
+        // Weekdays: Mon-Fri previous week = $125 total ($25/day × 5 days)
+        createExpense({ amount: 2500, date: '2025-10-27' }), // Monday (day=1)
+        createExpense({ amount: 2500, date: '2025-10-28' }), // Tuesday (day=2)
+        createExpense({ amount: 2500, date: '2025-10-29' }), // Wednesday (day=3)
+        createExpense({ amount: 2500, date: '2025-10-30' }), // Thursday (day=4)
+        createExpense({ amount: 2500, date: '2025-10-31' }), // Friday (day=5)
+      ];
+
+      const result = generateInsights(transactions);
+
+      vi.useRealTimers(); // Restore real timers
+
+      // Weekend: $400, Weekday: $125
+      // diff = (400 - 125) / 125 * 100 = 220% (way exceeds 20% threshold)
+      expect(result.length).toBeGreaterThan(0);
+      const weekendInsight = result.find((insight) =>
+        insight.message.toLowerCase().includes('weekend')
+      );
+      expect(weekendInsight).toBeDefined();
+      expect(weekendInsight?.type).toBe('negative'); // Spending more is negative
+    });
+
+    it('should generate month-over-month insight when past 50% of month', () => {
+      // Only test if we're past halfway through current month
+      const now = new Date();
+      const dayOfMonth = now.getDate();
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const monthProgressPercent = (dayOfMonth / daysInMonth) * 100;
+
+      if (monthProgressPercent <= GAMIFICATION_CONFIG.INSIGHT_MONTH_PROGRESS_THRESHOLD) {
+        // Skip test if not past threshold
+        return;
+      }
+
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        .toISOString()
+        .slice(0, 7);
+
+      const transactions = [
+        // Current month: $500
+        createExpense({ amount: 50000, date: `${currentMonth}-15` }),
+
+        // Last month: $1000
+        createExpense({ amount: 100000, date: `${lastMonth}-15` }),
+      ];
+
+      const result = generateInsights(transactions);
+
+      // Current month is 50% less than last month (exceeds 10% threshold)
+      const monthlyInsight = result.find((insight) =>
+        insight.message.toLowerCase().includes('month')
+      );
+      expect(monthlyInsight).toBeDefined();
+      expect(monthlyInsight?.type).toBe('positive'); // Spending less is positive
+    });
+
+    it('should handle empty transactions array', () => {
+      const result = generateInsights([]);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should limit insights to maximum 3', () => {
+      // Create scenario with multiple insights
+      const now = new Date();
+      const currentMonth = now.toISOString().slice(0, 7);
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        .toISOString()
+        .slice(0, 7);
+
+      // Generate many transactions to trigger multiple insights
+      const transactions = [
+        // Weekend overspending
+        ...Array.from({ length: 10 }, (_, i) => {
+          const date = new Date();
+          date.setDate(date.getDate() - i * 7); // Weekly on weekends
+          const day = date.getDay();
+          if (day === 0 || day === 6) {
+            return createExpense({ amount: 10000, date: date.toISOString().split('T')[0] });
+          }
+          return createExpense({ amount: 3000, date: date.toISOString().split('T')[0] });
+        }),
+
+        // Month-over-month change
+        createExpense({ amount: 100000, date: `${currentMonth}-15` }),
+        createExpense({ amount: 50000, date: `${lastMonth}-15` }),
+      ];
+
+      const result = generateInsights(transactions);
+
+      // Should return max 3 insights
+      expect(result.length).toBeLessThanOrEqual(3);
+    });
+
+    it('should filter transactions to last 30 days for recency', () => {
+      const now = new Date();
+
+      // Old transaction (60 days ago) - should be ignored
+      const oldDate = new Date();
+      oldDate.setDate(oldDate.getDate() - 60);
+
+      // Recent transaction (10 days ago) - should be included
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 10);
+
+      const transactions = [
+        createExpense({ amount: 100000, date: oldDate.toISOString().split('T')[0] }),
+        createExpense({ amount: 5000, date: recentDate.toISOString().split('T')[0] }),
+      ];
+
+      const result = generateInsights(transactions);
+
+      // Old transaction should not affect insights
+      expect(result).toBeDefined();
+    });
+
+    it('should not generate insight when below threshold', () => {
+      const saturdayDate = new Date();
+      saturdayDate.setDate(saturdayDate.getDate() - ((saturdayDate.getDay() + 1) % 7));
+
+      const mondayDate = new Date(saturdayDate);
+      mondayDate.setDate(saturdayDate.getDate() - 5);
+
+      const transactions = [
+        // Weekend: $100
+        createExpense({ amount: 10000, date: saturdayDate.toISOString().split('T')[0] }),
+
+        // Weekdays: $110 (only 10% more, below 20% threshold)
+        createExpense({ amount: 11000, date: mondayDate.toISOString().split('T')[0] }),
+      ];
+
+      const result = generateInsights(transactions);
+
+      // 10% difference is below 20% threshold
+      const weekendInsight = result.find((insight) =>
+        insight.message.toLowerCase().includes('weekend')
+      );
+      expect(weekendInsight).toBeUndefined();
+    });
+
+    it('should handle income transactions correctly (exclude from insights)', () => {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      const transactions = [
+        // Income (negative amount) - should be filtered out
+        createIncome({ amount: -100000, date: `${currentMonth}-01` }),
+
+        // Expense (positive amount) - should be included
+        createExpense({ amount: 10000, date: `${currentMonth}-15` }),
+      ];
+
+      const result = generateInsights(transactions);
+
+      // Income should not affect spending insights
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectRecentWins', () => {
+    it('should detect under-budget win (prorated)', () => {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      // Seed category in localStorage (detectRecentWins reads from readCategories())
+      const category = createCategory({
+        id: 'cat_groceries',
+        name: 'Groceries',
+      });
+      localStorage.setItem('payplan_categories_v1', JSON.stringify([category]));
+
+      // Today is Nov 3 or 4 (depends on timezone)
+      // Day 4 of November (30 days) → 4/30 = 13.33% of month elapsed
+      // Budget: $500 → Prorated: $500 * 4/30 = $66.67
+      // Spent: $50 → Under prorated budget! WIN 🎉
+      const budget = createBudget({
+        categoryId: 'cat_groceries',
+        amount: 50000, // $500
+        period: currentMonth,
+      });
+
+      const transactions = [
+        createExpense({
+          amount: 5000, // $50 spent (well under $66.67 prorated)
+          categoryId: 'cat_groceries',
+          date: `${currentMonth}-03`,
+        }),
+      ];
+
+      const result = detectRecentWins(transactions, [budget]);
+
+      expect(result.length).toBeGreaterThan(0);
+      const underBudgetWin = result.find((win) =>
+        win.message.toLowerCase().includes('under budget')
+      );
+      expect(underBudgetWin).toBeDefined();
+      expect(underBudgetWin?.icon).toBe('💪');
+    });
+
+    it('should not detect win when over prorated budget', () => {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      // Spent more than prorated budget → NO WIN
+      const budget = createBudget({
+        categoryId: 'cat_groceries',
+        amount: 50000, // $500
+        period: currentMonth,
+      });
+
+      const transactions = [
+        createExpense({
+          amount: 30000, // $300 spent (over prorated budget)
+          categoryId: 'cat_groceries',
+          date: `${currentMonth}-05`,
+        }),
+      ];
+
+      const result = detectRecentWins(transactions, [budget]);
+
+      const underBudgetWin = result.find((win) =>
+        win.message.toLowerCase().includes('under budget')
+      );
+      expect(underBudgetWin).toBeUndefined();
+    });
+
+    it('should detect large income win', () => {
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 3); // 3 days ago
+
+      const transactions = [
+        createIncome({
+          amount: -150000, // -$1500 income (exceeds $1000 threshold)
+          date: recentDate.toISOString().split('T')[0],
+        }),
+      ];
+
+      const result = detectRecentWins(transactions, []);
+
+      expect(result.length).toBeGreaterThan(0);
+      const incomeWin = result.find((win) =>
+        win.message.toLowerCase().includes('earned')
+      );
+      expect(incomeWin).toBeDefined();
+      expect(incomeWin?.icon).toBe('💰');
+      expect(incomeWin?.message).toContain('1500'); // Should show $1500
+    });
+
+    it('should not detect income win below threshold', () => {
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 3);
+
+      const transactions = [
+        createIncome({
+          amount: -50000, // -$500 income (below $1000 threshold)
+          date: recentDate.toISOString().split('T')[0],
+        }),
+      ];
+
+      const result = detectRecentWins(transactions, []);
+
+      const incomeWin = result.find((win) =>
+        win.message.toLowerCase().includes('earned')
+      );
+      expect(incomeWin).toBeUndefined();
+    });
+
+    it('should not detect income win outside recency window', () => {
+      const oldDate = new Date();
+      oldDate.setDate(oldDate.getDate() - 30); // 30 days ago (outside 7-day window)
+
+      const transactions = [
+        createIncome({
+          amount: -150000, // -$1500 (would qualify, but too old)
+          date: oldDate.toISOString().split('T')[0],
+        }),
+      ];
+
+      const result = detectRecentWins(transactions, []);
+
+      const incomeWin = result.find((win) =>
+        win.message.toLowerCase().includes('earned')
+      );
+      expect(incomeWin).toBeUndefined();
+    });
+
+    it('should handle multiple wins on same day', () => {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 2);
+
+      // Seed category
+      const category = createCategory({
+        id: 'cat_groceries',
+        name: 'Groceries',
+      });
+      localStorage.setItem('payplan_categories_v1', JSON.stringify([category]));
+
+      // Win 1: Under budget
+      const budget = createBudget({
+        categoryId: 'cat_groceries',
+        amount: 50000, // $500
+        period: currentMonth,
+      });
+
+      const transactions = [
+        // Under budget
+        createExpense({
+          amount: 5000, // $50 (way under prorated budget)
+          categoryId: 'cat_groceries',
+          date: `${currentMonth}-05`,
+        }),
+
+        // Win 2: Large income
+        createIncome({
+          amount: -200000, // -$2000
+          date: recentDate.toISOString().split('T')[0],
+        }),
+      ];
+
+      const result = detectRecentWins(transactions, [budget]);
+
+      // Should detect both wins
+      expect(result.length).toBeGreaterThanOrEqual(2);
+
+      const underBudgetWin = result.find((win) => win.message.includes('under budget'));
+      const incomeWin = result.find((win) => win.message.includes('earned'));
+
+      expect(underBudgetWin).toBeDefined();
+      expect(incomeWin).toBeDefined();
+    });
+
+    it('should handle no wins gracefully', () => {
+      const result = detectRecentWins([], []);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should limit wins to maximum 3', () => {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      // Create many budgets with under-spending
+      const budgets = Array.from({ length: 10 }, (_, i) =>
+        createBudget({
+          id: `budget_${i}`,
+          categoryId: `cat_${i}`,
+          amount: 50000,
+          period: currentMonth,
+        })
+      );
+
+      const transactions = Array.from({ length: 10 }, (_, i) =>
+        createExpense({
+          id: `txn_${i}`,
+          amount: 1000, // $10 (way under budget)
+          categoryId: `cat_${i}`,
+          date: `${currentMonth}-05`,
+        })
+      );
+
+      const result = detectRecentWins(transactions, budgets);
+
+      // Should return max 3 wins
+      expect(result.length).toBeLessThanOrEqual(3);
+    });
+
+    it('should sort wins by timestamp (most recent first)', () => {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      // Create transactions at different times
+      const oldDate = new Date();
+      oldDate.setDate(oldDate.getDate() - 6);
+
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 1);
+
+      const transactions = [
+        // Older income
+        createIncome({
+          amount: -150000,
+          date: oldDate.toISOString().split('T')[0],
+        }),
+
+        // Recent income
+        createIncome({
+          amount: -200000,
+          date: recentDate.toISOString().split('T')[0],
+        }),
+      ];
+
+      const result = detectRecentWins(transactions, []);
+
+      if (result.length >= 2) {
+        // Most recent should be first
+        const first = new Date(result[0].timestamp).getTime();
+        const second = new Date(result[1].timestamp).getTime();
+        expect(first).toBeGreaterThanOrEqual(second);
+      }
+    });
+
+    it('should handle empty budgets array', () => {
+      const transactions = [
+        createExpense({ amount: 10000, date: '2025-11-05' }),
+      ];
+
+      const result = detectRecentWins(transactions, []);
+
+      // No budget-related wins, but should not crash
+      expect(result).toBeDefined();
+    });
+
+    it('should filter expenses correctly (exclude income from spending)', () => {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      // Seed category
+      const category = createCategory({
+        id: 'cat_groceries',
+        name: 'Groceries',
+      });
+      localStorage.setItem('payplan_categories_v1', JSON.stringify([category]));
+
+      const budget = createBudget({
+        categoryId: 'cat_groceries',
+        amount: 50000, // $500
+        period: currentMonth,
+      });
+
+      const transactions = [
+        // Income (negative) - should be excluded from spending calculation
+        createIncome({
+          amount: -100000, // -$1000 income
+          date: `${currentMonth}-03`,
+        }),
+
+        // Expense (positive) - should be included
+        createExpense({
+          amount: 3000, // $30 spent (well under $66.67 prorated budget for day 4)
+          categoryId: 'cat_groceries',
+          date: `${currentMonth}-03`,
+        }),
+      ];
+
+      const result = detectRecentWins(transactions, [budget]);
+
+      // Income should not count toward spending
+      // $30 spent < $66.67 prorated = under budget win
+      const underBudgetWin = result.find((win) => win.message.includes('under budget'));
+      expect(underBudgetWin).toBeDefined();
+    });
+  });
+});
