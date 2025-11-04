@@ -450,19 +450,19 @@ describe('Gamification Logic', () => {
     it('should generate weekend overspending insight when difference exceeds threshold', () => {
       // Use fake timers to control "now" and eliminate timezone issues
       vi.useFakeTimers();
-      vi.setSystemTime(new Date('2025-11-04T12:00:00')); // Tuesday Nov 4, 2025 at noon
+      vi.setSystemTime(new Date('2025-11-10T12:00:00')); // Monday Nov 10, 2025 at noon
 
       const transactions = [
-        // Weekend: Saturday Nov 2 + Sunday Nov 3 = $400 total
-        createExpense({ amount: 20000, date: '2025-11-02' }), // Saturday (day=6)
-        createExpense({ amount: 20000, date: '2025-11-03' }), // Sunday (day=0)
+        // Weekend: Saturday Nov 1 + Sunday Nov 2 = $400 total
+        createExpense({ amount: 20000, date: '2025-11-01' }), // Saturday (UTC day=6)
+        createExpense({ amount: 20000, date: '2025-11-02' }), // Sunday (UTC day=0)
 
         // Weekdays: Mon-Fri previous week = $125 total ($25/day × 5 days)
-        createExpense({ amount: 2500, date: '2025-10-27' }), // Monday (day=1)
-        createExpense({ amount: 2500, date: '2025-10-28' }), // Tuesday (day=2)
-        createExpense({ amount: 2500, date: '2025-10-29' }), // Wednesday (day=3)
-        createExpense({ amount: 2500, date: '2025-10-30' }), // Thursday (day=4)
-        createExpense({ amount: 2500, date: '2025-10-31' }), // Friday (day=5)
+        createExpense({ amount: 2500, date: '2025-10-27' }), // Monday (UTC day=1)
+        createExpense({ amount: 2500, date: '2025-10-28' }), // Tuesday (UTC day=2)
+        createExpense({ amount: 2500, date: '2025-10-29' }), // Wednesday (UTC day=3)
+        createExpense({ amount: 2500, date: '2025-10-30' }), // Thursday (UTC day=4)
+        createExpense({ amount: 2500, date: '2025-10-31' }), // Friday (UTC day=5)
       ];
 
       const result = generateInsights(transactions);
@@ -538,7 +538,7 @@ describe('Gamification Logic', () => {
         ...Array.from({ length: 10 }, (_, i) => {
           const date = new Date();
           date.setDate(date.getDate() - i * 7); // Weekly on weekends
-          const day = date.getDay();
+          const day = date.getUTCDay(); // Use UTC to match date-only string parsing
           if (day === 0 || day === 6) {
             return createExpense({ amount: 10000, date: date.toISOString().split('T')[0] });
           }
@@ -580,7 +580,7 @@ describe('Gamification Logic', () => {
 
     it('should not generate insight when below threshold', () => {
       const saturdayDate = new Date();
-      saturdayDate.setDate(saturdayDate.getDate() - ((saturdayDate.getDay() + 1) % 7));
+      saturdayDate.setDate(saturdayDate.getDate() - ((saturdayDate.getUTCDay() + 1) % 7)); // Use UTC
 
       const mondayDate = new Date(saturdayDate);
       mondayDate.setDate(saturdayDate.getDate() - 5);
