@@ -900,14 +900,24 @@ npm run format
 ### Testing (Phase 1+ - NOW REQUIRED)
 
 ```bash
-# Run tests (business logic tests required in Phase 1!)
+# Run all tests
 npm test
 
-# Run tests with coverage (target: 60-80% overall, 80% business logic)
+# Run specific test file
+npm test -- gamification.test.ts
+
+# Run tests with coverage
 npm run test:coverage
+
+# Run tests in watch mode (for TDD)
+npm test -- --watch
 
 # Run tests for specific feature
 npm test features/categories
+
+# Generate HTML coverage report
+npm run test:coverage
+# View: frontend/coverage/index.html
 
 # Run E2E tests (Phase 2+)
 npm run test:e2e
@@ -915,6 +925,221 @@ npm run test:e2e
 # Run accessibility tests (Phase 2+)
 npm run test:a11y
 ```
+
+---
+
+## Testing Guide (Feature #063)
+
+### Phase 1 TDD Requirements (Constitution v3.1)
+
+**You MUST write tests for**:
+- ✅ **Business logic** (`features/*/lib/**/*.ts`) - 80% coverage target
+- ✅ **Financial calculations** - 90%+ coverage required (money is critical!)
+- ✅ **Storage services** - Test CRUD operations, 80%+ target
+- ✅ **Schemas (Zod)** - Test validation rules, 90%+ coverage required
+
+**You do NOT need tests for**:
+- ❌ **UI components** - Manual testing acceptable (Phase 1)
+- ❌ **Integration tests** - Defer to Phase 2
+- ❌ **E2E tests** - Defer to Phase 2
+
+---
+
+### Writing Tests (TDD Pattern)
+
+**Follow RED-GREEN-REFACTOR workflow**:
+
+```typescript
+// 1. RED: Write the test first (fails - function doesn't exist yet)
+import { describe, it, expect } from 'vitest';
+import { calculateBudgetProgress } from '../calculations';
+
+describe('calculateBudgetProgress', () => {
+  it('should return 50% when half of budget spent', () => {
+    const result = calculateBudgetProgress(50000, 100000); // $500 spent, $1000 budget
+    expect(result).toBe(50);
+  });
+});
+
+// 2. Run test: npm test -- calculations.test.ts
+// Expected: FAIL (function doesn't exist)
+
+// 3. GREEN: Write minimal code to pass
+export function calculateBudgetProgress(spent: number, budget: number): number {
+  return (spent / budget) * 100;
+}
+
+// 4. Run test again: npm test -- calculations.test.ts
+// Expected: PASS
+
+// 5. REFACTOR: Add edge case handling
+export function calculateBudgetProgress(spent: number, budget: number): number {
+  if (budget === 0) throw new Error('Budget cannot be zero');
+  if (budget < 0) throw new Error('Budget cannot be negative');
+  return (spent / budget) * 100;
+}
+
+// 6. Add more tests for edge cases
+it('should throw on zero budget', () => {
+  expect(() => calculateBudgetProgress(100, 0)).toThrow('Budget cannot be zero');
+});
+
+it('should throw on negative budget', () => {
+  expect(() => calculateBudgetProgress(100, -50)).toThrow('Budget cannot be negative');
+});
+```
+
+---
+
+### Using Test Fixtures
+
+**Feature #063 provides reusable fixtures for all business logic tests**:
+
+```typescript
+// Import fixtures using @/ alias (cleaner than relative paths)
+import { createCategory } from '@/features/categories/lib/__tests__/fixtures/category-fixtures';
+import { createBudget } from '@/features/budgets/lib/__tests__/fixtures/budget-fixtures';
+import { createExpense, createIncome } from '@/features/transactions/lib/__tests__/fixtures/transaction-fixtures';
+import { sharedFixtures } from '@/tests/fixtures/shared-fixtures';
+
+// Note: @/ alias resolves to frontend/src/ (configured in vite.config.ts)
+// Prefer @/ over relative paths like ../../../../../tests/fixtures/shared-fixtures
+
+// Create test data with defaults
+const category = createCategory(); // Uses defaults (Groceries, green color, etc.)
+
+// Override specific fields
+const customCategory = createCategory({
+  name: 'Transportation',
+  color: sharedFixtures.colors.blue
+});
+
+// Create related entities
+const budget = createBudget({
+  amount: 50000, // $500.00
+  categoryId: category.id
+});
+
+const expense = createExpense({
+  amount: 10000, // $100.00
+  categoryId: category.id,
+  date: '2025-11-04'
+});
+```
+
+**Fixture patterns available**:
+- **Factory functions**: `createCategory()`, `createBudget()`, `createExpense()`
+- **Builder pattern**: `new CategoryBuilder().withBudget(50000).build()`
+- **Trait variations**: `createOverspentBudget()`, `createCustomCategory()`
+- **Shared constants**: `sharedFixtures.dates`, `sharedFixtures.amounts`, `sharedFixtures.colors`
+
+---
+
+### Testing localStorage
+
+```typescript
+import { beforeEach } from 'vitest';
+
+beforeEach(() => {
+  localStorage.clear(); // Isolate tests - prevent data leakage
+});
+
+it('should persist data to localStorage', () => {
+  const data = { id: '123', name: 'Test Category' };
+  localStorage.setItem('payplan_categories_v1', JSON.stringify(data));
+
+  const stored = localStorage.getItem('payplan_categories_v1');
+  expect(stored).toBeTruthy();
+  expect(JSON.parse(stored!)).toEqual(data);
+});
+
+it('should return default when localStorage is empty', () => {
+  const result = readCategories(); // Your storage function
+  expect(result).toEqual([]); // Default empty array
+});
+```
+
+---
+
+### Testing Date-Based Logic
+
+**When to use fake timers**:
+- ✅ Testing logic that depends on "now" (current month, streak tracking)
+- ✅ Testing date comparisons (is transaction from last 30 days?)
+- ✅ Testing date arithmetic (calculate prorated budget by day of month)
+- ❌ Testing pure functions with static date inputs (no Date.now() calls)
+- ❌ Testing date parsing/formatting (doesn't depend on current time)
+
+**Use fake timers for deterministic dates**:
+
+```typescript
+import { vi, beforeEach, afterEach } from 'vitest';
+
+beforeEach(() => {
+  vi.useFakeTimers(); // Control "now"
+  vi.setSystemTime(new Date('2025-11-04T12:00:00')); // Set fixed date
+});
+
+afterEach(() => {
+  vi.useRealTimers(); // Always restore!
+});
+
+it('should calculate current month correctly', () => {
+  // Test runs as if it's Nov 4, 2025 at noon (timezone-independent)
+  const result = getCurrentMonth();
+  expect(result).toBe('2025-11');
+});
+```
+
+**Example WITHOUT fake timers** (static date input):
+```typescript
+// This test doesn't need fake timers (no Date.now() dependency)
+it('should parse ISO date correctly', () => {
+  const result = parseDate('2025-11-04');
+  expect(result.year).toBe(2025);
+  expect(result.month).toBe(11);
+});
+```
+
+**Timezone Handling** (ECMAScript quirk):
+```typescript
+// ⚠️ Date-only strings are parsed as UTC (ECMAScript spec quirk!)
+new Date('2025-10-27').getDay() // Returns 0 (Sunday) in UTC-5 timezone ❌
+new Date('2025-10-27').getUTCDay() // Returns 1 (Monday) in UTC ✅
+
+// Solution: Use getUTCDay() for date-only strings
+const day = new Date(transaction.date).getUTCDay(); // Correct!
+
+// OR: Append time to force local parsing
+const day = new Date(transaction.date + 'T00:00:00').getDay(); // Also works
+```
+
+---
+
+### Coverage Targets (Constitution v3.1)
+
+| Module Type | Phase 1 Target | Actual (Feature #063) |
+|-------------|----------------|----------------------|
+| **Financial calculations** | 90%+ | 90%+ ✅ |
+| **Business logic** | 80%+ | 85%+ ✅ |
+| **Schemas (Zod)** | 90%+ | 90%+ ✅ |
+| **Storage services** | 80%+ | 74-75% (limitation accepted) |
+| **UI components** | 0% (manual) | 0% (as expected) |
+
+**Why these targets?**
+- **90% for calculations**: Money errors are CRITICAL (user trust, legal liability)
+- **80% for business logic**: Core features must be reliable
+- **0% for UI**: Manual testing sufficient in Phase 1 (screen reader + keyboard nav)
+
+---
+
+### Running Tests in CI
+
+Tests automatically run on every PR via GitHub Actions:
+- See: [`.github/workflows/test.yml`](.github/workflows/test.yml)
+- Environment: `TZ=UTC` (eliminates timezone issues)
+- Coverage report uploaded as artifact
+- PR auto-commented with coverage summary
 
 ---
 
