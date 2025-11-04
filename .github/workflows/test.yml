@@ -139,10 +139,30 @@ jobs:
             const overallFunctions = coverage.total.functions.pct.toFixed(2);
             const overallStatements = coverage.total.statements.pct.toFixed(2);
 
+            // LOW-2 fix: Read thresholds from vite.config.ts instead of hardcoding
+            const viteConfigPath = './frontend/vite.config.ts';
+            let thresholds = { lines: 80, branches: 75, functions: 80, statements: 80 };
+
+            try {
+              const viteConfig = fs.readFileSync(viteConfigPath, 'utf8');
+              // Extract global thresholds (simple regex - works for our config format)
+              const linesMatch = viteConfig.match(/^\s+lines:\s+(\d+),/m);
+              const branchesMatch = viteConfig.match(/^\s+branches:\s+(\d+),/m);
+              const functionsMatch = viteConfig.match(/^\s+functions:\s+(\d+),/m);
+              const statementsMatch = viteConfig.match(/^\s+statements:\s+(\d+),/m);
+
+              if (linesMatch) thresholds.lines = parseInt(linesMatch[1]);
+              if (branchesMatch) thresholds.branches = parseInt(branchesMatch[1]);
+              if (functionsMatch) thresholds.functions = parseInt(functionsMatch[1]);
+              if (statementsMatch) thresholds.statements = parseInt(statementsMatch[1]);
+            } catch (error) {
+              console.log('Could not read thresholds from vite.config.ts, using defaults');
+            }
+
             const commentBody = [
               '## 📊 Test Coverage Report (Business Logic)',
               '',
-              'Phase 1 Targets: 80% lines for business logic, 90% for financial calculations',
+              `Phase 1 Targets: ${thresholds.lines}% lines for business logic, 90% for financial calculations`,
               '',
               showAllFiles ? '### All Files Coverage (API fallback mode)' : '### Changed Files Coverage',
               '',
@@ -154,10 +174,10 @@ jobs:
               '',
               '| Metric | Coverage | Phase 1 Target |',
               '|--------|----------|---------------|',
-              `| Lines | ${overallLines}% | 80%+ (business logic) |`,
-              `| Branches | ${overallBranches}% | 75%+ |`,
-              `| Functions | ${overallFunctions}% | 80%+ |`,
-              `| Statements | ${overallStatements}% | 80%+ |`,
+              `| Lines | ${overallLines}% | ${thresholds.lines}%+ (business logic) |`,
+              `| Branches | ${overallBranches}% | ${thresholds.branches}%+ |`,
+              `| Functions | ${overallFunctions}% | ${thresholds.functions}%+ |`,
+              `| Statements | ${overallStatements}% | ${thresholds.statements}%+ |`,
               '',
               'Note: UI components (0% coverage) are tested manually per Phase 1 requirements.',
               '',
