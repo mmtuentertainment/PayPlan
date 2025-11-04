@@ -1,0 +1,136 @@
+# Test Suite - Feature #063 Phase 8
+# Runs business logic tests with coverage reporting on every PR
+# Enforces per-file coverage thresholds defined in vite.config.ts
+
+name: Test Suite
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/src/**/*.ts'
+      - 'frontend/src/**/*.tsx'
+      - 'frontend/tests/**'
+      - 'frontend/package.json'
+      - 'frontend/vite.config.ts'
+      - '.github/workflows/test.yml'
+
+permissions:
+  contents: read
+  pull-requests: write # Required for PR comments
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Check coverage thresholds
+        run: |
+          # Vitest automatically enforces thresholds from vite.config.ts
+          # If any per-file threshold is not met, npm run test:coverage exits with code 1
+          # No additional validation needed - thresholds already enforced above
+          echo "✅ All coverage thresholds met (enforced by vite.config.ts)"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always() # Upload even if tests fail (for debugging)
+        with:
+          name: coverage-report
+          path: frontend/coverage/
+          retention-days: 30
+
+      - name: Comment PR with coverage summary
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && always()
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Check if coverage summary exists
+            const summaryPath = './frontend/coverage/coverage-summary.json';
+            if (!fs.existsSync(summaryPath)) {
+              console.log('No coverage summary found - tests may have failed');
+              return;
+            }
+
+            const coverage = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+
+            // Format coverage table for business logic files only
+            const businessLogicFiles = Object.entries(coverage)
+              .filter(([file]) => file.includes('/lib/') && !file.includes('__tests__'))
+              .sort((a, b) => a[0].localeCompare(b[0]));
+
+            if (businessLogicFiles.length === 0) {
+              console.log('No business logic files with coverage');
+              return;
+            }
+
+            const tableRows = businessLogicFiles.map(([file, data]) => {
+              const fileName = file.split('/').pop();
+              const lines = data.lines.pct.toFixed(2);
+              const branches = data.branches.pct.toFixed(2);
+              const functions = data.functions.pct.toFixed(2);
+              const statements = data.statements.pct.toFixed(2);
+
+              // Highlight files below Phase 1 targets
+              const linesIcon = parseFloat(lines) >= 80 ? '✅' : '⚠️';
+              const branchesIcon = parseFloat(branches) >= 75 ? '✅' : '⚠️';
+
+              return `| ${linesIcon} ${fileName} | ${lines}% | ${branches}% | ${functions}% | ${statements}% |`;
+            }).join('\n');
+
+            const overallLines = coverage.total.lines.pct.toFixed(2);
+            const overallBranches = coverage.total.branches.pct.toFixed(2);
+            const overallFunctions = coverage.total.functions.pct.toFixed(2);
+            const overallStatements = coverage.total.statements.pct.toFixed(2);
+
+            const comment = [
+              '## 📊 Test Coverage Report (Business Logic)',
+              '',
+              'Phase 1 Targets: 80% lines for business logic, 90% for financial calculations',
+              '',
+              '### Per-File Coverage',
+              '',
+              '| File | Lines | Branches | Functions | Statements |',
+              '|------|-------|----------|-----------|------------|',
+              tableRows,
+              '',
+              '### Overall Coverage',
+              '',
+              '| Metric | Coverage | Phase 1 Target |',
+              '|--------|----------|---------------|',
+              `| Lines | ${overallLines}% | 80%+ (business logic) |`,
+              `| Branches | ${overallBranches}% | 75%+ |`,
+              `| Functions | ${overallFunctions}% | 80%+ |`,
+              `| Statements | ${overallStatements}% | 80%+ |`,
+              '',
+              'Note: UI components (0% coverage) are tested manually per Phase 1 requirements.',
+              '',
+              `📦 Full coverage report available in [workflow artifacts](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            ].join('\n');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
