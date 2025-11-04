@@ -1,10 +1,11 @@
-# Specification Prompt: Critical Production Bug Fixes - Epic
+# Self-Directed Specification: Critical Production Bug Fixes - Epic
 
-**For**: Manus (Spec-Kit) → Claude Code (Implementation)
+**Role**: Claude Code (PM + Developer)
 **Type**: Bug Fix Epic (5 CRITICAL/URGENT issues)
 **Priority**: P0 (BLOCKS all new feature development)
 **Estimated Effort**: 1-2 days
 **Created**: 2025-11-04
+**Workflow**: Investigate → Specify → Implement → Test → Merge
 
 ---
 
@@ -365,22 +366,73 @@ it('should accept maxValue of 0 for empty transaction data', () => {
 
 ---
 
-## Special Instructions
+## Implementation Workflow (Self-Directed)
 
-<instructions>
-**For Manus**:
-1. Investigate each bug BEFORE specifying (run `npm run dev`, check console)
-2. Document actual root causes (not hypotheticals)
-3. Create comprehensive regression test plan
-4. Mark as **Tier 0** (critical, must fix before new features)
+<workflow>
+**Phase 1: Investigation** (2-3 hours)
+1. Run `npm run dev` and manually test all routes
+2. Check browser console for actual error messages
+3. Document root causes (not hypotheses)
+4. Verify which bugs are still present (some may be fixed already)
 
-**For Claude Code**:
-1. Start with Bug 4 (easiest, builds confidence)
-2. Add tests BEFORE fixing (TDD for regressions)
-3. Manual test ALL routes after each fix
-4. Create single PR with all 5 fixes (or separate PRs if too large)
-5. Address ALL bot feedback (no deferrals - these are critical bugs)
-</instructions>
+**Phase 2: Specification** (3-4 hours)
+1. Create `specs/064-bugfix-critical-production/` directory
+2. Write spec.md (5 bugs as user stories with acceptance criteria)
+3. Write plan.md (root cause analysis + fix strategy for each)
+4. Write tasks.md (20-30 atomic tasks, dependency-ordered)
+5. Write research.md (investigation findings)
+
+**Phase 3: Implementation** (6-8 hours)
+1. Start with Bug 4 (schema fix - easiest, builds confidence)
+2. Add regression test BEFORE fixing each bug (TDD)
+3. Implement fix
+4. Verify fix works (manual + automated tests)
+5. Repeat for Bugs 5, 3, 1, 2 (in dependency order)
+
+**Phase 4: Validation** (2-3 hours)
+1. Manual test ALL routes (Dashboard, Categories, Budgets, Transactions)
+2. Test empty states (0 transactions, 0 budgets, 0 categories)
+3. Test with malformed localStorage data
+4. Run full test suite (npm test)
+5. Create PR with all fixes
+
+**Phase 5: Quality Loop** (1-2 hours)
+1. Address ALL bot feedback (CRITICAL bugs require perfection)
+2. Manual retest after fixes
+3. HIL approval
+4. Merge
+</workflow>
+
+---
+
+## Self-Checklist
+
+<checklist>
+Before starting implementation:
+- [ ] Read this entire prompt
+- [ ] Run dev server and reproduce all 5 bugs
+- [ ] Document actual error messages (not assumptions)
+- [ ] Check if any bugs already fixed in main
+- [ ] Review constitution for bug fix requirements
+
+During specification:
+- [ ] Each bug has clear root cause (verified, not guessed)
+- [ ] Each fix has concrete code example
+- [ ] Each fix has regression test
+- [ ] Constitutional compliance validated
+
+During implementation:
+- [ ] Tests written BEFORE fixes (TDD)
+- [ ] All 5 bugs verified fixed
+- [ ] No new bugs introduced
+- [ ] Manual testing complete
+
+Before PR:
+- [ ] All tests pass (npm test)
+- [ ] No TypeScript errors (npx tsc --noEmit)
+- [ ] Manual testing checklist complete
+- [ ] All 5 Linear issues ready to close
+</checklist>
 
 ---
 
