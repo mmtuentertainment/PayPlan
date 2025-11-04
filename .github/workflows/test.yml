@@ -43,7 +43,9 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:coverage
         env:
-          TZ: UTC
+          TZ: UTC # Timezone-independent tests (eliminates date/time flakiness)
+        # Tests timeout after 2s per test file (vite.config.ts:45) - fast TDD feedback
+        # If CI tests timeout, likely indicates performance regression in code
 
       - name: Check coverage thresholds
         run: |
@@ -76,22 +78,43 @@ jobs:
 
             const coverage = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
 
-            // Get changed files in this PR (MEDIUM-1 fix: only show changed files)
-            const { data: prFiles } = await github.rest.pulls.listFiles({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-            });
-            const changedFiles = new Set(prFiles.map(f => f.filename));
+            // Get changed files in this PR with error handling (MEDIUM-2 fix)
+            let changedFiles = new Set();
+            let showAllFiles = false;
 
-            // Format coverage table for changed business logic files only
+            try {
+              const { data: prFiles } = await github.rest.pulls.listFiles({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+              });
+
+              // MEDIUM-1 fix: Robust path normalization
+              // Normalize paths to 'src/features/...' format for reliable matching
+              changedFiles = new Set(
+                prFiles.map(f => f.filename.replace(/^frontend\//, ''))
+              );
+            } catch (error) {
+              console.error('Failed to fetch PR files:', error.message);
+              console.log('Falling back to showing all coverage files');
+              showAllFiles = true; // Fallback: show all files if API fails
+            }
+
+            // Format coverage table for business logic files
             const businessLogicFiles = Object.entries(coverage)
               .filter(([file]) => {
-                // Only include business logic files that changed in this PR
-                const relativePath = file.replace(/^\/.*?\//, ''); // Remove absolute path prefix
-                return file.includes('/lib/') &&
-                       !file.includes('__tests__') &&
-                       (changedFiles.has(relativePath) || changedFiles.has('frontend/' + relativePath));
+                if (!file.includes('/lib/') || file.includes('__tests__')) {
+                  return false;
+                }
+
+                // If API failed, show all files
+                if (showAllFiles) {
+                  return true;
+                }
+
+                // Robust path matching: normalize coverage path to 'src/features/...'
+                const normalizedCoveragePath = file.replace(/^.*?src\//, 'src/');
+                return changedFiles.has(normalizedCoveragePath);
               })
               .sort((a, b) => a[0].localeCompare(b[0]));
 
@@ -121,7 +144,7 @@ jobs:
               '',
               'Phase 1 Targets: 80% lines for business logic, 90% for financial calculations',
               '',
-              '### Changed Files Coverage',
+              showAllFiles ? '### All Files Coverage (API fallback mode)' : '### Changed Files Coverage',
               '',
               '| File | Lines | Branches | Functions | Statements |',
               '|------|-------|----------|-----------|------------|',
