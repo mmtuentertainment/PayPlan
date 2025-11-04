@@ -533,17 +533,27 @@ describe('Gamification Logic', () => {
         .slice(0, 7);
 
       // Generate many transactions to trigger multiple insights
+      // M-2 fix: Use fixed dates instead of dynamic dates for determinism
       const transactions = [
-        // Weekend overspending
-        ...Array.from({ length: 10 }, (_, i) => {
-          const date = new Date();
-          date.setDate(date.getDate() - i * 7); // Weekly on weekends
-          const day = date.getUTCDay(); // Use UTC to match date-only string parsing
-          if (day === 0 || day === 6) {
-            return createExpense({ amount: 10000, date: date.toISOString().split('T')[0] });
-          }
-          return createExpense({ amount: 3000, date: date.toISOString().split('T')[0] });
-        }),
+        // Weekend overspending (4 weekends = 8 transactions)
+        createExpense({ amount: 10000, date: '2025-11-01' }), // Saturday
+        createExpense({ amount: 10000, date: '2025-11-02' }), // Sunday
+        createExpense({ amount: 10000, date: '2025-10-25' }), // Saturday
+        createExpense({ amount: 10000, date: '2025-10-26' }), // Sunday
+        createExpense({ amount: 10000, date: '2025-10-18' }), // Saturday
+        createExpense({ amount: 10000, date: '2025-10-19' }), // Sunday
+        createExpense({ amount: 10000, date: '2025-10-11' }), // Saturday
+        createExpense({ amount: 10000, date: '2025-10-12' }), // Sunday
+
+        // Weekday spending (8 weekday transactions)
+        createExpense({ amount: 3000, date: '2025-10-27' }), // Monday
+        createExpense({ amount: 3000, date: '2025-10-28' }), // Tuesday
+        createExpense({ amount: 3000, date: '2025-10-29' }), // Wednesday
+        createExpense({ amount: 3000, date: '2025-10-30' }), // Thursday
+        createExpense({ amount: 3000, date: '2025-10-31' }), // Friday
+        createExpense({ amount: 3000, date: '2025-10-20' }), // Monday
+        createExpense({ amount: 3000, date: '2025-10-21' }), // Tuesday
+        createExpense({ amount: 3000, date: '2025-10-22' }), // Wednesday
 
         // Month-over-month change
         createExpense({ amount: 100000, date: `${currentMonth}-15` }),
