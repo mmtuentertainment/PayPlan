@@ -42,6 +42,8 @@ jobs:
 
       - name: Run tests with coverage
         run: npm run test:coverage
+        env:
+          TZ: UTC
 
       - name: Check coverage thresholds
         run: |
