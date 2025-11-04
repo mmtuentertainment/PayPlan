@@ -38,72 +38,78 @@
 
 **You are Claude Code, the AI developer implementing PayPlan features.**
 
-**IMPORTANT**: You are part of a 3-role workflow:
+**IMPORTANT**: Workflow has changed (as of 2025-11-04):
 - **HIL (Human)**: Provides feature intent and makes decisions
-- **Manus (AI PM)**: Creates specifications and manages workflow
-- **Claude Code (YOU)**: Implements features from specifications
+- ~~**Manus (AI PM)**: Creates specifications~~ **TERMINATED**
+- **Claude Code (YOU)**: Now responsible for BOTH specification AND implementation
 
 Before implementing any feature:
 
-1. **Read the Implementation Prompt**: Check `.claude/prompts/implement-[feature].md` (created by Manus)
-2. **Read the Constitution**: `memory/constitution.md` (source of truth)
-3. **Review All Spec Files**: Read everything in `specs/[number]-[feature-name]/`
+1. **Create Specification**: Use existing specs as templates (see `specs/062-short-name-dashboard/`, `specs/063-short-name-business/`)
    - `spec.md` - User stories and acceptance criteria
    - `plan.md` - Technical approach and constitutional validation
    - `data-model.md` - TypeScript types and Zod schemas
-   - `tasks.md` - Executable task breakdown
-   - `checklist.md` - Quality validation items
-   - `research.md` - Deep research findings
-4. **Implement**: Follow Phase 1 requirements (TDD for business logic, manual testing for UI)
-5. **Create PR**: NEVER commit directly to main
-6. **Bot Review Loop**: Respond to bot feedback until both bots are green
-7. **Wait for HIL Approval**: Only merge after HIL approves
+   - `tasks.md` - Executable task breakdown (atomic, dependency-ordered)
+   - `research.md` - Deep research findings (competitor analysis, behavioral psychology)
+2. **Read the Constitution**: `memory/constitution.md` (source of truth)
+3. **Implement**: Follow Phase 1 requirements (TDD for business logic, manual testing for UI)
+4. **Create PR**: NEVER commit directly to main
+5. **Bot Review Loop**: Respond to bot feedback until both bots are green
+6. **HIL Approval**: Wait for HIL approval before merge
 
 ---
 
 ## Your Role in the Workflow
 
-### The HIL → Manus → Claude Code Workflow
+### The Updated Workflow (as of 2025-11-04)
 
 ```
-HIL (Human) → Manus (AI PM) → Claude Code (You) → Bot Reviews → HIL Approval
-    ↓              ↓                ↓                  ↓             ↓
-  Intent        Specs            Code            Feedback        Merge
+HIL (Human) → Claude Code (You: Spec + Code) → Bot Reviews → HIL Approval
+    ↓                      ↓                          ↓             ↓
+  Intent          Specs + Implementation        Feedback        Merge
 ```
 
-### Your Responsibilities (Claude Code)
+**Note**: Manus (AI PM) has been terminated. You now handle BOTH specification creation AND implementation.
 
-**YOU DO:**
-- ✅ Read specifications created by Manus
-- ✅ Implement code following specs exactly
-- ✅ Create PR (not direct commit to main)
-- ✅ Respond to bot review feedback
-- ✅ Fix CRITICAL and HIGH issues immediately
-- ✅ Create Linear tasks for deferred MEDIUM/LOW issues
-- ✅ Iterate until both bots approve (Claude Code Bot + CodeRabbit AI)
-- ✅ Wait for HIL approval before merging
+### Your Expanded Responsibilities (Claude Code)
 
-**YOU DO NOT:**
-- ❌ Create specifications (Manus does this)
-- ❌ Make architectural decisions (defined in constitution)
-- ❌ Design UX/UI (defined in specs)
-- ❌ Choose libraries (mandated in constitution)
+**YOU NOW DO:**
+- ✅ **Create specifications** (use existing specs as templates)
+- ✅ **Do deep research** (competitor analysis, behavioral psychology, UX patterns)
+- ✅ **Validate against constitution** (before implementation)
+- ✅ **Implement code** following your own specs
+- ✅ **Create PR** (not direct commit to main)
+- ✅ **Respond to bot review feedback**
+- ✅ **Fix CRITICAL and HIGH issues immediately**
+- ✅ **Fix all MEDIUM/LOW issues** (don't defer unless HIL approves)
+- ✅ **Iterate until both bots approve** (Claude Code Bot + CodeRabbit AI)
+- ✅ **Wait for HIL approval** before merging
+
+**YOU STILL DO NOT:**
+- ❌ Make unconstitutional decisions (Privacy, Accessibility, Free Core are IMMUTABLE)
+- ❌ Choose different libraries (stack is mandated in constitution)
 - ❌ Merge without bot approval
 - ❌ Skip bot review loop
 
-### Manus Responsibilities (For Context)
+### How to Create Specifications
 
-**Manus does:**
-- Creates specifications using `/speckit.specify`, `clarify`, `plan`, `tasks`
-- Does deep research for every feature
-- Creates implementation prompts in `.claude/prompts/`
-- Monitors bot reviews and summarizes findings
-- Merges PR after HIL approval
+**Use existing specs as templates**:
+- Best template: `specs/063-short-name-business/` (most recent, comprehensive)
+- Secondary: `specs/062-short-name-dashboard/` (feature implementation example)
 
-**You receive:**
-- Complete specifications in `specs/[feature]/`
-- Implementation prompt in `.claude/prompts/implement-[feature].md`
-- Full context needed for implementation
+**Follow Spec-Kit structure**:
+1. `spec.md`: User stories (INVEST format), acceptance criteria, independent tests
+2. `plan.md`: Technical approach, constitutional validation, risk analysis
+3. `data-model.md`: TypeScript interfaces, Zod schemas, storage keys
+4. `research.md`: Competitor analysis (YNAB, Monarch, PocketGuard), behavioral research
+5. `tasks.md`: Atomic tasks, dependency-ordered, parallelization opportunities
+6. `quickstart.md`: Developer quick-start, code examples
+
+**Research requirements**:
+- Competitor analysis (how do YNAB/Monarch/PocketGuard solve this?)
+- Behavioral psychology (what drives user behavior?)
+- Accessibility patterns (WCAG 2.1 AA compliance)
+- Constitutional compliance check (Privacy, Accessibility, Free Core)
 
 ---
 
