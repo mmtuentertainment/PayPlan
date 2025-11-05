@@ -55,8 +55,8 @@ export const ERROR_MESSAGES = {
   STORAGE_ACCESS_DENIED:
     'Unable to access localStorage. Please check your browser settings.',
   GOAL_NOT_FOUND: 'Goal not found.',
-  INVALID_GOAL_DATA: 'Invalid goal data. Please check your input.',
-  MAX_CONTRIBUTIONS_REACHED: `Maximum contributions (${MAX_CONTRIBUTIONS}) reached for this goal.`,
-  DESERIALIZATION_FAILED: 'Failed to load goals from storage.',
-  SERIALIZATION_FAILED: 'Failed to save goals to storage.',
+  INVALID_INPUT: 'Invalid input. Please check your data.',
+  MAX_CONTRIBUTIONS: `Maximum 100 contributions reached for this goal.`,
+  CANNOT_ARCHIVE: 'Only completed goals can be archived.',
+  STORAGE_ERROR: 'Failed to save goals to storage.',
 } as const;
