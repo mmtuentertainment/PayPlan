@@ -66,9 +66,7 @@ export const goalSchema = z
       .int('Monthly contribution must be an integer')
       .nonnegative('Monthly contribution cannot be negative')
       .nullable(),
-    status: z.enum(['active', 'completed', 'archived'], {
-      errorMap: () => ({ message: 'Status must be active, completed, or archived' }),
-    }),
+    status: z.enum(['active', 'completed', 'archived']),
     contributions: z
       .array(contributionSchema)
       .max(MAX_CONTRIBUTIONS, `Maximum ${MAX_CONTRIBUTIONS} contributions allowed per goal`),
@@ -158,9 +156,7 @@ export const updateGoalInputSchema = z
       .nullable()
       .optional(),
     status: z
-      .enum(['active', 'completed', 'archived'], {
-        errorMap: () => ({ message: 'Status must be active, completed, or archived' }),
-      })
+      .enum(['active', 'completed', 'archived'])
       .optional(),
   })
   .strict();

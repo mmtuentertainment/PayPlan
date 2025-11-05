@@ -53,11 +53,6 @@ export default defineConfig({
       },
     },
 
-    // Watch mode optimization
-    watch: {
-      exclude: ['node_modules/**', 'dist/**', 'coverage/**'],
-    },
-
     coverage: {
       provider: 'v8', // Faster than c8/istanbul (Research Decision 3)
       reporter: ['text', 'json-summary', 'json', 'html', 'lcov'],

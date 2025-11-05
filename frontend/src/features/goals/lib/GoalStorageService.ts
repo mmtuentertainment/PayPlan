@@ -5,7 +5,7 @@
  */
 
 import { v4 as uuid } from 'uuid';
-import type { Goal, CreateGoalInput, UpdateGoalInput, GoalResult } from '../types/goal';
+import type { Goal, GoalResult } from '../types/goal';
 import type { Contribution } from '../types/contribution';
 import {
   validateGoal,
@@ -89,7 +89,6 @@ export function createGoal(input: unknown): GoalResult<Goal> {
     return {
       success: false,
       error: ERROR_MESSAGES.INVALID_INPUT,
-      details: validationResult.error.issues,
     };
   }
 
@@ -116,7 +115,6 @@ export function createGoal(input: unknown): GoalResult<Goal> {
     return {
       success: false,
       error: ERROR_MESSAGES.INVALID_INPUT,
-      details: goalValidation.error.issues,
     };
   }
 
@@ -147,7 +145,6 @@ export function updateGoal(id: string, input: unknown): GoalResult<Goal> {
     return {
       success: false,
       error: ERROR_MESSAGES.INVALID_INPUT,
-      details: validationResult.error.issues,
     };
   }
 
@@ -177,7 +174,6 @@ export function updateGoal(id: string, input: unknown): GoalResult<Goal> {
       return {
         success: false,
         error: ERROR_MESSAGES.INVALID_INPUT,
-        details: goalValidation.error.issues,
       };
     }
 
@@ -269,7 +265,6 @@ export function addContribution(goalId: string, contribution: Contribution): Goa
       return {
         success: false,
         error: ERROR_MESSAGES.INVALID_INPUT,
-        details: goalValidation.error.issues,
       };
     }
 
