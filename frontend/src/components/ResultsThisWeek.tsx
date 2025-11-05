@@ -3,8 +3,8 @@
 // T027-T032: User Story 2 - Create Archive from Results (Feature 017)
 
 import { useState, useEffect, useRef } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { exportPaymentsToCSV, downloadCSV } from "@/services/csvExportService";
 import type { PaymentRecord } from "@/shared/types/csvExport";
 import { paymentRecordsArraySchema } from "@/shared/types/csvExport";

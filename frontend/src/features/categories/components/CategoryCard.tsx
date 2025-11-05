@@ -15,11 +15,11 @@
  */
 
 import { type Category } from '@/features/categories/types/category';
-import { Card, CardContent, CardFooter, CardHeader } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import * as Icons from 'lucide-react';
 import { Pencil, Trash2 } from 'lucide-react';
-import { cn } from '@/shared/lib/utils';
+import { cn } from '@/lib/utils';
 
 export interface CategoryCardProps {
   category: Category;

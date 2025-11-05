@@ -20,8 +20,8 @@ import { useCategories } from '@/features/categories/hooks/useCategories';
 import { CategoryList } from '@/features/categories/components/CategoryList';
 import { CategoryForm } from '@/features/categories/components/CategoryForm';
 import { DeleteCategoryDialog } from '@/features/categories/components/DeleteCategoryDialog';
-import { Button } from '@/shared/components/ui/button';
-import { Alert } from '@/shared/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 import { Plus, AlertCircle } from 'lucide-react';
 
 /**

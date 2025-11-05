@@ -11,12 +11,12 @@
 
 import { type Transaction } from '@/features/transactions/types/transaction';
 import { type Category } from '@/features/categories/types/category';
-import { Card, CardContent } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { formatCurrency } from '@/features/budgets/lib/calculations';
-import { cn } from '@/shared/lib/utils';
+import { cn } from '@/lib/utils';
 
 export interface TransactionCardProps {
   transaction: Transaction;
