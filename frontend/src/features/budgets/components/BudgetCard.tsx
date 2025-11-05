@@ -18,11 +18,11 @@
 
 import { type Budget, type BudgetProgress } from '@/features/budgets/types/budget';
 import { type Category } from '@/features/categories/types/category';
-import { Card, CardContent, CardFooter, CardHeader } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useProgressBar } from 'react-aria';
 import { Pencil, Trash2, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react';
-import { cn } from '@/shared/lib/utils';
+import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/features/budgets/lib/calculations';
 import * as Icons from 'lucide-react';
 

@@ -32,9 +32,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/shared/components/ui/alert-dialog';
-import { Button } from '@/shared/components/ui/button';
-import { Alert } from '@/shared/components/ui/alert';
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 import { Plus, AlertCircle, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { formatCurrency } from '@/features/budgets/lib/calculations';
 

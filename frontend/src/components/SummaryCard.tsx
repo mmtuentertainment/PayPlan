@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/shared/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 type Props = { summary: string };
 

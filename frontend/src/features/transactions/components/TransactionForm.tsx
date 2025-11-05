@@ -20,12 +20,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/shared/components/ui/dialog';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { CategorySelector } from '@/features/categories/components/CategorySelector';
-import { Alert } from '@/shared/components/ui/alert';
+import { Alert } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export interface TransactionFormProps {

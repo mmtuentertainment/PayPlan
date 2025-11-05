@@ -24,8 +24,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/shared/components/ui/alert-dialog';
-import { Alert } from '@/shared/components/ui/alert';
+} from '@/components/ui/alert-dialog';
+import { Alert } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 
 export interface DeleteCategoryDialogProps {
