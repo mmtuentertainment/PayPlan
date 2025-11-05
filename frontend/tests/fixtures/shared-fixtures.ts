@@ -26,6 +26,9 @@ export interface SharedFixtures {
     transactionId2: string;
     transactionId3: string;
     userId: string;
+    goalId1: string;
+    goalId2: string;
+    goalId3: string;
   };
 
   amounts: {
@@ -105,6 +108,9 @@ export const sharedFixtures: SharedFixtures = {
     transactionId2: 'txn_8888888888888888888888888888888',
     transactionId3: 'txn_9999999999999999999999999999999',
     userId: 'user_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    goalId1: 'goal_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    goalId2: 'goal_cccccccccccccccccccccccccccccccc',
+    goalId3: 'goal_dddddddddddddddddddddddddddddddd',
   },
 
   // Common amounts in cents

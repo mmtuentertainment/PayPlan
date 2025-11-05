@@ -42,4 +42,7 @@ export const ROUTES = {
 
   /** Transactions page (Feature 061) */
   TRANSACTIONS: '/transactions',
+
+  /** Goals tracking page (Feature 064) */
+  GOALS: '/goals',
 } as const;
