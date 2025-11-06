@@ -223,6 +223,8 @@ export const Goals: React.FC = () => {
               goals={goals}
               onEdit={handleEditGoal}
               onDelete={handleDeleteGoal}
+              onContributionAdded={refreshGoals}
+              onGoalComplete={handleGoalComplete}
             />
           )}
         </section>
