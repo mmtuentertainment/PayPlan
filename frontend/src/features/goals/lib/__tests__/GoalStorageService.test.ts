@@ -12,6 +12,7 @@ import {
   deleteGoal,
   addContribution,
   archiveGoal,
+  unarchiveGoal,
   clearGoals,
 } from '../GoalStorageService';
 import { createGoal as createGoalFixture, createContribution } from './fixtures';
@@ -479,6 +480,132 @@ describe('GoalStorageService', () => {
       if (!result.success) {
         expect(result.error).toBeDefined();
         expect(result.error).toContain('Goal not found');
+      }
+    });
+  });
+
+  describe('unarchiveGoal', () => {
+    it('should unarchive archived goal', () => {
+      const goal = createGoalFixture({
+        id: sharedFixtures.ids.goalId1,
+        status: 'archived',
+      });
+      const storage = {
+        version: '1.0.0',
+        goals: [goal],
+        lastModified: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+
+      const result = unarchiveGoal(sharedFixtures.ids.goalId1);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.status).toBe('completed');
+      }
+    });
+
+    it('should reject unarchiving non-archived goals', () => {
+      const goal = createGoalFixture({
+        id: sharedFixtures.ids.goalId1,
+        status: 'active', // NOT archived
+      });
+      const storage = {
+        version: '1.0.0',
+        goals: [goal],
+        lastModified: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+
+      const result = unarchiveGoal(sharedFixtures.ids.goalId1);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBeDefined();
+        expect(result.error).toContain('non-archived goal');
+      }
+    });
+
+    it('should return error when goal not found', () => {
+      const result = unarchiveGoal('goal_nonexistent');
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBeDefined();
+        expect(result.error).toContain('Goal not found');
+      }
+    });
+
+    it('should restore goal to completed status', () => {
+      const goal = createGoalFixture({
+        id: sharedFixtures.ids.goalId1,
+        status: 'archived',
+      });
+      const storage = {
+        version: '1.0.0',
+        goals: [goal],
+        lastModified: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+
+      const result = unarchiveGoal(sharedFixtures.ids.goalId1);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        // Verify status is restored to completed (not active)
+        expect(result.data.status).toBe('completed');
+      }
+    });
+
+    it('should update updatedAt timestamp', () => {
+      const originalUpdatedAt = '2024-01-01T00:00:00.000Z';
+      const goal = createGoalFixture({
+        id: sharedFixtures.ids.goalId1,
+        status: 'archived',
+        updatedAt: originalUpdatedAt,
+      });
+      const storage = {
+        version: '1.0.0',
+        goals: [goal],
+        lastModified: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+
+      const result = unarchiveGoal(sharedFixtures.ids.goalId1);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        // Verify updatedAt was changed
+        expect(result.data.updatedAt).not.toBe(originalUpdatedAt);
+        // Verify it's a valid ISO string
+        expect(() => new Date(result.data.updatedAt)).not.toThrow();
+      }
+    });
+
+    it('should persist changes to localStorage', () => {
+      const goal = createGoalFixture({
+        id: sharedFixtures.ids.goalId1,
+        status: 'archived',
+      });
+      const storage = {
+        version: '1.0.0',
+        goals: [goal],
+        lastModified: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+
+      const result = unarchiveGoal(sharedFixtures.ids.goalId1);
+
+      expect(result.success).toBe(true);
+
+      // Verify changes were persisted to localStorage
+      const stored = localStorage.getItem(STORAGE_KEY);
+      expect(stored).toBeTruthy();
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        expect(parsed.goals).toHaveLength(1);
+        expect(parsed.goals[0].status).toBe('completed');
+        expect(parsed.goals[0].id).toBe(sharedFixtures.ids.goalId1);
       }
     });
   });
