@@ -12,52 +12,52 @@
 **Goal**: Install Shadcn UI components, npm dependencies, and initialize feature directory structure
 
 - [X] T001 Install Shadcn UI components via CLI: `npx shadcn@latest add progress sonner skeleton empty dropdown-menu` (adds 5 components to frontend/src/components/ui/) - NOTE: Used sonner instead of deprecated toast + restructured to Shadcn standard paths
-- [X] T002 Install npm dependencies: `npm install date-fns@4.1.0 canvas-confetti@1.9.3` in frontend/ directory
+- [X] T002 Install npm dependencies: `npm install date-fns@4.1.0` in frontend/ directory
 - [X] T003 Create feature directory structure: `mkdir -p frontend/src/features/goals/{components,hooks,lib/__tests__/fixtures,types}`
 - [X] T004 Create barrel export file: frontend/src/features/goals/index.ts (empty, will populate later)
 - [ ] T005 Add /goals route constant to frontend/src/routes.ts: `GOALS: '/goals'`
 
 ---
 
-## Phase 2: Foundational (Business Logic - BLOCKS All User Stories) (25 tasks)
+## Phase 2: Foundational (Business Logic - BLOCKS All User Stories) (25 tasks) ✅ COMPLETE
 
 **Goal**: Implement core business logic, types, schemas, storage service, and calculation functions with 90%+ test coverage
 
 ### Types & Schemas (8 tasks)
 
-- [ ] T006 [P] Create Goal interface in frontend/src/features/goals/types/goal.ts (id, name, targetAmount, currentAmount, targetDate, monthlyContribution, status, contributions[], createdAt, updatedAt)
-- [ ] T007 [P] Create Contribution interface in frontend/src/features/goals/types/contribution.ts (id, goalId, amount, note, createdAt)
-- [ ] T008 [P] Create Zod contributionSchema in frontend/src/features/goals/lib/schemas.ts (validate amount >0, note max 200 chars, UUID, datetime)
-- [ ] T009 Create Zod goalSchema in frontend/src/features/goals/lib/schemas.ts (validate name 1-50 chars, targetAmount >0, nested contributions max 100, future targetDate)
-- [ ] T010 [P] Create constants file frontend/src/features/goals/lib/constants.ts (STORAGE_KEY='payplan_goals_v1', QUICK_ADD_AMOUNTS=[500,1000,2500], STATUS_COLORS, MAX_CONTRIBUTIONS=100)
-- [ ] T011 [P] Write schema validation tests in frontend/src/features/goals/lib/__tests__/schemas.test.ts (valid inputs pass, invalid fail, edge cases: 50-char name, 200-char note, 100 contributions)
-- [ ] T012 [P] Create goal fixtures in frontend/src/features/goals/lib/__tests__/fixtures/goal-fixtures.ts (createGoal, createCompletedGoal, createOverdueGoal, createBehindScheduleGoal factory functions)
-- [ ] T013 [P] Create contribution fixtures in frontend/src/features/goals/lib/__tests__/fixtures/contribution-fixtures.ts (createContribution, createContributionHistory factory functions)
+- [X] T006 [P] Create Goal interface in frontend/src/features/goals/types/goal.ts (id, name, targetAmount, currentAmount, targetDate, monthlyContribution, status, contributions[], createdAt, updatedAt)
+- [X] T007 [P] Create Contribution interface in frontend/src/features/goals/types/contribution.ts (id, goalId, amount, note, createdAt)
+- [X] T008 [P] Create Zod contributionSchema in frontend/src/features/goals/lib/schemas.ts (validate amount >0, note max 200 chars, UUID, datetime)
+- [X] T009 Create Zod goalSchema in frontend/src/features/goals/lib/schemas.ts (validate name 1-50 chars, targetAmount >0, nested contributions max 100, future targetDate)
+- [X] T010 [P] Create constants file frontend/src/features/goals/lib/constants.ts (STORAGE_KEY='payplan_goals_v1', QUICK_ADD_AMOUNTS=[500,1000,2500], STATUS_COLORS, MAX_CONTRIBUTIONS=100)
+- [X] T011 [P] Write schema validation tests in frontend/src/features/goals/lib/__tests__/schemas.test.ts (valid inputs pass, invalid fail, edge cases: 50-char name, 200-char note, 100 contributions)
+- [X] T012 [P] Create goal fixtures in frontend/src/features/goals/lib/__tests__/fixtures/goal-fixtures.ts (createGoal, createCompletedGoal, createOverdueGoal, createBehindScheduleGoal factory functions)
+- [X] T013 [P] Create contribution fixtures in frontend/src/features/goals/lib/__tests__/fixtures/contribution-fixtures.ts (createContribution, createContributionHistory factory functions)
 
 ### Calculation Functions (8 tasks - 90%+ COVERAGE REQUIRED)
 
-- [ ] T014 [P] Implement getGoalPercent function in frontend/src/features/goals/lib/calculations.ts (calculate percentage, CLAMP to 100%, round to 1 decimal)
-- [ ] T015 [P] Implement getDaysRemaining function in frontend/src/features/goals/lib/calculations.ts (use date-fns differenceInDays, return null if no targetDate)
-- [ ] T016 [P] Implement getRequiredMonthly function in frontend/src/features/goals/lib/calculations.ts (remaining amount / months remaining, handle <1 month edge case)
-- [ ] T017 [P] Implement getGoalStatus function in frontend/src/features/goals/lib/calculations.ts (return 'on-track' | 'at-risk' | 'completed' | 'past-due' based on percentage + daysRemaining)
-- [ ] T018 [P] Write calculations tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (test getGoalPercent: 0%, 50%, 100%, CLAMPING at 100% for 120% case)
-- [ ] T019 [P] Add getDaysRemaining tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (null for no date, positive, negative for past-due)
-- [ ] T020 [P] Add getRequiredMonthly tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (linear projection, <1 month edge case, 0 when complete)
-- [ ] T021 [P] Add getGoalStatus tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (on-track, at-risk <75% + <30 days, completed >=100%, past-due)
+- [X] T014 [P] Implement getGoalPercent function in frontend/src/features/goals/lib/calculations.ts (calculate percentage, CLAMP to 100%, round to 1 decimal)
+- [X] T015 [P] Implement getDaysRemaining function in frontend/src/features/goals/lib/calculations.ts (use date-fns differenceInDays, return null if no targetDate)
+- [X] T016 [P] Implement getRequiredMonthly function in frontend/src/features/goals/lib/calculations.ts (remaining amount / months remaining, handle <1 month edge case)
+- [X] T017 [P] Implement getGoalStatus function in frontend/src/features/goals/lib/calculations.ts (return 'on-track' | 'at-risk' | 'completed' | 'past-due' based on percentage + daysRemaining)
+- [X] T018 [P] Write calculations tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (test getGoalPercent: 0%, 50%, 100%, CLAMPING at 100% for 120% case)
+- [X] T019 [P] Add getDaysRemaining tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (null for no date, positive, negative for past-due)
+- [X] T020 [P] Add getRequiredMonthly tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (linear projection, <1 month edge case, 0 when complete)
+- [X] T021 [P] Add getGoalStatus tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (on-track, at-risk <75% + <30 days, completed >=100%, past-due)
 
 ### Storage Service (9 tasks - 80%+ COVERAGE REQUIRED)
 
-- [ ] T022 Implement createGoal in frontend/src/features/goals/lib/GoalStorageService.ts (generate UUID, set timestamps, validate with Zod, save to localStorage)
-- [ ] T023 Implement readGoals in frontend/src/features/goals/lib/GoalStorageService.ts (read from localStorage['payplan_goals_v1'], parse JSON, validate with Zod array schema, return [] on error)
-- [ ] T024 Implement readGoal in frontend/src/features/goals/lib/GoalStorageService.ts (find by ID, return null if not found)
-- [ ] T025 Implement updateGoal in frontend/src/features/goals/lib/GoalStorageService.ts (merge updates, set updatedAt, validate, save to localStorage)
-- [ ] T026 Implement deleteGoal in frontend/src/features/goals/lib/GoalStorageService.ts (filter by ID, save updated array, return boolean)
-- [ ] T027 [P] Write GoalStorageService CRUD tests in frontend/src/features/goals/lib/__tests__/GoalStorageService.test.ts (create with UUID, read all, read by ID, update, delete)
-- [ ] T028 [P] Add localStorage mocking tests in frontend/src/features/goals/lib/__tests__/GoalStorageService.test.ts (mock localStorage.getItem/setItem, test quota exceeded error)
-- [ ] T029 [P] Add error handling tests in frontend/src/features/goals/lib/__tests__/GoalStorageService.test.ts (corrupted JSON, invalid schema, empty storage)
-- [ ] T030 [P] Add edge case tests in frontend/src/features/goals/lib/__tests__/GoalStorageService.test.ts (duplicate IDs, concurrent writes, 100 contribution limit)
+- [X] T022 Implement createGoal in frontend/src/features/goals/lib/GoalStorageService.ts (generate UUID, set timestamps, validate with Zod, save to localStorage)
+- [X] T023 Implement readGoals in frontend/src/features/goals/lib/GoalStorageService.ts (read from localStorage['payplan_goals_v1'], parse JSON, validate with Zod array schema, return [] on error)
+- [X] T024 Implement readGoal in frontend/src/features/goals/lib/GoalStorageService.ts (find by ID, return null if not found)
+- [X] T025 Implement updateGoal in frontend/src/features/goals/lib/GoalStorageService.ts (merge updates, set updatedAt, validate, save to localStorage)
+- [X] T026 Implement deleteGoal in frontend/src/features/goals/lib/GoalStorageService.ts (filter by ID, save updated array, return boolean)
+- [X] T027 [P] Write GoalStorageService CRUD tests in frontend/src/features/goals/lib/__tests__/GoalStorageService.test.ts (create with UUID, read all, read by ID, update, delete)
+- [X] T028 [P] Add localStorage mocking tests in frontend/src/features/goals/lib/__tests__/GoalStorageService.test.ts (mock localStorage.getItem/setItem, test quota exceeded error)
+- [X] T029 [P] Add error handling tests in frontend/src/features/goals/lib/__tests__/GoalStorageService.test.ts (corrupted JSON, invalid schema, empty storage)
+- [X] T030 [P] Add edge case tests in frontend/src/features/goals/lib/__tests__/GoalStorageService.test.ts (duplicate IDs, concurrent writes, 100 contribution limit)
 
-**Checkpoint**: ✅ All business logic complete with 80-90% test coverage, <12s execution time
+**Checkpoint**: ✅ All business logic complete with 80-90% test coverage, <12s execution time (PR #76)
 
 ---
 
@@ -145,20 +145,20 @@
 
 ---
 
-## Phase 7: User Story 5 (P2) - Celebrate Completion (6 tasks)
+## Phase 7: User Story 5 (P2) - Subtle Completion Moment (6 tasks)
 
-**Goal**: Confetti animation + celebration modal on reaching 100% (respecting prefers-reduced-motion)
+**Goal**: Subtle completion animation (progress → 100% + checkmark fade-in) + professional celebration modal on reaching 100% (respecting prefers-reduced-motion)
 
-**Independent Test**: User adds final contribution to reach 100%, sees confetti + modal
+**Independent Test**: User adds final contribution to reach 100%, sees progress complete → checkmark → modal
 
-- [ ] T071 [P] [US5] Create GoalCelebration component in frontend/src/features/goals/components/GoalCelebration.tsx (Shadcn Dialog with title "Goal Complete! 🎉", show goalName, finalAmount, completionTime, buttons: "Set New Goal", "Archive Goal")
-- [ ] T072 [P] [US5] Add confetti animation to GoalCelebration (import canvas-confetti, check `window.matchMedia('(prefers-reduced-motion: reduce)')`, call confetti() with particleCount:100, spread:70, origin:{y:0.6})
+- [ ] T071 [P] [US5] Create GoalCelebration component in frontend/src/features/goals/components/GoalCelebration.tsx (Shadcn Dialog with title "Goal complete", show goalName, finalAmount, completionTime, buttons: "Set New Goal", "Archive Goal")
+- [ ] T072 [P] [US5] Add subtle completion animation to progress UI (animate to 100%, then show checkmark; if prefers-reduced-motion, render final state instantly)
 - [ ] T073 [P] [US5] Calculate completion statistics in GoalCelebration (time between createdAt and updatedAt in months, average monthly contribution = currentAmount / months)
 - [ ] T074 [US5] Add celebration trigger to useContributions (when auto-complete detected, call onCelebration callback passed from parent)
 - [ ] T075 [US5] Integrate GoalCelebration into Goals page (state for showCelebration, pass as onCelebration callback to useContributions, close modal on "Set New Goal" or "Archive")
 - [ ] T076 [US5] Export GoalCelebration from frontend/src/features/goals/index.ts barrel
 
-**Checkpoint**: ✅ US5 independently testable - Celebration triggers at 100%, confetti respects reduced motion
+**Checkpoint**: ✅ US5 independently testable – Subtle completion moment triggers at 100%, respects reduced motion
 
 ---
 

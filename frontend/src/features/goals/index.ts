@@ -16,11 +16,18 @@ export { GoalForm } from './components/GoalForm';
 export { GoalCard } from './components/GoalCard';
 export { GoalList } from './components/GoalList';
 
+// Components (Group 6)
+export { QuickAddSection } from './components/QuickAddSection';
+
 // Hooks (Group 3)
 export { useGoalMetrics } from './hooks/useGoalMetrics';
 
 // Hooks (Group 4)
 export { useGoals } from './hooks/useGoals';
+
+// Hooks (Group 6)
+export { useContributions } from './hooks/useContributions';
+export type { UseContributionsResult } from './hooks/useContributions';
 
 // Types
 export type { Goal, CreateGoalInput, UpdateGoalInput, GoalResult } from './types/goal';

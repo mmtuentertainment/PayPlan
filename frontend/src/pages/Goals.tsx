@@ -9,7 +9,8 @@
  * - US1: View Dashboard (metrics + goal list)
  * - US2: Create Goal (via dialog)
  * - US3: Edit Goal (via dialog)
- * - US4: Delete Goal (with confirmation)
+ * - US4: Quick-Add Contributions (preset buttons with undo)
+ * - US5: Delete Goal (with confirmation)
  */
 
 import React, { useState } from 'react';
@@ -18,6 +19,7 @@ import { GoalSkeleton } from '@/features/goals/components/GoalSkeleton';
 import { GoalEmptyState } from '@/features/goals/components/GoalEmptyState';
 import { GoalForm } from '@/features/goals/components/GoalForm';
 import { GoalList } from '@/features/goals/components/GoalList';
+import { QuickAddSection } from '@/features/goals/components/QuickAddSection';
 import { useGoalMetrics } from '@/features/goals/hooks/useGoalMetrics';
 import { useGoals } from '@/features/goals/hooks/useGoals';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/components/ui/alert-dialog';
@@ -41,7 +43,7 @@ import type { Goal, CreateGoalInput, UpdateGoalInput } from '@/features/goals/ty
  * - Desktop (1920px): 4 column metrics, 3 column goals
  */
 export const Goals: React.FC = () => {
-  const { goals, loading: isLoading, createGoal, updateGoal, deleteGoal } = useGoals();
+  const { goals, loading: isLoading, createGoal, updateGoal, deleteGoal, refreshGoals } = useGoals();
   const metrics = useGoalMetrics(goals);
 
   // Dialog state
@@ -142,6 +144,16 @@ export const Goals: React.FC = () => {
         ) : (
           <div className="mb-8">
             <GoalMetrics metrics={metrics} />
+          </div>
+        )}
+
+        {/* Quick Add Section (US4) */}
+        {!isLoading && goals.length > 0 && (
+          <div className="mb-8">
+            <QuickAddSection
+              goals={goals}
+              onContributionAdded={refreshGoals}
+            />
           </div>
         )}
 
