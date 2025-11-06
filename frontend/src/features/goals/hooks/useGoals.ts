@@ -11,6 +11,8 @@ import {
   createGoal as createGoalService,
   updateGoal as updateGoalService,
   deleteGoal as deleteGoalService,
+  archiveGoal as archiveGoalService,
+  unarchiveGoal as unarchiveGoalService,
 } from '../lib/GoalStorageService';
 import { STORAGE_KEY } from '../lib/constants';
 
@@ -24,6 +26,8 @@ export interface UseGoalsResult {
   createGoal: (input: CreateGoalInput) => GoalResult<Goal>;
   updateGoal: (id: string, input: UpdateGoalInput) => GoalResult<Goal>;
   deleteGoal: (id: string) => GoalResult<void>;
+  archiveGoal: (id: string) => GoalResult<Goal>;
+  unarchiveGoal: (id: string) => GoalResult<Goal>;
   refreshGoals: () => void;
 }
 
@@ -150,6 +154,40 @@ export function useGoals(): UseGoalsResult {
     return result;
   }, []);
 
+  /**
+   * Archive completed goal
+   */
+  const archiveGoal = useCallback((id: string): GoalResult<Goal> => {
+    const result = archiveGoalService(id);
+
+    if (result.success) {
+      // Optimistic update: Update status in state immediately
+      setGoals((prev) => prev.map((g) => (g.id === id ? result.data : g)));
+      setError(null);
+    } else {
+      setError(result.error);
+    }
+
+    return result;
+  }, []);
+
+  /**
+   * Unarchive archived goal
+   */
+  const unarchiveGoal = useCallback((id: string): GoalResult<Goal> => {
+    const result = unarchiveGoalService(id);
+
+    if (result.success) {
+      // Optimistic update: Update status in state immediately
+      setGoals((prev) => prev.map((g) => (g.id === id ? result.data : g)));
+      setError(null);
+    } else {
+      setError(result.error);
+    }
+
+    return result;
+  }, []);
+
   return {
     goals,
     loading,
@@ -157,6 +195,8 @@ export function useGoals(): UseGoalsResult {
     createGoal,
     updateGoal,
     deleteGoal,
+    archiveGoal,
+    unarchiveGoal,
     refreshGoals,
   };
 }

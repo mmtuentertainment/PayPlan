@@ -25,6 +25,7 @@ interface GoalCardProps {
   goal: Goal;
   onEdit: (goal: Goal) => void;
   onDelete: (goal: Goal) => void;
+  onArchive?: (goal: Goal) => void; // T090: Archive completed goal
   onContributionAdded?: () => void; // T087: Trigger parent refresh
   onGoalComplete?: (goal: Goal) => void; // For celebration trigger
 }
@@ -110,7 +111,7 @@ function getProgressIndicatorClass(status: 'completed' | 'past-due' | 'at-risk' 
  * @param onContributionAdded - Optional callback after contribution added
  * @param onGoalComplete - Optional callback when goal reaches 100%
  */
-export function GoalCard({ goal, onEdit, onDelete, onContributionAdded, onGoalComplete }: GoalCardProps) {
+export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdded, onGoalComplete }: GoalCardProps) {
   const percentage = getGoalPercent(goal.currentAmount, goal.targetAmount);
   const daysRemaining = getDaysRemaining(goal.targetDate);
   const requiredMonthly = getRequiredMonthly(goal.currentAmount, goal.targetAmount, goal.targetDate);
@@ -256,6 +257,12 @@ export function GoalCard({ goal, onEdit, onDelete, onContributionAdded, onGoalCo
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onEdit(goal)}>Edit Goal</DropdownMenuItem>
+            {/* T090: Archive menu item (only show for completed goals) */}
+            {goal.status === 'completed' && onArchive && (
+              <DropdownMenuItem onClick={() => onArchive(goal)}>
+                Archive Goal
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onClick={() => onDelete(goal)}
               className="text-red-600 focus:text-red-600"
