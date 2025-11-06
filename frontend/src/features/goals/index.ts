@@ -19,6 +19,9 @@ export { GoalList } from './components/GoalList';
 // Components (Group 6)
 export { QuickAddSection } from './components/QuickAddSection';
 
+// Components (Group 7)
+export { GoalCelebration } from './components/GoalCelebration';
+
 // Hooks (Group 3)
 export { useGoalMetrics } from './hooks/useGoalMetrics';
 
