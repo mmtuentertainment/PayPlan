@@ -7,7 +7,7 @@
 
 ## Summary
 
-Goal Tracking Dashboard enables low-income earners to create, track, and manage savings goals with research-validated UX patterns: 4-metric dashboard cards (Total Goals, Total Saved, Goals On Track, Average Progress), visual progress bars using Goal Gradient Effect psychology, traffic light color system (green/yellow/red status indicators), quick-add contribution buttons ($5/$10/$25) to reduce friction, and celebration animations for goal completion. Feature uses localStorage-first storage (`payplan_goals_v1`), Shadcn UI components (adding Progress + Toast + 3 enhanced components), and integrates with existing Main Dashboard Goal Progress Widget (Feature 062).
+Goal Tracking Dashboard enables low-income earners to create, track, and manage savings goals with research-validated UX patterns: 4-metric dashboard cards (Total Goals, Total Saved, Goals On Track, Average Progress), visual progress bars using Goal Gradient Effect psychology, traffic light color system (green/yellow/red status indicators), quick-add contribution buttons ($5/$10/$25) to reduce friction, and subtle completion moment (progress animation + checkmark) for goal completion. Feature uses localStorage-first storage (`payplan_goals_v1`), Shadcn UI components (adding Progress + Sonner + 3 enhanced components), and integrates with existing Main Dashboard Goal Progress Widget (Feature 062).
 
 **Technical Approach**: Feature-based architecture at `frontend/src/features/goals/` using Shadcn UI dashboard-01 pattern (metric cards + progress bars + status badges). Business logic in `lib/` with 80%+ test coverage (90%+ for financial calculations). UI components leverage existing Shadcn Card/Badge/Button/Dialog plus 5 new components installed via CLI (progress, toast, skeleton, empty, dropdown-menu). Mobile-first responsive design with hero metrics at top, card stacking <768px, and 44x44px touch targets (WCAG 2.2 AA).
 
@@ -18,13 +18,12 @@ Goal Tracking Dashboard enables low-income earners to create, track, and manage 
 - React 19.1.1 (UI framework, functional components only)
 - Shadcn UI components (Radix UI primitives + Tailwind styling):
   - **Existing** (14): Card, Badge, Button, Dialog, Alert-Dialog, Alert, Input, Label, Select, Textarea, Tabs, Radio-Group
-  - **NEW - MUST ADD** (2): Progress (goal progress bars), Toast (undo notifications)
+  - **NEW - MUST ADD** (2): Progress (goal progress bars), Sonner (toast notifications for undo)
   - **NEW - ENHANCED UX** (3): Skeleton (loading states), Empty (empty states), DropdownMenu (goal menus)
   - **Installation**: `npx shadcn@latest add progress sonner skeleton empty dropdown-menu` (✅ COMPLETED in Phase 1)
 - Zod 4.1.11 (schema validation for Goal/Contribution entities)
 - Tailwind CSS 4.1.13 (utility-first styling, traffic light colors)
 - date-fns 4.1.0 (days remaining, months remaining calculations)
-- canvas-confetti 1.9.3 (goal completion celebrations, Trust Score 10.0)
 - uuid 13.0.0 (Goal/Contribution IDs)
 - React Router 7.0.2 (route: /goals)
 
@@ -50,7 +49,7 @@ Goal Tracking Dashboard enables low-income earners to create, track, and manage 
 - Mobile-first (375px iPhone SE width minimum)
 - Offline-capable (all features work without internet)
 - Traffic light + text labels (not color alone for accessibility)
-- prefers-reduced-motion support (celebration animations)
+- prefers-reduced-motion support (completion animations)
 
 **Scale/Scope**:
 - 0-100 users (Phase 1)
@@ -71,7 +70,7 @@ Goal Tracking Dashboard enables low-income earners to create, track, and manage 
 | **I. Privacy-First** | Zero tracking by default | ✅ PASS | No analytics; error telemetry only |
 | **II. Accessibility** | WCAG 2.2 AA compliance | ✅ PASS | ARIA progressbar, keyboard nav, screen reader, 4.5:1/3:1 contrast, 44x44px |
 | **II. Accessibility** | Screen reader compatible | ✅ PASS | All 8 user stories have screen reader scenarios |
-| **II. Accessibility** | Reduced motion support | ✅ PASS | Confetti checks `prefers-reduced-motion` (US5.3) |
+| **II. Accessibility** | Reduced motion support | ✅ PASS | Completion animation checks `prefers-reduced-motion` (US5.3) |
 | **II. Accessibility** | Focus management | ✅ PASS | Logical Tab order, focus to amount input (US7.5) |
 | **III. Free Core** | Goal tracking free forever | ✅ PASS | Constitution Always Free #4: unlimited goals |
 | **IV. Visual-First** | Progress bars for goals | ✅ PASS | Shadcn Progress component, 0-100% bars (FR-002) |
@@ -118,7 +117,7 @@ frontend/src/features/goals/          # Feature-based architecture (PayPlan mand
 │   ├── GoalForm.tsx                  # Create/edit form (Shadcn Dialog + Input + Label)
 │   ├── QuickAddSection.tsx           # Quick-add $5/$10/$25 buttons (Shadcn Button + Select)
 │   ├── ContributionForm.tsx          # Manual contribution with note (Shadcn Dialog + Textarea)
-│   ├── GoalCelebration.tsx           # Completion modal with confetti (Shadcn Dialog + canvas-confetti)
+│   ├── GoalCelebration.tsx           # Completion modal with subtle animation (Shadcn Dialog + CSS transitions)
 │   ├── GoalEmptyState.tsx            # Empty state (Shadcn Empty component)
 │   ├── GoalSkeleton.tsx              # Loading state (Shadcn Skeleton)
 │   └── ContributionHistory.tsx       # Contribution list (simple list or Shadcn Table Phase 2)
@@ -328,27 +327,26 @@ Total Goals        Total Saved        Goals On Track     Avg Progress
 | Dependency | Version | Purpose | Bundle Size | Trust Score |
 |------------|---------|---------|-------------|-------------|
 | date-fns | 4.1.0 | Date calculations (days remaining, months) | ~13KB gzipped (tree-shakeable) | 7.6/10 (Good) |
-| canvas-confetti | 1.9.3 | Goal completion celebrations | ~3KB gzipped | 10.0/10 (Perfect) |
 | **Shadcn Components** | Latest | **UI component library** | **~2KB per component** | **N/A (Radix UI based)** |
 | - progress | Latest | Progress bars | ~2KB | Built on Radix UI Progress |
-| - toast + use-toast | Latest | Undo notifications | ~3KB | Built on Radix UI Toast |
+| - sonner | Latest | Toast notifications (undo) | ~3KB | Built on Sonner library |
 | - skeleton | Latest | Loading placeholders | ~1KB | Pure CSS |
 | - empty | Latest | Empty states | ~2KB | Custom component |
 | - dropdown-menu | Latest | Action menus | ~4KB | Built on Radix UI DropdownMenu |
 
 **Total Bundle Impact**:
-- External libs: +16KB (13KB date-fns + 3KB canvas-confetti)
+- External libs: +13KB (date-fns only)
 - Shadcn components: +12KB (2+3+1+2+4)
-- **Grand Total**: +28KB gzipped (acceptable for Phase 1, <2% of typical React app)
+- **Grand Total**: +25KB gzipped (acceptable for Phase 1, <2% of typical React app)
 
 **Justification**:
 - date-fns: Industry standard (48M weekly downloads), tree-shakeable, better than native Date API
-- canvas-confetti: Highest trust score (10.0), accessible, battle-tested (GitHub/Vercel)
 - Shadcn: Zero-bundle approach (copy components into project), built on Radix UI (already a dependency), styled with Tailwind (already a dependency)
 
 **Rejected Alternatives**:
 - ❌ Moment.js - Deprecated, heavy (66KB)
-- ❌ Lottie - Overkill for confetti (145KB)
+- ❌ canvas-confetti - Playful but not professional, unnecessary 3KB bundle increase
+- ❌ Lottie - Overkill for subtle animations (145KB)
 - ❌ Custom progress bars - Accessibility harder than Shadcn's Radix-based component
 
 ---
@@ -401,7 +399,7 @@ features/goals/lib/__tests__/
 - Keyboard navigation: Tab through all elements, Enter to activate, Escape to close
 - Responsive: Test on 375px (iPhone SE), 768px (iPad), 1920px (desktop)
 - Color contrast: Verify 4.5:1 text, 3:1 UI with WebAIM Contrast Checker
-- Reduced motion: Toggle browser setting, verify confetti disabled
+- Reduced motion: Toggle browser setting, verify completion animations disabled/instant
 
 ---
 
@@ -453,7 +451,7 @@ features/goals/lib/__tests__/
 - Phase 4: US2 - Create/Edit Goals (form, CRUD)
 - Phase 5: US3 - Visual Progress (progress bars, status badges)
 - Phase 6: US4 - Quick-Add (preset buttons, undo toast)
-- Phase 7: US5 - Celebrations (modal, confetti)
+- Phase 7: US5 - Completion Moment (modal, subtle animation)
 - Phase 8: US6 - Target Dates (calculations, warnings)
 - Phase 9: US7 - Contribution Notes (form, history)
 - Phase 10: US8 - Archive (archive/unarchive)

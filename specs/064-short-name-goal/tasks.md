@@ -12,7 +12,7 @@
 **Goal**: Install Shadcn UI components, npm dependencies, and initialize feature directory structure
 
 - [X] T001 Install Shadcn UI components via CLI: `npx shadcn@latest add progress sonner skeleton empty dropdown-menu` (adds 5 components to frontend/src/components/ui/) - NOTE: Used sonner instead of deprecated toast + restructured to Shadcn standard paths
-- [X] T002 Install npm dependencies: `npm install date-fns@4.1.0 canvas-confetti@1.9.3` in frontend/ directory
+- [X] T002 Install npm dependencies: `npm install date-fns@4.1.0` in frontend/ directory
 - [X] T003 Create feature directory structure: `mkdir -p frontend/src/features/goals/{components,hooks,lib/__tests__/fixtures,types}`
 - [X] T004 Create barrel export file: frontend/src/features/goals/index.ts (empty, will populate later)
 - [ ] T005 Add /goals route constant to frontend/src/routes.ts: `GOALS: '/goals'`
@@ -145,20 +145,20 @@
 
 ---
 
-## Phase 7: User Story 5 (P2) - Celebrate Completion (6 tasks)
+## Phase 7: User Story 5 (P2) - Subtle Completion Moment (6 tasks)
 
-**Goal**: Confetti animation + celebration modal on reaching 100% (respecting prefers-reduced-motion)
+**Goal**: Subtle completion animation (progress → 100% + checkmark fade-in) + professional celebration modal on reaching 100% (respecting prefers-reduced-motion)
 
-**Independent Test**: User adds final contribution to reach 100%, sees confetti + modal
+**Independent Test**: User adds final contribution to reach 100%, sees progress complete → checkmark → modal
 
-- [ ] T071 [P] [US5] Create GoalCelebration component in frontend/src/features/goals/components/GoalCelebration.tsx (Shadcn Dialog with title "Goal Complete! 🎉", show goalName, finalAmount, completionTime, buttons: "Set New Goal", "Archive Goal")
-- [ ] T072 [P] [US5] Add confetti animation to GoalCelebration (import canvas-confetti, check `window.matchMedia('(prefers-reduced-motion: reduce)')`, call confetti() with particleCount:100, spread:70, origin:{y:0.6})
+- [ ] T071 [P] [US5] Create GoalCelebration component in frontend/src/features/goals/components/GoalCelebration.tsx (Shadcn Dialog with title "Goal complete", show goalName, finalAmount, completionTime, buttons: "Set New Goal", "Archive Goal")
+- [ ] T072 [P] [US5] Add subtle completion animation to progress UI (animate to 100%, then show checkmark; if prefers-reduced-motion, render final state instantly)
 - [ ] T073 [P] [US5] Calculate completion statistics in GoalCelebration (time between createdAt and updatedAt in months, average monthly contribution = currentAmount / months)
 - [ ] T074 [US5] Add celebration trigger to useContributions (when auto-complete detected, call onCelebration callback passed from parent)
 - [ ] T075 [US5] Integrate GoalCelebration into Goals page (state for showCelebration, pass as onCelebration callback to useContributions, close modal on "Set New Goal" or "Archive")
 - [ ] T076 [US5] Export GoalCelebration from frontend/src/features/goals/index.ts barrel
 
-**Checkpoint**: ✅ US5 independently testable - Celebration triggers at 100%, confetti respects reduced motion
+**Checkpoint**: ✅ US5 independently testable – Subtle completion moment triggers at 100%, respects reduced motion
 
 ---
 
