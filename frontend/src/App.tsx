@@ -15,6 +15,9 @@ const Dashboard = lazy(() =>
 const Categories = lazy(() => import("./pages/Categories"));
 const Budgets = lazy(() => import("./pages/Budgets"));
 const Transactions = lazy(() => import("./pages/Transactions"));
+const Goals = lazy(() =>
+  import("./pages/Goals").then((m) => ({ default: m.Goals })),
+);
 import { PreferenceSettings } from "./components/preferences/PreferenceSettings";
 import { ToastNotification } from "./components/preferences/ToastNotification";
 import { ErrorTest } from "./components/ErrorTest";
@@ -204,6 +207,7 @@ function AppContent({
               <Route path={ROUTES.CATEGORIES} element={<Categories />} />
               <Route path={ROUTES.BUDGETS} element={<Budgets />} />
               <Route path={ROUTES.TRANSACTIONS} element={<Transactions />} />
+              <Route path={ROUTES.GOALS} element={<Goals />} />
               <Route path={ROUTES.ARCHIVES} element={<ArchiveListPage />} />
               <Route
                 path={ROUTES.ARCHIVE_DETAIL_PATTERN}
