@@ -15,8 +15,12 @@ import {
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
+import { Alert } from '@/shared/components/ui/alert';
+import { Info } from 'lucide-react';
+import { formatCurrency } from '@/features/budgets/lib/calculations';
 import type { Goal, CreateGoalInput, UpdateGoalInput } from '../types/goal';
 import { MAX_NAME_LENGTH } from '../lib/constants';
+import { getRequiredMonthly } from '../lib/calculations';
 
 interface GoalFormProps {
   open: boolean;
@@ -50,6 +54,10 @@ export function GoalForm({ open, onClose, onSubmit, goal, mode }: GoalFormProps)
   const [monthlyContribution, setMonthlyContribution] = useState(''); // Display value (dollars)
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // T082: Track required monthly recalculation
+  const [previousRequiredMonthly, setPreviousRequiredMonthly] = useState<number | null>(null);
+  const [recalculationMessage, setRecalculationMessage] = useState<string | null>(null);
+
   /**
    * Initialize form when goal changes (edit mode)
    */
@@ -61,15 +69,58 @@ export function GoalForm({ open, onClose, onSubmit, goal, mode }: GoalFormProps)
       setMonthlyContribution(
         goal.monthlyContribution ? (goal.monthlyContribution / 100).toFixed(2) : ''
       );
+
+      // T082: Initialize previous required monthly for edit mode
+      if (goal.targetDate) {
+        const initialRequired = getRequiredMonthly(
+          goal.currentAmount,
+          goal.targetAmount,
+          goal.targetDate
+        );
+        setPreviousRequiredMonthly(initialRequired);
+      }
     } else {
       // Reset form for create mode
       setName('');
       setTargetAmount('');
       setTargetDate('');
       setMonthlyContribution('');
+      setPreviousRequiredMonthly(null);
     }
     setErrors({});
+    setRecalculationMessage(null);
   }, [goal, mode, open]);
+
+  /**
+   * T082: Recalculate required monthly when target date or amount changes
+   */
+  useEffect(() => {
+    // Only show recalculation message in edit mode with a target date
+    if (mode !== 'edit' || !goal || !targetDate || !targetAmount) {
+      setRecalculationMessage(null);
+      return;
+    }
+
+    const targetAmountCents = Math.round(parseFloat(targetAmount) * 100);
+    const newRequiredMonthly = getRequiredMonthly(
+      goal.currentAmount,
+      targetAmountCents,
+      targetDate
+    );
+
+    // Show message if required monthly changed from previous value
+    if (
+      previousRequiredMonthly !== null &&
+      newRequiredMonthly !== null &&
+      previousRequiredMonthly !== newRequiredMonthly
+    ) {
+      setRecalculationMessage(
+        `Required monthly changed from ${formatCurrency(previousRequiredMonthly)} to ${formatCurrency(newRequiredMonthly)}`
+      );
+    } else {
+      setRecalculationMessage(null);
+    }
+  }, [targetDate, targetAmount, goal, mode, previousRequiredMonthly]);
 
   /**
    * Validate form inputs
@@ -219,6 +270,14 @@ export function GoalForm({ open, onClose, onSubmit, goal, mode }: GoalFormProps)
               </p>
             )}
           </div>
+
+          {/* T082: Recalculation message */}
+          {recalculationMessage && (
+            <Alert className="flex items-start gap-2">
+              <Info className="h-4 w-4 mt-0.5" aria-hidden="true" />
+              <span className="text-sm">{recalculationMessage}</span>
+            </Alert>
+          )}
 
           {/* Monthly Contribution (Optional) */}
           <div>

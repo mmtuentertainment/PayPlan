@@ -14,10 +14,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '@/features/budgets/lib/calculations';
 import type { Goal } from '../types/goal';
-import { getGoalPercent, getDaysRemaining, getGoalStatus } from '../lib/calculations';
+import { getGoalPercent, getDaysRemaining, getRequiredMonthly, getGoalStatus } from '../lib/calculations';
 
 interface GoalCardProps {
   goal: Goal;
@@ -109,6 +109,7 @@ function getProgressIndicatorClass(status: 'completed' | 'past-due' | 'at-risk' 
 export function GoalCard({ goal, onEdit, onDelete, onAddContribution }: GoalCardProps) {
   const percentage = getGoalPercent(goal.currentAmount, goal.targetAmount);
   const daysRemaining = getDaysRemaining(goal.targetDate);
+  const requiredMonthly = getRequiredMonthly(goal.currentAmount, goal.targetAmount, goal.targetDate);
   const status = getGoalStatus(percentage, daysRemaining);
 
   // Detect prefers-reduced-motion (T072 - US5)
@@ -131,20 +132,50 @@ export function GoalCard({ goal, onEdit, onDelete, onAddContribution }: GoalCard
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900">{goal.name}</h3>
             {goal.targetDate && (
-              <p className="text-sm text-gray-600 mt-1">
-                {daysRemaining !== null && daysRemaining >= 0
-                  ? `${daysRemaining} days remaining`
-                  : daysRemaining !== null && daysRemaining < 0
-                    ? `${Math.abs(daysRemaining)} days overdue`
-                    : ''}
-              </p>
+              <div className="mt-1 space-y-1">
+                <p className="text-sm text-gray-600">
+                  {daysRemaining !== null && daysRemaining >= 0
+                    ? `${daysRemaining} days remaining`
+                    : daysRemaining !== null && daysRemaining < 0
+                      ? `${Math.abs(daysRemaining)} days overdue`
+                      : ''}
+                </p>
+                {/* T078: Required monthly contribution display */}
+                {requiredMonthly !== null && requiredMonthly > 0 && percentage < 100 && (
+                  <p className="text-sm text-gray-600">
+                    Need {formatCurrency(requiredMonthly)}/month to reach target
+                  </p>
+                )}
+              </div>
             )}
           </div>
-          <Badge variant={getStatusVariant(status)}>{getStatusLabel(status)}</Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge variant={getStatusVariant(status)}>{getStatusLabel(status)}</Badge>
+            {/* T079: Behind Schedule warning badge */}
+            {status === 'at-risk' && (
+              <Badge variant="destructive" className="flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" aria-hidden="true" />
+                Behind Schedule
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* T083: ARIA live region for status announcements (screen readers) */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {status === 'completed' && `Goal ${goal.name} is complete at ${percentage}%`}
+          {status === 'at-risk' && `Goal ${goal.name} is behind schedule at ${percentage}% with ${daysRemaining} days remaining`}
+          {status === 'past-due' && `Goal ${goal.name} is past due at ${percentage}%`}
+          {status === 'on-track' && `Goal ${goal.name} is on track at ${percentage}%`}
+        </div>
+
         {/* Progress Bar (Shadcn Progress component - WCAG 2.2 AA compliant) */}
         <div>
           <div className="flex items-center justify-between mb-2">
