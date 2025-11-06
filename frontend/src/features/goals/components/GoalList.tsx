@@ -11,7 +11,8 @@ interface GoalListProps {
   goals: Goal[];
   onEdit: (goal: Goal) => void;
   onDelete: (goal: Goal) => void;
-  onAddContribution?: (goal: Goal) => void;
+  onContributionAdded?: () => void; // T087: Trigger parent refresh
+  onGoalComplete?: (goal: Goal) => void; // For celebration trigger
 }
 
 /**
@@ -25,9 +26,10 @@ interface GoalListProps {
  * @param goals - Array of goals to display
  * @param onEdit - Callback when Edit is clicked on a goal
  * @param onDelete - Callback when Delete is clicked on a goal
- * @param onAddContribution - Optional callback for quick-add (Group 6)
+ * @param onContributionAdded - Optional callback after contribution added
+ * @param onGoalComplete - Optional callback when goal reaches 100%
  */
-export function GoalList({ goals, onEdit, onDelete, onAddContribution }: GoalListProps) {
+export function GoalList({ goals, onEdit, onDelete, onContributionAdded, onGoalComplete }: GoalListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {goals.map((goal) => (
@@ -36,7 +38,8 @@ export function GoalList({ goals, onEdit, onDelete, onAddContribution }: GoalLis
           goal={goal}
           onEdit={onEdit}
           onDelete={onDelete}
-          onAddContribution={onAddContribution}
+          onContributionAdded={onContributionAdded}
+          onGoalComplete={onGoalComplete}
         />
       ))}
     </div>

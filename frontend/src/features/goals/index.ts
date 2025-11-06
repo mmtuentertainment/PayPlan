@@ -22,6 +22,10 @@ export { QuickAddSection } from './components/QuickAddSection';
 // Components (Group 7)
 export { GoalCelebration } from './components/GoalCelebration';
 
+// Components (Group 9 - Phase 9: US7)
+export { ContributionForm } from './components/ContributionForm';
+export { ContributionHistory } from './components/ContributionHistory';
+
 // Hooks (Group 3)
 export { useGoalMetrics } from './hooks/useGoalMetrics';
 

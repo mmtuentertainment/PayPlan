@@ -1,9 +1,10 @@
 /**
  * Goal Card Component for Goal Tracking Dashboard (Feature 064)
  * Individual goal display with progress bar, status badge, and actions
- * US1: View Dashboard, US3: Edit Goal, US4: Delete Goal
+ * US1: View Dashboard, US3: Edit Goal, US4: Delete Goal, US7: Manual Contribution
  */
 
+import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
@@ -18,12 +19,14 @@ import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '@/features/budgets/lib/calculations';
 import type { Goal } from '../types/goal';
 import { getGoalPercent, getDaysRemaining, getRequiredMonthly, getGoalStatus } from '../lib/calculations';
+import { ContributionForm } from './ContributionForm';
 
 interface GoalCardProps {
   goal: Goal;
   onEdit: (goal: Goal) => void;
   onDelete: (goal: Goal) => void;
-  onAddContribution?: (goal: Goal) => void;
+  onContributionAdded?: () => void; // T087: Trigger parent refresh
+  onGoalComplete?: (goal: Goal) => void; // For celebration trigger
 }
 
 /**
@@ -104,13 +107,17 @@ function getProgressIndicatorClass(status: 'completed' | 'past-due' | 'at-risk' 
  * @param goal - Goal to display
  * @param onEdit - Callback when Edit is clicked
  * @param onDelete - Callback when Delete is clicked
- * @param onAddContribution - Optional callback for quick-add (Group 6)
+ * @param onContributionAdded - Optional callback after contribution added
+ * @param onGoalComplete - Optional callback when goal reaches 100%
  */
-export function GoalCard({ goal, onEdit, onDelete, onAddContribution }: GoalCardProps) {
+export function GoalCard({ goal, onEdit, onDelete, onContributionAdded, onGoalComplete }: GoalCardProps) {
   const percentage = getGoalPercent(goal.currentAmount, goal.targetAmount);
   const daysRemaining = getDaysRemaining(goal.targetDate);
   const requiredMonthly = getRequiredMonthly(goal.currentAmount, goal.targetAmount, goal.targetDate);
   const status = getGoalStatus(percentage, daysRemaining);
+
+  // T087: Contribution form dialog state
+  const [isContributionFormOpen, setIsContributionFormOpen] = useState(false);
 
   // Detect prefers-reduced-motion (T072 - US5)
   const prefersReducedMotion = (() => {
@@ -216,16 +223,14 @@ export function GoalCard({ goal, onEdit, onDelete, onAddContribution }: GoalCard
       </CardContent>
 
       <CardFooter className="flex gap-2">
-        {/* Quick Add Contribution (Group 6 - placeholder for now) */}
-        {onAddContribution && (
-          <Button
-            variant="outline"
-            onClick={() => onAddContribution(goal)}
-            className="flex-1"
-          >
-            Add Contribution
-          </Button>
-        )}
+        {/* T087: Manual contribution button (opens dialog) */}
+        <Button
+          variant="outline"
+          onClick={() => setIsContributionFormOpen(true)}
+          className="flex-1"
+        >
+          Add Contribution
+        </Button>
 
         {/* Actions Dropdown */}
         <DropdownMenu>
@@ -260,6 +265,16 @@ export function GoalCard({ goal, onEdit, onDelete, onAddContribution }: GoalCard
           </DropdownMenuContent>
         </DropdownMenu>
       </CardFooter>
+
+      {/* T087: Contribution Form Dialog */}
+      <ContributionForm
+        open={isContributionFormOpen}
+        onClose={() => setIsContributionFormOpen(false)}
+        goalId={goal.id}
+        goalName={goal.name}
+        onContributionAdded={onContributionAdded}
+        onGoalComplete={onGoalComplete}
+      />
     </Card>
   );
 }
