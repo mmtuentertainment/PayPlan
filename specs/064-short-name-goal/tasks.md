@@ -61,102 +61,102 @@
 
 ---
 
-## Phase 3: User Story 1 (P1) 🎯 MVP - Dashboard Overview (10 tasks)
+## Phase 3: User Story 1 (P1) 🎯 MVP - Dashboard Overview (10 tasks) ✅ COMPLETE
 
 **Goal**: Display 4 metric cards (Total Goals, Total Saved, On Track, Avg Progress) with loading/empty states
 
 **Independent Test**: User with 3 goals sees dashboard with metrics, goal list with progress bars
 
-- [ ] T031 [US1] Implement computeDashboardMetrics function in frontend/src/features/goals/lib/calculations.ts (calculate totalGoals, totalSaved, goalsOnTrack >25%, averageProgress)
-- [ ] T032 [P] [US1] Write computeDashboardMetrics tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (test with 0 goals, 3 goals, 20 goals)
-- [ ] T033 [P] [US1] Create GoalMetrics component in frontend/src/features/goals/components/GoalMetrics.tsx (4 Shadcn Cards in grid, Total Goals, Total Saved hero, On Track, Avg Progress with trend arrows)
-- [ ] T034 [P] [US1] Create GoalSkeleton component in frontend/src/features/goals/components/GoalSkeleton.tsx (Shadcn Skeleton for loading state: 4 metric card skeletons + 3 goal card skeletons)
-- [ ] T035 [P] [US1] Create GoalEmptyState component in frontend/src/features/goals/components/GoalEmptyState.tsx (Shadcn Empty component: "No goals yet", "Create your first goal" button)
-- [ ] T036 [US1] Create useGoalMetrics hook in frontend/src/features/goals/hooks/useGoalMetrics.ts (useMemo to compute metrics from goals array, recalculate only when goals change)
-- [ ] T037 [US1] Create Goals page in frontend/src/pages/Goals.tsx (import GoalMetrics, GoalSkeleton, GoalEmptyState; show loading/empty/data states)
-- [ ] T038 [US1] Add Goals route to frontend/src/App.tsx (lazy load Goals component, add <Route path={ROUTES.GOALS} element={<Goals />} />)
-- [ ] T039 [US1] Update GoalProgressWidget in frontend/src/features/dashboard/components/GoalProgressWidget.tsx (change navigate('/goals') to navigate(ROUTES.GOALS))
-- [ ] T040 [US1] Export GoalMetrics, GoalSkeleton, GoalEmptyState from frontend/src/features/goals/index.ts barrel
+- [X] T031 [US1] Implement computeDashboardMetrics function in frontend/src/features/goals/lib/calculations.ts (calculate totalGoals, totalSaved, goalsOnTrack >25%, averageProgress)
+- [X] T032 [P] [US1] Write computeDashboardMetrics tests in frontend/src/features/goals/lib/__tests__/calculations.test.ts (test with 0 goals, 3 goals, 20 goals)
+- [X] T033 [P] [US1] Create GoalMetrics component in frontend/src/features/goals/components/GoalMetrics.tsx (4 Shadcn Cards in grid, Total Goals, Total Saved hero, On Track, Avg Progress with trend arrows)
+- [X] T034 [P] [US1] Create GoalSkeleton component in frontend/src/features/goals/components/GoalSkeleton.tsx (Shadcn Skeleton for loading state: 4 metric card skeletons + 3 goal card skeletons)
+- [X] T035 [P] [US1] Create GoalEmptyState component in frontend/src/features/goals/components/GoalEmptyState.tsx (Shadcn Empty component: "No goals yet", "Create your first goal" button)
+- [X] T036 [US1] Create useGoalMetrics hook in frontend/src/features/goals/hooks/useGoalMetrics.ts (useMemo to compute metrics from goals array, recalculate only when goals change)
+- [X] T037 [US1] Create Goals page in frontend/src/pages/Goals.tsx (import GoalMetrics, GoalSkeleton, GoalEmptyState; show loading/empty/data states)
+- [X] T038 [US1] Add Goals route to frontend/src/App.tsx (lazy load Goals component, add <Route path={ROUTES.GOALS} element={<Goals />} />)
+- [X] T039 [US1] Update GoalProgressWidget in frontend/src/features/dashboard/components/GoalProgressWidget.tsx (change navigate('/goals') to navigate(ROUTES.GOALS))
+- [X] T040 [US1] Export GoalMetrics, GoalSkeleton, GoalEmptyState from frontend/src/features/goals/index.ts barrel
 
 **Checkpoint**: ✅ US1 independently testable - Dashboard displays metrics for 0/3/20 goals with loading/empty states
 
 ---
 
-## Phase 4: User Story 2 (P1) 🎯 MVP - Create/Edit Goals (12 tasks)
+## Phase 4: User Story 2 (P1) 🎯 MVP - Create/Edit Goals (12 tasks) ✅ COMPLETE
 
 **Goal**: Allow users to create/edit/delete goals with Shadcn Dialog forms and validation
 
 **Independent Test**: User clicks "Create Goal", fills form, goal appears in dashboard
 
-- [ ] T041 [P] [US2] Create GoalForm component in frontend/src/features/goals/components/GoalForm.tsx (Shadcn Dialog + Input + Label + Button for name, targetAmount, targetDate, monthlyContribution)
-- [ ] T042 [P] [US2] Add form validation to GoalForm (Zod schema validation, show inline errors, disable submit if invalid)
-- [ ] T043 [P] [US2] Add dollar-to-cents conversion in GoalForm (parseFloat(input) * 100 for targetAmount and monthlyContribution)
-- [ ] T044 [P] [US2] Create GoalCard component in frontend/src/features/goals/components/GoalCard.tsx (Shadcn Card with goal name, Shadcn Progress bar, Shadcn Badge status, Edit/Delete buttons)
-- [ ] T045 [P] [US2] Add Shadcn DropdownMenu to GoalCard (three-dot menu with Edit, Delete, Archive options)
-- [ ] T046 [P] [US2] Create GoalList component in frontend/src/features/goals/components/GoalList.tsx (map goals to GoalCard components, grid layout responsive)
-- [ ] T047 [US2] Create useGoals hook in frontend/src/features/goals/hooks/useGoals.ts (useState for goals, useEffect to load from localStorage on mount, CRUD functions: create, update, delete)
-- [ ] T048 [US2] Add storage event listener to useGoals hook (window.addEventListener('storage') for cross-tab sync, reload goals when localStorage changes in another tab)
-- [ ] T049 [US2] Implement create goal in useGoals (call GoalStorageService.createGoal, update state, trigger re-render)
-- [ ] T050 [US2] Implement edit goal in useGoals (call GoalStorageService.updateGoal, recalculate progress percentage)
-- [ ] T051 [US2] Implement delete goal with confirmation in useGoals (Shadcn AlertDialog: "Delete [goalName]? This will delete X contributions. Cannot be undone", call GoalStorageService.deleteGoal)
-- [ ] T052 [US2] Export GoalForm, GoalCard, GoalList from frontend/src/features/goals/index.ts barrel
+- [X] T041 [P] [US2] Create GoalForm component in frontend/src/features/goals/components/GoalForm.tsx (Shadcn Dialog + Input + Label + Button for name, targetAmount, targetDate, monthlyContribution)
+- [X] T042 [P] [US2] Add form validation to GoalForm (Zod schema validation, show inline errors, disable submit if invalid)
+- [X] T043 [P] [US2] Add dollar-to-cents conversion in GoalForm (parseFloat(input) * 100 for targetAmount and monthlyContribution)
+- [X] T044 [P] [US2] Create GoalCard component in frontend/src/features/goals/components/GoalCard.tsx (Shadcn Card with goal name, Shadcn Progress bar, Shadcn Badge status, Edit/Delete buttons)
+- [X] T045 [P] [US2] Add Shadcn DropdownMenu to GoalCard (three-dot menu with Edit, Delete, Archive options)
+- [X] T046 [P] [US2] Create GoalList component in frontend/src/features/goals/components/GoalList.tsx (map goals to GoalCard components, grid layout responsive)
+- [X] T047 [US2] Create useGoals hook in frontend/src/features/goals/hooks/useGoals.ts (useState for goals, useEffect to load from localStorage on mount, CRUD functions: create, update, delete)
+- [X] T048 [US2] Add storage event listener to useGoals hook (window.addEventListener('storage') for cross-tab sync, reload goals when localStorage changes in another tab)
+- [X] T049 [US2] Implement create goal in useGoals (call GoalStorageService.createGoal, update state, trigger re-render)
+- [X] T050 [US2] Implement edit goal in useGoals (call GoalStorageService.updateGoal, recalculate progress percentage)
+- [X] T051 [US2] Implement delete goal with confirmation in useGoals (Shadcn AlertDialog: "Delete [goalName]? This will delete X contributions. Cannot be undone", call GoalStorageService.deleteGoal)
+- [X] T052 [US2] Export GoalForm, GoalCard, GoalList from frontend/src/features/goals/index.ts barrel
 
 **Checkpoint**: ✅ US2 independently testable - User can create/edit/delete goals, see in dashboard
 
 ---
 
-## Phase 5: User Story 3 (P1) 🎯 MVP - Visual Progress & Status (8 tasks)
+## Phase 5: User Story 3 (P1) 🎯 MVP - Visual Progress & Status (8 tasks) ✅ COMPLETE
 
 **Goal**: Display Shadcn Progress bars with traffic light colors and status badges
 
 **Independent Test**: User sees goal at 40% with green progress bar, goal at 95% with yellow bar
 
-- [ ] T053 [P] [US3] Add progress bar to GoalCard using Shadcn Progress component (value={getGoalPercent(goal)}, className with traffic light colors)
-- [ ] T054 [P] [US3] Implement traffic light color logic in GoalCard (green for 0-94%, yellow for 95-99%, blue for 100%+)
-- [ ] T055 [P] [US3] Add status badge to GoalCard using Shadcn Badge (variant based on getGoalStatus: 'Complete' green, 'Almost There' yellow, 'On Track' blue, 'Behind' red, 'Just Started' gray)
-- [ ] T056 [P] [US3] Add ARIA progressbar attributes to Shadcn Progress (aria-valuenow={percentage}, aria-valuemin=0, aria-valuemax=100, aria-label="[goalName] progress")
-- [ ] T057 [P] [US3] Add dollar amounts display to GoalCard (formatCurrency for currentAmount and targetAmount, show "$X of $Y (Z%)" with "$W remaining")
-- [ ] T058 [P] [US3] Add status icon to badges (CheckCircle for Complete, TrendingUp for Almost There, Target for On Track, AlertTriangle for Behind, Circle for Just Started from lucide-react)
-- [ ] T059 [P] [US3] Ensure color + text label accessibility (never color alone, all badges have text + icon, meet WCAG 2.2 4.5:1 text contrast, 3:1 UI contrast)
-- [ ] T060 [US3] Update GoalList to show all goals sorted by updatedAt DESC (most recently updated first)
+- [X] T053 [P] [US3] Add progress bar to GoalCard using Shadcn Progress component (value={getGoalPercent(goal)}, className with traffic light colors)
+- [X] T054 [P] [US3] Implement traffic light color logic in GoalCard (green for 0-94%, yellow for 95-99%, blue for 100%+)
+- [X] T055 [P] [US3] Add status badge to GoalCard using Shadcn Badge (variant based on getGoalStatus: 'Complete' green, 'Almost There' yellow, 'On Track' blue, 'Behind' red, 'Just Started' gray)
+- [X] T056 [P] [US3] Add ARIA progressbar attributes to Shadcn Progress (aria-valuenow={percentage}, aria-valuemin=0, aria-valuemax=100, aria-label="[goalName] progress")
+- [X] T057 [P] [US3] Add dollar amounts display to GoalCard (formatCurrency for currentAmount and targetAmount, show "$X of $Y (Z%)" with "$W remaining")
+- [X] T058 [P] [US3] Add status icon to badges (CheckCircle for Complete, TrendingUp for Almost There, Target for On Track, AlertTriangle for Behind, Circle for Just Started from lucide-react)
+- [X] T059 [P] [US3] Ensure color + text label accessibility (never color alone, all badges have text + icon, meet WCAG 2.2 4.5:1 text contrast, 3:1 UI contrast)
+- [X] T060 [US3] Update GoalList to show all goals sorted by updatedAt DESC (most recently updated first)
 
 **Checkpoint**: ✅ US3 independently testable - Visual progress bars with traffic light colors, status badges, accessible
 
 ---
 
-## Phase 6: User Story 4 (P1) 🎯 MVP - Quick-Add Contributions (10 tasks)
+## Phase 6: User Story 4 (P1) 🎯 MVP - Quick-Add Contributions (10 tasks) ✅ COMPLETE
 
 **Goal**: One-click contribution with $5/$10/$25 preset buttons and 5-second undo toast
 
 **Independent Test**: User selects goal, clicks "$10", sees toast "Added $10 to Emergency Fund. Undo", progress updates
 
-- [ ] T061 [P] [US4] Create QuickAddSection component in frontend/src/features/goals/components/QuickAddSection.tsx (Shadcn Select for goal dropdown, 3 Shadcn Buttons for $5/$10/$25, disabled until goal selected)
-- [ ] T062 [P] [US4] Add goal selector dropdown to QuickAddSection (populate with active goals, show goalName, store selected goalId in state)
-- [ ] T063 [P] [US4] Implement quick-add button handlers in QuickAddSection (onClick calls onAddContribution(goalId, amountCents), amounts: 500, 1000, 2500 cents)
-- [ ] T064 [US4] Create useContributions hook in frontend/src/features/goals/hooks/useContributions.ts (addContribution function, previousState for undo, toast integration)
-- [ ] T065 [US4] Implement addContribution in useContributions (create Contribution object with UUID, append to goal.contributions[], update goal.currentAmount, save to localStorage)
-- [ ] T066 [US4] Add auto-complete detection in useContributions (if currentAmount >= targetAmount, set status='completed', trigger celebration callback)
-- [ ] T067 [US4] Implement undo logic in useContributions (save previousGoalState before contribution, expose undoContribution function that reverts to previousState)
-- [ ] T068 [US4] Add Shadcn Toast with undo in useContributions (useToast hook, toast with title "Added $X to [goalName]", action button "Undo", duration 5000ms)
-- [ ] T069 [P] [US4] Write ContributionService tests in frontend/src/features/goals/lib/__tests__/ContributionService.test.ts (add contribution updates currentAmount, undo reverts, auto-complete triggers at 100%)
-- [ ] T070 [US4] Export QuickAddSection from frontend/src/features/goals/index.ts barrel and useContributions hook
+- [X] T061 [P] [US4] Create QuickAddSection component in frontend/src/features/goals/components/QuickAddSection.tsx (Shadcn Select for goal dropdown, 3 Shadcn Buttons for $5/$10/$25, disabled until goal selected)
+- [X] T062 [P] [US4] Add goal selector dropdown to QuickAddSection (populate with active goals, show goalName, store selected goalId in state)
+- [X] T063 [P] [US4] Implement quick-add button handlers in QuickAddSection (onClick calls onAddContribution(goalId, amountCents), amounts: 500, 1000, 2500 cents)
+- [X] T064 [US4] Create useContributions hook in frontend/src/features/goals/hooks/useContributions.ts (addContribution function, previousState for undo, toast integration)
+- [X] T065 [US4] Implement addContribution in useContributions (create Contribution object with UUID, append to goal.contributions[], update goal.currentAmount, save to localStorage)
+- [X] T066 [US4] Add auto-complete detection in useContributions (if currentAmount >= targetAmount, set status='completed', trigger celebration callback)
+- [X] T067 [US4] Implement undo logic in useContributions (save previousGoalState before contribution, expose undoContribution function that reverts to previousState)
+- [X] T068 [US4] Add Shadcn Toast with undo in useContributions (useToast hook, toast with title "Added $X to [goalName]", action button "Undo", duration 5000ms)
+- [X] T069 [P] [US4] Write ContributionService tests in frontend/src/features/goals/lib/__tests__/ContributionService.test.ts (add contribution updates currentAmount, undo reverts, auto-complete triggers at 100%)
+- [X] T070 [US4] Export QuickAddSection from frontend/src/features/goals/index.ts barrel and useContributions hook
 
 **Checkpoint**: ✅ US4 independently testable - Quick-add works with undo, progress updates instantly
 
 ---
 
-## Phase 7: User Story 5 (P2) - Subtle Completion Moment (6 tasks)
+## Phase 7: User Story 5 (P2) - Subtle Completion Moment (6 tasks) ✅ COMPLETE
 
 **Goal**: Subtle completion animation (progress → 100% + checkmark fade-in) + professional celebration modal on reaching 100% (respecting prefers-reduced-motion)
 
 **Independent Test**: User adds final contribution to reach 100%, sees progress complete → checkmark → modal
 
-- [ ] T071 [P] [US5] Create GoalCelebration component in frontend/src/features/goals/components/GoalCelebration.tsx (Shadcn Dialog with title "Goal complete", show goalName, finalAmount, completionTime, buttons: "Set New Goal", "Archive Goal")
-- [ ] T072 [P] [US5] Add subtle completion animation to progress UI (animate to 100%, then show checkmark; if prefers-reduced-motion, render final state instantly)
-- [ ] T073 [P] [US5] Calculate completion statistics in GoalCelebration (time between createdAt and updatedAt in months, average monthly contribution = currentAmount / months)
-- [ ] T074 [US5] Add celebration trigger to useContributions (when auto-complete detected, call onCelebration callback passed from parent)
-- [ ] T075 [US5] Integrate GoalCelebration into Goals page (state for showCelebration, pass as onCelebration callback to useContributions, close modal on "Set New Goal" or "Archive")
-- [ ] T076 [US5] Export GoalCelebration from frontend/src/features/goals/index.ts barrel
+- [X] T071 [P] [US5] Create GoalCelebration component in frontend/src/features/goals/components/GoalCelebration.tsx (Shadcn Dialog with title "Goal complete", show goalName, finalAmount, completionTime, buttons: "Set New Goal", "Archive Goal")
+- [X] T072 [P] [US5] Add subtle completion animation to progress UI (animate to 100%, then show checkmark; if prefers-reduced-motion, render final state instantly)
+- [X] T073 [P] [US5] Calculate completion statistics in GoalCelebration (time between createdAt and updatedAt in months, average monthly contribution = currentAmount / months)
+- [X] T074 [US5] Add celebration trigger to useContributions (when auto-complete detected, call onCelebration callback passed from parent)
+- [X] T075 [US5] Integrate GoalCelebration into Goals page (state for showCelebration, pass as onCelebration callback to useContributions, close modal on "Set New Goal" or "Archive")
+- [X] T076 [US5] Export GoalCelebration from frontend/src/features/goals/index.ts barrel
 
 **Checkpoint**: ✅ US5 independently testable – Subtle completion moment triggers at 100%, respects reduced motion
 
