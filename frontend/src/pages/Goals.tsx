@@ -269,7 +269,12 @@ export const Goals: React.FC = () => {
               {/* Active Goals Tab */}
               <TabsContent value="active">
                 {activeGoals.length === 0 ? (
-                  <div className="text-center py-8">
+                  <div
+                    className="text-center py-8"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Active goals status"
+                  >
                     <p className="text-sm text-gray-500">
                       No active goals. Create your first goal to get started!
                     </p>
@@ -289,7 +294,12 @@ export const Goals: React.FC = () => {
               {/* Archived Goals Tab */}
               <TabsContent value="archived">
                 {archivedGoals.length === 0 ? (
-                  <div className="text-center py-8">
+                  <div
+                    className="text-center py-8"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Archived goals status"
+                  >
                     <p className="text-sm text-gray-500">
                       No archived goals. Completed goals will appear here after archiving.
                     </p>
