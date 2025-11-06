@@ -27,20 +27,24 @@ const PII_PATTERNS = {
   email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
 
   // Phone: (123) 456-7890, 123-456-7890, 1234567890
-  phone: /\b(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b/g,
+  // Updated: Fixed to avoid capturing parentheses and plus sign
+  phone: /(?:\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/g,
 
   // SSN: 123-45-6789, 123456789
   ssn: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
 
-  // Credit Card: 1234-5678-9012-3456 (13-19 digits, grouped by 4)
-  creditCard: /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4,7}\b/g,
+  // Credit Card: 1234-5678-9012-3456 (13-19 digits, Amex 15 digits supported)
+  // Updated: Fixed to also match 15-digit Amex cards (4-6-5 pattern)
+  creditCard: /\b(?:\d{4}[-\s]?\d{6}[-\s]?\d{5}|\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{3,7})\b/g,
 
   // Names: "John Doe", "Jane Smith" (capitalized first/last name pattern)
-  // Conservative pattern to avoid false positives
-  name: /\b[A-Z][a-z]+\s[A-Z][a-z]+\b/g,
+  // Conservative pattern: Only match common first names followed by last names
+  // This avoids false positives like "Emergency Fund" or "House Fund"
+  name: /\b(?:John|Jane|James|Mary|Robert|Patricia|Michael|Linda|William|Elizabeth|David|Barbara|Richard|Susan|Joseph|Jessica|Thomas|Sarah|Charles|Karen|Christopher|Nancy|Daniel|Lisa|Mark|Betty|Donald|Helen|George|Sandra|Kenneth|Donna|Steven|Carol|Paul|Ruth|Andrew|Sharon|Joshua|Michelle|Emily|Laura|Madison|Emma|Jacob|Olivia|Noah|Sophia|Liam|Isabella|Mason|Ava|Ethan|Mia|Alexander|Charlotte)\s[A-Z][a-z]+\b/g,
 
   // Street Address: "123 Main St", "456 Oak Avenue"
-  address: /\b\d{1,5}\s+[A-Za-z0-9\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd)\b/gi,
+  // Updated: Fixed to match full address pattern, not just street name
+  address: /\b\d{1,5}\s+(?:[A-Za-z0-9]+\s+)*(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd)\b/gi,
 };
 
 /**
@@ -53,12 +57,13 @@ export function sanitizePII(text: string): string {
   let sanitized = text;
 
   // Replace each PII pattern with [REDACTED] placeholder
+  // Note: Order matters! Process addresses before names to avoid false positives
   sanitized = sanitized.replace(PII_PATTERNS.email, '[EMAIL_REDACTED]');
-  sanitized = sanitized.replace(PII_PATTERNS.phone, '[PHONE_REDACTED]');
-  sanitized = sanitized.replace(PII_PATTERNS.ssn, '[SSN_REDACTED]');
   sanitized = sanitized.replace(PII_PATTERNS.creditCard, '[CARD_REDACTED]');
-  sanitized = sanitized.replace(PII_PATTERNS.name, '[NAME_REDACTED]');
+  sanitized = sanitized.replace(PII_PATTERNS.ssn, '[SSN_REDACTED]');
+  sanitized = sanitized.replace(PII_PATTERNS.phone, '[PHONE_REDACTED]');
   sanitized = sanitized.replace(PII_PATTERNS.address, '[ADDRESS_REDACTED]');
+  sanitized = sanitized.replace(PII_PATTERNS.name, '[NAME_REDACTED]');
 
   return sanitized;
 }
@@ -211,12 +216,15 @@ export function downloadFile(content: string, filename: string, mimeType: string
   // Generate object URL for download
   const url = URL.createObjectURL(blob);
 
-  // Create anchor element and trigger download
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-
-  // Clean up object URL to prevent memory leak
-  URL.revokeObjectURL(url);
+  try {
+    // Create anchor element and trigger download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+  } finally {
+    // Clean up object URL to prevent memory leak
+    // This runs even if click() throws an error
+    URL.revokeObjectURL(url);
+  }
 }
