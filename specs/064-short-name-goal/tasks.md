@@ -182,19 +182,21 @@
 
 ---
 
-## Phase 9: User Story 7 (P2) - Contribution Notes (5 tasks)
+## Phase 9: User Story 7 (P2) - Contribution Notes (5 tasks) ✅ COMPLETE
 
 **Goal**: Manual contribution form with optional 200-character note
 
 **Independent Test**: User adds $50 contribution with note "Birthday money", sees in history
 
-- [ ] T084 [P] [US7] Create ContributionForm component in frontend/src/features/goals/components/ContributionForm.tsx (Shadcn Dialog + Input for amount + Textarea for note, validate 200 char max)
-- [ ] T085 [P] [US7] Add dollar-to-cents conversion in ContributionForm (parseFloat(amount) * 100)
-- [ ] T086 [P] [US7] Create ContributionHistory component in frontend/src/features/goals/components/ContributionHistory.tsx (list contributions sorted by createdAt DESC, show amount, note, timestamp)
-- [ ] T087 [US7] Add "Add Contribution" button to GoalCard (opens ContributionForm dialog, passes goalId)
-- [ ] T088 [US7] Export ContributionForm, ContributionHistory from frontend/src/features/goals/index.ts barrel
+- [X] T084 [P] [US7] Create ContributionForm component in frontend/src/features/goals/components/ContributionForm.tsx (Shadcn Dialog + Input for amount + Textarea for note, validate 200 char max) - ✅ CREATED (220 lines, Dialog + validation + useContributions integration)
+- [X] T085 [P] [US7] Add dollar-to-cents conversion in ContributionForm (parseFloat(amount) * 100) - ✅ IMPLEMENTED (Math.round for precision, line 104)
+- [X] T086 [P] [US7] Create ContributionHistory component in frontend/src/features/goals/components/ContributionHistory.tsx (list contributions sorted by createdAt DESC, show amount, note, timestamp) - ✅ CREATED (72 lines, sorted DESC, date-fns formatting)
+- [X] T087 [US7] Add "Add Contribution" button to GoalCard (opens ContributionForm dialog, passes goalId) - ✅ WIRED (GoalCard + GoalList + Goals.tsx, callbacks flow correctly)
+- [X] T088 [US7] Export ContributionForm, ContributionHistory from frontend/src/features/goals/index.ts barrel - ✅ EXPORTED (Group 9 section)
 
 **Checkpoint**: ✅ US7 independently testable - Manual contributions with notes work, history displays
+
+**PR**: #83 (branches from Phase 8, PR #82)
 
 ---
 
