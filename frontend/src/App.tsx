@@ -31,6 +31,7 @@ import { ROUTES } from "./routes";
 import { NavigationHeader } from "./components/navigation/NavigationHeader";
 import Breadcrumbs from "./components/navigation/Breadcrumbs";
 import ErrorBoundary from "@/shared/components/ErrorBoundary";
+import { Toaster } from "@/shared/components/ui/sonner";
 
 function App() {
   // Initialize preferences hook at app level
@@ -320,6 +321,9 @@ function AppContent({
           onDismiss={() => setToast(null)}
         />
       )}
+
+      {/* Sonner toast provider for goal contributions (Feature 064) */}
+      <Toaster />
     </>
   );
 }
