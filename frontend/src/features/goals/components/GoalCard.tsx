@@ -63,23 +63,42 @@ function getStatusLabel(status: 'completed' | 'past-due' | 'at-risk' | 'on-track
   }
 }
 
+/**
+ * Get progress bar color class based on status (traffic light system)
+ * Triple encoding: Color + percentage text + status badge
+ *
+ * Returns Tailwind classes for Shadcn Progress indicator
+ */
+function getProgressIndicatorClass(status: 'completed' | 'past-due' | 'at-risk' | 'on-track'): string {
+  switch (status) {
+    case 'completed':
+      return '[&>div]:bg-green-600'; // Green - goal achieved
+    case 'past-due':
+      return '[&>div]:bg-red-600'; // Red - deadline passed, not complete
+    case 'at-risk':
+      return '[&>div]:bg-yellow-500'; // Yellow - <75% progress with <30 days
+    case 'on-track':
+      return '[&>div]:bg-blue-600'; // Blue - making good progress
+    default:
+      return '[&>div]:bg-blue-600';
+  }
+}
 
 /**
  * Individual goal card component
  *
  * Features:
- * - Progress bar with percentage (default blue color)
+ * - Progress bar with percentage and traffic light colors (US3: Visual Progress)
  * - Status badge (completed, at-risk, on-track, past-due)
  * - Amount display (current / target)
  * - Dropdown menu for actions (Edit, Delete)
+ * - Triple encoding: Color + icon + text (not color alone)
  *
  * Accessibility:
  * - ARIA progressbar attributes
  * - Keyboard navigation (Tab, Enter)
  * - Screen reader friendly labels
  * - Touch targets 44x44px minimum
- *
- * Note: Traffic light color system will be added in Phase 5 (US3: Visual Progress)
  *
  * @param goal - Goal to display
  * @param onEdit - Callback when Edit is clicked
@@ -120,6 +139,7 @@ export function GoalCard({ goal, onEdit, onDelete, onAddContribution }: GoalCard
           </div>
           <Progress
             value={percentage}
+            className={getProgressIndicatorClass(status)}
             aria-label={`${goal.name}: ${percentage}% complete`}
           />
         </div>
