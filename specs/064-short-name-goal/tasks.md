@@ -162,21 +162,23 @@
 
 ---
 
-## Phase 8: User Story 6 (P2) - Target Dates & Warnings (7 tasks)
+## Phase 8: User Story 6 (P2) - Target Dates & Warnings (7 tasks) ✅ COMPLETE
 
 **Goal**: Calculate days remaining, required monthly, show "Behind Schedule" warnings
 
 **Independent Test**: User with goal (target date 9 months away) sees "270 days remaining", "$222/month needed"
 
-- [ ] T077 [P] [US6] Add target date display to GoalCard (show "X days remaining" using getDaysRemaining, format date with date-fns)
-- [ ] T078 [P] [US6] Add required monthly display to GoalCard (show "$X/month needed to reach target by [date]" using getRequiredMonthly)
-- [ ] T079 [P] [US6] Add "Behind Schedule" warning badge to GoalCard (show red Badge when getGoalStatus returns 'at-risk', message: "You may not reach target by deadline")
-- [ ] T080 [P] [US6] Add "Past Due" indicator to GoalCard (show red Badge when getGoalStatus returns 'past-due', message: "Target date passed")
-- [ ] T081 [P] [US6] Add target date input to GoalForm (Shadcn Input type="date", validate future dates only with Zod refine)
-- [ ] T082 [P] [US6] Add recalculation message to GoalForm (when editing targetDate, show "Required monthly changed from $X to $Y")
-- [ ] T083 [P] [US6] Add screen reader announcements for target dates (ARIA live region for days remaining updates, announce status changes)
+- [X] T077 [P] [US6] Add target date display to GoalCard (show "X days remaining" using getDaysRemaining, format date with date-fns) - ✅ VERIFIED (already exists lines 136-141)
+- [X] T078 [P] [US6] Add required monthly display to GoalCard (show "$X/month needed to reach target by [date]" using getRequiredMonthly) - ✅ IMPLEMENTED (lines 144-148)
+- [X] T079 [P] [US6] Add "Behind Schedule" warning badge to GoalCard (show red Badge when getGoalStatus returns 'at-risk', message: "You may not reach target by deadline") - ✅ IMPLEMENTED (lines 155-160)
+- [X] T080 [P] [US6] Add "Past Due" indicator to GoalCard (show red Badge when getGoalStatus returns 'past-due', message: "Target date passed") - ✅ VERIFIED (already exists lines 139-140)
+- [X] T081 [P] [US6] Add target date input to GoalForm (Shadcn Input type="date", validate future dates only with Zod refine) - ✅ VERIFIED (already exists lines 91-98, 212-220)
+- [X] T082 [P] [US6] Add recalculation message to GoalForm (when editing targetDate, show "Required monthly changed from $X to $Y") - ✅ IMPLEMENTED (lines 58-59, 73-80, 97-123, 274-280)
+- [X] T083 [P] [US6] Add screen reader announcements for target dates (ARIA live region for days remaining updates, announce status changes) - ✅ IMPLEMENTED (lines 166-177)
 
 **Checkpoint**: ✅ US6 independently testable - Target dates calculate correctly, warnings appear for behind-schedule goals
+
+**PR**: #82 (branches from Phase 7, PR #81)
 
 ---
 
