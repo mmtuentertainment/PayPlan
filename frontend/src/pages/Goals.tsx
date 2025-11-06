@@ -13,7 +13,7 @@
  * - US5: Delete Goal (with confirmation)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { GoalMetrics } from '@/features/goals/components/GoalMetrics';
 import { GoalSkeleton } from '@/features/goals/components/GoalSkeleton';
 import { GoalEmptyState } from '@/features/goals/components/GoalEmptyState';
@@ -24,6 +24,7 @@ import { GoalCelebration } from '@/features/goals/components/GoalCelebration';
 import { useGoalMetrics } from '@/features/goals/hooks/useGoalMetrics';
 import { useGoals } from '@/features/goals/hooks/useGoals';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import type { Goal, CreateGoalInput, UpdateGoalInput } from '@/features/goals/types/goal';
 
 /**
@@ -44,8 +45,19 @@ import type { Goal, CreateGoalInput, UpdateGoalInput } from '@/features/goals/ty
  * - Desktop (1920px): 4 column metrics, 3 column goals
  */
 export const Goals: React.FC = () => {
-  const { goals, loading: isLoading, createGoal, updateGoal, deleteGoal, refreshGoals } = useGoals();
-  const metrics = useGoalMetrics(goals);
+  const { goals, loading: isLoading, createGoal, updateGoal, deleteGoal, archiveGoal, refreshGoals } = useGoals();
+
+  // T091: Filter goals by status
+  const activeGoals = useMemo(() => goals.filter((g) => g.status !== 'archived'), [goals]);
+  const archivedGoals = useMemo(
+    () => goals.filter((g) => g.status === 'archived').sort((a, b) =>
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    ),
+    [goals]
+  );
+
+  // T091: Pass activeGoals to metrics (exclude archived from dashboard)
+  const metrics = useGoalMetrics(activeGoals);
 
   // Dialog state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -53,6 +65,9 @@ export const Goals: React.FC = () => {
   const [selectedGoal, setSelectedGoal] = useState<Goal | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<Goal | undefined>(undefined);
+
+  // T092: Tab state (active/archived)
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
 
   // Celebration state (US5)
   const [showCelebration, setShowCelebration] = useState(false);
@@ -101,6 +116,18 @@ export const Goals: React.FC = () => {
   };
 
   /**
+   * T090: Archive completed goal
+   */
+  const handleArchiveGoal = (goal: Goal) => {
+    const result = archiveGoal(goal.id);
+    if (!result.success) {
+      // TODO: Show error toast (Group 6 or later)
+      alert(`Failed to archive goal: ${result.error}`);
+    }
+    // No need to refresh - useGoals already updates state optimistically
+  };
+
+  /**
    * Handle form submission (create or edit)
    */
   const handleFormSubmit = (data: CreateGoalInput | UpdateGoalInput) => {
@@ -144,11 +171,15 @@ export const Goals: React.FC = () => {
   /**
    * Handle "Archive Goal" from celebration modal
    */
-  const handleArchiveGoal = () => {
-    // TODO: Implement archiveGoal functionality (defer to later phase)
+  const handleArchiveFromCelebration = () => {
+    if (completedGoal) {
+      const result = archiveGoal(completedGoal.id);
+      if (!result.success) {
+        alert(`Failed to archive goal: ${result.error}`);
+      }
+    }
     setShowCelebration(false);
     setCompletedGoal(null);
-    alert('Archive functionality coming soon!');
   };
 
   return (
@@ -179,11 +210,11 @@ export const Goals: React.FC = () => {
           </div>
         )}
 
-        {/* Quick Add Section (US4) */}
-        {!isLoading && goals.length > 0 && (
+        {/* Quick Add Section (US4) - Only show for active goals */}
+        {!isLoading && activeGoals.length > 0 && (
           <div className="mb-8">
             <QuickAddSection
-              goals={goals}
+              goals={activeGoals}
               onGoalComplete={handleGoalComplete}
               onContributionAdded={refreshGoals}
             />
@@ -217,15 +248,57 @@ export const Goals: React.FC = () => {
             <GoalEmptyState onCreateGoal={handleCreateGoal} />
           )}
 
-          {/* Goal List */}
+          {/* T092: Tabs for Active/Archived Goals */}
           {!isLoading && goals.length > 0 && (
-            <GoalList
-              goals={goals}
-              onEdit={handleEditGoal}
-              onDelete={handleDeleteGoal}
-              onContributionAdded={refreshGoals}
-              onGoalComplete={handleGoalComplete}
-            />
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'archived')}>
+              <TabsList className="mb-6">
+                <TabsTrigger value="active">
+                  Active ({activeGoals.length})
+                </TabsTrigger>
+                <TabsTrigger value="archived">
+                  Archived ({archivedGoals.length})
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Active Goals Tab */}
+              <TabsContent value="active">
+                {activeGoals.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-gray-500">
+                      No active goals. Create your first goal to get started!
+                    </p>
+                  </div>
+                ) : (
+                  <GoalList
+                    goals={activeGoals}
+                    onEdit={handleEditGoal}
+                    onDelete={handleDeleteGoal}
+                    onArchive={handleArchiveGoal}
+                    onContributionAdded={refreshGoals}
+                    onGoalComplete={handleGoalComplete}
+                  />
+                )}
+              </TabsContent>
+
+              {/* Archived Goals Tab */}
+              <TabsContent value="archived">
+                {archivedGoals.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-gray-500">
+                      No archived goals. Completed goals will appear here after archiving.
+                    </p>
+                  </div>
+                ) : (
+                  <GoalList
+                    goals={archivedGoals}
+                    onEdit={handleEditGoal}
+                    onDelete={handleDeleteGoal}
+                    onContributionAdded={refreshGoals}
+                    onGoalComplete={handleGoalComplete}
+                  />
+                )}
+              </TabsContent>
+            </Tabs>
           )}
         </section>
       </main>
@@ -273,7 +346,7 @@ export const Goals: React.FC = () => {
           setCompletedGoal(null);
         }}
         onSetNewGoal={handleSetNewGoal}
-        onArchiveGoal={handleArchiveGoal}
+        onArchiveGoal={handleArchiveFromCelebration}
       />
     </div>
   );

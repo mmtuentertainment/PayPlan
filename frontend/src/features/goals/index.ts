@@ -51,6 +51,7 @@ export {
   deleteGoal,
   addContribution,
   archiveGoal,
+  unarchiveGoal,
   clearGoals,
 } from './lib/GoalStorageService';
 

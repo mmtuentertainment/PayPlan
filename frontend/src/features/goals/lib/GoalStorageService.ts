@@ -326,6 +326,52 @@ export function archiveGoal(id: string): GoalResult<Goal> {
 }
 
 /**
+ * Unarchive archived goal
+ * @param id - Goal ID
+ * @returns Result with unarchived goal or error
+ */
+export function unarchiveGoal(id: string): GoalResult<Goal> {
+  try {
+    const goals = loadGoals();
+    const index = goals.findIndex((g) => g.id === id);
+
+    if (index === -1) {
+      return {
+        success: false,
+        error: ERROR_MESSAGES.GOAL_NOT_FOUND,
+      };
+    }
+
+    const goal = goals[index];
+
+    // Can only unarchive archived goals
+    if (goal.status !== 'archived') {
+      return {
+        success: false,
+        error: 'Cannot unarchive non-archived goal',
+      };
+    }
+
+    // Restore to completed status (since it was archived from completed)
+    const unarchivedGoal: Goal = {
+      ...goal,
+      status: 'completed',
+      updatedAt: new Date().toISOString(),
+    };
+
+    goals[index] = unarchivedGoal;
+    saveGoals(goals);
+
+    return { success: true, data: unarchivedGoal };
+  } catch (error) {
+    return {
+      success: false,
+      error: ERROR_MESSAGES.STORAGE_ERROR,
+    };
+  }
+}
+
+/**
  * Clear all goals (for testing/reset)
  * DANGEROUS: Only use for tests or explicit user reset
  */
