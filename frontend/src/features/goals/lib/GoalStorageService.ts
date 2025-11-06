@@ -25,27 +25,102 @@ interface GoalStorage {
 }
 
 /**
- * Load all goals from localStorage
- * @returns Array of goals (empty if none exist or parse error)
+ * Storage quota check result
  */
-export function loadGoals(): Goal[] {
+export interface StorageQuotaResult {
+  usedBytes: number;
+  estimatedLimitBytes: number;
+  usagePercent: number;
+  warning: boolean; // True if >= 80%
+  critical: boolean; // True if >= 95%
+}
+
+/**
+ * Result type for loadGoalsWithCorruptionCheck (T102)
+ */
+export interface LoadGoalsResult {
+  goals: Goal[];
+  corrupted: boolean; // True if data was corrupted and reset
+}
+
+/**
+ * Internal helper: Load goals with corruption detection
+ * @returns Object with goals array and corruption flag
+ * @private
+ */
+function loadGoalsWithCorruptionCheck(): LoadGoalsResult {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) return [];
+    if (!data) return { goals: [], corrupted: false };
 
     const parsed = JSON.parse(data);
     const result = validateGoalStorage(parsed);
 
     if (!result.success) {
-      console.error('[GoalStorageService] Invalid storage format:', result.error);
-      return [];
+      console.error('[GoalStorageService] Invalid storage format, resetting:', result.error);
+      // T102: Reset corrupted data to empty array
+      localStorage.removeItem(STORAGE_KEY);
+      return { goals: [], corrupted: true };
     }
 
-    return result.data.goals;
+    return { goals: result.data.goals, corrupted: false };
   } catch (error) {
-    console.error('[GoalStorageService] Failed to load goals:', error);
-    return [];
+    console.error('[GoalStorageService] Failed to load goals, resetting:', error);
+    // T102: Reset corrupted data to empty array
+    localStorage.removeItem(STORAGE_KEY);
+    return { goals: [], corrupted: true };
   }
+}
+
+/**
+ * Internal helper: Load goals array only (for internal CRUD operations)
+ * @returns Array of goals (empty if none exist)
+ * @private
+ */
+function loadGoalsArray(): Goal[] {
+  return loadGoalsWithCorruptionCheck().goals;
+}
+
+/**
+ * Load all goals from localStorage (T102: with corruption detection)
+ * Public API for hooks/components
+ * @returns Object with goals array and corruption flag
+ */
+export function loadGoals(): LoadGoalsResult {
+  return loadGoalsWithCorruptionCheck(); // T102: Return full result for useGoals hook
+}
+
+/**
+ * Check localStorage quota usage
+ * @returns Storage quota information with warning/critical flags
+ */
+export function checkStorageQuota(): StorageQuotaResult {
+  // Calculate total localStorage usage (all keys)
+  let totalBytes = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key) {
+      const value = localStorage.getItem(key) || '';
+      // Multiply by 2 because JavaScript strings are UTF-16 (2 bytes per char)
+      totalBytes += (key.length + value.length) * 2;
+    }
+  }
+
+  // Estimated localStorage limit (5MB = 5 * 1024 * 1024 bytes)
+  // Most browsers use 5MB, some use 10MB
+  const estimatedLimit = 5 * 1024 * 1024;
+
+  const usagePercent = (totalBytes / estimatedLimit) * 100;
+  const warning = usagePercent >= 80;
+  const critical = usagePercent >= 95;
+
+  return {
+    usedBytes: totalBytes,
+    estimatedLimitBytes: estimatedLimit,
+    usagePercent: Math.round(usagePercent * 10) / 10, // Round to 1 decimal
+    warning,
+    critical,
+  };
 }
 
 /**
@@ -73,7 +148,7 @@ function saveGoals(goals: Goal[]): void {
  * @returns Goal or null if not found
  */
 export function getGoal(id: string): Goal | null {
-  const goals = loadGoals();
+  const goals = loadGoalsArray(); // Use internal helper
   return goals.find((g) => g.id === id) || null;
 }
 
@@ -119,7 +194,7 @@ export function createGoal(input: unknown): GoalResult<Goal> {
   }
 
   try {
-    const goals = loadGoals();
+    const goals = loadGoalsArray();  // T102: Use internal helper
     goals.push(newGoal);
     saveGoals(goals);
 
@@ -151,7 +226,7 @@ export function updateGoal(id: string, input: unknown): GoalResult<Goal> {
   const validated = validationResult.data;
 
   try {
-    const goals = loadGoals();
+    const goals = loadGoalsArray();  // T102: Use internal helper
     const index = goals.findIndex((g) => g.id === id);
 
     if (index === -1) {
@@ -196,7 +271,7 @@ export function updateGoal(id: string, input: unknown): GoalResult<Goal> {
  */
 export function deleteGoal(id: string): GoalResult<void> {
   try {
-    const goals = loadGoals();
+    const goals = loadGoalsArray();  // T102: Use internal helper
     const index = goals.findIndex((g) => g.id === id);
 
     if (index === -1) {
@@ -226,7 +301,7 @@ export function deleteGoal(id: string): GoalResult<void> {
  */
 export function addContribution(goalId: string, contribution: Contribution): GoalResult<Goal> {
   try {
-    const goals = loadGoals();
+    const goals = loadGoalsArray();  // T102: Use internal helper
     const index = goals.findIndex((g) => g.id === goalId);
 
     if (index === -1) {
@@ -287,7 +362,7 @@ export function addContribution(goalId: string, contribution: Contribution): Goa
  */
 export function archiveGoal(id: string): GoalResult<Goal> {
   try {
-    const goals = loadGoals();
+    const goals = loadGoalsArray();  // T102: Use internal helper
     const index = goals.findIndex((g) => g.id === id);
 
     if (index === -1) {
@@ -332,7 +407,7 @@ export function archiveGoal(id: string): GoalResult<Goal> {
  */
 export function unarchiveGoal(id: string): GoalResult<Goal> {
   try {
-    const goals = loadGoals();
+    const goals = loadGoalsArray();  // T102: Use internal helper
     const index = goals.findIndex((g) => g.id === id);
 
     if (index === -1) {

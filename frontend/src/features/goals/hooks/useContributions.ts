@@ -56,8 +56,8 @@ export function useContributions(
   const addContribution = useCallback(
     (goalId: string, amountCents: number, note?: string): GoalResult<Goal> => {
       try {
-        // Load current goals
-        const goals = loadGoals();
+        // Load current goals (T102: destructure LoadGoalsResult)
+        const { goals } = loadGoals();
         const goal = goals.find((g) => g.id === goalId);
 
         if (!goal) {

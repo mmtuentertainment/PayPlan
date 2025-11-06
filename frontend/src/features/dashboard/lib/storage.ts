@@ -164,15 +164,25 @@ export function readBudgets(): Budget[] {
 /**
  * Read goals from localStorage (conditional - may not exist)
  */
+/**
+ * T104: Read goals from localStorage using GoalStorageService
+ *
+ * Uses the canonical GoalStorageService from Feature 064 to ensure
+ * consistent data access across the app. Returns goals array only
+ * (ignores corrupted flag since dashboard is read-only).
+ *
+ * @returns Array of goals (empty if none exist or validation fails)
+ */
 export function readGoals(): unknown[] {
   try {
-    const data = localStorage.getItem(STORAGE_KEYS.GOALS);
-    if (!data) return [];
+    // T104: Import dynamically to avoid circular dependency
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { loadGoals } = require('@/features/goals/lib/GoalStorageService');
 
-    const parsed = JSON.parse(data);
-    return parsed.goals || [];
+    const { goals } = loadGoals(); // T104: Use GoalStorageService (returns {goals, corrupted})
+    return goals;
   } catch (error) {
-    // Goals feature may not be implemented yet
+    // Goals feature may not be implemented yet, or import failed
     return [];
   }
 }

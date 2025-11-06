@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner'; // T102: Toast for corrupted data notification
 import type { Goal, CreateGoalInput, UpdateGoalInput, GoalResult } from '../types/goal';
 import {
   loadGoals,
@@ -13,7 +14,9 @@ import {
   deleteGoal as deleteGoalService,
   archiveGoal as archiveGoalService,
   unarchiveGoal as unarchiveGoalService,
+  checkStorageQuota,
 } from '../lib/GoalStorageService';
+import type { StorageQuotaResult } from '../lib/GoalStorageService';
 import { STORAGE_KEY } from '../lib/constants';
 
 /**
@@ -23,6 +26,7 @@ export interface UseGoalsResult {
   goals: Goal[];
   loading: boolean;
   error: string | null;
+  storageQuota: StorageQuotaResult | null;
   createGoal: (input: CreateGoalInput) => GoalResult<Goal>;
   updateGoal: (id: string, input: UpdateGoalInput) => GoalResult<Goal>;
   deleteGoal: (id: string) => GoalResult<void>;
@@ -55,19 +59,41 @@ export function useGoals(): UseGoalsResult {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storageQuota, setStorageQuota] = useState<StorageQuotaResult | null>(null);
 
   /**
-   * Load goals from localStorage
+   * Check storage quota
+   */
+  const checkQuota = useCallback(() => {
+    try {
+      const quota = checkStorageQuota();
+      setStorageQuota(quota);
+    } catch (err) {
+      console.error('[useGoals] Failed to check storage quota:', err);
+    }
+  }, []);
+
+  /**
+   * Load goals from localStorage (T102: with corruption detection)
    */
   const refreshGoals = useCallback(() => {
     try {
-      const loaded = loadGoals();
+      const { goals: loaded, corrupted } = loadGoals(); // T102: Destructure result
       setGoals(loaded);
       setError(null);
+      checkQuota(); // T101: Check quota after loading
+
+      // T102: Show toast if data was corrupted and reset
+      if (corrupted) {
+        toast.error('Goal data was corrupted and has been reset', {
+          description: 'Your goals could not be loaded due to corrupted data. Starting fresh.',
+          duration: 5000,
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load goals');
     }
-  }, []);
+  }, [checkQuota]);
 
   /**
    * Initial load on mount
@@ -104,21 +130,38 @@ export function useGoals(): UseGoalsResult {
   }, [refreshGoals]);
 
   /**
-   * Create new goal
+   * Create new goal (T101: Check quota before creating)
    */
   const createGoal = useCallback((input: CreateGoalInput): GoalResult<Goal> => {
+    // T101: Check storage quota before creating
+    try {
+      const quota = checkStorageQuota();
+      if (quota.critical) {
+        const errorMsg = 'Storage limit exceeded (>95% full). Cannot create new goals. Please delete or archive existing goals to free up space.';
+        setError(errorMsg);
+        return {
+          success: false,
+          error: errorMsg,
+        };
+      }
+    } catch (err) {
+      console.error('[useGoals] Failed to check quota before create:', err);
+      // Continue with creation if quota check fails (don't block user)
+    }
+
     const result = createGoalService(input);
 
     if (result.success) {
       // Optimistic update: Add to state immediately
       setGoals((prev) => [...prev, result.data]);
       setError(null);
+      checkQuota(); // T101: Update quota after successful creation
     } else {
       setError(result.error);
     }
 
     return result;
-  }, []);
+  }, [checkQuota]);
 
   /**
    * Update existing goal
@@ -130,12 +173,13 @@ export function useGoals(): UseGoalsResult {
       // Optimistic update: Update in state immediately
       setGoals((prev) => prev.map((g) => (g.id === id ? result.data : g)));
       setError(null);
+      checkQuota(); // T101: Update quota after successful update
     } else {
       setError(result.error);
     }
 
     return result;
-  }, []);
+  }, [checkQuota]);
 
   /**
    * Delete goal by ID
@@ -147,12 +191,13 @@ export function useGoals(): UseGoalsResult {
       // Optimistic update: Remove from state immediately
       setGoals((prev) => prev.filter((g) => g.id !== id));
       setError(null);
+      checkQuota(); // T101: Update quota after successful deletion
     } else {
       setError(result.error);
     }
 
     return result;
-  }, []);
+  }, [checkQuota]);
 
   /**
    * Archive completed goal
@@ -164,12 +209,13 @@ export function useGoals(): UseGoalsResult {
       // Optimistic update: Update status in state immediately
       setGoals((prev) => prev.map((g) => (g.id === id ? result.data : g)));
       setError(null);
+      checkQuota(); // T101: Update quota after successful archive
     } else {
       setError(result.error);
     }
 
     return result;
-  }, []);
+  }, [checkQuota]);
 
   /**
    * Unarchive archived goal
@@ -181,17 +227,19 @@ export function useGoals(): UseGoalsResult {
       // Optimistic update: Update status in state immediately
       setGoals((prev) => prev.map((g) => (g.id === id ? result.data : g)));
       setError(null);
+      checkQuota(); // T101: Update quota after successful unarchive
     } else {
       setError(result.error);
     }
 
     return result;
-  }, []);
+  }, [checkQuota]);
 
   return {
     goals,
     loading,
     error,
+    storageQuota, // T101: Expose storage quota state
     createGoal,
     updateGoal,
     deleteGoal,

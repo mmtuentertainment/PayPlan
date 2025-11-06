@@ -21,6 +21,7 @@ import { GoalForm } from '@/features/goals/components/GoalForm';
 import { GoalList } from '@/features/goals/components/GoalList';
 import { QuickAddSection } from '@/features/goals/components/QuickAddSection';
 import { GoalCelebration } from '@/features/goals/components/GoalCelebration';
+import { ExportGoalsButton } from '@/features/goals/components/ExportGoalsButton';
 import { useGoalMetrics } from '@/features/goals/hooks/useGoalMetrics';
 import { useGoals } from '@/features/goals/hooks/useGoals';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/components/ui/alert-dialog';
@@ -231,12 +232,17 @@ export const Goals: React.FC = () => {
               Your Goals
             </h2>
             {!isLoading && goals.length > 0 && (
-              <button
-                onClick={handleCreateGoal}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Create Goal
-              </button>
+              <div className="flex items-center gap-3">
+                {/* T103: Export Goals Button */}
+                <ExportGoalsButton goals={goals} />
+
+                <button
+                  onClick={handleCreateGoal}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Create Goal
+                </button>
+              </div>
             )}
           </div>
 
