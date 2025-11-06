@@ -206,12 +206,14 @@
 
 **Independent Test**: User archives completed goal, it disappears from dashboard, visible in "View Archived"
 
-- [ ] T089 [P] [US8] Add archive/unarchive functions to useGoals hook (updateGoal with status='archived' or 'active')
-- [ ] T090 [P] [US8] Add "Archive Goal" to GoalCard DropdownMenu (show only for completed goals, call archive function)
-- [ ] T091 [P] [US8] Filter archived goals from dashboard in Goals page (goals.filter(g => g.status !== 'archived'))
-- [ ] T092 [US8] Add "View Archived" link/tab to Goals page (Shadcn Tabs: Active | Archived, show archived goals sorted by updatedAt DESC)
+- [X] T089 [P] [US8] Add archive/unarchive functions to useGoals hook (updateGoal with status='archived' or 'active') - ✅ IMPLEMENTED (Added archiveGoal/unarchiveGoal wrappers + unarchiveGoal() in GoalStorageService.ts)
+- [X] T090 [P] [US8] Add "Archive Goal" to GoalCard DropdownMenu (show only for completed goals, call archive function) - ✅ IMPLEMENTED (Conditional menu item, only for completed goals)
+- [X] T091 [P] [US8] Filter archived goals from dashboard in Goals page (goals.filter(g => g.status !== 'archived')) - ✅ IMPLEMENTED (activeGoals/archivedGoals useMemo filters, metrics exclude archived)
+- [X] T092 [US8] Add "View Archived" link/tab to Goals page (Shadcn Tabs: Active | Archived, show archived goals sorted by updatedAt DESC) - ✅ IMPLEMENTED (Shadcn Tabs with counts, empty states, sorted DESC)
 
 **Checkpoint**: ✅ US8 independently testable - Archive/unarchive works, dashboard shows only active
+
+**PR**: #84 (branches from Phase 9, PR #83)
 
 ---
 
