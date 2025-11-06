@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
+import { CheckCircle2 } from 'lucide-react';
 import { formatCurrency } from '@/features/budgets/lib/calculations';
 import type { Goal } from '../types/goal';
 import { getGoalPercent, getDaysRemaining, getGoalStatus } from '../lib/calculations';
@@ -110,6 +111,19 @@ export function GoalCard({ goal, onEdit, onDelete, onAddContribution }: GoalCard
   const daysRemaining = getDaysRemaining(goal.targetDate);
   const status = getGoalStatus(percentage, daysRemaining);
 
+  // Detect prefers-reduced-motion (T072 - US5)
+  const prefersReducedMotion = (() => {
+    try {
+      return typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return false; // Default to animations enabled
+    }
+  })();
+
+  const isComplete = percentage >= 100;
+
   return (
     <Card>
       <CardHeader>
@@ -135,7 +149,15 @@ export function GoalCard({ goal, onEdit, onDelete, onAddContribution }: GoalCard
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">Progress</span>
-            <span className="text-sm font-medium text-gray-900">{percentage}%</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-900">{percentage}%</span>
+              {isComplete && (
+                <CheckCircle2
+                  className={`w-4 h-4 text-green-600 ${prefersReducedMotion ? '' : 'animate-fade-in'}`}
+                  aria-label="Goal completed"
+                />
+              )}
+            </div>
           </div>
           <Progress
             value={percentage}

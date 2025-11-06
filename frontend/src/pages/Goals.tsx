@@ -20,6 +20,7 @@ import { GoalEmptyState } from '@/features/goals/components/GoalEmptyState';
 import { GoalForm } from '@/features/goals/components/GoalForm';
 import { GoalList } from '@/features/goals/components/GoalList';
 import { QuickAddSection } from '@/features/goals/components/QuickAddSection';
+import { GoalCelebration } from '@/features/goals/components/GoalCelebration';
 import { useGoalMetrics } from '@/features/goals/hooks/useGoalMetrics';
 import { useGoals } from '@/features/goals/hooks/useGoals';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/components/ui/alert-dialog';
@@ -52,6 +53,10 @@ export const Goals: React.FC = () => {
   const [selectedGoal, setSelectedGoal] = useState<Goal | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<Goal | undefined>(undefined);
+
+  // Celebration state (US5)
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [completedGoal, setCompletedGoal] = useState<Goal | null>(null);
 
   /**
    * Open create goal dialog
@@ -119,6 +124,33 @@ export const Goals: React.FC = () => {
     }
   };
 
+  /**
+   * Handle goal completion (US5)
+   */
+  const handleGoalComplete = (goal: Goal) => {
+    setCompletedGoal(goal);
+    setShowCelebration(true);
+  };
+
+  /**
+   * Handle "Set New Goal" from celebration modal
+   */
+  const handleSetNewGoal = () => {
+    setShowCelebration(false);
+    setCompletedGoal(null);
+    handleCreateGoal(); // Open create goal form
+  };
+
+  /**
+   * Handle "Archive Goal" from celebration modal
+   */
+  const handleArchiveGoal = () => {
+    // TODO: Implement archiveGoal functionality (defer to later phase)
+    setShowCelebration(false);
+    setCompletedGoal(null);
+    alert('Archive functionality coming soon!');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <header className="mb-6">
@@ -152,6 +184,7 @@ export const Goals: React.FC = () => {
           <div className="mb-8">
             <QuickAddSection
               goals={goals}
+              onGoalComplete={handleGoalComplete}
               onContributionAdded={refreshGoals}
             />
           </div>
@@ -228,6 +261,18 @@ export const Goals: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Goal Celebration Modal (US5: Subtle Completion Moment) */}
+      <GoalCelebration
+        open={showCelebration}
+        goal={completedGoal}
+        onClose={() => {
+          setShowCelebration(false);
+          setCompletedGoal(null);
+        }}
+        onSetNewGoal={handleSetNewGoal}
+        onArchiveGoal={handleArchiveGoal}
+      />
     </div>
   );
 };
