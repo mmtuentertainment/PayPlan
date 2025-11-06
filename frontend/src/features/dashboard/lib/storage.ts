@@ -173,13 +173,22 @@ export function readBudgets(): Budget[] {
  *
  * @returns Array of goals (empty if none exist or validation fails)
  */
+// Lazy-load GoalStorageService to avoid circular dependency
+// This module-level variable caches the import after first use
+let goalStorageService: typeof import('@/features/goals/lib/GoalStorageService') | null = null;
+
 export function readGoals(): unknown[] {
   try {
-    // T104: Import dynamically to avoid circular dependency
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { loadGoals } = require('@/features/goals/lib/GoalStorageService');
+    // T104: Lazy-load GoalStorageService on first use to avoid circular dependency
+    // Using synchronous approach with cached module for compatibility with useState
+    if (!goalStorageService) {
+      // Note: This is still using require for synchronous loading in useState
+      // A future refactor could move to async loading with useEffect
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      goalStorageService = require('@/features/goals/lib/GoalStorageService');
+    }
 
-    const { goals } = loadGoals(); // T104: Use GoalStorageService (returns {goals, corrupted})
+    const { goals } = goalStorageService!.loadGoals(); // T104: Use GoalStorageService
     return goals;
   } catch (error) {
     // Goals feature may not be implemented yet, or import failed
