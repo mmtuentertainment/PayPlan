@@ -57,8 +57,8 @@ export default defineConfig({
       provider: 'v8', // Faster than c8/istanbul (Research Decision 3)
       reporter: ['text', 'json-summary', 'json', 'html', 'lcov'],
 
-      // Only collect coverage for business logic
-      include: ['src/features/*/lib/**/*.ts'],
+      // Only collect coverage for business logic (lib/) and hooks (hooks/)
+      include: ['src/features/*/lib/**/*.ts', 'src/features/*/hooks/**/*.ts'],
       exclude: [
         'node_modules/**',
         'tests/**',

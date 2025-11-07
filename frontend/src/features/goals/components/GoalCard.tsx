@@ -19,6 +19,7 @@ import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '@/features/budgets/lib/calculations';
 import type { Goal } from '../types/goal';
 import { getGoalPercent, getDaysRemaining, getRequiredMonthly, getGoalStatus } from '../lib/calculations';
+import { getProgressIndicatorClass } from '../lib/progressIndicator';
 import { ContributionForm } from './ContributionForm';
 
 interface GoalCardProps {
@@ -65,27 +66,6 @@ function getStatusLabel(status: 'completed' | 'past-due' | 'at-risk' | 'on-track
       return '→ On Track';
     default:
       return status;
-  }
-}
-
-/**
- * Get progress bar color class based on status (traffic light system)
- * Triple encoding: Color + percentage text + status badge
- *
- * Returns Tailwind classes for Shadcn Progress indicator
- */
-function getProgressIndicatorClass(status: 'completed' | 'past-due' | 'at-risk' | 'on-track'): string {
-  switch (status) {
-    case 'completed':
-      return '[&>div]:bg-green-600'; // Green - goal achieved
-    case 'past-due':
-      return '[&>div]:bg-red-600'; // Red - deadline passed, not complete
-    case 'at-risk':
-      return '[&>div]:bg-yellow-500'; // Yellow - <75% progress with <30 days
-    case 'on-track':
-      return '[&>div]:bg-blue-600'; // Blue - making good progress
-    default:
-      return '[&>div]:bg-blue-600';
   }
 }
 

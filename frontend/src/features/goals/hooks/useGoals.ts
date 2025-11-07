@@ -4,7 +4,7 @@
  * US2-US4: Create, Edit, Delete Goals
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner'; // T102: Toast for corrupted data notification
 import type { Goal, CreateGoalInput, UpdateGoalInput, GoalResult } from '../types/goal';
 import {
@@ -61,6 +61,9 @@ export function useGoals(): UseGoalsResult {
   const [error, setError] = useState<string | null>(null);
   const [storageQuota, setStorageQuota] = useState<StorageQuotaResult | null>(null);
 
+  // PR78-5: Track mounted state to prevent memory leaks from state updates after unmount
+  const isMounted = useRef(true);
+
   /**
    * Check storage quota
    */
@@ -100,7 +103,10 @@ export function useGoals(): UseGoalsResult {
    */
   useEffect(() => {
     refreshGoals();
-    setLoading(false);
+    // PR78-5: Guard against state update after unmount
+    if (isMounted.current) {
+      setLoading(false);
+    }
   }, [refreshGoals]);
 
   /**
@@ -234,6 +240,13 @@ export function useGoals(): UseGoalsResult {
 
     return result;
   }, [checkQuota]);
+
+  // PR78-5: Cleanup on unmount - set isMounted to false
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   return {
     goals,
