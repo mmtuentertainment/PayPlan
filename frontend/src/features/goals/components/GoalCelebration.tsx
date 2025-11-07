@@ -4,6 +4,7 @@
  * US5: Subtle Completion Moment
  */
 
+import { useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog';
 import { Button } from '@/shared/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
@@ -48,6 +49,19 @@ export function GoalCelebration({
   onSetNewGoal,
   onArchiveGoal,
 }: GoalCelebrationProps) {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  // Focus management for accessibility (WCAG 2.2 AA requirement)
+  useEffect(() => {
+    if (open && titleRef.current) {
+      // Small delay to ensure modal is fully rendered
+      const timeoutId = setTimeout(() => {
+        titleRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open]);
+
   if (!goal) return null;
 
   // Calculate completion statistics (T073)
@@ -63,7 +77,7 @@ export function GoalCelebration({
         <DialogHeader>
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-6 h-6 text-green-600" aria-hidden="true" />
-            <DialogTitle>Goal complete</DialogTitle>
+            <DialogTitle ref={titleRef} tabIndex={-1}>Goal complete</DialogTitle>
           </div>
         </DialogHeader>
 
