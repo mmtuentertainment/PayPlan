@@ -158,6 +158,7 @@ export const Goals: React.FC = () => {
   const handleGoalComplete = (goal: Goal) => {
     setCompletedGoal(goal);
     setShowCelebration(true);
+    refreshGoals(); // Refresh data to prevent stale data in celebration modal
   };
 
   /**
