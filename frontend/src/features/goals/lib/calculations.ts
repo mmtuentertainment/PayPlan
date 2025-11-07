@@ -120,3 +120,74 @@ export function getGoalStatus(
   if (daysRemaining !== null && daysRemaining < 30 && percentageComplete < 75) return 'at-risk';
   return 'on-track';
 }
+
+/**
+ * Calculate goal completion statistics for celebration modal
+ * Used in GoalCelebration component (T073)
+ *
+ * @param createdAt - ISO date string when goal was created
+ * @param updatedAt - ISO date string when goal was completed
+ * @param currentAmount - Final saved amount in cents
+ * @returns Completion statistics
+ * @throws Error if dates are invalid or amount is negative
+ */
+export function calculateGoalCompletionStats(
+  createdAt: string,
+  updatedAt: string,
+  currentAmount: number
+) {
+  // Validate inputs to prevent NaN and Invalid Date (PR81-4 fix)
+  if (!createdAt || !updatedAt) {
+    throw new Error('Goal must have createdAt and updatedAt timestamps');
+  }
+
+  if (typeof currentAmount !== 'number' || currentAmount < 0) {
+    throw new Error('Goal must have a valid positive currentAmount');
+  }
+
+  const startDate = new Date(createdAt);
+  const endDate = new Date(updatedAt);
+
+  // Validate dates
+  if (isNaN(startDate.getTime())) {
+    throw new Error('Invalid createdAt date');
+  }
+
+  if (isNaN(endDate.getTime())) {
+    throw new Error('Invalid updatedAt date');
+  }
+
+  // Calculate duration in months
+  const months = differenceInMonths(endDate, startDate);
+
+  // Calculate average monthly contribution
+  // Use Math.max(months, 1) to avoid division by zero for same-month completions
+  const avgMonthlyContribution = currentAmount / Math.max(months, 1);
+
+  return {
+    months,
+    avgMonthlyContribution,
+    totalAmount: currentAmount,
+  };
+}
+
+/**
+ * Format completion time for display in celebration modal
+ *
+ * @param months - Number of months to complete
+ * @returns Human-readable time string
+ *
+ * @example
+ * formatCompletionTime(0) // 'less than a month'
+ * formatCompletionTime(1) // '1 month'
+ * formatCompletionTime(6) // '6 months'
+ */
+export function formatCompletionTime(months: number): string {
+  if (months === 0) {
+    return 'less than a month';
+  } else if (months === 1) {
+    return '1 month';
+  } else {
+    return `${months} months`;
+  }
+}
