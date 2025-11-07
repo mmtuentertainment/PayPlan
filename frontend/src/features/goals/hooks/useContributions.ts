@@ -154,6 +154,12 @@ export function useContributions(
         };
       }
     },
+    // PR80-3: undoSpecificContribution is NOT in dependencies because:
+    // 1. The toast onClick closure captures contributionId (string value), not the function
+    // 2. contributionId is unique per contribution and never changes
+    // 3. undoSpecificContribution looks up the snapshot by contributionId, which is stable
+    // 4. Adding it would create circular dependency (defined after addContribution)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [onGoalComplete]
   );
 
