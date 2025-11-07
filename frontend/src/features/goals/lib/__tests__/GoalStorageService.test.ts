@@ -28,19 +28,22 @@ describe('GoalStorageService', () => {
   describe('loadGoals', () => {
     it('should return empty array when localStorage is empty', () => {
       const result = loadGoals();
-      expect(result).toEqual([]);
+      expect(result.goals).toEqual([]);
+      expect(result.corrupted).toBe(false);
     });
 
     it('should return empty array when data is corrupted', () => {
       localStorage.setItem(STORAGE_KEY, 'invalid json{{{');
       const result = loadGoals();
-      expect(result).toEqual([]);
+      expect(result.goals).toEqual([]);
+      expect(result.corrupted).toBe(true);
     });
 
     it('should return empty array when storage format is invalid', () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ invalid: 'format' }));
       const result = loadGoals();
-      expect(result).toEqual([]);
+      expect(result.goals).toEqual([]);
+      expect(result.corrupted).toBe(true);
     });
 
     it('should load valid goals from localStorage', () => {
@@ -53,7 +56,8 @@ describe('GoalStorageService', () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
 
       const result = loadGoals();
-      expect(result).toEqual([goal]);
+      expect(result.goals).toEqual([goal]);
+      expect(result.corrupted).toBe(false);
     });
 
     it('should load multiple goals', () => {
@@ -67,9 +71,10 @@ describe('GoalStorageService', () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
 
       const result = loadGoals();
-      expect(result).toHaveLength(2);
-      expect(result[0].id).toBe(sharedFixtures.ids.goalId1);
-      expect(result[1].id).toBe(sharedFixtures.ids.goalId2);
+      expect(result.goals).toHaveLength(2);
+      expect(result.goals[0].id).toBe(sharedFixtures.ids.goalId1);
+      expect(result.goals[1].id).toBe(sharedFixtures.ids.goalId2);
+      expect(result.corrupted).toBe(false);
     });
   });
 
@@ -304,7 +309,7 @@ describe('GoalStorageService', () => {
       expect(result.success).toBe(true);
 
       // Verify goal is gone
-      const goals = loadGoals();
+      const { goals } = loadGoals();
       expect(goals).toHaveLength(0);
     });
 
@@ -323,7 +328,7 @@ describe('GoalStorageService', () => {
       expect(result.success).toBe(true);
 
       // Verify only goal2 remains
-      const goals = loadGoals();
+      const { goals } = loadGoals();
       expect(goals).toHaveLength(1);
       expect(goals[0].name).toBe('Goal 2');
     });
@@ -626,7 +631,7 @@ describe('GoalStorageService', () => {
       expect(stored).toBeNull();
 
       // Verify loadGoals returns empty
-      const goals = loadGoals();
+      const { goals } = loadGoals();
       expect(goals).toEqual([]);
     });
   });
