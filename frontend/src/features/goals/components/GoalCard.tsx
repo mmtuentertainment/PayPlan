@@ -4,7 +4,7 @@
  * US1: View Dashboard, US3: Edit Goal, US4: Delete Goal, US7: Manual Contribution
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
@@ -121,7 +121,8 @@ export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdde
   const [isContributionFormOpen, setIsContributionFormOpen] = useState(false);
 
   // Detect prefers-reduced-motion (T072 - US5)
-  const prefersReducedMotion = (() => {
+  // Memoized to prevent unnecessary re-checks on every render (Performance: PR81-5)
+  const prefersReducedMotion = useMemo(() => {
     try {
       return typeof window !== 'undefined' &&
         window.matchMedia &&
@@ -129,7 +130,7 @@ export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdde
     } catch {
       return false; // Default to animations enabled
     }
-  })();
+  }, []); // Empty deps - only check once on mount
 
   const isComplete = percentage >= 100;
 
