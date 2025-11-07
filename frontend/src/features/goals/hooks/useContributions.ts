@@ -202,14 +202,6 @@ export function useContributions(
       });
 
       if (result.success) {
-        // Remove snapshot after successful undo
-        undoSnapshots.current.delete(contributionId);
-
-        // If this was the last contribution, clear lastContributionId
-        if (lastContributionId === contributionId) {
-          setLastContributionId(null);
-        }
-
         // Show confirmation toast
         toast('Contribution undone', {
           description: `Reverted to ${formatCurrency(updatedCurrentAmount)}`,
@@ -225,6 +217,15 @@ export function useContributions(
       toast.error('Failed to undo contribution', {
         description: errorMessage,
       });
+    } finally {
+      // PR85-5: Always clean up snapshot to prevent memory leak
+      // Even if undo fails, we don't want stale snapshots accumulating
+      undoSnapshots.current.delete(contributionId);
+
+      // If this was the last contribution, clear lastContributionId
+      if (lastContributionId === contributionId) {
+        setLastContributionId(null);
+      }
     }
   }, [lastContributionId]);
 

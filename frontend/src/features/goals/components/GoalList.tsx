@@ -12,6 +12,7 @@ interface GoalListProps {
   onEdit: (goal: Goal) => void;
   onDelete: (goal: Goal) => void;
   onArchive?: (goal: Goal) => void; // T090: Archive completed goal
+  onUnarchive?: (goal: Goal) => void; // PR85-8: Unarchive goal (restore to active)
   onContributionAdded?: () => void; // T087: Trigger parent refresh
   onGoalComplete?: (goal: Goal) => void; // For celebration trigger
 }
@@ -30,7 +31,7 @@ interface GoalListProps {
  * @param onContributionAdded - Optional callback after contribution added
  * @param onGoalComplete - Optional callback when goal reaches 100%
  */
-export function GoalList({ goals, onEdit, onDelete, onArchive, onContributionAdded, onGoalComplete }: GoalListProps) {
+export function GoalList({ goals, onEdit, onDelete, onArchive, onUnarchive, onContributionAdded, onGoalComplete }: GoalListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {goals.map((goal) => (
@@ -40,6 +41,7 @@ export function GoalList({ goals, onEdit, onDelete, onArchive, onContributionAdd
           onEdit={onEdit}
           onDelete={onDelete}
           onArchive={onArchive}
+          onUnarchive={onUnarchive}
           onContributionAdded={onContributionAdded}
           onGoalComplete={onGoalComplete}
         />

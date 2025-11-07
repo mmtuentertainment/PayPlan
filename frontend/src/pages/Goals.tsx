@@ -46,7 +46,7 @@ import type { Goal, CreateGoalInput, UpdateGoalInput } from '@/features/goals/ty
  * - Desktop (1920px): 4 column metrics, 3 column goals
  */
 export const Goals: React.FC = () => {
-  const { goals, loading: isLoading, createGoal, updateGoal, deleteGoal, archiveGoal, refreshGoals } = useGoals();
+  const { goals, loading: isLoading, createGoal, updateGoal, deleteGoal, archiveGoal, unarchiveGoal, refreshGoals } = useGoals();
 
   // T091: Filter goals by status
   const activeGoals = useMemo(() => goals.filter((g) => g.status !== 'archived'), [goals]);
@@ -124,6 +124,18 @@ export const Goals: React.FC = () => {
     if (!result.success) {
       // TODO: Show error toast (Group 6 or later)
       alert(`Failed to archive goal: ${result.error}`);
+    }
+    // No need to refresh - useGoals already updates state optimistically
+  };
+
+  /**
+   * PR85-8: Unarchive goal (restore to active)
+   */
+  const handleUnarchiveGoal = (goal: Goal) => {
+    const result = unarchiveGoal(goal.id);
+    if (!result.success) {
+      // TODO: Show error toast (Group 6 or later)
+      alert(`Failed to unarchive goal: ${result.error}`);
     }
     // No need to refresh - useGoals already updates state optimistically
   };
@@ -310,6 +322,7 @@ export const Goals: React.FC = () => {
                     goals={archivedGoals}
                     onEdit={handleEditGoal}
                     onDelete={handleDeleteGoal}
+                    onUnarchive={handleUnarchiveGoal}
                     onContributionAdded={refreshGoals}
                     onGoalComplete={handleGoalComplete}
                   />

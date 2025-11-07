@@ -124,7 +124,12 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleExportCSV} disabled={isExporting}>
+          <DropdownMenuItem
+            onClick={handleExportCSV}
+            disabled={isExporting}
+            role="menuitem"
+            aria-label="Export goals as CSV file"
+          >
             <svg
               className="w-4 h-4 mr-2"
               fill="none"
@@ -142,7 +147,12 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
             Export as CSV
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={handleExportJSON} disabled={isExporting}>
+          <DropdownMenuItem
+            onClick={handleExportJSON}
+            disabled={isExporting}
+            role="menuitem"
+            aria-label="Export goals as JSON file"
+          >
             <svg
               className="w-4 h-4 mr-2"
               fill="none"

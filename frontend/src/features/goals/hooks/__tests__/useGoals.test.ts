@@ -398,6 +398,45 @@ describe('useGoals', () => {
 
       expect(GoalStorageService.checkStorageQuota).toHaveBeenCalledTimes(initialQuotaCalls + 2); // Once before, once after
     });
+
+    it('should update quota state even when creation is blocked due to critical storage (PR85-3)', () => {
+      const newGoalInput = {
+        name: 'Test Goal',
+        targetAmount: 100000,
+        category: 'savings' as const,
+      };
+
+      const criticalQuota = {
+        used: 4800000,
+        available: 5000000,
+        percentage: 96,
+        critical: true,
+      };
+
+      vi.mocked(GoalStorageService.checkStorageQuota).mockReturnValue(criticalQuota);
+
+      const { result } = renderHook(() => useGoals());
+
+      // Quota state should be updated even though creation will be blocked
+      expect(result.current.storageQuota).toEqual(criticalQuota);
+
+      let createResult;
+      act(() => {
+        createResult = result.current.createGoal(newGoalInput);
+      });
+
+      // Creation should fail
+      expect(createResult).toEqual({
+        success: false,
+        error: expect.stringContaining('Storage limit exceeded'),
+      });
+
+      // But quota state should still reflect the critical state
+      expect(result.current.storageQuota).toEqual(criticalQuota);
+
+      // createGoal should NOT be called when quota is critical
+      expect(GoalStorageService.createGoal).not.toHaveBeenCalled();
+    });
   });
 
   describe('updateGoal', () => {

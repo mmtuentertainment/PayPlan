@@ -160,6 +160,12 @@ export function calculateGoalCompletionStats(
   // Calculate duration in months
   const months = differenceInMonths(endDate, startDate);
 
+  // Guard against negative completion windows (PR85-4)
+  // This can happen if updatedAt < createdAt (data corruption or time drift)
+  if (months < 0) {
+    throw new Error('Goal completion date cannot be before creation date');
+  }
+
   // Calculate average monthly contribution
   // Use Math.max(months, 1) to avoid division by zero for same-month completions
   const avgMonthlyContribution = currentAmount / Math.max(months, 1);

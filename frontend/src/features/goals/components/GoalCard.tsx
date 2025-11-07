@@ -27,6 +27,7 @@ interface GoalCardProps {
   onEdit: (goal: Goal) => void;
   onDelete: (goal: Goal) => void;
   onArchive?: (goal: Goal) => void; // T090: Archive completed goal
+  onUnarchive?: (goal: Goal) => void; // PR85-8: Unarchive goal (restore to active)
   onContributionAdded?: () => void; // T087: Trigger parent refresh
   onGoalComplete?: (goal: Goal) => void; // For celebration trigger
 }
@@ -91,7 +92,7 @@ function getStatusLabel(status: 'completed' | 'past-due' | 'at-risk' | 'on-track
  * @param onContributionAdded - Optional callback after contribution added
  * @param onGoalComplete - Optional callback when goal reaches 100%
  */
-export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdded, onGoalComplete }: GoalCardProps) {
+export function GoalCard({ goal, onEdit, onDelete, onArchive, onUnarchive, onContributionAdded, onGoalComplete }: GoalCardProps) {
   const percentage = getGoalPercent(goal.currentAmount, goal.targetAmount);
   const daysRemaining = getDaysRemaining(goal.targetDate);
   const requiredMonthly = getRequiredMonthly(goal.currentAmount, goal.targetAmount, goal.targetDate);
@@ -242,6 +243,12 @@ export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdde
             {goal.status === 'completed' && onArchive && (
               <DropdownMenuItem onClick={() => onArchive(goal)}>
                 Archive Goal
+              </DropdownMenuItem>
+            )}
+            {/* PR85-8: Unarchive menu item (only show for archived goals) */}
+            {goal.status === 'archived' && onUnarchive && (
+              <DropdownMenuItem onClick={() => onUnarchive(goal)}>
+                Unarchive Goal
               </DropdownMenuItem>
             )}
             <DropdownMenuItem

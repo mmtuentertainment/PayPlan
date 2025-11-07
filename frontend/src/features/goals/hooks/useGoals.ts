@@ -142,6 +142,8 @@ export function useGoals(): UseGoalsResult {
     // T101: Check storage quota before creating
     try {
       const quota = checkStorageQuota();
+      setStorageQuota(quota); // PR85-3: Update quota state even when blocking creation
+
       if (quota.critical) {
         const errorMsg = 'Storage limit exceeded (>95% full). Cannot create new goals. Please delete or archive existing goals to free up space.';
         setError(errorMsg);

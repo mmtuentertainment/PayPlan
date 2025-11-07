@@ -174,7 +174,7 @@ export function readBudgets(): Budget[] {
  *
  * @returns Array of goals (empty if none exist or validation fails)
  */
-export function readGoals(): unknown[] {
+export function readGoals(): Goal[] {
   try {
     const { goals } = loadGoals(); // T104: Use GoalStorageService
     return goals;

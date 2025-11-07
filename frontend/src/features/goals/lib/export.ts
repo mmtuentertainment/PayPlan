@@ -40,7 +40,7 @@ const PII_PATTERNS = {
   // Names: "John Doe", "Jane Smith" (capitalized first/last name pattern)
   // Conservative pattern: Only match common first names followed by last names
   // This avoids false positives like "Emergency Fund" or "House Fund"
-  name: /\b(?:John|Jane|James|Mary|Robert|Patricia|Michael|Linda|William|Elizabeth|David|Barbara|Richard|Susan|Joseph|Jessica|Thomas|Sarah|Charles|Karen|Christopher|Nancy|Daniel|Lisa|Mark|Betty|Donald|Helen|George|Sandra|Kenneth|Donna|Steven|Carol|Paul|Ruth|Andrew|Sharon|Joshua|Michelle|Emily|Laura|Madison|Emma|Jacob|Olivia|Noah|Sophia|Liam|Isabella|Mason|Ava|Ethan|Mia|Alexander|Charlotte)\s[A-Z][a-z]+\b/g,
+  // name pattern REMOVED (PR85-6): Unreliable detection, false positives on goal names like "John's Emergency Fund"
 
   // Street Address: "123 Main St", "456 Oak Avenue"
   // Updated: Fixed to match full address pattern, not just street name
@@ -63,7 +63,7 @@ export function sanitizePII(text: string): string {
   sanitized = sanitized.replace(PII_PATTERNS.ssn, '[SSN_REDACTED]');
   sanitized = sanitized.replace(PII_PATTERNS.phone, '[PHONE_REDACTED]');
   sanitized = sanitized.replace(PII_PATTERNS.address, '[ADDRESS_REDACTED]');
-  sanitized = sanitized.replace(PII_PATTERNS.name, '[NAME_REDACTED]');
+  // name sanitization REMOVED (PR85-6) - see comment in PII_PATTERNS above
 
   return sanitized;
 }
