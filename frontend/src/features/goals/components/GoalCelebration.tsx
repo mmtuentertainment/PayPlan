@@ -64,11 +64,26 @@ export function GoalCelebration({
 
   if (!goal) return null;
 
+  // Validate required fields to prevent NaN or Invalid Date
+  if (!goal.createdAt || !goal.updatedAt || goal.currentAmount == null) {
+    console.error('GoalCelebration: Missing required fields', { goal });
+    return null;
+  }
+
   // Calculate completion statistics (T073)
-  const months = differenceInMonths(
-    new Date(goal.updatedAt),
-    new Date(goal.createdAt)
-  );
+  const createdDate = new Date(goal.createdAt);
+  const updatedDate = new Date(goal.updatedAt);
+
+  // Validate dates are valid
+  if (isNaN(createdDate.getTime()) || isNaN(updatedDate.getTime())) {
+    console.error('GoalCelebration: Invalid dates', {
+      createdAt: goal.createdAt,
+      updatedAt: goal.updatedAt,
+    });
+    return null;
+  }
+
+  const months = differenceInMonths(updatedDate, createdDate);
   const avgMonthly = goal.currentAmount / Math.max(months, 1); // Avoid division by zero
 
   return (
