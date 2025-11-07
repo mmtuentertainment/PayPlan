@@ -423,7 +423,7 @@ export function unarchiveGoal(id: string): GoalResult<Goal> {
     if (goal.status !== 'archived') {
       return {
         success: false,
-        error: 'Cannot unarchive non-archived goal',
+        error: ERROR_MESSAGES.CANNOT_UNARCHIVE,
       };
     }
 

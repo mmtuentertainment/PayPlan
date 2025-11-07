@@ -8,6 +8,7 @@ import type { Category } from '@/features/categories/types/category';
 import type { Transaction } from '@/features/transactions/types/transaction';
 import type { Budget } from '@/features/budgets/types/budget';
 import type { StreakData } from '@/features/dashboard/types/gamification';
+import type { Goal } from '@/features/goals/types/goal';
 
 // Canonical Zod schemas imported from domain modules (ADR 002)
 import { categorySchema as CategorySchema } from '@/features/categories/lib/schemas';

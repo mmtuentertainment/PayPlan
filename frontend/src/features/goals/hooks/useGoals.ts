@@ -157,18 +157,42 @@ export function useGoals(): UseGoalsResult {
       // Continue with creation if quota check fails (don't block user)
     }
 
-    const result = createGoalService(input);
+    // PR85-H1: Wrap goal creation in try-catch to handle QuotaExceededError race condition
+    // Even if pre-check passes, another tab could fill storage between check and write
+    try {
+      const result = createGoalService(input);
 
-    if (result.success) {
-      // Optimistic update: Add to state immediately
-      setGoals((prev) => [...prev, result.data]);
-      setError(null);
-      checkQuota(); // T101: Update quota after successful creation
-    } else {
-      setError(result.error);
+      if (result.success) {
+        // Optimistic update: Add to state immediately
+        setGoals((prev) => [...prev, result.data]);
+        setError(null);
+        checkQuota(); // T101: Update quota after successful creation
+      } else if (result.error && result.error.includes('QuotaExceededError')) {
+        // Handle quota error even if pre-check passed (race condition)
+        const quotaError = 'Storage limit exceeded. Please delete or archive existing goals to free up space.';
+        setError(quotaError);
+        return {
+          success: false,
+          error: quotaError,
+        };
+      } else {
+        setError(result.error);
+      }
+
+      return result;
+    } catch (err) {
+      // Catch QuotaExceededError thrown by localStorage.setItem()
+      if (err instanceof Error && (err.name === 'QuotaExceededError' || err.message.includes('quota'))) {
+        const quotaError = 'Storage limit exceeded. Please delete or archive existing goals to free up space.';
+        setError(quotaError);
+        return {
+          success: false,
+          error: quotaError,
+        };
+      }
+      // Re-throw unexpected errors
+      throw err;
     }
-
-    return result;
   }, [checkQuota]);
 
   /**
