@@ -306,8 +306,13 @@ describe('useContributions', () => {
 
   describe('undoContribution', () => {
     it('should restore previous state and show toast', () => {
-      const goalBefore = { ...mockGoal, currentAmount: 50000 }; // $500
-      const goalAfter = { ...mockGoal, currentAmount: 60000 }; // $600
+      const goalBefore = { ...mockGoal, currentAmount: 50000, contributions: [] }; // $500
+      const contributionId = 'test-contribution-id';
+      const goalAfter = {
+        ...mockGoal,
+        currentAmount: 60000,
+        contributions: [{ id: contributionId, goalId: 'goal-123', amount: 10000, note: null, createdAt: '2025-01-01' }]
+      }; // $600
 
       // First load: before contribution
       vi.mocked(GoalStorageService.loadGoals).mockReturnValueOnce({
@@ -326,6 +331,12 @@ describe('useContributions', () => {
       // Add contribution
       act(() => {
         result.current.addContribution('goal-123', 10000);
+      });
+
+      // Mock loadGoals for undo (undoSpecificContribution needs current state)
+      vi.mocked(GoalStorageService.loadGoals).mockReturnValueOnce({
+        goals: [goalAfter],
+        success: true,
       });
 
       // Mock undo update
@@ -502,6 +513,201 @@ describe('useContributions', () => {
       });
 
       expect(result.current.canUndo).toBe(false);
+    });
+  });
+
+  describe('Race Condition Fix (PR80-2)', () => {
+    it('should correctly undo first contribution when multiple contributions added rapidly', () => {
+      // Simulate the race condition scenario:
+      // 1. User adds contribution #1 ($100) -> toast #1 appears
+      // 2. User adds contribution #2 ($50) -> toast #2 appears
+      // 3. User clicks "Undo" on toast #1 -> should undo contribution #1 (not #2)
+
+      const goalInitial = { ...mockGoal, currentAmount: 50000 }; // $500
+      const goalAfterFirst = { ...mockGoal, currentAmount: 60000 }; // $600
+      const goalAfterSecond = { ...mockGoal, currentAmount: 65000 }; // $650
+
+      // Mock loadGoals for contribution #1
+      vi.mocked(GoalStorageService.loadGoals).mockReturnValueOnce({
+        goals: [goalInitial],
+        success: true,
+      });
+
+      // Mock updateGoal for contribution #1
+      vi.mocked(GoalStorageService.updateGoal).mockReturnValueOnce({
+        success: true,
+        data: goalAfterFirst,
+      });
+
+      const { result } = renderHook(() => useContributions());
+
+      // Capture toast action onClick for contribution #1
+      let undoFirstContribution: (() => void) | undefined;
+
+      act(() => {
+        result.current.addContribution('goal-123', 10000); // Add $100
+      });
+
+      // Extract undo callback from first toast (simulates clicking "Undo" on toast #1)
+      const firstToastCall = vi.mocked(toast).mock.calls[0];
+      undoFirstContribution = firstToastCall[1]?.action?.onClick;
+
+      // Mock loadGoals for contribution #2 (goal now has first contribution)
+      vi.mocked(GoalStorageService.loadGoals).mockReturnValueOnce({
+        goals: [goalAfterFirst],
+        success: true,
+      });
+
+      // Mock updateGoal for contribution #2
+      vi.mocked(GoalStorageService.updateGoal).mockReturnValueOnce({
+        success: true,
+        data: goalAfterSecond,
+      });
+
+      // Add second contribution rapidly (before first toast expires)
+      act(() => {
+        result.current.addContribution('goal-123', 5000); // Add $50
+      });
+
+      // Mock loadGoals for undo (undoSpecificContribution needs current state with BOTH contributions)
+      const contributionId1 = 'first-contribution-id';
+      const contributionId2 = 'second-contribution-id';
+      const goalWithBothContributions = {
+        ...mockGoal,
+        currentAmount: 65000, // $650
+        contributions: [
+          { id: contributionId1, goalId: 'goal-123', amount: 10000, note: null, createdAt: '2025-01-01' },
+          { id: contributionId2, goalId: 'goal-123', amount: 5000, note: null, createdAt: '2025-01-01' }
+        ]
+      };
+
+      vi.mocked(GoalStorageService.loadGoals).mockReturnValueOnce({
+        goals: [goalWithBothContributions],
+        success: true,
+      });
+
+      // Mock undo for first contribution (should revert to $550, removing first $100)
+      vi.mocked(GoalStorageService.updateGoal).mockReturnValueOnce({
+        success: true,
+        data: { ...mockGoal, currentAmount: 55000 }, // $550 after removing first $100
+      });
+
+      // Click "Undo" on toast #1 (should undo first contribution)
+      act(() => {
+        undoFirstContribution!();
+      });
+
+      // Verify that undo removed first contribution ($100) from current state ($650)
+      // Result: $650 - $100 = $550 (NOT $500, because second contribution remains!)
+      expect(GoalStorageService.updateGoal).toHaveBeenLastCalledWith(
+        'goal-123',
+        expect.objectContaining({
+          currentAmount: 55000, // $550 ($650 - $100 first contribution)
+          contributions: expect.arrayContaining([
+            expect.objectContaining({ amount: 5000 }) // Second contribution remains
+          ])
+        })
+      );
+
+      // Verify correct undo toast message
+      expect(toast).toHaveBeenCalledWith(
+        'Contribution undone',
+        expect.objectContaining({
+          description: expect.stringContaining('$550.00'), // $650 - $100 = $550
+        })
+      );
+    });
+
+    it('should correctly undo second contribution when multiple contributions added rapidly', () => {
+      // Similar test but clicking "Undo" on toast #2 (second contribution)
+
+      const goalInitial = { ...mockGoal, currentAmount: 50000 }; // $500
+      const goalAfterFirst = { ...mockGoal, currentAmount: 60000 }; // $600
+      const goalAfterSecond = { ...mockGoal, currentAmount: 65000 }; // $650
+
+      // Mock contribution #1
+      vi.mocked(GoalStorageService.loadGoals).mockReturnValueOnce({
+        goals: [goalInitial],
+        success: true,
+      });
+      vi.mocked(GoalStorageService.updateGoal).mockReturnValueOnce({
+        success: true,
+        data: goalAfterFirst,
+      });
+
+      const { result } = renderHook(() => useContributions());
+
+      act(() => {
+        result.current.addContribution('goal-123', 10000); // Add $100
+      });
+
+      // Mock contribution #2
+      vi.mocked(GoalStorageService.loadGoals).mockReturnValueOnce({
+        goals: [goalAfterFirst],
+        success: true,
+      });
+      vi.mocked(GoalStorageService.updateGoal).mockReturnValueOnce({
+        success: true,
+        data: goalAfterSecond,
+      });
+
+      let undoSecondContribution: (() => void) | undefined;
+
+      act(() => {
+        result.current.addContribution('goal-123', 5000); // Add $50
+      });
+
+      // Extract undo callback from second toast
+      const secondToastCall = vi.mocked(toast).mock.calls[1];
+      undoSecondContribution = secondToastCall[1]?.action?.onClick;
+
+      // Mock loadGoals for undo (undoSpecificContribution needs current state with BOTH contributions)
+      const contrib1Id = 'first-contribution-id';
+      const contrib2Id = 'second-contribution-id';
+      const goalWithBoth = {
+        ...mockGoal,
+        currentAmount: 65000, // $650
+        contributions: [
+          { id: contrib1Id, goalId: 'goal-123', amount: 10000, note: null, createdAt: '2025-01-01' },
+          { id: contrib2Id, goalId: 'goal-123', amount: 5000, note: null, createdAt: '2025-01-01' }
+        ]
+      };
+
+      vi.mocked(GoalStorageService.loadGoals).mockReturnValueOnce({
+        goals: [goalWithBoth],
+        success: true,
+      });
+
+      // Mock undo for second contribution (should remove $50, leaving $600)
+      vi.mocked(GoalStorageService.updateGoal).mockReturnValueOnce({
+        success: true,
+        data: goalAfterFirst,
+      });
+
+      // Click "Undo" on toast #2 (should undo second contribution only)
+      act(() => {
+        undoSecondContribution!();
+      });
+
+      // Verify that undo removed second contribution ($50) from current state ($650)
+      // Result: $650 - $50 = $600 (first contribution remains)
+      expect(GoalStorageService.updateGoal).toHaveBeenLastCalledWith(
+        'goal-123',
+        expect.objectContaining({
+          currentAmount: 60000, // $600 ($650 - $50 second contribution)
+          contributions: expect.arrayContaining([
+            expect.objectContaining({ amount: 10000 }) // First contribution remains
+          ])
+        })
+      );
+
+      // Verify correct undo toast message
+      expect(toast).toHaveBeenCalledWith(
+        'Contribution undone',
+        expect.objectContaining({
+          description: expect.stringContaining('$600.00'), // $650 - $50 = $600
+        })
+      );
     });
   });
 });
