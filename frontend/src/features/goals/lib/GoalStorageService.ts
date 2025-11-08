@@ -94,10 +94,16 @@ export function loadGoals(): LoadGoalsResult {
  * Check localStorage quota usage
  * @returns Storage quota information with warning/critical flags
  *
- * Uses Storage API (navigator.storage.estimate()) when available for accurate quota,
- * falls back to conservative 5MB estimate otherwise. Safari/Firefox may allow 10MB.
+ * Bot review H1: Made synchronous to avoid async complexity in React hooks.
+ * Phase 1 uses conservative 5MB estimate. Storage API support deferred to Phase 2.
+ *
+ * Browser localStorage limits (approximate):
+ * - Chrome/Edge: 10MB per origin
+ * - Firefox: 10MB per origin
+ * - Safari: 5MB per origin
+ * - Conservative estimate: 5MB (works across all browsers)
  */
-export async function checkStorageQuota(): Promise<StorageQuotaResult> {
+export function checkStorageQuota(): StorageQuotaResult {
   // Calculate total localStorage usage (all keys)
   let totalBytes = 0;
   for (let i = 0; i < localStorage.length; i++) {
@@ -109,22 +115,9 @@ export async function checkStorageQuota(): Promise<StorageQuotaResult> {
     }
   }
 
-  // Try to detect actual quota using Storage API (Chrome 52+, Firefox 51+, Safari 15.2+)
-  let estimatedLimit = 5 * 1024 * 1024; // Default: 5MB (conservative estimate)
-
-  if ('storage' in navigator && 'estimate' in navigator.storage) {
-    try {
-      const estimate = await navigator.storage.estimate();
-      // estimate.quota is the total storage quota in bytes
-      // For localStorage, actual limit varies by browser but quota gives accurate value
-      if (estimate.quota && estimate.quota > 0) {
-        estimatedLimit = estimate.quota;
-      }
-    } catch (error) {
-      // Storage API failed, use fallback
-      console.warn('[GoalStorageService] Storage API unavailable, using 5MB fallback');
-    }
-  }
+  // Phase 1: Use conservative 5MB estimate (lowest common denominator)
+  // Ensures quota warnings trigger before Safari's 5MB limit is reached
+  const estimatedLimit = 5 * 1024 * 1024; // 5MB in bytes
 
   const usagePercent = (totalBytes / estimatedLimit) * 100;
   const warning = usagePercent >= 80;

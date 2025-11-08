@@ -54,11 +54,12 @@ describe('useGoals', () => {
       corrupted: false,
     });
 
-    // Default mock: checkStorageQuota returns normal usage
-    vi.mocked(GoalStorageService.checkStorageQuota).mockResolvedValue({
-      used: 1000,
-      available: 5000000,
-      percentage: 0.02,
+    // Default mock: checkStorageQuota returns normal usage (sync function)
+    vi.mocked(GoalStorageService.checkStorageQuota).mockReturnValue({
+      usedBytes: 1000,
+      estimatedLimitBytes: 5000000,
+      usagePercent: 0.02,
+      warning: false,
       critical: false,
     });
   });
@@ -141,13 +142,14 @@ describe('useGoals', () => {
 
     it('should expose storage quota state', async () => {
       const mockQuota = {
-        used: 2500000,
-        available: 5000000,
-        percentage: 50,
+        usedBytes: 2500000,
+        estimatedLimitBytes: 5000000,
+        usagePercent: 50,
+        warning: false,
         critical: false,
       };
 
-      vi.mocked(GoalStorageService.checkStorageQuota).mockResolvedValue(mockQuota);
+      vi.mocked(GoalStorageService.checkStorageQuota).mockReturnValue(mockQuota);
 
       const { result } = renderHook(() => useGoals());
 
@@ -157,9 +159,9 @@ describe('useGoals', () => {
     });
 
     it('should handle quota check failure gracefully', () => {
-      vi.mocked(GoalStorageService.checkStorageQuota).mockRejectedValue(
-        new Error('Quota API unavailable')
-      );
+      vi.mocked(GoalStorageService.checkStorageQuota).mockImplementation(() => {
+        throw new Error('Quota API unavailable');
+      });
 
       const { result } = renderHook(() => useGoals());
 
@@ -293,10 +295,11 @@ describe('useGoals', () => {
     });
 
     it('should prevent creation when storage is critical (>95%)', async () => {
-      vi.mocked(GoalStorageService.checkStorageQuota).mockResolvedValue({
-        used: 4800000,
-        available: 5000000,
-        percentage: 96,
+      vi.mocked(GoalStorageService.checkStorageQuota).mockReturnValue({
+        usedBytes: 4800000,
+        estimatedLimitBytes: 5000000,
+        usagePercent: 96,
+        warning: true,
         critical: true,
       });
 
@@ -327,9 +330,9 @@ describe('useGoals', () => {
     });
 
     it('should continue creation if quota check fails', () => {
-      vi.mocked(GoalStorageService.checkStorageQuota).mockRejectedValue(
-        new Error('Quota API unavailable')
-      );
+      vi.mocked(GoalStorageService.checkStorageQuota).mockImplementation(() => {
+        throw new Error('Quota API unavailable');
+      });
 
       const newGoalInput = {
         name: 'Test Goal',
@@ -414,13 +417,14 @@ describe('useGoals', () => {
       };
 
       const criticalQuota = {
-        used: 4800000,
-        available: 5000000,
-        percentage: 96,
+        usedBytes: 4800000,
+        estimatedLimitBytes: 5000000,
+        usagePercent: 96,
+        warning: true,
         critical: true,
       };
 
-      vi.mocked(GoalStorageService.checkStorageQuota).mockResolvedValue(criticalQuota);
+      vi.mocked(GoalStorageService.checkStorageQuota).mockReturnValue(criticalQuota);
 
       const { result } = renderHook(() => useGoals());
 
