@@ -54,8 +54,8 @@ main
 
 ### Review Order (Sequential)
 1. **PR #74** (Phase 1) → Review & approve → Merge to `064-short-name-goal`
-2. **Phase 2 PR** → Review & approve → Merge to `064-phase1-setup`
-3. **Phase 3 PR** → Review & approve → Merge to `064-phase2-foundational`
+2. **Phase 2 PR** → Review & approve → Merge to `064-short-name-goal`
+3. **Phase 3 PR** → Review & approve → Merge to `064-short-name-goal`
 4. Continue until Phase 11...
 
 ### Why Stacked PRs?
@@ -65,12 +65,21 @@ main
 - ✅ **Rollback safety** - Can revert individual phases without losing all work
 - ✅ **Parallel work** - Can continue Phase 3 while Phase 2 is in review
 
-### Merge Strategy
+### Merge Strategy (CLARIFIED 2025-11-08)
+
+**Sequential Merging** (Standard GitHub workflow):
+
 After each phase PR is approved:
-1. Merge to previous phase branch
-2. Previous phase branch merges to its parent
-3. Continue cascade until all phases merged to base
+1. **Merge directly to base** (`064-short-name-goal`)
+2. Each phase is **self-contained** and independently testable
+3. No cascading merges (simpler, safer)
 4. Finally merge base `064-short-name-goal` → `main`
+
+**Why Sequential over Cascading?**
+- ✅ **Simpler**: Standard GitHub PR workflow (no complex rebase logic)
+- ✅ **Faster**: Reviews don't wait for previous phases
+- ✅ **Safer**: Each phase independently verified by CI/CD
+- ✅ **Phase 1 principle**: Simplicity over complexity
 
 ## Current Status
 

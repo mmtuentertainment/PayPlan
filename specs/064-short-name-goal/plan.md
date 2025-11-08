@@ -172,7 +172,7 @@ frontend/src/features/dashboard/      # Integration point (Feature 062 existing)
     └── GoalProgressWidget.tsx        # ✅ EXISTING - UPDATE to use ROUTES.GOALS instead of hardcoded '/goals'
 ```
 
-**Structure Decision**: Feature-based architecture (PayPlan Constitution mandate). Goals feature self-contained in `features/goals/` with Shadcn UI components for all UI (Card for metrics/goals, Progress for bars, Badge for status, Toast for undo, Dialog for forms). Business logic in `lib/` requires 80%+ test coverage (90%+ for `calculations.ts` financial logic). Integration with main dashboard via existing GoalProgressWidget reading computed GoalProgress[] data.
+**Structure Decision**: Feature-based architecture (PayPlan Constitution mandate). Goals feature self-contained in `features/goals/` with Shadcn UI components for all UI (Card for metrics/goals, Progress for bars, Badge for status, Sonner for undo, Dialog for forms). Business logic in `lib/` requires **phased test coverage** (Week 1-2: 60%, Week 3-6: 70%, Week 7+: 80% target per Constitution v3.1). **Financial calculations always 90%+** (`calculations.ts` is money-critical). Integration with main dashboard via existing GoalProgressWidget reading computed GoalProgress[] data.
 
 **Shadcn Component Installation**:
 ```bash
