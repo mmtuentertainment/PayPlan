@@ -35,8 +35,10 @@ const PII_PATTERNS = {
   ssn: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
 
   // Credit Card: 1234-5678-9012-3456 (13-19 digits, Amex 15 digits supported)
-  // Updated: Fixed to also match 15-digit Amex cards (4-6-5 pattern)
-  creditCard: /\b(?:\d{4}[-\s]?\d{6}[-\s]?\d{5}|\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{3,7})\b/g,
+  // Bot review H1: Added patterns for no-separator formats
+  // Patterns: 16-digit no spaces (1234567890123456), 15-digit Amex (123456789012345),
+  //           4-6-5 Amex with separators, 4-4-4-4 standard with separators
+  creditCard: /\b(?:\d{16}|\d{15}|\d{4}[-\s]?\d{6}[-\s]?\d{5}|\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{3,7})\b/g,
 
   // Names: "John Doe", "Jane Smith" (capitalized first/last name pattern)
   // Conservative pattern: Only match common first names followed by last names
@@ -202,8 +204,11 @@ export function exportGoalsToCSV(goals: Goal[]): string {
 
   if (totalRows > EXCEL_MAX_ROWS) {
     throw new Error(
-      `CSV export too large: ${totalRows.toLocaleString()} rows exceeds Excel's limit of ${EXCEL_MAX_ROWS.toLocaleString()} rows. ` +
-        `Please export in smaller batches or use JSON format (no row limit).`
+      `CSV export too large: ${totalRows.toLocaleString()} rows exceeds Excel's limit of ${EXCEL_MAX_ROWS.toLocaleString()} rows.\n\n` +
+        `Recommended solutions:\n` +
+        `1. Export as JSON instead (no row limit) - select "Export as JSON" from the export menu\n` +
+        `2. Export goals in smaller date ranges or batches\n` +
+        `3. Archive old goals and export only active ones`
     );
   }
 

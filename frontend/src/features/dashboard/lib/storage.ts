@@ -174,13 +174,20 @@ export function readBudgets(): Budget[] {
  * (ignores corrupted flag since dashboard is read-only).
  *
  * @returns Array of goals (empty if none exist or validation fails)
+ *
+ * @remarks Bot review C1: No circular dependency exists
+ * - dashboard → goals (one-way dependency, safe)
+ * - goals does NOT import dashboard (verified 2025-11-08)
+ * - Try-catch handles loadGoals() errors (localStorage, quota, corruption)
  */
 export function readGoals(): Goal[] {
   try {
     const { goals } = loadGoals(); // T104: Use GoalStorageService
     return goals;
   } catch (error) {
-    // Goals feature may not be implemented yet, or import failed
+    // Handle errors from loadGoals() (localStorage read failures, quota errors, data corruption)
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading goals from localStorage via GoalStorageService');
     return [];
   }
 }

@@ -115,7 +115,7 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
             variant="outline"
             disabled={disabled || isExporting || goals.length === 0}
             className="inline-flex items-center"
-            aria-label="Export goals"
+            aria-label={isExporting ? 'Exporting goals' : 'Export goals'}
             aria-busy={isExporting}
           >
             {/* Conditional icon: spinner when exporting, download otherwise */}

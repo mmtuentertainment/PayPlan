@@ -156,7 +156,11 @@ export function useGoals(): UseGoalsResult {
     try {
       const quota = checkStorageQuota();
 
-      // Bot review H2: Only update quota state if NOT blocking creation
+      // Bot review H2: Update quota state BEFORE returning critical error
+      // This ensures the UI always shows current quota status
+      setStorageQuota(quota);
+
+      // Block creation if storage is critical (>95% full)
       if (quota.critical) {
         const errorMsg = 'Storage limit exceeded (>95% full). Cannot create new goals. Please delete or archive existing goals to free up space.';
         setError(errorMsg);
@@ -165,9 +169,6 @@ export function useGoals(): UseGoalsResult {
           error: errorMsg,
         };
       }
-
-      // Quota is not critical, safe to update state and proceed
-      setStorageQuota(quota);
     } catch (err) {
       console.error('[useGoals] Failed to check quota before create:', err);
       // Continue with creation if quota check fails (don't block user)

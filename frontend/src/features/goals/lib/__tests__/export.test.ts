@@ -179,6 +179,12 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
         expect(result).toBe('Amex: [CARD_REDACTED]');
       });
 
+      it('should redact Amex without separators (15 digits) - Bot review H1', () => {
+        const text = 'Amex: 123456789012345';
+        const result = sanitizePII(text);
+        expect(result).toBe('Amex: [CARD_REDACTED]');
+      });
+
       it('should redact card with spaces', () => {
         const text = 'Visa: 1234 5678 9012 3456';
         const result = sanitizePII(text);
