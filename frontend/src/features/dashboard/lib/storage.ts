@@ -182,7 +182,7 @@ export function readBudgets(): Budget[] {
  */
 export function readGoals(): Goal[] {
   try {
-    const { goals } = loadGoals(); // T104: Use GoalStorageService
+    const { data: goals } = loadGoals(); // T104: Use GoalStorageService
     return goals;
   } catch (error) {
     // Handle errors from loadGoals() (localStorage read failures, quota errors, data corruption)

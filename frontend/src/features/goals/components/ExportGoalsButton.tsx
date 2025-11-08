@@ -184,7 +184,7 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
 
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={handleExportCSV}
+            onSelect={handleExportCSV}
             disabled={isExporting}
             role="menuitem"
             aria-label="Export goals as CSV file"
@@ -207,7 +207,7 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onClick={handleExportJSON}
+            onSelect={handleExportJSON}
             disabled={isExporting}
             role="menuitem"
             aria-label="Export goals as JSON file"
