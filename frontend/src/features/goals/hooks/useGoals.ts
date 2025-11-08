@@ -133,7 +133,26 @@ export function useGoals(): UseGoalsResult {
    * Create new goal (T101: Check quota before creating)
    */
   const createGoal = useCallback((input: CreateGoalInput): GoalResult<Goal> => {
-    // T101: Check storage quota before creating
+    // Bot review C1: Storage Quota Race Condition Handling
+    //
+    // This function uses BOTH pre-check AND try-catch for defense-in-depth:
+    //
+    // 1. PRE-CHECK (lines 138-155): Provides early feedback to user
+    //    - Checks quota BEFORE attempting write
+    //    - Blocks creation if storage >95% full
+    //    - Good UX: User sees error immediately without triggering write failure
+    //
+    // 2. TRY-CATCH (lines 159-192): Handles race conditions
+    //    - Another browser tab could consume storage between pre-check and write
+    //    - Catches QuotaExceededError from localStorage.setItem()
+    //    - Fallback safety net for concurrent storage writes
+    //
+    // Why BOTH are needed:
+    // - Pre-check alone: ❌ Race condition (storage filled by another tab)
+    // - Try-catch alone: ❌ Poor UX (user triggers write failure before seeing error)
+    // - Both together: ✅ Best-effort prevention + guaranteed error handling
+    //
+    // T101: Check storage quota before creating (best-effort)
     try {
       const quota = checkStorageQuota();
 
@@ -154,7 +173,7 @@ export function useGoals(): UseGoalsResult {
       // Continue with creation if quota check fails (don't block user)
     }
 
-    // PR85-H1: Wrap goal creation in try-catch to handle QuotaExceededError race condition
+    // Wrap goal creation in try-catch to handle QuotaExceededError race condition
     // Even if pre-check passes, another tab could fill storage between check and write
     try {
       const result = createGoalService(input);

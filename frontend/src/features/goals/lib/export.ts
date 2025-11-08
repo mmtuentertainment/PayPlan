@@ -195,6 +195,18 @@ export function exportGoalsToCSV(goals: Goal[]): string {
   // Transform to denormalized CSV rows (flatten array of arrays)
   const csvRows = sanitizedGoals.flatMap(transformGoalToCSVRows);
 
+  // Bot review M1: Validate Excel row limit (1,048,576 rows)
+  // Excel 2007+ has a hard limit of 1,048,576 rows (including header row)
+  const EXCEL_MAX_ROWS = 1048576;
+  const totalRows = csvRows.length + 1; // +1 for header row
+
+  if (totalRows > EXCEL_MAX_ROWS) {
+    throw new Error(
+      `CSV export too large: ${totalRows.toLocaleString()} rows exceeds Excel's limit of ${EXCEL_MAX_ROWS.toLocaleString()} rows. ` +
+        `Please export in smaller batches or use JSON format (no row limit).`
+    );
+  }
+
   // Generate CSV with PapaParse (RFC 4180 compliant)
   const csvContent = Papa.unparse(csvRows, {
     quotes: true, // Force quotes around all fields (handles special chars)
