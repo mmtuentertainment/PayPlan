@@ -256,7 +256,7 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       // Verify contribution-level fields
       expect(rows[0].contributionId).toBe('contrib_001');
       expect(rows[0].contributionAmount).toBe('50.00'); // $50.00
-      expect(rows[0].contributionNote).toBe('Bonus from John Doe at 123 Main St');
+      expect(rows[0].contributionNote).toBe('Bonus from John Doe at [ADDRESS_REDACTED]'); // PII sanitized
       expect(rows[0].contributionDate).toBe('2025-11-05');
       expect(rows[0].contributionCreatedAt).toBe('2025-11-05T10:00:00Z');
     });
@@ -752,12 +752,17 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
         updatedAt: '2025-11-03T10:00:00Z',
       };
 
-      // Test CSV export
+      // Test CSV export (denormalized format - one row per contribution)
       const csv = exportGoalsToCSV([complexGoal]);
       const parsedCSV = Papa.parse(csv, { header: true }).data as ParsedCSVRow[];
 
-      expect(parsedCSV[0].name).toBe('House Fund');
-      expect(parsedCSV[0].contributionCount).toBe('3');
+      // 3 contributions = 3 rows
+      expect(parsedCSV).toHaveLength(3);
+
+      // All rows have same goal name
+      expect(parsedCSV[0].goalName).toBe('House Fund');
+      expect(parsedCSV[1].goalName).toBe('House Fund');
+      expect(parsedCSV[2].goalName).toBe('House Fund');
 
       // Test JSON export - verify reliable PII patterns (email, SSN) are sanitized
       const json = exportGoalsToJSON([complexGoal]);
@@ -778,11 +783,12 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       };
 
       const csv = exportGoalsToCSV([edgeCaseGoal]);
-      const parsed = Papa.parse(csv, { header: true }).data as any[];
+      const parsed = Papa.parse(csv, { header: true }).data as ParsedCSVRow[];
 
-      expect(parsed[0].targetAmount).toBe('0.01');
-      expect(parsed[0].currentAmount).toBe('0.00');
-      expect(parsed[0].monthlyContribution).toBe('9999999.99');
+      // Denormalized format uses goalTargetAmount, goalCurrentAmount, goalMonthlyContribution
+      expect(parsed[0].goalTargetAmount).toBe('0.01');
+      expect(parsed[0].goalCurrentAmount).toBe('0.00');
+      expect(parsed[0].goalMonthlyContribution).toBe('9999999.99');
     });
   });
 });
