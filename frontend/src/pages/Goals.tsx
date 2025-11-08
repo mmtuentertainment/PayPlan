@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { GoalMetrics } from '@/features/goals/components/GoalMetrics';
 import { GoalSkeleton } from '@/features/goals/components/GoalSkeleton';
 import { GoalEmptyState } from '@/features/goals/components/GoalEmptyState';
@@ -110,8 +111,10 @@ export const Goals: React.FC = () => {
         setIsDeleteDialogOpen(false);
         setGoalToDelete(undefined);
       } else {
-        // TODO: Show error toast (Group 6 or later)
-        alert(`Failed to delete goal: ${result.error}`);
+        toast.error('Failed to delete goal', {
+          description: result.error,
+          duration: 5000,
+        });
       }
     }
   };
@@ -122,8 +125,10 @@ export const Goals: React.FC = () => {
   const handleArchiveGoal = (goal: Goal) => {
     const result = archiveGoal(goal.id);
     if (!result.success) {
-      // TODO: Show error toast (Group 6 or later)
-      alert(`Failed to archive goal: ${result.error}`);
+      toast.error('Failed to archive goal', {
+        description: result.error,
+        duration: 5000,
+      });
     }
     // No need to refresh - useGoals already updates state optimistically
   };
@@ -134,8 +139,10 @@ export const Goals: React.FC = () => {
   const handleUnarchiveGoal = (goal: Goal) => {
     const result = unarchiveGoal(goal.id);
     if (!result.success) {
-      // TODO: Show error toast (Group 6 or later)
-      alert(`Failed to unarchive goal: ${result.error}`);
+      toast.error('Failed to unarchive goal', {
+        description: result.error,
+        duration: 5000,
+      });
     }
     // No need to refresh - useGoals already updates state optimistically
   };
@@ -149,8 +156,10 @@ export const Goals: React.FC = () => {
       if (result.success) {
         setIsFormOpen(false);
       } else {
-        // TODO: Show error toast (Group 6 or later)
-        alert(`Failed to create goal: ${result.error}`);
+        toast.error('Failed to create goal', {
+          description: result.error,
+          duration: 5000,
+        });
       }
     } else if (selectedGoal) {
       const result = updateGoal(selectedGoal.id, data as UpdateGoalInput);
@@ -158,8 +167,10 @@ export const Goals: React.FC = () => {
         setIsFormOpen(false);
         setSelectedGoal(undefined);
       } else {
-        // TODO: Show error toast (Group 6 or later)
-        alert(`Failed to update goal: ${result.error}`);
+        toast.error('Failed to update goal', {
+          description: result.error,
+          duration: 5000,
+        });
       }
     }
   };
@@ -189,7 +200,10 @@ export const Goals: React.FC = () => {
     if (completedGoal) {
       const result = archiveGoal(completedGoal.id);
       if (!result.success) {
-        alert(`Failed to archive goal: ${result.error}`);
+        toast.error('Failed to archive goal', {
+          description: result.error,
+          duration: 5000,
+        });
       }
     }
     setShowCelebration(false);

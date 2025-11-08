@@ -107,6 +107,31 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
         const result = sanitizePII(text);
         expect(result).toBe('International: [PHONE_REDACTED]');
       });
+
+      // Bot review H1: Edge case PII patterns for international phones
+      it('should redact UK format +44 20 1234 5678', () => {
+        const text = 'UK phone: +44 20 1234 5678';
+        const result = sanitizePII(text);
+        expect(result).toBe('UK phone: [PHONE_REDACTED]');
+      });
+
+      it('should redact Australia format +61 2 1234 5678', () => {
+        const text = 'Australia: +61 2 1234 5678';
+        const result = sanitizePII(text);
+        expect(result).toBe('Australia: [PHONE_REDACTED]');
+      });
+
+      it('should redact France format +33 1 23 45 67 89', () => {
+        const text = 'Contact: +33 1 23 45 67 89';
+        const result = sanitizePII(text);
+        expect(result).toBe('Contact: [PHONE_REDACTED]');
+      });
+
+      it('should redact Germany format +49 30 12345678', () => {
+        const text = 'Berlin office: +49 30 12345678';
+        const result = sanitizePII(text);
+        expect(result).toBe('Berlin office: [PHONE_REDACTED]');
+      });
     });
 
     describe('SSN Sanitization', () => {
@@ -573,30 +598,30 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
 
     it('should generate CSV filename with timestamp', () => {
       const filename = generateExportFilename('csv');
-      expect(filename).toBe('payplan-goals-2025-11-06-143045.csv');
+      expect(filename).toBe('payplan-goals-2025-11-06-143045Z.csv');
     });
 
     it('should generate JSON filename with timestamp', () => {
       const filename = generateExportFilename('json');
-      expect(filename).toBe('payplan-goals-2025-11-06-143045.json');
+      expect(filename).toBe('payplan-goals-2025-11-06-143045Z.json');
     });
 
     it('should pad single-digit values', () => {
       vi.setSystemTime(new Date('2025-01-05T09:05:03'));
       const filename = generateExportFilename('csv');
-      expect(filename).toBe('payplan-goals-2025-01-05-090503.csv');
+      expect(filename).toBe('payplan-goals-2025-01-05-090503Z.csv');
     });
 
     it('should handle midnight correctly', () => {
       vi.setSystemTime(new Date('2025-11-06T00:00:00'));
       const filename = generateExportFilename('csv');
-      expect(filename).toBe('payplan-goals-2025-11-06-000000.csv');
+      expect(filename).toBe('payplan-goals-2025-11-06-000000Z.csv');
     });
 
     it('should handle end of year', () => {
       vi.setSystemTime(new Date('2025-12-31T23:59:59'));
       const filename = generateExportFilename('json');
-      expect(filename).toBe('payplan-goals-2025-12-31-235959.json');
+      expect(filename).toBe('payplan-goals-2025-12-31-235959Z.json');
     });
   });
 

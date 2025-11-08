@@ -26,9 +26,10 @@ const PII_PATTERNS = {
   // Email: user@domain.com
   email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
 
-  // Phone: (123) 456-7890, 123-456-7890, 1234567890
-  // Updated: Fixed to avoid capturing parentheses and plus sign
-  phone: /(?:\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/g,
+  // Phone: (123) 456-7890, 123-456-7890, +44 20 1234 5678, +61 2 1234 5678
+  // Supports US/Canada (+1) and international formats (+44, +61, etc.)
+  // Matches: optional country code (+1-999), area code (2-4 digits), local number
+  phone: /(?:\+?[1-9]\d{0,3}[-.\s]?)?\(?[0-9]{2,4}\)?[-.\s]?[0-9]{2,4}[-.\s]?[0-9]{2,9}/g,
 
   // SSN: 123-45-6789, 123456789
   ssn: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
@@ -229,15 +230,17 @@ export function exportGoalsToJSON(goals: Goal[]): string {
 export function generateExportFilename(format: 'csv' | 'json'): string {
   const now = new Date();
 
-  // Generate ISO 8601 basic format timestamp for filename (no colons, cross-platform safe)
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
+  // Generate ISO 8601 basic format timestamp for filename (UTC, timezone-aware)
+  // Use UTC to ensure consistent timestamps regardless of user's timezone
+  const year = now.getUTCFullYear();
+  const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(now.getUTCDate()).padStart(2, '0');
+  const hours = String(now.getUTCHours()).padStart(2, '0');
+  const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(now.getUTCSeconds()).padStart(2, '0');
 
-  const timestamp = `${year}-${month}-${day}-${hours}${minutes}${seconds}`;
+  // Append 'Z' to indicate UTC timezone (cross-platform safe, no colons)
+  const timestamp = `${year}-${month}-${day}-${hours}${minutes}${seconds}Z`;
 
   return `payplan-goals-${timestamp}.${format}`;
 }
