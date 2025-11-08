@@ -211,6 +211,20 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
     });
   });
 
+  // Type for parsed CSV rows (per CodeRabbit feedback - avoid 'any' types)
+  type ParsedCSVRow = {
+    id: string;
+    name: string;
+    targetAmount: string;
+    currentAmount: string;
+    monthlyContribution: string;
+    targetDate: string;
+    status: string;
+    contributionCount: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+
   describe('exportGoalsToCSV', () => {
     it('should export single goal to CSV with headers', () => {
       const goals = [mockGoal];
@@ -218,7 +232,7 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
 
       // Parse CSV to verify structure
       const parsed = Papa.parse(csv, { header: true });
-      const rows = parsed.data as any[];
+      const rows = parsed.data as ParsedCSVRow[];
 
       expect(rows).toHaveLength(1);
       expect(rows[0].id).toBe('goal_001');
@@ -242,7 +256,7 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       const csv = exportGoalsToCSV(goals);
 
       const parsed = Papa.parse(csv, { header: true });
-      const rows = parsed.data as any[];
+      const rows = parsed.data as ParsedCSVRow[];
 
       expect(rows).toHaveLength(2);
       expect(rows[1].id).toBe('goal_002');
@@ -267,7 +281,7 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
 
       const csv = exportGoalsToCSV([goalNoDate]);
       const parsed = Papa.parse(csv, { header: true });
-      const rows = parsed.data as any[];
+      const rows = parsed.data as ParsedCSVRow[];
 
       expect(rows[0].targetDate).toBe('');
       expect(rows[0].monthlyContribution).toBe('0.00');
@@ -282,7 +296,7 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
 
       const csv = exportGoalsToCSV([completedGoal]);
       const parsed = Papa.parse(csv, { header: true });
-      const rows = parsed.data as any[];
+      const rows = parsed.data as ParsedCSVRow[];
 
       expect(rows[0].status).toBe('completed');
       expect(rows[0].currentAmount).toBe('1000.00');
@@ -572,7 +586,7 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
 
       // Test CSV export
       const csv = exportGoalsToCSV([complexGoal]);
-      const parsedCSV = Papa.parse(csv, { header: true }).data as any[];
+      const parsedCSV = Papa.parse(csv, { header: true }).data as ParsedCSVRow[];
 
       expect(parsedCSV[0].name).toBe('House Fund');
       expect(parsedCSV[0].contributionCount).toBe('3');
