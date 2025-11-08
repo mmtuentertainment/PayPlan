@@ -56,18 +56,25 @@ export function QuickAddSection({
   onContributionAdded,
 }: QuickAddSectionProps) {
   const [selectedGoalId, setSelectedGoalId] = useState<string>('');
+  const [isAdding, setIsAdding] = useState(false); // PR80-8: Loading state
   const { addContribution } = useContributions(onGoalComplete);
 
   /**
    * Handle quick-add button click
+   * PR80-8: Made async with loading state to prevent double-submission
    */
-  const handleQuickAdd = (amountCents: number) => {
-    if (!selectedGoalId) return;
+  const handleQuickAdd = async (amountCents: number) => {
+    if (!selectedGoalId || isAdding) return;
 
-    const result = addContribution(selectedGoalId, amountCents);
+    setIsAdding(true);
+    try {
+      const result = addContribution(selectedGoalId, amountCents);
 
-    if (result.success && onContributionAdded) {
-      onContributionAdded();
+      if (result.success && onContributionAdded) {
+        await onContributionAdded(); // Wait for parent refresh
+      }
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -127,11 +134,12 @@ export function QuickAddSection({
                 variant="outline"
                 size="lg"
                 onClick={() => handleQuickAdd(amountCents)}
-                disabled={!selectedGoalId}
-                className="h-16 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!selectedGoalId || isAdding}
+                className={`h-16 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${isAdding ? 'animate-pulse' : ''}`}
                 aria-label={`Add ${formatCurrency(amountCents)} to selected goal`}
+                aria-busy={isAdding}
               >
-                {formatCurrency(amountCents)}
+                {isAdding ? 'Adding...' : formatCurrency(amountCents)}
               </Button>
             ))}
           </div>

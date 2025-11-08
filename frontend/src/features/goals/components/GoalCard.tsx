@@ -2,6 +2,8 @@
  * Goal Card Component for Goal Tracking Dashboard (Feature 064)
  * Individual goal display with progress bar, status badge, and actions
  * US1: View Dashboard, US3: Edit Goal, US4: Delete Goal, US7: Manual Contribution
+ *
+ * PR78-7: Refactored to use consolidated STATUS_CONFIG instead of separate mapping functions
  */
 
 import { useState, useMemo } from 'react';
@@ -20,6 +22,7 @@ import { formatCurrency } from '@/shared/lib/utils';
 import type { Goal } from '../types/goal';
 import { getGoalPercent, getDaysRemaining, getRequiredMonthly, getGoalStatus } from '../lib/calculations';
 import { getProgressIndicatorClass } from '../lib/progressIndicator';
+import { getStatusConfig } from '../lib/statusConfig'; // PR78-7: Consolidated status config
 import { ContributionForm } from './ContributionForm';
 
 interface GoalCardProps {
@@ -30,44 +33,6 @@ interface GoalCardProps {
   onUnarchive?: (goal: Goal) => void; // PR85-8: Unarchive goal (restore to active)
   onContributionAdded?: () => void; // T087: Trigger parent refresh
   onGoalComplete?: (goal: Goal) => void; // For celebration trigger
-}
-
-/**
- * Get badge variant based on goal status
- */
-function getStatusVariant(
-  status: 'completed' | 'past-due' | 'at-risk' | 'on-track'
-): 'default' | 'secondary' | 'destructive' | 'outline' {
-  switch (status) {
-    case 'completed':
-      return 'default'; // Green
-    case 'past-due':
-      return 'destructive'; // Red
-    case 'at-risk':
-      return 'secondary'; // Yellow
-    case 'on-track':
-      return 'outline'; // Blue
-    default:
-      return 'outline';
-  }
-}
-
-/**
- * Get status label with icon for accessibility
- */
-function getStatusLabel(status: 'completed' | 'past-due' | 'at-risk' | 'on-track'): string {
-  switch (status) {
-    case 'completed':
-      return '✓ Completed';
-    case 'past-due':
-      return '⚠ Past Due';
-    case 'at-risk':
-      return '⚠ At Risk';
-    case 'on-track':
-      return '→ On Track';
-    default:
-      return status;
-  }
 }
 
 /**
@@ -140,7 +105,11 @@ export function GoalCard({ goal, onEdit, onDelete, onArchive, onUnarchive, onCon
             )}
           </div>
           <div className="flex flex-col items-end gap-2">
-            <Badge variant={getStatusVariant(status)}>{getStatusLabel(status)}</Badge>
+            {/* PR78-7: Use consolidated status config */}
+            {(() => {
+              const statusConfig = getStatusConfig(status);
+              return <Badge variant={statusConfig.badgeVariant}>{statusConfig.label}</Badge>;
+            })()}
             {/* T079: Behind Schedule warning badge */}
             {status === 'at-risk' && (
               <Badge variant="destructive" className="flex items-center gap-1">

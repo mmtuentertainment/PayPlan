@@ -135,8 +135,11 @@ export function checkStorageQuota(): StorageQuotaResult {
 /**
  * Save goals to localStorage
  * @param goals - Goals to save
+ * @returns Result indicating success or error
+ *
+ * PR76-2: Changed from void to GoalResult<void> for consistent error handling
  */
-function saveGoals(goals: Goal[]): void {
+function saveGoals(goals: Goal[]): GoalResult<void> {
   const storage: GoalStorage = {
     version: '1.0.0',
     goals,
@@ -145,9 +148,13 @@ function saveGoals(goals: Goal[]): void {
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+    return { success: true, data: undefined };
   } catch (error) {
     console.error('[GoalStorageService] Failed to save goals:', error);
-    throw new Error(ERROR_MESSAGES.STORAGE_ERROR);
+    return {
+      success: false,
+      error: ERROR_MESSAGES.STORAGE_ERROR,
+    };
   }
 }
 
@@ -205,7 +212,12 @@ export function createGoal(input: unknown): GoalResult<Goal> {
   try {
     const goals = loadGoalsArray();  // T102: Use internal helper
     goals.push(newGoal);
-    saveGoals(goals);
+
+    // PR76-2: Check saveGoals result
+    const saveResult = saveGoals(goals);
+    if (!saveResult.success) {
+      return saveResult;
+    }
 
     return { success: true, data: newGoal };
   } catch (error) {
@@ -262,7 +274,12 @@ export function updateGoal(id: string, input: unknown): GoalResult<Goal> {
     }
 
     goals[index] = updatedGoal;
-    saveGoals(goals);
+
+    // PR76-2: Check saveGoals result
+    const saveResult = saveGoals(goals);
+    if (!saveResult.success) {
+      return saveResult;
+    }
 
     return { success: true, data: updatedGoal };
   } catch (error) {
@@ -291,7 +308,12 @@ export function deleteGoal(id: string): GoalResult<void> {
     }
 
     goals.splice(index, 1);
-    saveGoals(goals);
+
+    // PR76-2: Check saveGoals result
+    const saveResult = saveGoals(goals);
+    if (!saveResult.success) {
+      return saveResult;
+    }
 
     return { success: true, data: undefined };
   } catch (error) {
@@ -353,7 +375,12 @@ export function addContribution(goalId: string, contribution: Contribution): Goa
     }
 
     goals[index] = updatedGoal;
-    saveGoals(goals);
+
+    // PR76-2: Check saveGoals result
+    const saveResult = saveGoals(goals);
+    if (!saveResult.success) {
+      return saveResult;
+    }
 
     return { success: true, data: updatedGoal };
   } catch (error) {
@@ -405,7 +432,12 @@ export function archiveGoal(id: string): GoalResult<Goal> {
     };
 
     goals[index] = archivedGoal;
-    saveGoals(goals);
+
+    // PR76-2: Check saveGoals result
+    const saveResult = saveGoals(goals);
+    if (!saveResult.success) {
+      return saveResult;
+    }
 
     return { success: true, data: archivedGoal };
   } catch (error) {
@@ -451,7 +483,12 @@ export function unarchiveGoal(id: string): GoalResult<Goal> {
     };
 
     goals[index] = unarchivedGoal;
-    saveGoals(goals);
+
+    // PR76-2: Check saveGoals result
+    const saveResult = saveGoals(goals);
+    if (!saveResult.success) {
+      return saveResult;
+    }
 
     return { success: true, data: unarchivedGoal };
   } catch (error) {

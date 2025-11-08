@@ -823,6 +823,7 @@ PayPlan is a **privacy-first budgeting app** designed to help **low-income earne
 - TypeScript 5.8.3 (type safety, strict mode)
 - Tailwind CSS 4.1.13 (utility-first styling)
 - Radix UI (accessible component primitives)
+- @radix-ui/react-icons 1.3.2 (icon library for UI components)
 - Recharts (data visualization - MANDATED, do not use Chart.js or alternatives)
 - Vite 6.1.9 (build tool)
 

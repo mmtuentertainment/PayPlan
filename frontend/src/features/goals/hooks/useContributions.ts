@@ -73,6 +73,20 @@ export function useContributions(
    */
   const addContribution = useCallback(
     (goalId: string, amountCents: number, note?: string): GoalResult<Goal> => {
+      // PR80-5: Validate contribution amount
+      if (!Number.isInteger(amountCents)) {
+        return {
+          success: false,
+          error: 'Contribution amount must be a whole number of cents',
+        };
+      }
+      if (amountCents <= 0) {
+        return {
+          success: false,
+          error: 'Contribution amount must be greater than zero',
+        };
+      }
+
       try {
         // Load current goals (T102: destructure LoadGoalsResult)
         const { goals } = loadGoals();

@@ -293,7 +293,7 @@ export function GoalForm({ open, onClose, onSubmit, goal, mode }: GoalFormProps)
 
           {/* T082: Recalculation message */}
           {recalculationMessage && (
-            <Alert className="flex items-start gap-2">
+            <Alert className="flex items-start gap-2" role="alert" aria-live="polite">
               <Info className="h-4 w-4 mt-0.5" aria-hidden="true" />
               <span className="text-sm">{recalculationMessage}</span>
             </Alert>

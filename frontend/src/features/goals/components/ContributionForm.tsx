@@ -122,7 +122,7 @@ export function ContributionForm({
     const result = addContribution(
       goalId,
       amountCents,
-      note.trim() || undefined // Pass undefined if note is empty
+      note.trim() || null // PR83-1: Pass null if note is empty (matches type)
     );
 
     if (result.success) {

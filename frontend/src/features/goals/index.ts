@@ -60,5 +60,9 @@ export {
 } from './lib/GoalStorageService';
 export type { StorageQuotaResult, LoadGoalsResult } from './lib/GoalStorageService';
 
+// Status Configuration (PR78-7: Consolidated status mappings)
+export { STATUS_CONFIG, getStatusConfig } from './lib/statusConfig';
+export type { GoalStatus } from './lib/statusConfig';
+
 // Constants
 export { STORAGE_KEY, MAX_NAME_LENGTH, MAX_NOTE_LENGTH, MAX_CONTRIBUTIONS, QUICK_ADD_AMOUNTS, STATUS_COLORS, ERROR_MESSAGES } from './lib/constants';
