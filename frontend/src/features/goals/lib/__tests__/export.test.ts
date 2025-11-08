@@ -217,6 +217,21 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
         const result = sanitizePII(text);
         expect(result).toBe('[ADDRESS_REDACTED]');
       });
+
+      // Bot review C2: Conservative pattern to avoid false positives
+      it('should NOT redact amounts followed by street names (false positive prevention)', () => {
+        const text = 'Save $1000 for Main Street apartment';
+        const result = sanitizePII(text);
+        // Conservative pattern avoids redacting "$1000 for Main Street" as an address
+        expect(result).toBe('Save $1000 for Main Street apartment');
+      });
+
+      it('should NOT redact street names without house numbers', () => {
+        const text = 'Visit Main Street shops and Oak Avenue Mall';
+        const result = sanitizePII(text);
+        // Only redacts full addresses with house numbers
+        expect(result).toBe('Visit Main Street shops and Oak Avenue Mall');
+      });
     });
 
     describe('Complex Text Sanitization', () => {

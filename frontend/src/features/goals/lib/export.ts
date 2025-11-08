@@ -44,8 +44,9 @@ const PII_PATTERNS = {
   // name pattern REMOVED (PR85-6): Unreliable detection, false positives on goal names like "John's Emergency Fund"
 
   // Street Address: "123 Main St", "456 Oak Avenue"
-  // Updated: Fixed to match full address pattern, not just street name
-  address: /\b\d{1,5}\s+(?:[A-Za-z0-9]+\s+)*(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd)\b/gi,
+  // Bot review C2: Require street name IMMEDIATELY before street type
+  // Pattern: <number> <name> <type> (no extra words allowed between name and type)
+  address: /\b\d{1,5}\s+[A-Za-z0-9]+\s+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd)\b/gi,
 };
 
 /**
