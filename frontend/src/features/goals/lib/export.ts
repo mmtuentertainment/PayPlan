@@ -26,10 +26,10 @@ const PII_PATTERNS = {
   // Email: user@domain.com
   email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
 
-  // Phone: (123) 456-7890, 123-456-7890, +44 20 1234 5678, +61 2 1234 5678
-  // Supports US/Canada (+1) and international formats (+44, +61, etc.)
-  // Matches: optional country code (+1-999), area code (2-4 digits), local number
-  phone: /(?:\+?[1-9]\d{0,3}[-.\s]?)?\(?[0-9]{2,4}\)?[-.\s]?[0-9]{2,4}[-.\s]?[0-9]{2,9}/g,
+  // Phone: (123) 456-7890, 123-456-7890, +1-555-123-4567
+  // Note: International formats (+44, +61, +33, +49) may not be fully captured
+  // This is a known Phase 1 limitation - using conservative regex to avoid false positives
+  phone: /(?:\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b/g,
 
   // SSN: 123-45-6789, 123456789
   ssn: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
