@@ -109,6 +109,14 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
 
   return (
     <div>
+      {/* Bot review: Accessibility - Visually hidden text explaining disabled state (WCAG 2.2 AA) */}
+      {goals.length === 0 && (
+        <span id="export-button-disabled-reason" className="sr-only">
+          Export is disabled because there are no goals to export. Create a goal first to enable this
+          feature.
+        </span>
+      )}
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -117,6 +125,7 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
             className="inline-flex items-center"
             aria-label={isExporting ? 'Exporting goals' : 'Export goals'}
             aria-busy={isExporting}
+            aria-describedby={goals.length === 0 ? 'export-button-disabled-reason' : undefined}
           >
             {/* Conditional icon: spinner when exporting, download otherwise */}
             {isExporting ? (

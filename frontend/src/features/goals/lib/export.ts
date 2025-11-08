@@ -209,6 +209,7 @@ function transformGoalToCSVRows(goal: Goal): GoalCSVRow[] {
   };
 
   // If no contributions, export one row with empty contribution fields
+  // Bot review: Type safety - use `satisfies` to ensure all 14 fields are present (compile-time check)
   if (goal.contributions.length === 0) {
     return [
       {
@@ -218,19 +219,23 @@ function transformGoalToCSVRows(goal: Goal): GoalCSVRow[] {
         contributionNote: '',
         contributionDate: '',
         contributionCreatedAt: '',
-      },
+      } satisfies GoalCSVRow,
     ];
   }
 
   // Otherwise, create one row per contribution
-  return goal.contributions.map((contribution) => ({
-    ...goalData,
-    contributionId: contribution.id,
-    contributionAmount: formatCurrency(contribution.amount),
-    contributionNote: contribution.note || '',
-    contributionDate: contribution.createdAt.split('T')[0], // Extract date from ISO timestamp
-    contributionCreatedAt: contribution.createdAt,
-  }));
+  // Bot review: Type safety - use `satisfies` to ensure all 14 fields are present (compile-time check)
+  return goal.contributions.map(
+    (contribution) =>
+      ({
+        ...goalData,
+        contributionId: contribution.id,
+        contributionAmount: formatCurrency(contribution.amount),
+        contributionNote: contribution.note || '',
+        contributionDate: contribution.createdAt.split('T')[0], // Extract date from ISO timestamp
+        contributionCreatedAt: contribution.createdAt,
+      }) satisfies GoalCSVRow
+  );
 }
 
 /**
@@ -296,6 +301,26 @@ export function exportGoalsToJSON(goals: Goal[]): string {
  *
  * @param format - File format ('csv' or 'json')
  * @returns Filename with timestamp
+ *
+ * @remarks UTC Timezone Decision (Bot review: Timezone Clarity)
+ *
+ * This function uses UTC instead of local time for filename timestamps.
+ *
+ * **Rationale**:
+ * 1. **Consistency**: UTC ensures identical filenames for the same export across timezones
+ * 2. **Sortability**: ISO 8601 UTC timestamps sort chronologically (filename-based sorting)
+ * 3. **Cross-platform**: UTC avoids timezone ambiguity when sharing exports across regions
+ * 4. **No DST issues**: UTC has no daylight saving time transitions (no duplicate/missing hours)
+ *
+ * **Example**:
+ * - User in PST (UTC-8) exports at 9:00 AM local → payplan-goals-2025-11-08-170000Z.csv
+ * - User in EST (UTC-5) exports at 9:00 AM local → payplan-goals-2025-11-08-140000Z.csv
+ * - Both files have globally unique, unambiguous timestamps
+ *
+ * **Trade-offs**:
+ * - Con: Filename timestamp doesn't match user's local clock (9 AM export shows as 17:00)
+ * - Pro: No timezone-related bugs (DST, ambiguous hours, cross-platform sharing)
+ * - Pro: Globally consistent (two users in different timezones can compare export times)
  */
 export function generateExportFilename(format: 'csv' | 'json'): string {
   const now = new Date();
