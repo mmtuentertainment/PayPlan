@@ -139,16 +139,20 @@ export function useGoals(): UseGoalsResult {
    * Create new goal (T101: Check quota before creating)
    */
   const createGoal = useCallback((input: CreateGoalInput): GoalResult<Goal> => {
-    // Bot review C1: Storage Quota Race Condition Handling
+    // Bot review C1: Storage Quota Race Condition Handling (Bot review M3)
     //
-    // This function uses BOTH pre-check AND try-catch for defense-in-depth:
+    // This function uses BOTH pre-check AND try-catch for defense-in-depth.
     //
-    // 1. PRE-CHECK (lines 138-155): Provides early feedback to user
+    // **FULL DOCUMENTATION**: See ADR 001 - Storage Quota Race Condition Handling
+    // docs/architecture/decisions/001-storage-quota-race-condition-handling.md
+    //
+    // Quick summary:
+    // 1. PRE-CHECK (lines 162-181): Provides early feedback to user
     //    - Checks quota BEFORE attempting write
     //    - Blocks creation if storage >95% full
     //    - Good UX: User sees error immediately without triggering write failure
     //
-    // 2. TRY-CATCH (lines 159-192): Handles race conditions
+    // 2. TRY-CATCH (lines 185-218): Handles race conditions
     //    - Another browser tab could consume storage between pre-check and write
     //    - Catches QuotaExceededError from localStorage.setItem()
     //    - Fallback safety net for concurrent storage writes

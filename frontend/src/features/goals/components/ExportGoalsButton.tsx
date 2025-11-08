@@ -16,6 +16,12 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 import { Button } from '@/shared/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/shared/components/ui/tooltip';
 import type { Goal } from '../types/goal';
 import {
   exportGoalsToCSV,
@@ -115,16 +121,17 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
   };
 
   return (
-    <div>
-      {/* Bot review: Accessibility - Visually hidden text explaining disabled state (WCAG 2.2 AA) */}
-      {goals.length === 0 && (
-        <span id="export-button-disabled-reason" className="sr-only">
-          Export is disabled because there are no goals to export. Create a goal first to enable this
-          feature.
-        </span>
-      )}
+    <TooltipProvider>
+      <div className="flex items-center gap-2">
+        {/* Bot review: Accessibility - Visually hidden text explaining disabled state (WCAG 2.2 AA) */}
+        {goals.length === 0 && (
+          <span id="export-button-disabled-reason" className="sr-only">
+            Export is disabled because there are no goals to export. Create a goal first to enable this
+            feature.
+          </span>
+        )}
 
-      <DropdownMenu>
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
@@ -223,6 +230,43 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Bot review M1: UTC Timestamp Clarity - Info icon with tooltip explaining UTC timestamps */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            className="inline-flex items-center justify-center w-5 h-5 rounded-full text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            aria-label="Information about export file timestamps"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="max-w-xs">
+          <p className="text-sm">
+            <strong>Export files use UTC time</strong>
+          </p>
+          <p className="text-xs mt-1">
+            The 'Z' in filenames (e.g., <code className="bg-white/10 px-1 rounded">170000Z</code>) indicates
+            UTC (Coordinated Universal Time). This ensures consistent timestamps across all timezones.
+          </p>
+          <p className="text-xs mt-1">
+            Example: Exporting at 9 AM PST creates a file with "170000Z" (5 PM UTC).
+          </p>
+        </TooltipContent>
+      </Tooltip>
     </div>
+    </TooltipProvider>
   );
 }

@@ -27,8 +27,32 @@ const PII_PATTERNS = {
   email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
 
   // Phone: (123) 456-7890, 123-456-7890, +1-555-123-4567
-  // Note: International formats (+44, +61, +33, +49) may not be fully captured
-  // This is a known Phase 1 limitation - using conservative regex to avoid false positives
+  // Bot review M2: International Phone Format Coverage
+  //
+  // **Current Scope**: US phone numbers only (+1 country code, 10-digit format)
+  // **Matches**: (555) 123-4567, 555-123-4567, +1-555-123-4567, 1-555-123-4567
+  // **Does NOT match**: International formats (e.g., +44, +61, +33, +49, +86, +91)
+  //
+  // **Rationale for US-only in Phase 1**:
+  // - Conservative approach: Avoids false positives on non-phone numbers
+  // - Goal names may contain digit patterns (e.g., "Save $1,234 for vacation")
+  // - International regex patterns are complex and error-prone (many country-specific rules)
+  //
+  // **Known Limitations** (documented for Phase 2):
+  // 1. UK (+44): +44 20 7946 0958, +44 7911 123456 (landline vs mobile)
+  // 2. Australia (+61): +61 2 1234 5678, +61 412 345 678 (landline vs mobile)
+  // 3. France (+33): +33 1 23 45 67 89 (space-separated groups)
+  // 4. Germany (+49): +49 30 123456, +49 151 12345678 (variable length)
+  // 5. China (+86): +86 10 1234 5678, +86 138 1234 5678 (variable length)
+  // 6. India (+91): +91 11 2345 6789, +91 98765 43210 (variable length)
+  //
+  // **Future Enhancement** (Phase 2):
+  // - Use libphonenumber-js library for comprehensive international support
+  // - Support 200+ country codes with format validation
+  // - Handle variable-length numbers (7-15 digits per ITU-T E.164 standard)
+  //
+  // **Alternative considered**: Broad regex matching +[0-9]{1,3}[-.\s]?[0-9]{7,15}
+  // **Rejected**: Too many false positives (dates, amounts, goal names with numbers)
   phone: /(?:\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b/g,
 
   // SSN: 123-45-6789, 123456789
