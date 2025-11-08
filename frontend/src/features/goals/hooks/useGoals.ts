@@ -87,7 +87,7 @@ export function useGoals(): UseGoalsResult {
       if (corrupted) {
         toast.error('Goal data was corrupted and has been reset', {
           description: 'Your goals could not be loaded due to corrupted data. Starting fresh.',
-          duration: 5000,
+          duration: 10000, // 10s - Industry standard for error messages (bot review M3)
         });
       }
     } catch (err) {

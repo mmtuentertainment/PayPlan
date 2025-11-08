@@ -63,12 +63,12 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
 
       // Success toast
       toast.success('Goals exported to CSV successfully', {
-        duration: 5000, // 5s - Consistent with error toast (bot review M3)
+        duration: 5000, // 5s - Industry standard for success messages (bot review M3)
       });
     } catch (err) {
       console.error('[ExportGoalsButton] CSV export failed:', err);
       toast.error('Failed to export goals to CSV. Please try again.', {
-        duration: 5000, // 5s - UX consistency (bot review M3)
+        duration: 10000, // 10s - Industry standard for error messages (users need more time to read critical info - bot review M3)
         position: 'top-center',
       });
     } finally {
@@ -94,12 +94,12 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
 
       // Success toast
       toast.success('Goals exported to JSON successfully', {
-        duration: 5000, // 5s - Consistent with error toast (bot review M3)
+        duration: 5000, // 5s - Industry standard for success messages (bot review M3)
       });
     } catch (err) {
       console.error('[ExportGoalsButton] JSON export failed:', err);
       toast.error('Failed to export goals to JSON. Please try again.', {
-        duration: 5000, // 5s - UX consistency (bot review M3)
+        duration: 10000, // 10s - Industry standard for error messages (users need more time to read critical info - bot review M3)
         position: 'top-center',
       });
     } finally {

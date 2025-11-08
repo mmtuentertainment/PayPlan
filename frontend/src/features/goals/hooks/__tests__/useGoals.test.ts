@@ -129,7 +129,7 @@ describe('useGoals', () => {
         'Goal data was corrupted and has been reset',
         expect.objectContaining({
           description: expect.stringContaining('corrupted data'),
-          duration: 5000,
+          duration: 10000, // Bot review M3: Error toasts use 10s (industry standard)
         })
       );
     });

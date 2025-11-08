@@ -183,6 +183,7 @@ export function useContributions(
       if (!goal) {
         toast.error('Failed to undo contribution', {
           description: 'Goal not found',
+          duration: 10000, // 10s - Industry standard for error messages (bot review M3)
         });
         return;
       }
@@ -210,12 +211,14 @@ export function useContributions(
       } else {
         toast.error('Failed to undo contribution', {
           description: result.error,
+          duration: 10000, // 10s - Industry standard for error messages (bot review M3)
         });
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to undo contribution';
       toast.error('Failed to undo contribution', {
         description: errorMessage,
+        duration: 10000, // 10s - Industry standard for error messages (bot review M3)
       });
     } finally {
       // PR85-5: Always clean up snapshot to prevent memory leak
