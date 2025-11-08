@@ -246,6 +246,7 @@ function transformGoalToCSVRows(goal: Goal): GoalCSVRow[] {
  *
  * @param goals - Goals to export
  * @returns CSV content string
+ * @throws {Error} When total rows exceed Excel's 1,048,576 row limit (bot review: @throws tag)
  */
 export function exportGoalsToCSV(goals: Goal[]): string {
   // Sanitize PII from goal names and contribution notes
@@ -297,10 +298,28 @@ export function exportGoalsToJSON(goals: Goal[]): string {
 /**
  * Generate export filename with timestamp
  *
- * Format: payplan-goals-YYYY-MM-DD-HHmmss.{csv|json}
+ * Format: payplan-goals-YYYY-MM-DD-HHmmssZ.{csv|json}
+ * Example: payplan-goals-2025-11-08-170000Z.csv
  *
  * @param format - File format ('csv' or 'json')
- * @returns Filename with timestamp
+ * @returns Filename with timestamp (UTC, indicated by 'Z' suffix)
+ *
+ * @remarks UTC Timezone Decision (Bot review: Timezone Clarity)
+ * @remarks 'Z' Suffix Meaning (Bot review: UTC indicator may confuse users)
+ *
+ * The 'Z' at the end of the timestamp stands for "Zulu time" (military/aviation term for UTC).
+ * It's a standard ISO 8601 notation meaning "zero hour offset" from UTC.
+ *
+ * **Why include 'Z'?**
+ * - ISO 8601 compliance: Globally recognized standard for UTC timestamps
+ * - Clarity: Prevents ambiguity about which timezone the timestamp represents
+ * - Sortability: Files with 'Z' suffix can be easily identified as UTC timestamps
+ * - Developer-friendly: Engineers and power users recognize ISO 8601 immediately
+ *
+ * **User-facing impact:**
+ * - Less technical users: May not understand 'Z', but filename sorts correctly regardless
+ * - Technical users: Immediately recognize ISO 8601 UTC format
+ * - Alternative considered: Omit 'Z', but this loses timezone information (ambiguous)
  *
  * @remarks UTC Timezone Decision (Bot review: Timezone Clarity)
  *

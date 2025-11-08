@@ -14,6 +14,12 @@ import { getGoalPercent } from '../lib/calculations';
 import { formatCurrency } from '@/shared/lib/utils';
 
 /**
+ * Toast duration constants (bot review: extract magic numbers)
+ * Industry standard: error toasts need 7-10s (users need more time to read critical info)
+ */
+const TOAST_DURATION_ERROR = 10000; // 10 seconds
+
+/**
  * Undo snapshot for a specific contribution
  */
 interface UndoSnapshot {
@@ -183,7 +189,7 @@ export function useContributions(
       if (!goal) {
         toast.error('Failed to undo contribution', {
           description: 'Goal not found',
-          duration: 10000, // 10s - Industry standard for error messages (bot review M3)
+          duration: TOAST_DURATION_ERROR,
         });
         return;
       }
@@ -211,14 +217,14 @@ export function useContributions(
       } else {
         toast.error('Failed to undo contribution', {
           description: result.error,
-          duration: 10000, // 10s - Industry standard for error messages (bot review M3)
+          duration: TOAST_DURATION_ERROR,
         });
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to undo contribution';
       toast.error('Failed to undo contribution', {
         description: errorMessage,
-        duration: 10000, // 10s - Industry standard for error messages (bot review M3)
+        duration: TOAST_DURATION_ERROR,
       });
     } finally {
       // PR85-5: Always clean up snapshot to prevent memory leak

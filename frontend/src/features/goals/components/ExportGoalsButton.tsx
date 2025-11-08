@@ -24,6 +24,13 @@ import {
   downloadFile,
 } from '../lib/export';
 
+/**
+ * Toast duration constants (bot review: extract magic numbers)
+ * Industry standards: success 3-5s, error 7-10s
+ */
+const TOAST_DURATION_SUCCESS = 5000; // 5 seconds
+const TOAST_DURATION_ERROR = 10000; // 10 seconds
+
 interface ExportGoalsButtonProps {
   goals: Goal[]; // Goals to export
   disabled?: boolean; // Disable button (e.g., no goals to export)
@@ -63,12 +70,12 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
 
       // Success toast
       toast.success('Goals exported to CSV successfully', {
-        duration: 5000, // 5s - Industry standard for success messages (bot review M3)
+        duration: TOAST_DURATION_SUCCESS,
       });
     } catch (err) {
       console.error('[ExportGoalsButton] CSV export failed:', err);
       toast.error('Failed to export goals to CSV. Please try again.', {
-        duration: 10000, // 10s - Industry standard for error messages (users need more time to read critical info - bot review M3)
+        duration: TOAST_DURATION_ERROR,
         position: 'top-center',
       });
     } finally {
@@ -94,12 +101,12 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
 
       // Success toast
       toast.success('Goals exported to JSON successfully', {
-        duration: 5000, // 5s - Industry standard for success messages (bot review M3)
+        duration: TOAST_DURATION_SUCCESS,
       });
     } catch (err) {
       console.error('[ExportGoalsButton] JSON export failed:', err);
       toast.error('Failed to export goals to JSON. Please try again.', {
-        duration: 10000, // 10s - Industry standard for error messages (users need more time to read critical info - bot review M3)
+        duration: TOAST_DURATION_ERROR,
         position: 'top-center',
       });
     } finally {

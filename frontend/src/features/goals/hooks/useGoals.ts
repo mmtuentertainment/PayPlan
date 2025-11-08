@@ -20,6 +20,12 @@ import type { StorageQuotaResult } from '../lib/GoalStorageService';
 import { STORAGE_KEY } from '../lib/constants';
 
 /**
+ * Toast duration constants (bot review: extract magic numbers)
+ * Industry standard: error toasts need 7-10s (users need more time to read critical info)
+ */
+const TOAST_DURATION_ERROR = 10000; // 10 seconds
+
+/**
  * Hook return type
  */
 export interface UseGoalsResult {
@@ -87,7 +93,7 @@ export function useGoals(): UseGoalsResult {
       if (corrupted) {
         toast.error('Goal data was corrupted and has been reset', {
           description: 'Your goals could not be loaded due to corrupted data. Starting fresh.',
-          duration: 10000, // 10s - Industry standard for error messages (bot review M3)
+          duration: TOAST_DURATION_ERROR,
         });
       }
     } catch (err) {
