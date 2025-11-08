@@ -244,10 +244,10 @@ export const Goals: React.FC = () => {
             >
               Your Goals
             </h2>
-            {!isLoading && goals.length > 0 && (
+            {!isLoading && (
               <div className="flex items-center gap-3">
-                {/* T103: Export Goals Button */}
-                <ExportGoalsButton goals={goals} />
+                {/* T103: Export Goals Button - Always visible, disabled when no goals */}
+                <ExportGoalsButton goals={goals} disabled={goals.length === 0} />
 
                 <button
                   onClick={handleCreateGoal}
