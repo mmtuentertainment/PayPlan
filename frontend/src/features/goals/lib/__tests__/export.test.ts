@@ -240,6 +240,74 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       });
     });
 
+    describe('Name Sanitization (PR86-3)', () => {
+      it('should redact personal names (First Last pattern)', () => {
+        const names = [
+          'John Smith',
+          'Sarah Johnson',
+          'Michael Chen',
+          'Emily Rodriguez',
+        ];
+
+        names.forEach((name) => {
+          expect(sanitizePII(name)).toBe('[NAME_REDACTED]');
+        });
+      });
+
+      it('should redact names in sentences', () => {
+        const text = 'Goal created by Sarah Johnson on 2025-01-01';
+        const result = sanitizePII(text);
+        expect(result).toBe('Goal created by [NAME_REDACTED] on 2025-01-01');
+      });
+
+      // Stop-word filtering tests (PR86-3)
+      it('should NOT redact goal names with stop-words (false positive prevention)', () => {
+        const goalNames = [
+          'Emergency Fund',
+          'House Payment',
+          'Car Savings',
+          'Wedding Fund',
+          'Vacation Trip',
+          'College Fund',
+          'Down Payment',
+        ];
+
+        goalNames.forEach((name) => {
+          expect(sanitizePII(name)).toBe(name); // Should NOT be redacted
+        });
+      });
+
+      it('should NOT redact capitalized phrases containing stop-words', () => {
+        const text = 'Save for Emergency Fund and Vacation Trip goals';
+        const result = sanitizePII(text);
+        expect(result).toBe('Save for Emergency Fund and Vacation Trip goals');
+      });
+
+      it('should handle mixed redaction (real name + goal name)', () => {
+        const text = 'John Smith created Emergency Fund goal';
+        const result = sanitizePII(text);
+        expect(result).toBe('[NAME_REDACTED] created Emergency Fund goal');
+      });
+
+      it('should redact multiple names in same text', () => {
+        const text = 'John Smith and Sarah Johnson are saving together';
+        const result = sanitizePII(text);
+        expect(result).toBe('[NAME_REDACTED] and [NAME_REDACTED] are saving together');
+      });
+
+      it('should NOT redact single words (requires First Last pattern)', () => {
+        const text = 'Created by John in January';
+        const result = sanitizePII(text);
+        expect(result).toBe('Created by John in January'); // "John" alone doesn't match
+      });
+
+      it('should NOT redact all-caps words (requires capitalized pattern)', () => {
+        const text = 'JOHN SMITH created this goal';
+        const result = sanitizePII(text);
+        expect(result).toBe('JOHN SMITH created this goal'); // All-caps doesn't match
+      });
+    });
+
     describe('Complex Text Sanitization', () => {
       it('should sanitize multiple PII types in one text', () => {
         const text = 'Contact: john@example.com, 555-123-4567, 123 Main St';
@@ -298,7 +366,8 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
 
       // Verify goal-level fields
       expect(rows[0].goalId).toBe('goal_001');
-      expect(rows[0].goalName).toBe('Emergency Fund for Jane Smith');
+      // PR86-3: Goal name contains "Jane Smith" which gets redacted (PII sanitization)
+      expect(rows[0].goalName).toBe('Emergency Fund for [NAME_REDACTED]');
       expect(rows[0].goalTargetAmount).toBe('1000.00');
       expect(rows[0].goalCurrentAmount).toBe('500.00');
       expect(rows[0].goalMonthlyContribution).toBe('50.00');
@@ -308,7 +377,8 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       // Verify contribution-level fields
       expect(rows[0].contributionId).toBe('contrib_001');
       expect(rows[0].contributionAmount).toBe('50.00'); // $50.00
-      expect(rows[0].contributionNote).toBe('Bonus from John Doe at [ADDRESS_REDACTED]'); // PII sanitized
+      // PR86-3: Both "John Doe" (name) and address are redacted (PII sanitization)
+      expect(rows[0].contributionNote).toBe('Bonus from [NAME_REDACTED] at [ADDRESS_REDACTED]');
       expect(rows[0].contributionDate).toBe('2025-11-05');
       expect(rows[0].contributionCreatedAt).toBe('2025-11-05T10:00:00Z');
     });
@@ -440,7 +510,8 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       // Goal with 0 contributions should export 1 row with empty contribution fields
       expect(rows).toHaveLength(1);
       expect(rows[0].goalId).toBe('goal_001');
-      expect(rows[0].goalName).toBe('Emergency Fund for Jane Smith');
+      // PR86-3: Goal name contains "Jane Smith" which gets redacted (PII sanitization)
+      expect(rows[0].goalName).toBe('Emergency Fund for [NAME_REDACTED]');
       expect(rows[0].contributionId).toBe('');
       expect(rows[0].contributionAmount).toBe('');
       expect(rows[0].contributionNote).toBe('');
@@ -491,7 +562,8 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       // Verify goal data is repeated for each row
       rows.forEach((row) => {
         expect(row.goalId).toBe('goal_001');
-        expect(row.goalName).toBe('Emergency Fund for Jane Smith');
+        // PR86-3: Goal name contains "Jane Smith" which gets redacted (PII sanitization)
+        expect(row.goalName).toBe('Emergency Fund for [NAME_REDACTED]');
         expect(row.goalCurrentAmount).toBe('450.00');
       });
 

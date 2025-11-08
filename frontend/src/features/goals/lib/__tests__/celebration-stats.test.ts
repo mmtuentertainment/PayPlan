@@ -267,21 +267,23 @@ describe('calculateCelebrationStats', () => {
       }
     });
 
-    it('should handle updatedAt before createdAt (negative months)', () => {
+    it('should reject updatedAt before createdAt (data corruption - PR86-2)', () => {
       const goal = createTestGoal({
         createdAt: '2025-06-01T00:00:00Z',
-        updatedAt: '2025-01-01T00:00:00Z', // 5 months BEFORE createdAt
+        updatedAt: '2025-01-01T00:00:00Z', // 5 months BEFORE createdAt (invalid!)
         currentAmount: 50000,
       });
 
       const result = calculateCelebrationStats(goal);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        // differenceInMonths will return -5
-        expect(result.stats.months).toBe(-5);
-        // avgMonthly = 50000 / max(-5, 1) = 50000 / 1 = 50000
-        expect(result.stats.avgMonthly).toBe(50000);
+      // PR86-2: Negative months indicate data corruption (updatedAt < createdAt)
+      // Should fail fast with clear error message instead of displaying nonsensical stats
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain('Invalid date order');
+        expect(result.error).toContain('2025-01-01T00:00:00Z'); // updatedAt
+        expect(result.error).toContain('2025-06-01T00:00:00Z'); // createdAt
+        expect(result.error).toContain('5 months before'); // Clear description
       }
     });
 

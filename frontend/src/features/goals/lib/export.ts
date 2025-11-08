@@ -41,15 +41,58 @@ const PII_PATTERNS = {
   creditCard: /\b(?:\d{16}|\d{15}|\d{4}[-\s]?\d{6}[-\s]?\d{5}|\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{3,7})\b/g,
 
   // Names: "John Doe", "Jane Smith" (capitalized first/last name pattern)
-  // Conservative pattern: Only match common first names followed by last names
-  // This avoids false positives like "Emergency Fund" or "House Fund"
-  // name pattern REMOVED (PR85-6): Unreliable detection, false positives on goal names like "John's Emergency Fund"
+  // PR86-3: Restored with word-boundary matching (Feature 019 approach)
+  // Matches: capitalized First Last (e.g., "Sarah Johnson", "Michael Chen")
+  // Stop-word filtering prevents false positives on goal names (see GOAL_NAME_STOP_WORDS)
+  name: /\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g,
 
   // Street Address: "123 Main St", "456 Oak Avenue"
   // Bot review C2: Require street name IMMEDIATELY before street type
   // Pattern: <number> <name> <type> (no extra words allowed between name and type)
   address: /\b\d{1,5}\s+[A-Za-z0-9]+\s+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd)\b/gi,
 };
+
+/**
+ * Stop-words for name sanitization (PR86-3)
+ *
+ * Common goal name terms that should NOT be redacted as names.
+ * Prevents false positives on goal names like "Emergency Fund" or "House Payment"
+ *
+ * Examples:
+ * - "Emergency Fund" → NOT redacted (contains "Emergency" and "Fund")
+ * - "John Smith" → REDACTED (no stop-words)
+ * - "Car Payment" → NOT redacted (contains "Car" and "Payment")
+ */
+const GOAL_NAME_STOP_WORDS = new Set([
+  'Emergency',
+  'House',
+  'Car',
+  'Wedding',
+  'Vacation',
+  'Retirement',
+  'College',
+  'Fund',
+  'Savings',
+  'Account',
+  'Budget',
+  'Payment',
+  'Down',
+  'Trip',
+  'Goal',
+  // Common street/location words that might appear in goal names
+  // PR86-3: Prevents false positives on location names like "Main Street" or "Oak Avenue"
+  'Main',
+  'Street',
+  'Oak',
+  'Pine',
+  'Elm',
+  'Maple',
+  'Avenue',
+  'Road',
+  'Drive',
+  'Mall', // Shopping centers
+  'Visit', // Travel-related
+]);
 
 /**
  * Sanitize text by replacing PII with redacted placeholders
@@ -67,7 +110,16 @@ export function sanitizePII(text: string): string {
   sanitized = sanitized.replace(PII_PATTERNS.ssn, '[SSN_REDACTED]');
   sanitized = sanitized.replace(PII_PATTERNS.phone, '[PHONE_REDACTED]');
   sanitized = sanitized.replace(PII_PATTERNS.address, '[ADDRESS_REDACTED]');
-  // name sanitization REMOVED (PR85-6) - see comment in PII_PATTERNS above
+
+  // PR86-3: Name sanitization with stop-word filtering (restored from PR85-6 removal)
+  // Check each name match against stop-words to avoid false positives on goal names
+  sanitized = sanitized.replace(PII_PATTERNS.name, (match) => {
+    // Check if match contains any stop-word (case-insensitive)
+    const hasStopWord = Array.from(GOAL_NAME_STOP_WORDS).some((word) =>
+      match.includes(word)
+    );
+    return hasStopWord ? match : '[NAME_REDACTED]';
+  });
 
   return sanitized;
 }

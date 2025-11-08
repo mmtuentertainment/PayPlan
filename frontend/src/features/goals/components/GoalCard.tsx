@@ -238,21 +238,21 @@ export function GoalCard({ goal, onEdit, onDelete, onArchive, onUnarchive, onCon
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(goal)}>Edit Goal</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onEdit(goal)}>Edit Goal</DropdownMenuItem>
             {/* T090: Archive menu item (only show for completed goals) */}
             {goal.status === 'completed' && onArchive && (
-              <DropdownMenuItem onClick={() => onArchive(goal)}>
+              <DropdownMenuItem onSelect={() => onArchive(goal)}>
                 Archive Goal
               </DropdownMenuItem>
             )}
             {/* PR85-8: Unarchive menu item (only show for archived goals) */}
             {goal.status === 'archived' && onUnarchive && (
-              <DropdownMenuItem onClick={() => onUnarchive(goal)}>
+              <DropdownMenuItem onSelect={() => onUnarchive(goal)}>
                 Unarchive Goal
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
-              onClick={() => onDelete(goal)}
+              onSelect={() => onDelete(goal)}
               className="text-red-600 focus:text-red-600"
             >
               Delete Goal

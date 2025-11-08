@@ -71,6 +71,14 @@ export function calculateCelebrationStats(goal: Goal): CelebrationStatsResult {
   // Calculate months difference (using date-fns for accuracy)
   const months = differenceInMonths(updatedDate, createdDate);
 
+  // PR86-2: Guard against negative months (data corruption: updatedAt < createdAt)
+  if (months < 0) {
+    return {
+      success: false,
+      error: `Invalid date order: updatedAt (${goal.updatedAt}) is ${Math.abs(months)} months before createdAt (${goal.createdAt}). This indicates data corruption.`,
+    };
+  }
+
   // Calculate average monthly contribution
   // Use Math.max(months, 1) to avoid division by zero
   // If goal was completed in <1 month, treat as 1 month for average calculation
