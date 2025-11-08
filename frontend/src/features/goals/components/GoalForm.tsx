@@ -4,7 +4,7 @@
  * US2: Create Goal, US3: Edit Goal
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,

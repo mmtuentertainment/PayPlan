@@ -5,6 +5,7 @@
  */
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import {
   Select,
   SelectTrigger,
@@ -70,7 +71,16 @@ export function QuickAddSection({
     try {
       const result = addContribution(selectedGoalId, amountCents);
 
-      if (result.success && onContributionAdded) {
+      // PR80-11: Show error toast when contribution fails
+      if (!result.success) {
+        toast.error('Failed to add contribution', {
+          description: result.error || 'An unknown error occurred',
+          duration: 5000,
+        });
+        return;
+      }
+
+      if (onContributionAdded) {
         await onContributionAdded(); // Wait for parent refresh
       }
     } finally {
@@ -112,9 +122,9 @@ export function QuickAddSection({
           </Select>
         </div>
 
-        {/* Selected Goal Display */}
+        {/* Selected Goal Display - PR80-9: Added aria-live for screen readers */}
         {selectedGoal && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3" role="status" aria-live="polite">
             <p className="text-sm text-blue-900">
               <span className="font-medium">Adding to:</span> {selectedGoal.name}
             </p>

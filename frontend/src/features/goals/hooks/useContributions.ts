@@ -30,6 +30,11 @@ interface UndoSnapshot {
 
 /**
  * Hook return type
+ *
+ * TODO (PR80-10): Add onContributionUndone callback
+ * - Callback should trigger UI refresh after undo completes
+ * - Similar to onGoalComplete callback pattern
+ * - Defer to Phase 2 (not critical for Phase 1 MVP)
  */
 export interface UseContributionsResult {
   addContribution: (goalId: string, amountCents: number, note?: string) => GoalResult<Goal>;
