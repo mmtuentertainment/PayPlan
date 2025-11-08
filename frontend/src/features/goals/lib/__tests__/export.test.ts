@@ -212,21 +212,28 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
   });
 
   // Type for parsed CSV rows (per CodeRabbit feedback - avoid 'any' types)
+  // UPDATED: Denormalized format (one row per contribution, goal data repeated)
   type ParsedCSVRow = {
-    id: string;
-    name: string;
-    targetAmount: string;
-    currentAmount: string;
-    monthlyContribution: string;
-    targetDate: string;
-    status: string;
-    contributionCount: string;
-    createdAt: string;
-    updatedAt: string;
+    // Goal-level fields (repeated for each contribution)
+    goalId: string;
+    goalName: string;
+    goalTargetAmount: string;
+    goalCurrentAmount: string;
+    goalMonthlyContribution: string;
+    goalTargetDate: string;
+    goalStatus: string;
+    goalCreatedAt: string;
+    goalUpdatedAt: string;
+    // Contribution-level fields (unique per row)
+    contributionId: string;
+    contributionAmount: string;
+    contributionNote: string;
+    contributionDate: string;
+    contributionCreatedAt: string;
   };
 
   describe('exportGoalsToCSV', () => {
-    it('should export single goal to CSV with headers', () => {
+    it('should export single goal with one contribution (denormalized format)', () => {
       const goals = [mockGoal];
       const csv = exportGoalsToCSV(goals);
 
@@ -234,22 +241,43 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       const parsed = Papa.parse(csv, { header: true });
       const rows = parsed.data as ParsedCSVRow[];
 
+      // One row per contribution
       expect(rows).toHaveLength(1);
-      expect(rows[0].id).toBe('goal_001');
-      expect(rows[0].targetAmount).toBe('1000.00');
-      expect(rows[0].currentAmount).toBe('500.00');
-      expect(rows[0].monthlyContribution).toBe('50.00');
-      expect(rows[0].contributionCount).toBe('1');
+
+      // Verify goal-level fields
+      expect(rows[0].goalId).toBe('goal_001');
+      expect(rows[0].goalName).toBe('Emergency Fund for Jane Smith');
+      expect(rows[0].goalTargetAmount).toBe('1000.00');
+      expect(rows[0].goalCurrentAmount).toBe('500.00');
+      expect(rows[0].goalMonthlyContribution).toBe('50.00');
+      expect(rows[0].goalTargetDate).toBe('2026-06-30');
+      expect(rows[0].goalStatus).toBe('active');
+
+      // Verify contribution-level fields
+      expect(rows[0].contributionId).toBe('contrib_001');
+      expect(rows[0].contributionAmount).toBe('50.00'); // $50.00
+      expect(rows[0].contributionNote).toBe('Bonus from John Doe at 123 Main St');
+      expect(rows[0].contributionDate).toBe('2025-11-05');
+      expect(rows[0].contributionCreatedAt).toBe('2025-11-05T10:00:00Z');
     });
 
 
-    it('should handle multiple goals', () => {
+    it('should handle multiple goals with contributions', () => {
+      const contribution2: Contribution = {
+        id: 'contrib_002',
+        goalId: 'goal_002',
+        amount: 25000, // $250.00
+        note: 'Birthday money',
+        date: '2025-11-06',
+        createdAt: '2025-11-06T12:00:00Z',
+      };
+
       const goal2: Goal = {
         ...mockGoal,
         id: 'goal_002',
         name: 'Vacation Fund',
-        currentAmount: 0,
-        contributions: [],
+        currentAmount: 25000,
+        contributions: [contribution2],
       };
 
       const goals = [mockGoal, goal2];
@@ -258,10 +286,20 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       const parsed = Papa.parse(csv, { header: true });
       const rows = parsed.data as ParsedCSVRow[];
 
+      // Two goals, each with 1 contribution = 2 rows
       expect(rows).toHaveLength(2);
-      expect(rows[1].id).toBe('goal_002');
-      expect(rows[1].currentAmount).toBe('0.00');
-      expect(rows[1].contributionCount).toBe('0');
+
+      // Verify first goal's row
+      expect(rows[0].goalId).toBe('goal_001');
+      expect(rows[0].contributionId).toBe('contrib_001');
+
+      // Verify second goal's row
+      expect(rows[1].goalId).toBe('goal_002');
+      expect(rows[1].goalName).toBe('Vacation Fund');
+      expect(rows[1].goalCurrentAmount).toBe('250.00');
+      expect(rows[1].contributionId).toBe('contrib_002');
+      expect(rows[1].contributionAmount).toBe('250.00');
+      expect(rows[1].contributionNote).toBe('Birthday money');
     });
 
     it('should handle empty goals array', () => {
@@ -283,8 +321,16 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       const parsed = Papa.parse(csv, { header: true });
       const rows = parsed.data as ParsedCSVRow[];
 
-      expect(rows[0].targetDate).toBe('');
-      expect(rows[0].monthlyContribution).toBe('0.00');
+      // One goal with one contribution = 1 row
+      expect(rows).toHaveLength(1);
+
+      // Verify null goal fields are formatted correctly
+      expect(rows[0].goalTargetDate).toBe('');
+      expect(rows[0].goalMonthlyContribution).toBe('0.00');
+
+      // Contribution fields should still be present
+      expect(rows[0].contributionId).toBe('contrib_001');
+      expect(rows[0].contributionAmount).toBe('50.00');
     });
 
     it('should handle goals with completed status', () => {
@@ -298,8 +344,15 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       const parsed = Papa.parse(csv, { header: true });
       const rows = parsed.data as ParsedCSVRow[];
 
-      expect(rows[0].status).toBe('completed');
-      expect(rows[0].currentAmount).toBe('1000.00');
+      // One goal with one contribution = 1 row
+      expect(rows).toHaveLength(1);
+
+      // Verify goal status and amount
+      expect(rows[0].goalStatus).toBe('completed');
+      expect(rows[0].goalCurrentAmount).toBe('1000.00');
+
+      // Contribution fields should be present
+      expect(rows[0].contributionId).toBe('contrib_001');
     });
 
     it('should use RFC 4180 compliant CSV format', () => {
@@ -314,6 +367,121 @@ describe('export.ts - PII Sanitization and Export Functions', () => {
       expect(csv).toContain('"Goal, with comma"');
       // Verify Windows line endings
       expect(csv).toContain('\r\n');
+
+      // Parse to verify structure integrity
+      const parsed = Papa.parse(csv, { header: true });
+      const rows = parsed.data as ParsedCSVRow[];
+      expect(rows[0].goalName).toBe('Goal, with comma');
+    });
+
+    it('should handle goal with zero contributions (edge case)', () => {
+      const goalNoContributions: Goal = {
+        ...mockGoal,
+        contributions: [],
+        currentAmount: 0,
+      };
+
+      const csv = exportGoalsToCSV([goalNoContributions]);
+      const parsed = Papa.parse(csv, { header: true });
+      const rows = parsed.data as ParsedCSVRow[];
+
+      // Goal with 0 contributions should export 1 row with empty contribution fields
+      expect(rows).toHaveLength(1);
+      expect(rows[0].goalId).toBe('goal_001');
+      expect(rows[0].goalName).toBe('Emergency Fund for Jane Smith');
+      expect(rows[0].contributionId).toBe('');
+      expect(rows[0].contributionAmount).toBe('');
+      expect(rows[0].contributionNote).toBe('');
+      expect(rows[0].contributionDate).toBe('');
+    });
+
+    it('should handle goal with multiple contributions (denormalization)', () => {
+      const contributions: Contribution[] = [
+        {
+          id: 'contrib_001',
+          goalId: 'goal_001',
+          amount: 10000, // $100
+          note: 'First contribution',
+          date: '2025-11-01',
+          createdAt: '2025-11-01T10:00:00Z',
+        },
+        {
+          id: 'contrib_002',
+          goalId: 'goal_001',
+          amount: 15000, // $150
+          note: 'Second contribution',
+          date: '2025-11-05',
+          createdAt: '2025-11-05T10:00:00Z',
+        },
+        {
+          id: 'contrib_003',
+          goalId: 'goal_001',
+          amount: 20000, // $200
+          note: 'Third contribution',
+          date: '2025-11-10',
+          createdAt: '2025-11-10T10:00:00Z',
+        },
+      ];
+
+      const goalMultipleContributions: Goal = {
+        ...mockGoal,
+        contributions,
+        currentAmount: 45000, // $450 total
+      };
+
+      const csv = exportGoalsToCSV([goalMultipleContributions]);
+      const parsed = Papa.parse(csv, { header: true });
+      const rows = parsed.data as ParsedCSVRow[];
+
+      // 3 contributions = 3 rows
+      expect(rows).toHaveLength(3);
+
+      // Verify goal data is repeated for each row
+      rows.forEach((row) => {
+        expect(row.goalId).toBe('goal_001');
+        expect(row.goalName).toBe('Emergency Fund for Jane Smith');
+        expect(row.goalCurrentAmount).toBe('450.00');
+      });
+
+      // Verify contribution-specific data differs
+      expect(rows[0].contributionId).toBe('contrib_001');
+      expect(rows[0].contributionAmount).toBe('100.00');
+      expect(rows[0].contributionNote).toBe('First contribution');
+
+      expect(rows[1].contributionId).toBe('contrib_002');
+      expect(rows[1].contributionAmount).toBe('150.00');
+      expect(rows[1].contributionNote).toBe('Second contribution');
+
+      expect(rows[2].contributionId).toBe('contrib_003');
+      expect(rows[2].contributionAmount).toBe('200.00');
+      expect(rows[2].contributionNote).toBe('Third contribution');
+    });
+
+    it('should sanitize PII in denormalized CSV rows', () => {
+      const contributionWithPII: Contribution = {
+        id: 'contrib_pii',
+        goalId: 'goal_001',
+        amount: 10000,
+        note: 'Gift from john@example.com at 555-123-4567',
+        date: '2025-11-01',
+        createdAt: '2025-11-01T10:00:00Z',
+      };
+
+      const goalWithPII: Goal = {
+        ...mockGoal,
+        name: 'Save for 123 Main Street house',
+        contributions: [contributionWithPII],
+      };
+
+      const csv = exportGoalsToCSV([goalWithPII]);
+      const parsed = Papa.parse(csv, { header: true });
+      const rows = parsed.data as ParsedCSVRow[];
+
+      // Verify PII sanitized in goal name
+      expect(rows[0].goalName).toBe('Save for [ADDRESS_REDACTED] house');
+
+      // Verify PII sanitized in contribution note
+      expect(rows[0].contributionNote).toBe('Gift from [EMAIL_REDACTED] at [PHONE_REDACTED]');
     });
   });
 

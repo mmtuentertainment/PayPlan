@@ -96,50 +96,92 @@ function sanitizeContribution(contribution: Contribution): Contribution {
 }
 
 /**
- * CSV Row for goal export (flattened structure)
+ * CSV Row for goal export (denormalized structure - one row per contribution)
+ *
+ * This format repeats goal-level data for each contribution to preserve
+ * all contribution details (amount, note, date) in the export.
+ *
+ * For goals with 0 contributions, a single row is exported with empty
+ * contribution fields to ensure the goal is not lost.
  */
 interface GoalCSVRow {
-  id: string;
-  name: string;
-  targetAmount: string; // Formatted as currency
-  currentAmount: string; // Formatted as currency (matches Goal.currentAmount, not savedAmount)
-  monthlyContribution: string; // Formatted as currency
-  targetDate: string; // ISO date or empty
-  status: string;
-  createdAt: string; // ISO date
-  updatedAt: string; // ISO date
-  contributionCount: number;
+  // Goal-level fields (repeated for each contribution)
+  goalId: string;
+  goalName: string;
+  goalTargetAmount: string; // Formatted as currency
+  goalCurrentAmount: string; // Formatted as currency
+  goalMonthlyContribution: string; // Formatted as currency
+  goalTargetDate: string; // ISO date or empty
+  goalStatus: string;
+  goalCreatedAt: string; // ISO date
+  goalUpdatedAt: string; // ISO date
+  // Contribution-level fields (unique per row)
+  contributionId: string;
+  contributionAmount: string; // Formatted as currency
+  contributionNote: string;
+  contributionDate: string; // ISO date
+  contributionCreatedAt: string; // ISO date
 }
 
 /**
- * Transform goal to CSV row format
+ * Transform goal to denormalized CSV rows (one row per contribution)
+ *
+ * For goals with 0 contributions, returns a single row with empty contribution fields.
+ * For goals with N contributions, returns N rows with repeated goal data.
  *
  * @param goal - Goal to transform
- * @returns CSV row object
+ * @returns Array of CSV row objects
  */
-function transformGoalToCSVRow(goal: Goal): GoalCSVRow {
+function transformGoalToCSVRows(goal: Goal): GoalCSVRow[] {
   // Format amounts as currency (dollars with 2 decimals)
   const formatCurrency = (cents: number | null) => {
     if (cents === null) return '0.00';
     return (cents / 100).toFixed(2);
   };
 
-  return {
-    id: goal.id,
-    name: goal.name,
-    targetAmount: formatCurrency(goal.targetAmount),
-    currentAmount: formatCurrency(goal.currentAmount), // Fixed: currentAmount, not savedAmount
-    monthlyContribution: formatCurrency(goal.monthlyContribution),
-    targetDate: goal.targetDate || '',
-    status: goal.status,
-    createdAt: goal.createdAt,
-    updatedAt: goal.updatedAt,
-    contributionCount: goal.contributions.length,
+  // Base goal data (repeated for each contribution)
+  const goalData = {
+    goalId: goal.id,
+    goalName: goal.name,
+    goalTargetAmount: formatCurrency(goal.targetAmount),
+    goalCurrentAmount: formatCurrency(goal.currentAmount),
+    goalMonthlyContribution: formatCurrency(goal.monthlyContribution),
+    goalTargetDate: goal.targetDate || '',
+    goalStatus: goal.status,
+    goalCreatedAt: goal.createdAt,
+    goalUpdatedAt: goal.updatedAt,
   };
+
+  // If no contributions, export one row with empty contribution fields
+  if (goal.contributions.length === 0) {
+    return [
+      {
+        ...goalData,
+        contributionId: '',
+        contributionAmount: '',
+        contributionNote: '',
+        contributionDate: '',
+        contributionCreatedAt: '',
+      },
+    ];
+  }
+
+  // Otherwise, create one row per contribution
+  return goal.contributions.map((contribution) => ({
+    ...goalData,
+    contributionId: contribution.id,
+    contributionAmount: formatCurrency(contribution.amount),
+    contributionNote: contribution.note || '',
+    contributionDate: contribution.createdAt.split('T')[0], // Extract date from ISO timestamp
+    contributionCreatedAt: contribution.createdAt,
+  }));
 }
 
 /**
- * Export goals to CSV format with PII sanitization
+ * Export goals to CSV format with PII sanitization (denormalized)
+ *
+ * Returns one row per contribution. Goal data is repeated for each contribution.
+ * Goals with 0 contributions export a single row with empty contribution fields.
  *
  * @param goals - Goals to export
  * @returns CSV content string
@@ -148,8 +190,8 @@ export function exportGoalsToCSV(goals: Goal[]): string {
   // Sanitize PII from goal names and contribution notes
   const sanitizedGoals = goals.map(sanitizeGoal);
 
-  // Transform to CSV rows
-  const csvRows = sanitizedGoals.map(transformGoalToCSVRow);
+  // Transform to denormalized CSV rows (flatten array of arrays)
+  const csvRows = sanitizedGoals.flatMap(transformGoalToCSVRows);
 
   // Generate CSV with PapaParse (RFC 4180 compliant)
   const csvContent = Papa.unparse(csvRows, {
