@@ -93,8 +93,11 @@ export function loadGoals(): LoadGoalsResult {
 /**
  * Check localStorage quota usage
  * @returns Storage quota information with warning/critical flags
+ *
+ * Uses Storage API (navigator.storage.estimate()) when available for accurate quota,
+ * falls back to conservative 5MB estimate otherwise. Safari/Firefox may allow 10MB.
  */
-export function checkStorageQuota(): StorageQuotaResult {
+export async function checkStorageQuota(): Promise<StorageQuotaResult> {
   // Calculate total localStorage usage (all keys)
   let totalBytes = 0;
   for (let i = 0; i < localStorage.length; i++) {
@@ -106,9 +109,22 @@ export function checkStorageQuota(): StorageQuotaResult {
     }
   }
 
-  // Estimated localStorage limit (5MB = 5 * 1024 * 1024 bytes)
-  // Most browsers use 5MB, some use 10MB
-  const estimatedLimit = 5 * 1024 * 1024;
+  // Try to detect actual quota using Storage API (Chrome 52+, Firefox 51+, Safari 15.2+)
+  let estimatedLimit = 5 * 1024 * 1024; // Default: 5MB (conservative estimate)
+
+  if ('storage' in navigator && 'estimate' in navigator.storage) {
+    try {
+      const estimate = await navigator.storage.estimate();
+      // estimate.quota is the total storage quota in bytes
+      // For localStorage, actual limit varies by browser but quota gives accurate value
+      if (estimate.quota && estimate.quota > 0) {
+        estimatedLimit = estimate.quota;
+      }
+    } catch (error) {
+      // Storage API failed, use fallback
+      console.warn('[GoalStorageService] Storage API unavailable, using 5MB fallback');
+    }
+  }
 
   const usagePercent = (totalBytes / estimatedLimit) * 100;
   const warning = usagePercent >= 80;
@@ -357,6 +373,13 @@ export function addContribution(goalId: string, contribution: Contribution): Goa
 
 /**
  * Archive completed goal
+ *
+ * Note: Uses shallow copy (spread operator) which is safe because:
+ * - Goal objects follow immutable pattern
+ * - Contributions array is never mutated in place
+ * - All mutations create new arrays: [...goal.contributions, newContribution]
+ * - No nested objects are modified after spread
+ *
  * @param id - Goal ID
  * @returns Result with archived goal or error
  */

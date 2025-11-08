@@ -11,7 +11,7 @@ import type { Goal, GoalResult } from '../types/goal';
 import type { CreateContributionInput } from '../types/contribution';
 import { loadGoals, updateGoal } from '../lib/GoalStorageService';
 import { getGoalPercent } from '../lib/calculations';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
+import { formatCurrency } from '@/shared/lib/utils';
 
 /**
  * Undo snapshot for a specific contribution

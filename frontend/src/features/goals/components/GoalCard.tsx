@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
+import { formatCurrency } from '@/shared/lib/utils';
 import type { Goal } from '../types/goal';
 import { getGoalPercent, getDaysRemaining, getRequiredMonthly, getGoalStatus } from '../lib/calculations';
 import { getProgressIndicatorClass } from '../lib/progressIndicator';

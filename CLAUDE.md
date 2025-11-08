@@ -193,6 +193,12 @@ PayPlan is a **privacy-first budgeting app** designed to help **low-income earne
 - PapaParse 5.5.3 (CSV parsing)
 - uuid 13.0.0 (unique IDs)
 - React Router 7.0.2 (client-side routing)
+- date-fns 4.1.0 (date manipulation and formatting)
+- luxon 3.7.2 (date/time manipulation alternative)
+- react-aria 3.44.0 (accessible UI primitives)
+- react-focus-lock 2.13.6 (focus management for modals)
+- sonner 2.0.7 (toast notifications)
+- ics 3.8.1 (iCalendar format generation)
 
 **Testing** (Phase 2+):
 - Vitest 3.2.4 (unit/integration tests)

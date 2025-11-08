@@ -17,7 +17,7 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Alert } from '@/shared/components/ui/alert';
 import { Info } from 'lucide-react';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
+import { formatCurrency } from '@/shared/lib/utils';
 import type { Goal, CreateGoalInput, UpdateGoalInput } from '../types/goal';
 import { MAX_NAME_LENGTH } from '../lib/constants';
 import { getRequiredMonthly } from '../lib/calculations';

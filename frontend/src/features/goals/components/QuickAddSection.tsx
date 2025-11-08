@@ -16,7 +16,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import type { Goal } from '../types/goal';
 import { QUICK_ADD_AMOUNTS } from '../lib/constants';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
+import { formatCurrency } from '@/shared/lib/utils';
 import { useContributions } from '../hooks/useContributions';
 
 interface QuickAddSectionProps {

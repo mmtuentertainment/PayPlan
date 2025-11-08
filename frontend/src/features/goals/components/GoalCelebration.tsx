@@ -8,8 +8,8 @@ import { useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog';
 import { Button } from '@/shared/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
-import { differenceInMonths } from 'date-fns';
+import { formatCurrency } from '@/shared/lib/utils';
+import { calculateCelebrationStats } from '../lib/celebration-stats';
 import type { Goal } from '../types/goal';
 
 interface GoalCelebrationProps {
@@ -64,27 +64,20 @@ export function GoalCelebration({
 
   if (!goal) return null;
 
-  // Validate required fields to prevent NaN or Invalid Date
-  if (!goal.createdAt || !goal.updatedAt || goal.currentAmount == null) {
-    console.error('GoalCelebration: Missing required fields', { goal });
-    return null;
-  }
+  // PR81-1: Extract business logic to lib/celebration-stats.ts for testability
+  // Calculate completion statistics (validation + date arithmetic + division by zero protection)
+  const statsResult = calculateCelebrationStats(goal);
 
-  // Calculate completion statistics (T073)
-  const createdDate = new Date(goal.createdAt);
-  const updatedDate = new Date(goal.updatedAt);
-
-  // Validate dates are valid
-  if (isNaN(createdDate.getTime()) || isNaN(updatedDate.getTime())) {
-    console.error('GoalCelebration: Invalid dates', {
-      createdAt: goal.createdAt,
-      updatedAt: goal.updatedAt,
+  // If calculation fails (invalid data), log error and don't render modal
+  if (!statsResult.success) {
+    console.error('GoalCelebration: Failed to calculate stats', {
+      goal,
+      error: statsResult.error,
     });
     return null;
   }
 
-  const months = differenceInMonths(updatedDate, createdDate);
-  const avgMonthly = goal.currentAmount / Math.max(months, 1); // Avoid division by zero
+  const { months, avgMonthly } = statsResult.stats;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

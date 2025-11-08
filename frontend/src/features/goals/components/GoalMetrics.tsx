@@ -5,7 +5,7 @@
  */
 
 import { Card, CardContent } from '@/shared/components/ui/card';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
+import { formatCurrency } from '@/shared/lib/utils';
 import type { DashboardMetrics } from '../lib/dashboard-metrics';
 
 interface GoalMetricsProps {
