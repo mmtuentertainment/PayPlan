@@ -50,7 +50,7 @@ reviews:
     base_branches:
       - main
       - develop  # Add if you use develop branch
-      - "062-short-name-dashboard"  # Feature branch for Dashboard (Chunk 1-6 PRs)
+      - "064-short-name-goal"  # Feature branch for Goal Tracking (Phase 1-11 PRs)
     ignore_title_keywords:
       - "WIP"
       - "DO NOT MERGE"
