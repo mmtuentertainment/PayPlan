@@ -15,6 +15,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
+import { TOAST_DURATION } from '@/shared/lib/toast-constants';
 import { GoalMetrics } from '@/features/goals/components/GoalMetrics';
 import { GoalSkeleton } from '@/features/goals/components/GoalSkeleton';
 import { GoalEmptyState } from '@/features/goals/components/GoalEmptyState';
@@ -113,7 +114,7 @@ export const Goals: React.FC = () => {
       } else {
         toast.error('Failed to delete goal', {
           description: result.error,
-          duration: 5000,
+          duration: TOAST_DURATION.ERROR,
         });
       }
     }
@@ -127,7 +128,7 @@ export const Goals: React.FC = () => {
     if (!result.success) {
       toast.error('Failed to archive goal', {
         description: result.error,
-        duration: 5000,
+        duration: TOAST_DURATION.ERROR,
       });
     }
     // No need to refresh - useGoals already updates state optimistically
@@ -141,7 +142,7 @@ export const Goals: React.FC = () => {
     if (!result.success) {
       toast.error('Failed to unarchive goal', {
         description: result.error,
-        duration: 5000,
+        duration: TOAST_DURATION.ERROR,
       });
     }
     // No need to refresh - useGoals already updates state optimistically
@@ -158,7 +159,7 @@ export const Goals: React.FC = () => {
       } else {
         toast.error('Failed to create goal', {
           description: result.error,
-          duration: 5000,
+          duration: TOAST_DURATION.ERROR,
         });
       }
     } else if (selectedGoal) {
@@ -169,7 +170,7 @@ export const Goals: React.FC = () => {
       } else {
         toast.error('Failed to update goal', {
           description: result.error,
-          duration: 5000,
+          duration: TOAST_DURATION.ERROR,
         });
       }
     }
@@ -202,7 +203,7 @@ export const Goals: React.FC = () => {
       if (!result.success) {
         toast.error('Failed to archive goal', {
           description: result.error,
-          duration: 5000,
+          duration: TOAST_DURATION.ERROR,
         });
       }
     }

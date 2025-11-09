@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { TOAST_DURATION } from '@/shared/lib/toast-constants';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,13 +30,6 @@ import {
   generateExportFilename,
   downloadFile,
 } from '../lib/export';
-
-/**
- * Toast duration constants (bot review: extract magic numbers)
- * Industry standards: success 3-5s, error 7-10s
- */
-const TOAST_DURATION_SUCCESS = 5000; // 5 seconds
-const TOAST_DURATION_ERROR = 10000; // 10 seconds
 
 interface ExportGoalsButtonProps {
   goals: Goal[]; // Goals to export
@@ -76,12 +70,12 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
 
       // Success toast
       toast.success('Goals exported to CSV successfully', {
-        duration: TOAST_DURATION_SUCCESS,
+        duration: TOAST_DURATION.SUCCESS,
       });
     } catch (err) {
       console.error('[ExportGoalsButton] CSV export failed:', err);
       toast.error('Failed to export goals to CSV. Please try again.', {
-        duration: TOAST_DURATION_ERROR,
+        duration: TOAST_DURATION.ERROR,
         position: 'top-center',
       });
     } finally {
@@ -107,12 +101,12 @@ export function ExportGoalsButton({ goals, disabled = false }: ExportGoalsButton
 
       // Success toast
       toast.success('Goals exported to JSON successfully', {
-        duration: TOAST_DURATION_SUCCESS,
+        duration: TOAST_DURATION.SUCCESS,
       });
     } catch (err) {
       console.error('[ExportGoalsButton] JSON export failed:', err);
       toast.error('Failed to export goals to JSON. Please try again.', {
-        duration: TOAST_DURATION_ERROR,
+        duration: TOAST_DURATION.ERROR,
         position: 'top-center',
       });
     } finally {

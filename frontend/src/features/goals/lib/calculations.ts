@@ -129,7 +129,11 @@ export function getGoalStatus(
  * @param updatedAt - ISO date string when goal was completed
  * @param currentAmount - Final saved amount in cents
  * @returns Completion statistics
- * @throws Error if dates are invalid or amount is negative
+ * @throws {Error} When createdAt or updatedAt is missing/falsy
+ * @throws {Error} When currentAmount is not a number or is negative
+ * @throws {Error} When createdAt cannot be parsed as a valid date (NaN)
+ * @throws {Error} When updatedAt cannot be parsed as a valid date (NaN)
+ * @throws {Error} When updatedAt is before createdAt (data corruption or time drift)
  */
 export function calculateGoalCompletionStats(
   createdAt: string,

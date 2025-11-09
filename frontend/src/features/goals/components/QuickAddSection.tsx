@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { TOAST_DURATION } from '@/shared/lib/toast-constants';
 import {
   Select,
   SelectTrigger,
@@ -75,7 +76,7 @@ export function QuickAddSection({
       if (!result.success) {
         toast.error('Failed to add contribution', {
           description: result.error || 'An unknown error occurred',
-          duration: 5000,
+          duration: TOAST_DURATION.ERROR,
         });
         return;
       }

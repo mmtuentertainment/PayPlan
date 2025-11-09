@@ -502,6 +502,8 @@ export function unarchiveGoal(id: string): GoalResult<Goal> {
 /**
  * Clear all goals (for testing/reset)
  * DANGEROUS: Only use for tests or explicit user reset
+ *
+ * @throws {Error} When localStorage.removeItem() fails (quota exceeded, access denied, or browser restrictions)
  */
 export function clearGoals(): void {
   try {
