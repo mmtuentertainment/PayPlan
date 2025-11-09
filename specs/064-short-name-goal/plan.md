@@ -177,7 +177,7 @@ frontend/src/features/dashboard/      # Integration point (Feature 062 existing)
 **Shadcn Component Installation**:
 ```bash
 # Phase 1 Setup - Install 5 Shadcn components (Option B: Enhanced MVP)
-npx shadcn@latest add progress toast skeleton empty dropdown-menu
+npx shadcn@latest add progress sonner skeleton empty dropdown-menu
 ```
 
 ## Complexity Tracking

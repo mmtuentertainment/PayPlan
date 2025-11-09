@@ -950,26 +950,24 @@ import { useCategories } from '@/features/categories/hooks/useCategories';
 - Constitutional compliance (privacy, accessibility, performance)
 - Quality gates (bot reviews, HIL approval)
 - Permanent documentation (code changes, specs don't)
-- Manus → Claude Code handoff clarity
 
 **Full Workflow** (for every feature):
-1. **Manus** runs `/speckit.specify` → creates `spec.md`
-2. **Manus** runs `/speckit.clarify` → resolves ambiguities with deep research
-3. **Manus** runs `/speckit.plan` → creates `plan.md`, `data-model.md`, `research.md`
-4. **Manus** runs `/speckit.tasks` → creates `tasks.md`, `checklist.md`
-5. **Manus** creates implementation prompt → `.claude/prompts/implement-[feature].md`
-6. **Claude Code (you)** runs `/speckit.implement` → generates code from specs
-7. **Claude Code** creates PR → bot review loop → HIL approval → merge
+1. **Claude Code (you)** runs `/speckit.specify` → creates `spec.md`
+2. **Claude Code (you)** runs `/speckit.clarify` → resolves ambiguities with deep research
+3. **Claude Code (you)** runs `/speckit.plan` → creates `plan.md`, `data-model.md`, `research.md`
+4. **Claude Code (you)** runs `/speckit.tasks` → creates `tasks.md`, `checklist.md`
+5. **Claude Code (you)** runs `/speckit.implement` → generates code from specs
+6. **Claude Code (you)** creates PR → bot review loop → HIL approval → merge
 
-**You receive** (from Manus):
+**You create**:
 - Complete specifications in `specs/[number]-[feature-name]/`
-- Implementation prompt in `.claude/prompts/implement-[feature].md`
-- All context needed for implementation
+- All implementation code
+- Pull requests with bot review responses
 
 **You do NOT**:
 - Skip spec files (all are required)
-- Create specs yourself (Manus does this)
-- Make architectural decisions (defined in specs)
+- Skip constitutional validation
+- Make decisions that violate IMMUTABLE principles (Privacy, Accessibility, Free Core)
 
 ---
 

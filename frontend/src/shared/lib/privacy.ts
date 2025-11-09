@@ -24,9 +24,26 @@
  * - Names (common patterns like "John Doe", "Jane Smith")
  * - Street addresses (numbers + street names)
  *
- * @remarks Phase 1 Limitations
- * - Phone regex is US-only (+1 country code, 10-digit format)
- * - International phone support deferred to Phase 2 (requires libphonenumber-js)
+ * @remarks Phase 1 Limitations (Known False Negatives)
+ *
+ * **⚠️ PII sanitization is BEST-EFFORT and NOT comprehensive.**
+ * Users should review exported data before sharing externally.
+ *
+ * **Known limitations**:
+ * 1. **Name pattern**: Only detects ~50 common Western names (misses "Aarav Patel", "Wei Chen", "José García")
+ * 2. **Phone pattern**: US-only format (misses +44, +61, +33, +49, +86, +91 international numbers)
+ * 3. **Address pattern**: Only numbered street addresses (misses "Near Central Park", "Apartment 5B")
+ * 4. **Email pattern**: Comprehensive (no known major limitations)
+ * 5. **SSN pattern**: US-only (misses equivalent international IDs)
+ * 6. **Credit card pattern**: Comprehensive (13-19 digit Luhn algorithm patterns)
+ *
+ * **Recommendation**: Add user-facing warning in export UI:
+ * "PII sanitization is best-effort. Review exported data before sharing."
+ *
+ * @remarks Phase 2 Enhancements
+ * - International phone support (libphonenumber-js library)
+ * - Expanded name detection (NLP-based entity recognition)
+ * - Address parsing (Google Places API or similar)
  * - See Linear issue: "Add international phone support for PII sanitization"
  *
  * @see {@link sanitizePII} for usage examples

@@ -142,10 +142,11 @@ export function useContributions(
         const percentage = getGoalPercent(updatedGoal.currentAmount, updatedGoal.targetAmount);
         const wasCompleted = percentage >= 100;
 
-        // Save to storage
+        // Save to storage (include status to persist completion state)
         const result = updateGoal(goalId, {
           currentAmount: updatedGoal.currentAmount,
           contributions: updatedGoal.contributions,
+          status: wasCompleted ? 'completed' : goal.status,
         });
 
         if (!result.success) {
