@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner'; // T102: Toast for corrupted data notification
 import type { Goal, CreateGoalInput, UpdateGoalInput, GoalResult } from '../types/goal';
 import {
   loadGoals,
@@ -13,8 +14,16 @@ import {
   deleteGoal as deleteGoalService,
   archiveGoal as archiveGoalService,
   unarchiveGoal as unarchiveGoalService,
+  checkStorageQuota,
 } from '../lib/GoalStorageService';
+import type { StorageQuotaResult } from '../lib/GoalStorageService';
 import { STORAGE_KEY } from '../lib/constants';
+
+/**
+ * Toast duration constants (bot review: extract magic numbers)
+ * Industry standard: error toasts need 7-10s (users need more time to read critical info)
+ */
+const TOAST_DURATION_ERROR = 10000; // 10 seconds
 
 /**
  * Hook return type
@@ -23,6 +32,7 @@ export interface UseGoalsResult {
   goals: Goal[];
   loading: boolean;
   error: string | null;
+  storageQuota: StorageQuotaResult | null;
   createGoal: (input: CreateGoalInput) => GoalResult<Goal>;
   updateGoal: (id: string, input: UpdateGoalInput) => GoalResult<Goal>;
   deleteGoal: (id: string) => GoalResult<void>;
@@ -55,19 +65,41 @@ export function useGoals(): UseGoalsResult {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storageQuota, setStorageQuota] = useState<StorageQuotaResult | null>(null);
 
   /**
-   * Load goals from localStorage
+   * Check storage quota
+   */
+  const checkQuota = useCallback(() => {
+    try {
+      const quota = checkStorageQuota();
+      setStorageQuota(quota);
+    } catch (err) {
+      console.error('[useGoals] Failed to check storage quota:', err);
+    }
+  }, []);
+
+  /**
+   * Load goals from localStorage (T102: with corruption detection)
    */
   const refreshGoals = useCallback(() => {
     try {
-      const loaded = loadGoals();
+      const { goals: loaded, corrupted } = loadGoals(); // T102: Destructure result
       setGoals(loaded);
       setError(null);
+      checkQuota(); // T101: Check quota after loading
+
+      // T102: Show toast if data was corrupted and reset
+      if (corrupted) {
+        toast.error('Goal data was corrupted and has been reset', {
+          description: 'Your goals could not be loaded due to corrupted data. Starting fresh.',
+          duration: TOAST_DURATION_ERROR,
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load goals');
     }
-  }, []);
+  }, [checkQuota]);
 
   /**
    * Initial load on mount
@@ -104,21 +136,91 @@ export function useGoals(): UseGoalsResult {
   }, [refreshGoals]);
 
   /**
-   * Create new goal
+   * Create new goal (T101: Check quota before creating)
    */
   const createGoal = useCallback((input: CreateGoalInput): GoalResult<Goal> => {
-    const result = createGoalService(input);
+    // Bot review C1: Storage Quota Race Condition Handling (Bot review M3)
+    //
+    // This function uses BOTH pre-check AND try-catch for defense-in-depth.
+    //
+    // **FULL DOCUMENTATION**: See ADR 001 - Storage Quota Race Condition Handling
+    // docs/architecture/decisions/001-storage-quota-race-condition-handling.md
+    //
+    // Quick summary:
+    // 1. PRE-CHECK (lines 162-181): Provides early feedback to user
+    //    - Checks quota BEFORE attempting write
+    //    - Blocks creation if storage >95% full
+    //    - Good UX: User sees error immediately without triggering write failure
+    //
+    // 2. TRY-CATCH (lines 185-218): Handles race conditions
+    //    - Another browser tab could consume storage between pre-check and write
+    //    - Catches QuotaExceededError from localStorage.setItem()
+    //    - Fallback safety net for concurrent storage writes
+    //
+    // Why BOTH are needed:
+    // - Pre-check alone: ❌ Race condition (storage filled by another tab)
+    // - Try-catch alone: ❌ Poor UX (user triggers write failure before seeing error)
+    // - Both together: ✅ Best-effort prevention + guaranteed error handling
+    //
+    // T101: Check storage quota before creating (best-effort)
+    try {
+      const quota = checkStorageQuota();
 
-    if (result.success) {
-      // Optimistic update: Add to state immediately
-      setGoals((prev) => [...prev, result.data]);
-      setError(null);
-    } else {
-      setError(result.error);
+      // Bot review H2: Update quota state BEFORE returning critical error
+      // This ensures the UI always shows current quota status
+      setStorageQuota(quota);
+
+      // Block creation if storage is critical (>95% full)
+      if (quota.critical) {
+        const errorMsg = 'Storage limit exceeded (>95% full). Cannot create new goals. Please delete or archive existing goals to free up space.';
+        setError(errorMsg);
+        return {
+          success: false,
+          error: errorMsg,
+        };
+      }
+    } catch (err) {
+      console.error('[useGoals] Failed to check quota before create:', err);
+      // Continue with creation if quota check fails (don't block user)
     }
 
-    return result;
-  }, []);
+    // Wrap goal creation in try-catch to handle QuotaExceededError race condition
+    // Even if pre-check passes, another tab could fill storage between check and write
+    try {
+      const result = createGoalService(input);
+
+      if (result.success) {
+        // Optimistic update: Add to state immediately
+        setGoals((prev) => [...prev, result.data]);
+        setError(null);
+        checkQuota(); // T101: Update quota after successful creation
+      } else if (result.error && result.error.includes('QuotaExceededError')) {
+        // Handle quota error even if pre-check passed (race condition)
+        const quotaError = 'Storage limit exceeded. Please delete or archive existing goals to free up space.';
+        setError(quotaError);
+        return {
+          success: false,
+          error: quotaError,
+        };
+      } else {
+        setError(result.error);
+      }
+
+      return result;
+    } catch (err) {
+      // Catch QuotaExceededError thrown by localStorage.setItem()
+      if (err instanceof Error && (err.name === 'QuotaExceededError' || err.message.includes('quota'))) {
+        const quotaError = 'Storage limit exceeded. Please delete or archive existing goals to free up space.';
+        setError(quotaError);
+        return {
+          success: false,
+          error: quotaError,
+        };
+      }
+      // Re-throw unexpected errors
+      throw err;
+    }
+  }, [checkQuota]);
 
   /**
    * Update existing goal
@@ -130,12 +232,13 @@ export function useGoals(): UseGoalsResult {
       // Optimistic update: Update in state immediately
       setGoals((prev) => prev.map((g) => (g.id === id ? result.data : g)));
       setError(null);
+      checkQuota(); // T101: Update quota after successful update
     } else {
       setError(result.error);
     }
 
     return result;
-  }, []);
+  }, [checkQuota]);
 
   /**
    * Delete goal by ID
@@ -147,12 +250,13 @@ export function useGoals(): UseGoalsResult {
       // Optimistic update: Remove from state immediately
       setGoals((prev) => prev.filter((g) => g.id !== id));
       setError(null);
+      checkQuota(); // T101: Update quota after successful deletion
     } else {
       setError(result.error);
     }
 
     return result;
-  }, []);
+  }, [checkQuota]);
 
   /**
    * Archive completed goal
@@ -164,12 +268,13 @@ export function useGoals(): UseGoalsResult {
       // Optimistic update: Update status in state immediately
       setGoals((prev) => prev.map((g) => (g.id === id ? result.data : g)));
       setError(null);
+      checkQuota(); // T101: Update quota after successful archive
     } else {
       setError(result.error);
     }
 
     return result;
-  }, []);
+  }, [checkQuota]);
 
   /**
    * Unarchive archived goal
@@ -181,17 +286,19 @@ export function useGoals(): UseGoalsResult {
       // Optimistic update: Update status in state immediately
       setGoals((prev) => prev.map((g) => (g.id === id ? result.data : g)));
       setError(null);
+      checkQuota(); // T101: Update quota after successful unarchive
     } else {
       setError(result.error);
     }
 
     return result;
-  }, []);
+  }, [checkQuota]);
 
   return {
     goals,
     loading,
     error,
+    storageQuota, // T101: Expose storage quota state
     createGoal,
     updateGoal,
     deleteGoal,

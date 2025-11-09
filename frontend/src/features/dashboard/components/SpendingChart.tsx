@@ -18,7 +18,8 @@ interface SpendingChartProps {
  */
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
+  payload?: Array<{ payload: SpendingChartData }>;
+  label?: string;
 }
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {

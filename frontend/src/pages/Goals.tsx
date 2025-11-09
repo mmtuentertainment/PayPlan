@@ -14,6 +14,8 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { toast } from 'sonner';
+import { TOAST_DURATION } from '@/shared/lib/toast-constants';
 import { GoalMetrics } from '@/features/goals/components/GoalMetrics';
 import { GoalSkeleton } from '@/features/goals/components/GoalSkeleton';
 import { GoalEmptyState } from '@/features/goals/components/GoalEmptyState';
@@ -21,6 +23,7 @@ import { GoalForm } from '@/features/goals/components/GoalForm';
 import { GoalList } from '@/features/goals/components/GoalList';
 import { QuickAddSection } from '@/features/goals/components/QuickAddSection';
 import { GoalCelebration } from '@/features/goals/components/GoalCelebration';
+import { ExportGoalsButton } from '@/features/goals/components/ExportGoalsButton';
 import { useGoalMetrics } from '@/features/goals/hooks/useGoalMetrics';
 import { useGoals } from '@/features/goals/hooks/useGoals';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/components/ui/alert-dialog';
@@ -45,7 +48,7 @@ import type { Goal, CreateGoalInput, UpdateGoalInput } from '@/features/goals/ty
  * - Desktop (1920px): 4 column metrics, 3 column goals
  */
 export const Goals: React.FC = () => {
-  const { goals, loading: isLoading, createGoal, updateGoal, deleteGoal, archiveGoal, refreshGoals } = useGoals();
+  const { goals, loading: isLoading, createGoal, updateGoal, deleteGoal, archiveGoal, unarchiveGoal, refreshGoals } = useGoals();
 
   // T091: Filter goals by status
   const activeGoals = useMemo(() => goals.filter((g) => g.status !== 'archived'), [goals]);
@@ -109,8 +112,10 @@ export const Goals: React.FC = () => {
         setIsDeleteDialogOpen(false);
         setGoalToDelete(undefined);
       } else {
-        // TODO: Show error toast (Group 6 or later)
-        alert(`Failed to delete goal: ${result.error}`);
+        toast.error('Failed to delete goal', {
+          description: result.error,
+          duration: TOAST_DURATION.ERROR,
+        });
       }
     }
   };
@@ -121,8 +126,24 @@ export const Goals: React.FC = () => {
   const handleArchiveGoal = (goal: Goal) => {
     const result = archiveGoal(goal.id);
     if (!result.success) {
-      // TODO: Show error toast (Group 6 or later)
-      alert(`Failed to archive goal: ${result.error}`);
+      toast.error('Failed to archive goal', {
+        description: result.error,
+        duration: TOAST_DURATION.ERROR,
+      });
+    }
+    // No need to refresh - useGoals already updates state optimistically
+  };
+
+  /**
+   * PR85-8: Unarchive goal (restore to active)
+   */
+  const handleUnarchiveGoal = (goal: Goal) => {
+    const result = unarchiveGoal(goal.id);
+    if (!result.success) {
+      toast.error('Failed to unarchive goal', {
+        description: result.error,
+        duration: TOAST_DURATION.ERROR,
+      });
     }
     // No need to refresh - useGoals already updates state optimistically
   };
@@ -136,8 +157,10 @@ export const Goals: React.FC = () => {
       if (result.success) {
         setIsFormOpen(false);
       } else {
-        // TODO: Show error toast (Group 6 or later)
-        alert(`Failed to create goal: ${result.error}`);
+        toast.error('Failed to create goal', {
+          description: result.error,
+          duration: TOAST_DURATION.ERROR,
+        });
       }
     } else if (selectedGoal) {
       const result = updateGoal(selectedGoal.id, data as UpdateGoalInput);
@@ -145,8 +168,10 @@ export const Goals: React.FC = () => {
         setIsFormOpen(false);
         setSelectedGoal(undefined);
       } else {
-        // TODO: Show error toast (Group 6 or later)
-        alert(`Failed to update goal: ${result.error}`);
+        toast.error('Failed to update goal', {
+          description: result.error,
+          duration: TOAST_DURATION.ERROR,
+        });
       }
     }
   };
@@ -157,6 +182,7 @@ export const Goals: React.FC = () => {
   const handleGoalComplete = (goal: Goal) => {
     setCompletedGoal(goal);
     setShowCelebration(true);
+    refreshGoals(); // Refresh data to prevent stale data in celebration modal
   };
 
   /**
@@ -175,7 +201,10 @@ export const Goals: React.FC = () => {
     if (completedGoal) {
       const result = archiveGoal(completedGoal.id);
       if (!result.success) {
-        alert(`Failed to archive goal: ${result.error}`);
+        toast.error('Failed to archive goal', {
+          description: result.error,
+          duration: TOAST_DURATION.ERROR,
+        });
       }
     }
     setShowCelebration(false);
@@ -230,13 +259,18 @@ export const Goals: React.FC = () => {
             >
               Your Goals
             </h2>
-            {!isLoading && goals.length > 0 && (
-              <button
-                onClick={handleCreateGoal}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Create Goal
-              </button>
+            {!isLoading && (
+              <div className="flex items-center gap-3">
+                {/* T103: Export Goals Button - Always visible, disabled when no goals */}
+                <ExportGoalsButton goals={goals} disabled={goals.length === 0} />
+
+                <button
+                  onClick={handleCreateGoal}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Create Goal
+                </button>
+              </div>
             )}
           </div>
 
@@ -263,7 +297,12 @@ export const Goals: React.FC = () => {
               {/* Active Goals Tab */}
               <TabsContent value="active">
                 {activeGoals.length === 0 ? (
-                  <div className="text-center py-8">
+                  <div
+                    className="text-center py-8"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Active goals status"
+                  >
                     <p className="text-sm text-gray-500">
                       No active goals. Create your first goal to get started!
                     </p>
@@ -283,7 +322,12 @@ export const Goals: React.FC = () => {
               {/* Archived Goals Tab */}
               <TabsContent value="archived">
                 {archivedGoals.length === 0 ? (
-                  <div className="text-center py-8">
+                  <div
+                    className="text-center py-8"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Archived goals status"
+                  >
                     <p className="text-sm text-gray-500">
                       No archived goals. Completed goals will appear here after archiving.
                     </p>
@@ -293,6 +337,7 @@ export const Goals: React.FC = () => {
                     goals={archivedGoals}
                     onEdit={handleEditGoal}
                     onDelete={handleDeleteGoal}
+                    onUnarchive={handleUnarchiveGoal}
                     onContributionAdded={refreshGoals}
                     onGoalComplete={handleGoalComplete}
                   />

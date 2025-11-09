@@ -58,5 +58,6 @@ export const ERROR_MESSAGES = {
   INVALID_INPUT: 'Invalid input. Please check your data.',
   MAX_CONTRIBUTIONS: `Maximum 100 contributions reached for this goal.`,
   CANNOT_ARCHIVE: 'Only completed goals can be archived.',
+  CANNOT_UNARCHIVE: 'Cannot unarchive non-archived goal.',
   STORAGE_ERROR: 'Failed to save goals to storage.',
 } as const;

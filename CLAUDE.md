@@ -1,6 +1,6 @@
 # PayPlan Development Guide for Claude Code
 
-**Last Updated**: 2025-11-02 (Major Update - Clean Architecture + TDD Requirements)
+**Last Updated**: 2025-11-08 (Major Update - Context Engineering Guide + Advanced Features)
 **Current Phase**: Phase 1 (Pre-MVP, 0-100 users)
 **Constitution Version**: 3.1 (Evidence-based: Phased TDD, 8-12 features MVP, 60-80% coverage ramp)
 **Codebase Status**: ✅ CLEAN (Feature-based architecture, professionally organized)
@@ -11,26 +11,27 @@
 ## Table of Contents
 
 1. [Quick Start](#quick-start)
-2. [Your Role in the Workflow](#your-role-in-the-workflow)
-3. [Current Phase: Phase 1](#current-phase-phase-1-pre-mvp)
-4. [Project Overview](#project-overview)
-5. [Technology Stack](#technology-stack)
-6. [Project Structure](#project-structure-updated-2025-11-02)
-7. [Development Workflow](#development-workflow)
-8. [Bot Review Loop](#bot-review-loop-critical)
-9. [Phase 1 Definition of Done](#phase-1-definition-of-done-updated-v31)
-10. [Constitutional Principles](#constitutional-principles-must-follow)
-11. [Conflict Resolution](#conflict-resolution)
-12. [Mandatory Features](#mandatory-features-post-pivot-roadmap)
-13. [Code Standards](#code-standards)
-14. [Accessibility Requirements](#accessibility-requirements-immutable)
-15. [Privacy Requirements](#privacy-requirements-immutable)
-16. [Performance Guidelines](#performance-guidelines-phase-1)
-17. [Common Commands](#common-commands)
-18. [Tooling Integration](#tooling-integration)
-19. [Frequently Asked Questions](#frequently-asked-questions)
-20. [Working with the New Folder Structure](#working-with-the-new-folder-structure-2025-11-02)
-21. [Resources](#resources)
+2. [Context Engineering for Claude Code](#context-engineering-for-claude-code-ultimate-guide)
+3. [Your Role in the Workflow](#your-role-in-the-workflow)
+4. [Current Phase: Phase 1](#current-phase-phase-1-pre-mvp)
+5. [Project Overview](#project-overview)
+6. [Technology Stack](#technology-stack)
+7. [Project Structure](#project-structure-updated-2025-11-02)
+8. [Development Workflow](#development-workflow)
+9. [Bot Review Loop](#bot-review-loop-critical)
+10. [Phase 1 Definition of Done](#phase-1-definition-of-done-updated-v31)
+11. [Constitutional Principles](#constitutional-principles-must-follow)
+12. [Conflict Resolution](#conflict-resolution)
+13. [Mandatory Features](#mandatory-features-post-pivot-roadmap)
+14. [Code Standards](#code-standards)
+15. [Accessibility Requirements](#accessibility-requirements-immutable)
+16. [Privacy Requirements](#privacy-requirements-immutable)
+17. [Performance Guidelines](#performance-guidelines-phase-1)
+18. [Common Commands](#common-commands)
+19. [Tooling Integration](#tooling-integration)
+20. [Frequently Asked Questions](#frequently-asked-questions)
+21. [Working with the New Folder Structure](#working-with-the-new-folder-structure-2025-11-02)
+22. [Resources](#resources)
 
 ---
 
@@ -56,6 +57,647 @@ Before implementing any feature:
 4. **Create PR**: NEVER commit directly to main
 5. **Bot Review Loop**: Respond to bot feedback until both bots are green
 6. **HIL Approval**: Wait for HIL approval before merge
+
+---
+
+## Context Engineering for Claude Code: Ultimate Guide
+
+**Research Date**: 2025-11-08
+**Based on**: Anthropic Engineering (Sept 2025) + Official Claude Code Documentation
+**Source**: [V3 Comprehensive Research](docs/research/claude-ai-comprehensive-research-v3.md)
+
+---
+
+### Executive Summary (Read This First)
+
+**CRITICAL SHIFT**: Context engineering has replaced prompt engineering as the critical skill.
+
+**Core Challenge**: Find the **smallest possible set of high-signal tokens** that maximize desired outcomes.
+
+**Why This Matters**:
+- Claude has a **finite attention budget** that depletes with every token
+- **Context rot** occurs as token count increases (recall accuracy decreases)
+- **n² pairwise relationships** mean attention gets "stretched thin" with more tokens
+- **More context ≠ better performance** (can actually hurt)
+
+**The Solution**: Structure prompts according to attention patterns + use Claude Code's advanced features strategically.
+
+---
+
+### Core Principles (Anthropic Official, Sept 2025)
+
+#### 1. Context Rot & Attention Budget
+
+**Context Rot** (Official Term):
+> "LLMs, like humans, lose focus or experience confusion at a certain point... Context rot: as the number of tokens in the context window increases, the model's ability to accurately recall information from that context decreases."
+
+**Attention Budget** (Official Term):
+> "LLMs have an 'attention budget' that they draw on when parsing large volumes of context. Every new token introduced depletes this budget by some amount."
+
+**Implications**:
+- Put **critical information at START** (strongest attention)
+- Put **raw data at END** (weakest attention, but accessible)
+- Keep **middle sections focused** (moderate attention)
+- **Every token must justify its existence**
+
+#### 2. The Goldilocks Zone (Official Guidance)
+
+> "The right altitude is the Goldilocks zone between two common failure modes:
+> 1. **Too specific**: Hardcoded complex, brittle logic
+> 2. **Too vague**: High-level guidance that fails to give concrete signals
+>
+> **Optimal**: Specific enough to guide behavior effectively, yet flexible enough to provide strong heuristics."
+
+**Application to CLAUDE.md**:
+- ✅ Specific examples with code
+- ✅ Clear rules with rationale
+- ✅ Flexible patterns (not hardcoded solutions)
+- ❌ Avoid over-prescriptive step-by-step procedures
+- ❌ Avoid vague "do your best" guidance
+
+#### 3. XML Tags - Official Structure
+
+**Why XML** (from official docs):
+- **Clarity**: Separate different parts of prompt
+- **Accuracy**: Reduce misinterpretation errors
+- **Flexibility**: Easy to modify without rewriting
+- **Parseability**: Extract specific parts of response
+
+**Structure Pattern**:
+```xml
+<context>
+  Background information, project state, constraints
+</context>
+
+<data>
+  Relevant code, specs, test results
+</data>
+
+<instructions>
+  1. Specific tasks
+  2. Quality gates
+  3. Success criteria
+</instructions>
+
+<examples>
+  Concrete code examples showing desired patterns
+</examples>
+```
+
+**Best Practices**:
+- Be consistent with tag names
+- Nest tags hierarchically (`<outer><inner></inner></outer>`)
+- Reference tags explicitly ("Using the contract in `<contract>` tags...")
+
+#### 4. Examples = Pictures (Official Metaphor)
+
+> "For an LLM, examples are the 'pictures' worth a thousand words."
+
+**Implication**:
+- Show code examples, don't just describe patterns
+- One working example > three paragraphs of explanation
+- Examples should be **complete** and **runnable**
+
+---
+
+### Claude Code Advanced Features (When to Use)
+
+#### Subagents (Parallel Specialized Tasks)
+
+**What**: Specialized AI assistants with independent context windows
+
+**When to Use**:
+- ✅ **Parallel workflows**: Frontend + backend simultaneously
+- ✅ **Specialized expertise**: Code review, testing, debugging
+- ✅ **Context preservation**: Keep main conversation focused on high-level goals
+- ✅ **Long tasks**: Delegate time-consuming research/analysis
+- ❌ **Simple tasks**: Don't spawn subagent for trivial operations
+
+**How to Invoke**:
+```bash
+# Automatic (Claude decides when appropriate)
+> Fix the authentication bug
+
+# Explicit (you request specific subagent)
+> Use the code-reviewer subagent to check my recent changes
+> Have the test-runner subagent fix failing tests
+```
+
+**Configuration** (`.claude/agents/code-reviewer.md`):
+```markdown
+---
+name: code-reviewer
+description: Expert code reviewer. Use proactively after code changes.
+tools: Read, Grep, Glob, Bash
+model: sonnet
+---
+
+You are a senior code reviewer focusing on code quality, security, and best practices.
+When invoked, analyze recent changes for:
+1. Security vulnerabilities (XSS, SQL injection, CSRF)
+2. Accessibility issues (WCAG 2.2 AA compliance)
+3. Performance problems (O(n²) algorithms, memory leaks)
+4. Code quality (DRY, SOLID, naming conventions)
+
+Provide specific, actionable feedback with code examples.
+```
+
+**Key Features**:
+- **Separate context window**: Doesn't pollute main conversation
+- **Specialized tools**: Can limit to specific tool subset
+- **Reusable**: Create once, use across projects
+- **Proactive use**: Include "use PROACTIVELY" in description for automatic delegation
+
+**Best Practices** (from docs):
+- Use Plan subagent for codebase exploration (built-in)
+- Create task-specific subagents (not general-purpose)
+- Limit tools to minimum needed (security + performance)
+- Use explicit invocation when you want control
+
+#### Hooks (Automation & Quality Gates)
+
+**What**: Bash commands or LLM prompts that execute at specific events
+
+**When to Use**:
+- ✅ **Quality gates**: Run tests after code changes
+- ✅ **Validation**: Check commit messages, PR descriptions
+- ✅ **Automation**: Format code, lint files, run security checks
+- ✅ **Context injection**: Add relevant info to user prompts
+- ❌ **Slow operations**: Keep hooks fast (<5s) or use background tasks
+
+**Hook Events**:
+- `PreToolUse`: Before tool execution (approval, validation)
+- `PostToolUse`: After tool execution (tests, linting, formatting)
+- `UserPromptSubmit`: When user sends message (context injection, validation)
+- `Stop`: When Claude wants to stop (task completion check)
+- `SubagentStop`: When subagent wants to stop
+- `SessionStart`: When session begins (setup, environment checks)
+- `SessionEnd`: When session ends (cleanup, reports)
+
+**Configuration** (`.claude/settings.json`):
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run lint --fix",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/add-context.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Evaluate if Claude should stop: $ARGUMENTS. Check if all acceptance criteria from spec.md are met. Return JSON with 'should_continue': true/false and 'reason'."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Prompt-Based Hooks** (LLM evaluation):
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if all tasks are complete: $ARGUMENTS. Verify: 1) Tests passing, 2) Documentation updated, 3) PR created. Return JSON."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Best Practices**:
+- Keep hooks **fast** (<5s execution time)
+- Use `$CLAUDE_PROJECT_DIR` for project-specific scripts
+- Return JSON for complex decisions
+- Use exit codes for simple pass/fail (0=continue, 1=block, 2=warn)
+- Hooks run in parallel (design for concurrency)
+
+#### MCP Tools (External Integrations)
+
+**What**: Model Context Protocol - standardized way to connect AI to external systems
+
+**When to Use**:
+- ✅ **Just-in-time data**: Fetch documentation, API schemas on demand
+- ✅ **External services**: Database queries, API calls, file systems
+- ✅ **Dynamic context**: Load data based on conversation flow
+- ❌ **Static data**: Pre-load in CLAUDE.md instead
+
+**Examples**:
+- `mcp__linear__list_issues`: Fetch Linear issues
+- `mcp__github__get_pr`: Get GitHub PR details
+- `mcp__fetch__fetch`: Fetch web content with markdown conversion
+- `mcp__context7__get-library-docs`: Get up-to-date library documentation
+
+**Configuration** (`~/.claude/mcp.json`):
+```json
+{
+  "mcpServers": {
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-linear"],
+      "env": {
+        "LINEAR_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+**Best Practices**:
+- Use MCP for **dynamic** data (changes frequently)
+- Pre-load **static** data in CLAUDE.md
+- MCP tools inherit to subagents (unless restricted)
+- Set reasonable timeouts (`MCP_TOOL_TIMEOUT` env var)
+
+#### Background Tasks (Long-Running Processes)
+
+**What**: Processes that run without blocking Claude's progress
+
+**When to Use**:
+- ✅ **Dev servers**: Keep running while coding
+- ✅ **Test watchers**: Continuous test execution
+- ✅ **Build processes**: Long compilation times
+- ✅ **Monitoring**: Log tailing, error tracking
+- ❌ **Quick commands**: Use regular Bash tool instead
+
+**How to Use**:
+```bash
+# Start background task
+npm run dev &
+
+# Monitor with BashOutput tool
+# Claude can check output periodically without blocking
+```
+
+**Best Practices**:
+- Use for processes that need to stay alive
+- Claude can monitor output and fix crashes
+- Use hooks to auto-restart on failure
+
+---
+
+### Optimal Prompt Structure for CLAUDE.md
+
+**Template** (following attention patterns):
+
+```markdown
+## [Feature/Section Name]
+
+<!-- EXECUTIVE SUMMARY: At TOP (strongest attention) -->
+**Critical Rules** (Read This First):
+- ✅ DO THIS: [Most important rule with example]
+- ❌ NEVER DO THIS: [Critical prohibition with example]
+- ⚠️ ATTENTION: [Common mistake to avoid]
+
+<!-- KEY INFORMATION: Still high attention -->
+### When to Use
+
+[Concise decision tree or checklist]
+
+### Quick Reference
+
+| Scenario | Action | Tool/Feature |
+|----------|--------|--------------|
+| [Scenario] | [Action] | [Subagent/Hook/Tool] |
+
+<!-- DETAILED GUIDANCE: Middle (moderate attention) -->
+### Implementation Guide
+
+<context>
+  Background: [Why this exists, what problem it solves]
+  Constraints: [Important limitations]
+</context>
+
+<instructions>
+  1. [Specific step with rationale]
+  2. [Next step with rationale]
+</instructions>
+
+<examples>
+```typescript
+// ✅ CORRECT: [Explanation]
+[Complete working code example]
+
+// ❌ WRONG: [Explanation]
+[Anti-pattern example]
+```
+</examples>
+
+<!-- REFERENCE DATA: Bottom (weakest attention) -->
+### Complete API Reference
+
+[Full technical details, all options, edge cases]
+
+### Related Documentation
+
+- [Link to related section]
+- [Link to external docs]
+```
+
+**Why This Works**:
+- **Executive summary** leverages strongest attention (start)
+- **Key information** gets high attention (near start)
+- **Examples** act as "pictures" (official metaphor)
+- **Reference data** at bottom (weak attention, but accessible when needed)
+- **XML structure** provides clarity and parseability
+
+---
+
+### Real-World Examples from PayPlan
+
+#### Example 1: Feature Implementation Prompt
+
+**Bad** (violates context engineering):
+```markdown
+## Feature: Goal Export
+
+Implement goal export feature. Users should be able to export goals. Support multiple formats. Make sure it works well. Follow best practices. Let me know if you have questions.
+```
+
+**Issues**:
+- Too vague (violates Goldilocks zone)
+- No examples (missing "pictures")
+- No structure (no XML tags)
+- Critical info buried (weak attention)
+
+**Good** (follows context engineering):
+```markdown
+## Feature: Goal Export
+
+<!-- EXECUTIVE SUMMARY: Critical info at TOP -->
+**Critical Rules**:
+- ✅ Use iCalendar format for calendar export (RFC 5545 compliant)
+- ✅ PII sanitization REQUIRED (emails, names, addresses)
+- ❌ NEVER export without user-initiated action
+- ⚠️ 5MB localStorage limit - handle gracefully
+
+**When to Use Subagents**:
+- Use `code-reviewer` subagent AFTER implementation (proactive)
+- Use `test-runner` subagent to validate exports
+
+<!-- STRUCTURED CONTENT -->
+<context>
+  User Story: As a user, I want to export my goals to different formats so I can track them in external tools.
+
+  Constraints:
+  - Privacy-first: localStorage only, no server required
+  - Accessibility: WCAG 2.2 AA (keyboard + screen reader)
+  - Performance: Export <1s for 100 goals
+</context>
+
+<data>
+  Existing Code:
+  - `features/goals/lib/GoalStorageService.ts` - storage operations
+  - `features/goals/types/goal.ts` - Goal interface
+  - `shared/lib/privacy.ts` - PII sanitization utilities
+</data>
+
+<instructions>
+  1. Create export feature in `features/goals/lib/export/`
+  2. Support formats: JSON, CSV, iCalendar (RFC 5545)
+  3. Write TDD tests FIRST (80%+ coverage required - Phase 1 constitution)
+  4. Implement UI in `features/goals/components/GoalExport.tsx`
+  5. Manual testing with screen reader (NVDA/VoiceOver)
+  6. Create PR (not direct commit)
+  7. Run code-reviewer subagent proactively
+</instructions>
+
+<examples>
+```typescript
+// ✅ CORRECT: iCalendar export with PII sanitization
+import { sanitizePII } from '@/shared/lib/privacy';
+import { createEvents } from 'ics';
+
+export function exportGoalsToICal(goals: Goal[]): string {
+  const events = goals.map(goal => ({
+    title: sanitizePII(goal.name),
+    description: sanitizePII(goal.description),
+    start: parseDate(goal.targetDate),
+    // ... RFC 5545 compliant fields
+  }));
+
+  const { error, value } = createEvents(events);
+  if (error) throw new Error(`iCal export failed: ${error}`);
+  return value;
+}
+
+// ❌ WRONG: No PII sanitization (privacy violation)
+export function exportGoalsToICal(goals: Goal[]): string {
+  return goals.map(g => g.name).join('\n'); // LEAKS PII!
+}
+```
+</examples>
+
+<!-- REFERENCE DATA at bottom -->
+### Technical Specifications
+
+- RFC 5545: https://datatracker.ietf.org/doc/html/rfc5545
+- Library: ics@3.8.1 (already in package.json)
+- Test Coverage: 80%+ (constitution v3.1 Phase 1)
+- Acceptance Criteria: See `specs/064-goal-export/spec.md`
+```
+
+#### Example 2: Hook Configuration for Quality Gates
+
+**Scenario**: Automatically run tests after code changes
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm test -- --changed --passWithNoTests",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if Claude should stop working. Verify: 1) All tests passing (check recent test output), 2) Test coverage ≥80% for business logic, 3) Manual UI testing documented in PR. Return JSON: { 'should_continue': boolean, 'reason': string, 'missing_tasks': string[] }"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Why This Works**:
+- `PostToolUse` runs tests automatically (quality gate)
+- `Stop` hook uses LLM to intelligently check completion (prompt-based)
+- Verifies constitution compliance (Phase 1: 80% business logic coverage)
+
+#### Example 3: Subagent for Test Report Analysis
+
+**Scenario**: Analyze test reports using V3 optimal format
+
+`.claude/agents/test-analyzer.md`:
+```markdown
+---
+name: test-analyzer
+description: Analyzes test execution results and creates V3-formatted reports. Use after running test suites.
+tools: Read, Grep, Glob, Write
+model: sonnet
+---
+
+You are a test analysis expert specializing in V3 optimal test report format.
+
+<context_engineering_principles>
+  - Executive summary at TOP (strongest attention)
+  - Detailed analysis in MIDDLE (moderate attention)
+  - Raw data at BOTTOM (weakest attention)
+  - Cross-verification from 4+ sources
+  - 95-100% confidence scores
+</context_engineering_principles>
+
+<task>
+When invoked to analyze test results:
+
+1. Read test output files
+2. Cross-verify from multiple sources:
+   - Source code analysis
+   - Browser DOM inspection (if UI tests)
+   - Grep searches for relevant patterns
+   - Unit test validation
+3. Create V3-formatted report with:
+   - Executive summary at top (status, key findings, immediate actions)
+   - Detailed results in middle (passing/failing tests, root causes)
+   - Raw data at bottom (full logs, debug output)
+4. Provide confidence scores (95-100% target)
+5. Include actionable next steps with time estimates
+</task>
+
+<examples>
+See: `/home/matt/PROJECTS/PayPlan/docs/research/claude-ai-comprehensive-research-v3.md`
+Section 9: "Optimal Test Report Format V3"
+</examples>
+```
+
+**Usage**:
+```bash
+> Use the test-analyzer subagent to analyze the T097-T105 test results
+```
+
+---
+
+### Decision Tree: When to Use Each Feature
+
+```
+START: Need to accomplish a task
+│
+├─ Is it a SPECIALIZED task (code review, testing, debugging)?
+│  └─ YES → Use SUBAGENT (parallel context, specialized expertise)
+│
+├─ Need AUTOMATION at specific event (after code change, before commit)?
+│  └─ YES → Use HOOK (PostToolUse, PreToolUse, etc.)
+│
+├─ Need EXTERNAL data (API, database, documentation)?
+│  └─ YES → Use MCP TOOL (just-in-time context)
+│
+├─ Is it a LONG-RUNNING process (dev server, test watcher)?
+│  └─ YES → Use BACKGROUND TASK (non-blocking execution)
+│
+└─ Is it a SIMPLE, QUICK task?
+   └─ YES → Use REGULAR TOOLS (Bash, Read, Write, Edit)
+```
+
+**Examples by Scenario**:
+
+| Scenario | Feature | Why |
+|----------|---------|-----|
+| Review code after PR creation | Subagent (`code-reviewer`) | Specialized expertise, separate context |
+| Run tests after code changes | Hook (`PostToolUse`) | Automatic quality gate |
+| Fetch latest React docs | MCP Tool (`context7`) | Just-in-time, always current |
+| Keep dev server running | Background Task | Long-running, non-blocking |
+| Read a file | Regular Tool (`Read`) | Simple, quick operation |
+| Analyze complex test failure | Subagent (`test-analyzer`) | Needs deep analysis, cross-verification |
+| Lint code before commit | Hook (`PreToolUse` or `PostToolUse`) | Automatic validation |
+| Check task completion | Hook (`Stop` with prompt) | Intelligent decision with LLM |
+
+---
+
+### Best Practices Summary
+
+**Structure** (from V3 research):
+1. ✅ Executive summary at TOP (critical info first)
+2. ✅ Use XML tags for clarity (`<context>`, `<instructions>`, `<examples>`)
+3. ✅ Examples = Pictures (show, don't just tell)
+4. ✅ Reference data at BOTTOM (accessible but not prominent)
+
+**Token Efficiency** (from Anthropic Sept 2025):
+1. ✅ Every token must justify its existence
+2. ✅ High-signal information only
+3. ✅ Remove redundancy aggressively
+4. ✅ Use just-in-time context (MCP tools, subagents)
+
+**Claude Code Features** (from official docs):
+1. ✅ Use subagents for specialized tasks
+2. ✅ Use hooks for automation & quality gates
+3. ✅ Use MCP tools for external data
+4. ✅ Use background tasks for long processes
+5. ✅ Configure proactively (don't wait for explicit requests)
+
+**Goldilocks Zone** (from Anthropic):
+1. ✅ Specific examples with code
+2. ✅ Clear rules with rationale
+3. ✅ Flexible patterns (not hardcoded)
+4. ❌ Avoid over-prescription
+5. ❌ Avoid vague guidance
+
+---
+
+### Resources
+
+**Research Documents**:
+- [V3 Comprehensive Research](docs/research/claude-ai-comprehensive-research-v3.md) - Sept 2025 Anthropic findings
+- [V2 Optimal Test Report Format](docs/research/claude-ai-optimal-test-format-v2.md) - Test report structure
+
+**Official Documentation**:
+- [Anthropic Engineering: Context Engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) - Sept 29, 2025
+- [Claude Docs: XML Tags](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/use-xml-tags)
+- [Claude Code: Subagents](https://docs.claude.com/en/docs/claude-code/sub-agents)
+- [Claude Code: Hooks Reference](https://code.claude.com/docs/en/hooks)
+- [Claude Code: MCP](https://docs.claude.com/en/docs/claude-code/mcp)
+
+**PayPlan Examples**:
+- `.claude/agents/` - Subagent configurations
+- `.claude/settings.json` - Hook configurations
+- `specs/063-short-name-business/` - Complete spec example
 
 ---
 
@@ -181,6 +823,7 @@ PayPlan is a **privacy-first budgeting app** designed to help **low-income earne
 - TypeScript 5.8.3 (type safety, strict mode)
 - Tailwind CSS 4.1.13 (utility-first styling)
 - Radix UI (accessible component primitives)
+- @radix-ui/react-icons 1.3.2 (icon library for UI components)
 - Recharts (data visualization - MANDATED, do not use Chart.js or alternatives)
 - Vite 6.1.9 (build tool)
 
@@ -193,6 +836,12 @@ PayPlan is a **privacy-first budgeting app** designed to help **low-income earne
 - PapaParse 5.5.3 (CSV parsing)
 - uuid 13.0.0 (unique IDs)
 - React Router 7.0.2 (client-side routing)
+- date-fns 4.1.0 (date manipulation and formatting)
+- luxon 3.7.2 (date/time manipulation alternative)
+- react-aria 3.44.0 (accessible UI primitives)
+- react-focus-lock 2.13.6 (focus management for modals)
+- sonner 2.0.7 (toast notifications)
+- ics 3.8.1 (iCalendar format generation)
 
 **Testing** (Phase 2+):
 - Vitest 3.2.4 (unit/integration tests)
@@ -301,26 +950,24 @@ import { useCategories } from '@/features/categories/hooks/useCategories';
 - Constitutional compliance (privacy, accessibility, performance)
 - Quality gates (bot reviews, HIL approval)
 - Permanent documentation (code changes, specs don't)
-- Manus → Claude Code handoff clarity
 
 **Full Workflow** (for every feature):
-1. **Manus** runs `/speckit.specify` → creates `spec.md`
-2. **Manus** runs `/speckit.clarify` → resolves ambiguities with deep research
-3. **Manus** runs `/speckit.plan` → creates `plan.md`, `data-model.md`, `research.md`
-4. **Manus** runs `/speckit.tasks` → creates `tasks.md`, `checklist.md`
-5. **Manus** creates implementation prompt → `.claude/prompts/implement-[feature].md`
-6. **Claude Code (you)** runs `/speckit.implement` → generates code from specs
-7. **Claude Code** creates PR → bot review loop → HIL approval → merge
+1. **Claude Code (you)** runs `/speckit.specify` → creates `spec.md`
+2. **Claude Code (you)** runs `/speckit.clarify` → resolves ambiguities with deep research
+3. **Claude Code (you)** runs `/speckit.plan` → creates `plan.md`, `data-model.md`, `research.md`
+4. **Claude Code (you)** runs `/speckit.tasks` → creates `tasks.md`, `checklist.md`
+5. **Claude Code (you)** runs `/speckit.implement` → generates code from specs
+6. **Claude Code (you)** creates PR → bot review loop → HIL approval → merge
 
-**You receive** (from Manus):
+**You create**:
 - Complete specifications in `specs/[number]-[feature-name]/`
-- Implementation prompt in `.claude/prompts/implement-[feature].md`
-- All context needed for implementation
+- All implementation code
+- Pull requests with bot review responses
 
 **You do NOT**:
 - Skip spec files (all are required)
-- Create specs yourself (Manus does this)
-- Make architectural decisions (defined in specs)
+- Skip constitutional validation
+- Make decisions that violate IMMUTABLE principles (Privacy, Accessibility, Free Core)
 
 ---
 
@@ -1336,6 +1983,13 @@ docs/
 
 ## Version History
 
+- **2025-11-08**: MAJOR UPDATE - Context Engineering Ultimate Guide (based on Sept 2025 Anthropic research + official Claude Code docs)
+  - Added comprehensive context engineering guide (Section 2)
+  - Integrated V3 research findings (context rot, attention budget, Goldilocks zone)
+  - Documented all Claude Code advanced features (subagents, hooks, MCP, background tasks)
+  - Provided decision trees and real PayPlan examples
+  - Included optimal prompt structure template
+  - Direct Tavily API usage documented for future research
 - **2025-11-02**: MAJOR UPDATE - Clean architecture, TDD requirements, v3.1 alignment, barrel exports
 - **2025-10-30**: Added Architecture Decision Records (ADR) process documentation
 - **2025-10-28**: Added HIL → Manus → Claude Code workflow, bot review loop process

@@ -8,12 +8,14 @@ import type { Category } from '@/features/categories/types/category';
 import type { Transaction } from '@/features/transactions/types/transaction';
 import type { Budget } from '@/features/budgets/types/budget';
 import type { StreakData } from '@/features/dashboard/types/gamification';
+import type { Goal } from '@/features/goals/types/goal';
 
 // Canonical Zod schemas imported from domain modules (ADR 002)
 import { categorySchema as CategorySchema } from '@/features/categories/lib/schemas';
 import { transactionSchema as TransactionSchema } from '@/features/transactions/lib/schemas';
 import { budgetSchema as BudgetSchema } from '@/features/budgets/lib/schemas';
 import { StreakDataSchema } from '@/features/dashboard/lib/schemas';
+import { loadGoals } from '@/features/goals/lib/GoalStorageService';
 
 /**
  * localStorage keys used by dashboard (read-only)
@@ -164,15 +166,28 @@ export function readBudgets(): Budget[] {
 /**
  * Read goals from localStorage (conditional - may not exist)
  */
-export function readGoals(): unknown[] {
+/**
+ * T104: Read goals from localStorage using GoalStorageService
+ *
+ * Uses the canonical GoalStorageService from Feature 064 to ensure
+ * consistent data access across the app. Returns goals array only
+ * (ignores corrupted flag since dashboard is read-only).
+ *
+ * @returns Array of goals (empty if none exist or validation fails)
+ *
+ * @remarks Bot review C1: No circular dependency exists
+ * - dashboard → goals (one-way dependency, safe)
+ * - goals does NOT import dashboard (verified 2025-11-08)
+ * - Try-catch handles loadGoals() errors (localStorage, quota, corruption)
+ */
+export function readGoals(): Goal[] {
   try {
-    const data = localStorage.getItem(STORAGE_KEYS.GOALS);
-    if (!data) return [];
-
-    const parsed = JSON.parse(data);
-    return parsed.goals || [];
+    const { data: goals } = loadGoals(); // T104: Use GoalStorageService
+    return goals;
   } catch (error) {
-    // Goals feature may not be implemented yet
+    // Handle errors from loadGoals() (localStorage read failures, quota errors, data corruption)
+    // Privacy-safe logging: Do not log error object (may contain PII from corrupted data)
+    console.error('Error reading goals from localStorage via GoalStorageService');
     return [];
   }
 }

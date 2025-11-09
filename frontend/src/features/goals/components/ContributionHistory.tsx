@@ -5,7 +5,7 @@
  */
 
 import { format } from 'date-fns';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
+import { formatCurrency } from '@/shared/lib/utils';
 import type { Contribution } from '../types/contribution';
 
 interface ContributionHistoryProps {

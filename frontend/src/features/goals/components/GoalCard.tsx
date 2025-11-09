@@ -2,9 +2,11 @@
  * Goal Card Component for Goal Tracking Dashboard (Feature 064)
  * Individual goal display with progress bar, status badge, and actions
  * US1: View Dashboard, US3: Edit Goal, US4: Delete Goal, US7: Manual Contribution
+ *
+ * PR78-7: Refactored to use consolidated STATUS_CONFIG instead of separate mapping functions
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
@@ -16,9 +18,11 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
+import { formatCurrency } from '@/shared/lib/utils';
 import type { Goal } from '../types/goal';
 import { getGoalPercent, getDaysRemaining, getRequiredMonthly, getGoalStatus } from '../lib/calculations';
+import { getProgressIndicatorClass } from '../lib/progressIndicator';
+import { getStatusConfig } from '../lib/statusConfig'; // PR78-7: Consolidated status config
 import { ContributionForm } from './ContributionForm';
 
 interface GoalCardProps {
@@ -26,67 +30,9 @@ interface GoalCardProps {
   onEdit: (goal: Goal) => void;
   onDelete: (goal: Goal) => void;
   onArchive?: (goal: Goal) => void; // T090: Archive completed goal
+  onUnarchive?: (goal: Goal) => void; // PR85-8: Unarchive goal (restore to active)
   onContributionAdded?: () => void; // T087: Trigger parent refresh
   onGoalComplete?: (goal: Goal) => void; // For celebration trigger
-}
-
-/**
- * Get badge variant based on goal status
- */
-function getStatusVariant(
-  status: 'completed' | 'past-due' | 'at-risk' | 'on-track'
-): 'default' | 'secondary' | 'destructive' | 'outline' {
-  switch (status) {
-    case 'completed':
-      return 'default'; // Green
-    case 'past-due':
-      return 'destructive'; // Red
-    case 'at-risk':
-      return 'secondary'; // Yellow
-    case 'on-track':
-      return 'outline'; // Blue
-    default:
-      return 'outline';
-  }
-}
-
-/**
- * Get status label with icon for accessibility
- */
-function getStatusLabel(status: 'completed' | 'past-due' | 'at-risk' | 'on-track'): string {
-  switch (status) {
-    case 'completed':
-      return '✓ Completed';
-    case 'past-due':
-      return '⚠ Past Due';
-    case 'at-risk':
-      return '⚠ At Risk';
-    case 'on-track':
-      return '→ On Track';
-    default:
-      return status;
-  }
-}
-
-/**
- * Get progress bar color class based on status (traffic light system)
- * Triple encoding: Color + percentage text + status badge
- *
- * Returns Tailwind classes for Shadcn Progress indicator
- */
-function getProgressIndicatorClass(status: 'completed' | 'past-due' | 'at-risk' | 'on-track'): string {
-  switch (status) {
-    case 'completed':
-      return '[&>div]:bg-green-600'; // Green - goal achieved
-    case 'past-due':
-      return '[&>div]:bg-red-600'; // Red - deadline passed, not complete
-    case 'at-risk':
-      return '[&>div]:bg-yellow-500'; // Yellow - <75% progress with <30 days
-    case 'on-track':
-      return '[&>div]:bg-blue-600'; // Blue - making good progress
-    default:
-      return '[&>div]:bg-blue-600';
-  }
 }
 
 /**
@@ -111,7 +57,7 @@ function getProgressIndicatorClass(status: 'completed' | 'past-due' | 'at-risk' 
  * @param onContributionAdded - Optional callback after contribution added
  * @param onGoalComplete - Optional callback when goal reaches 100%
  */
-export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdded, onGoalComplete }: GoalCardProps) {
+export function GoalCard({ goal, onEdit, onDelete, onArchive, onUnarchive, onContributionAdded, onGoalComplete }: GoalCardProps) {
   const percentage = getGoalPercent(goal.currentAmount, goal.targetAmount);
   const daysRemaining = getDaysRemaining(goal.targetDate);
   const requiredMonthly = getRequiredMonthly(goal.currentAmount, goal.targetAmount, goal.targetDate);
@@ -121,7 +67,8 @@ export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdde
   const [isContributionFormOpen, setIsContributionFormOpen] = useState(false);
 
   // Detect prefers-reduced-motion (T072 - US5)
-  const prefersReducedMotion = (() => {
+  // Memoized to prevent unnecessary re-checks on every render (Performance: PR81-5)
+  const prefersReducedMotion = useMemo(() => {
     try {
       return typeof window !== 'undefined' &&
         window.matchMedia &&
@@ -129,7 +76,7 @@ export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdde
     } catch {
       return false; // Default to animations enabled
     }
-  })();
+  }, []); // Empty deps - only check once on mount
 
   const isComplete = percentage >= 100;
 
@@ -158,7 +105,11 @@ export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdde
             )}
           </div>
           <div className="flex flex-col items-end gap-2">
-            <Badge variant={getStatusVariant(status)}>{getStatusLabel(status)}</Badge>
+            {/* PR78-7: Use consolidated status config */}
+            {(() => {
+              const statusConfig = getStatusConfig(status);
+              return <Badge variant={statusConfig.badgeVariant}>{statusConfig.label}</Badge>;
+            })()}
             {/* T079: Behind Schedule warning badge */}
             {status === 'at-risk' && (
               <Badge variant="destructive" className="flex items-center gap-1">
@@ -256,15 +207,21 @@ export function GoalCard({ goal, onEdit, onDelete, onArchive, onContributionAdde
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(goal)}>Edit Goal</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onEdit(goal)}>Edit Goal</DropdownMenuItem>
             {/* T090: Archive menu item (only show for completed goals) */}
             {goal.status === 'completed' && onArchive && (
-              <DropdownMenuItem onClick={() => onArchive(goal)}>
+              <DropdownMenuItem onSelect={() => onArchive(goal)}>
                 Archive Goal
               </DropdownMenuItem>
             )}
+            {/* PR85-8: Unarchive menu item (only show for archived goals) */}
+            {goal.status === 'archived' && onUnarchive && (
+              <DropdownMenuItem onSelect={() => onUnarchive(goal)}>
+                Unarchive Goal
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
-              onClick={() => onDelete(goal)}
+              onSelect={() => onDelete(goal)}
               className="text-red-600 focus:text-red-600"
             >
               Delete Goal

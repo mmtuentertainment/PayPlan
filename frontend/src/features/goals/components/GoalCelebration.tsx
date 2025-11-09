@@ -4,11 +4,12 @@
  * US5: Subtle Completion Moment
  */
 
+import { useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog';
 import { Button } from '@/shared/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
-import { differenceInMonths } from 'date-fns';
+import { formatCurrency } from '@/shared/lib/utils';
+import { calculateCelebrationStats } from '../lib/celebration-stats';
 import type { Goal } from '../types/goal';
 
 interface GoalCelebrationProps {
@@ -48,14 +49,35 @@ export function GoalCelebration({
   onSetNewGoal,
   onArchiveGoal,
 }: GoalCelebrationProps) {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  // Focus management for accessibility (WCAG 2.2 AA requirement)
+  useEffect(() => {
+    if (open && titleRef.current) {
+      // Small delay to ensure modal is fully rendered
+      const timeoutId = setTimeout(() => {
+        titleRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open]);
+
   if (!goal) return null;
 
-  // Calculate completion statistics (T073)
-  const months = differenceInMonths(
-    new Date(goal.updatedAt),
-    new Date(goal.createdAt)
-  );
-  const avgMonthly = goal.currentAmount / Math.max(months, 1); // Avoid division by zero
+  // PR81-1: Extract business logic to lib/celebration-stats.ts for testability
+  // Calculate completion statistics (validation + date arithmetic + division by zero protection)
+  const statsResult = calculateCelebrationStats(goal);
+
+  // If calculation fails (invalid data), log error and don't render modal
+  if (!statsResult.success) {
+    console.error('GoalCelebration: Failed to calculate stats', {
+      goal,
+      error: statsResult.error,
+    });
+    return null;
+  }
+
+  const { months, avgMonthly } = statsResult.stats;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -63,7 +85,7 @@ export function GoalCelebration({
         <DialogHeader>
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-6 h-6 text-green-600" aria-hidden="true" />
-            <DialogTitle>Goal complete</DialogTitle>
+            <DialogTitle ref={titleRef} tabIndex={-1}>Goal complete</DialogTitle>
           </div>
         </DialogHeader>
 

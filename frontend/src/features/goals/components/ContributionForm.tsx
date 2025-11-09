@@ -4,7 +4,7 @@
  * US7: Contribution Notes
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -61,6 +61,20 @@ export function ContributionForm({
   // useContributions hook for adding contribution
   const { addContribution } = useContributions(onGoalComplete);
 
+  // PR78-4: Focus management for accessibility (WCAG 2.2 AA requirement)
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  // Focus management: Focus title when dialog opens
+  useEffect(() => {
+    if (open && titleRef.current) {
+      // Small delay to ensure modal is fully rendered
+      const timeoutId = setTimeout(() => {
+        titleRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open]);
+
   /**
    * Reset form when dialog opens/closes
    */
@@ -108,7 +122,7 @@ export function ContributionForm({
     const result = addContribution(
       goalId,
       amountCents,
-      note.trim() || undefined // Pass undefined if note is empty
+      note.trim() || null // PR83-1: Pass null if note is empty (matches type)
     );
 
     if (result.success) {
@@ -137,7 +151,7 @@ export function ContributionForm({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Contribution</DialogTitle>
+          <DialogTitle ref={titleRef} tabIndex={-1}>Add Contribution</DialogTitle>
           <p className="text-sm text-gray-600 mt-1">
             Add a contribution to "{goalName}"
           </p>

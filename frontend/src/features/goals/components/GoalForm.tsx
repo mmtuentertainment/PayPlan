@@ -4,7 +4,7 @@
  * US2: Create Goal, US3: Edit Goal
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Alert } from '@/shared/components/ui/alert';
 import { Info } from 'lucide-react';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
+import { formatCurrency } from '@/shared/lib/utils';
 import type { Goal, CreateGoalInput, UpdateGoalInput } from '../types/goal';
 import { MAX_NAME_LENGTH } from '../lib/constants';
 import { getRequiredMonthly } from '../lib/calculations';
@@ -57,6 +57,20 @@ export function GoalForm({ open, onClose, onSubmit, goal, mode }: GoalFormProps)
   // T082: Track required monthly recalculation
   const [previousRequiredMonthly, setPreviousRequiredMonthly] = useState<number | null>(null);
   const [recalculationMessage, setRecalculationMessage] = useState<string | null>(null);
+
+  // PR78-4: Focus management for accessibility (WCAG 2.2 AA requirement)
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  // Focus management: Focus title when dialog opens
+  useEffect(() => {
+    if (open && titleRef.current) {
+      // Small delay to ensure modal is fully rendered
+      const timeoutId = setTimeout(() => {
+        titleRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open]);
 
   /**
    * Initialize form when goal changes (edit mode)
@@ -142,7 +156,9 @@ export function GoalForm({ open, onClose, onSubmit, goal, mode }: GoalFormProps)
     if (targetDate) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const selectedDate = new Date(targetDate);
+      // Fix timezone bug: Append 'T00:00:00' to force local timezone parsing
+      // (date-only strings like "2025-11-05" are parsed as UTC, causing off-by-one day errors)
+      const selectedDate = new Date(targetDate + 'T00:00:00');
       if (selectedDate < today) {
         newErrors.targetDate = 'Target date must be today or in the future';
       }
@@ -185,17 +201,21 @@ export function GoalForm({ open, onClose, onSubmit, goal, mode }: GoalFormProps)
 
   /**
    * Get today's date in YYYY-MM-DD format (for min attribute)
+   * Fix timezone bug: Use local date components instead of toISOString() (which uses UTC)
    */
   const getTodayDate = (): string => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle ref={titleRef} tabIndex={-1}>
             {mode === 'create' ? 'Create New Goal' : 'Edit Goal'}
           </DialogTitle>
         </DialogHeader>
@@ -273,7 +293,7 @@ export function GoalForm({ open, onClose, onSubmit, goal, mode }: GoalFormProps)
 
           {/* T082: Recalculation message */}
           {recalculationMessage && (
-            <Alert className="flex items-start gap-2">
+            <Alert className="flex items-start gap-2" role="alert" aria-live="polite">
               <Info className="h-4 w-4 mt-0.5" aria-hidden="true" />
               <span className="text-sm">{recalculationMessage}</span>
             </Alert>

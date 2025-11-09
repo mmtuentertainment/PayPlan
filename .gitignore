@@ -57,3 +57,6 @@ logs/
 # Research documentation (temporary, generated during planning)
 specs/*/research-docs/
 .codebase-safety/
+
+.gemini/
+gha-creds-*.json

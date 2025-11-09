@@ -70,5 +70,11 @@ export default {
       },
     }
   },
+  safelist: [
+    {
+      pattern: /\[&>div\]:bg-(green|red|yellow|blue)-(500|600)/,
+      variants: [],
+    },
+  ],
   plugins: [],
 } satisfies Config

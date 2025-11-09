@@ -26,6 +26,9 @@ export { GoalCelebration } from './components/GoalCelebration';
 export { ContributionForm } from './components/ContributionForm';
 export { ContributionHistory } from './components/ContributionHistory';
 
+// Components (Group 10 - Phase 11: T103)
+export { ExportGoalsButton } from './components/ExportGoalsButton';
+
 // Hooks (Group 3)
 export { useGoalMetrics } from './hooks/useGoalMetrics';
 
@@ -53,7 +56,13 @@ export {
   archiveGoal,
   unarchiveGoal,
   clearGoals,
+  checkStorageQuota,
 } from './lib/GoalStorageService';
+export type { StorageQuotaResult, LoadGoalsResult } from './lib/GoalStorageService';
+
+// Status Configuration (PR78-7: Consolidated status mappings)
+export { STATUS_CONFIG, getStatusConfig } from './lib/statusConfig';
+export type { GoalStatus } from './lib/statusConfig';
 
 // Constants
 export { STORAGE_KEY, MAX_NAME_LENGTH, MAX_NOTE_LENGTH, MAX_CONTRIBUTIONS, QUICK_ADD_AMOUNTS, STATUS_COLORS, ERROR_MESSAGES } from './lib/constants';

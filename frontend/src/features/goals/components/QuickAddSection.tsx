@@ -5,6 +5,8 @@
  */
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { TOAST_DURATION } from '@/shared/lib/toast-constants';
 import {
   Select,
   SelectTrigger,
@@ -16,7 +18,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import type { Goal } from '../types/goal';
 import { QUICK_ADD_AMOUNTS } from '../lib/constants';
-import { formatCurrency } from '@/features/budgets/lib/calculations';
+import { formatCurrency } from '@/shared/lib/utils';
 import { useContributions } from '../hooks/useContributions';
 
 interface QuickAddSectionProps {
@@ -56,18 +58,34 @@ export function QuickAddSection({
   onContributionAdded,
 }: QuickAddSectionProps) {
   const [selectedGoalId, setSelectedGoalId] = useState<string>('');
+  const [isAdding, setIsAdding] = useState(false); // PR80-8: Loading state
   const { addContribution } = useContributions(onGoalComplete);
 
   /**
    * Handle quick-add button click
+   * PR80-8: Made async with loading state to prevent double-submission
    */
-  const handleQuickAdd = (amountCents: number) => {
-    if (!selectedGoalId) return;
+  const handleQuickAdd = async (amountCents: number) => {
+    if (!selectedGoalId || isAdding) return;
 
-    const result = addContribution(selectedGoalId, amountCents);
+    setIsAdding(true);
+    try {
+      const result = addContribution(selectedGoalId, amountCents);
 
-    if (result.success && onContributionAdded) {
-      onContributionAdded();
+      // PR80-11: Show error toast when contribution fails
+      if (!result.success) {
+        toast.error('Failed to add contribution', {
+          description: result.error || 'An unknown error occurred',
+          duration: TOAST_DURATION.ERROR,
+        });
+        return;
+      }
+
+      if (onContributionAdded) {
+        await onContributionAdded(); // Wait for parent refresh
+      }
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -105,9 +123,9 @@ export function QuickAddSection({
           </Select>
         </div>
 
-        {/* Selected Goal Display */}
+        {/* Selected Goal Display - PR80-9: Added aria-live for screen readers */}
         {selectedGoal && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3" role="status" aria-live="polite">
             <p className="text-sm text-blue-900">
               <span className="font-medium">Adding to:</span> {selectedGoal.name}
             </p>
@@ -127,11 +145,12 @@ export function QuickAddSection({
                 variant="outline"
                 size="lg"
                 onClick={() => handleQuickAdd(amountCents)}
-                disabled={!selectedGoalId}
-                className="h-16 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!selectedGoalId || isAdding}
+                className={`h-16 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${isAdding ? 'animate-pulse' : ''}`}
                 aria-label={`Add ${formatCurrency(amountCents)} to selected goal`}
+                aria-busy={isAdding}
               >
-                {formatCurrency(amountCents)}
+                {isAdding ? 'Adding...' : formatCurrency(amountCents)}
               </Button>
             ))}
           </div>
